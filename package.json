@@ -27,6 +27,7 @@
 		"prettier-plugin-svelte": "^3.1.2",
 		"svelte": "^4.2.7",
 		"svelte-check": "^3.6.0",
+		"sveltekit-superforms": "^2.15.2",
 		"tailwindcss": "^3.4.4",
 		"tslib": "^2.4.1",
 		"typescript": "^5.0.0",
@@ -39,6 +40,7 @@
 		"bits-ui": "^0.21.11",
 		"clsx": "^2.1.1",
 		"tailwind-merge": "^2.3.0",
-		"tailwind-variants": "^0.2.1"
+		"tailwind-variants": "^0.2.1",
+		"zod": "^3.23.8"
 	}
 }
