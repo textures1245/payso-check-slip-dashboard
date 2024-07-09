@@ -199,7 +199,7 @@
 
 				<AlertDialog.Root >
 					<AlertDialog.Trigger><Button variant="outline" class="bg-orange-500 w-full h-100">ดูรายการ</Button></AlertDialog.Trigger>
-					<AlertDialog.Content class="bg-slate-300 rounded-lg p-4 h-full my-10" style="width:auto;height:auto">
+					<AlertDialog.Content class="bg-slate-300 rounded-lg p-4 h-full my-10 " style="width:auto;height:auto">
 						<AlertDialog.Header >
 							<AlertDialog.Title >
                                 <div class="flex" >
