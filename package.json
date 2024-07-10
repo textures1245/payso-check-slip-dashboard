@@ -38,6 +38,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@iconify/svelte": "^4.0.2",
 		"@radix-ui/react-dialog": "^1.1.1",
 		"bits-ui": "^0.21.12",
 		"chart.js": "^4.4.3",
