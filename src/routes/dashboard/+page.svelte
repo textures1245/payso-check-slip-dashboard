@@ -50,7 +50,7 @@
 	let loading = false;
 	
 	let data = {
-	  labels: ['จำนวนครั้งการใช้งาน', 'max'],
+	  labels: ['จำนวนที่ใช้', 'จำนวนทั้งหมด'],
 	  datasets: [{
 		label: '',
 		data: [datatoo,maxr],
@@ -95,19 +95,19 @@
 <div class="flex justify-start ... text-2xl font-sans ... font-bold ...">
 	<h1>Data</h1>
 </div>
-<div class=" flex justify-evenly ... text-xl font-sans ... h-60">
-	<div class="w-1/6 text-center">
-		<div class="rounded-lg border-2 border-black w-full max-w-80 h-full max-h-24 bg-red-700">
+<div class=" flex justify-evenly ... text-lg font-sans ... h-60 ">
+	<div class="w-2/6 text-center ms-10 ">
+		<div class="rounded-lg border-2 border-black w-full max-w-96 h-full max-h-32  bg-red-700">
 			<p>หัวข้อ</p>
 			<p>359 bath</p>
 		</div>
-		<div class="rounded-lg border-2 border-black w-full max-w-80 h-full max-h-24 mt-3 bg-red-700">
+		<div class="rounded-lg border-2 border-black w-full max-w-96 h-full max-h-32 mt-3 bg-red-700">
 			<p>หัวข้อ</p>
 			<p>359 bath</p>
 		</div>
 	</div>
 	<div
-		class="w-1/6 text-center mt-7 rounded-lg border-2 border-black w-full max-w-80 h-62 max-h-70"
+		class=" text-center mt-7 rounded-lg border-2 border-black w-2/6 max-w-96 h-full max-h-70 mx-3"
 	>
 	<div class=" h-full max-h-70 content">
 		<div>
@@ -119,10 +119,10 @@
 		<div class=" w-100"><Button variant="outline" class="w-4/5 h-12 bg-orange-500">Dowload Excel</Button></div>
 	</div>
 	</div>
-	<div class="w-1/6 text-center">
-		<div class="rounded-lg border-2 border-black w-full max-w-80 h-full max-h-24 bg-red-700">
+	<div class="w-2/6 text-center">
+		<div class="rounded-lg border-2 border-black w-full max-w-96 h-full max-h-32 bg-red-700">
 			
-			<div class="flex justify-evenly">
+			<div class="flex justify-evenly w-full h-full">
 			<div class="my-5"><img src={logo} class="w-100 h-100 max-h-16"></div>
 			<div>
 				<p>หัวข้อ</p>
@@ -131,7 +131,7 @@
 			
 			</div>
 		</div>
-		<div class="rounded-lg border-2 border-black w-full max-w-80 h-full max-h-24 mt-3 bg-red-700">
+		<div class="rounded-lg border-2 border-black w-full max-w-96 h-full max-h-32 mt-3 bg-red-700">
 			<div class="flex justify-evenly ">
 				<div class="my-5"><img src={logo} class="w-100 h-100 max-h-16"></div>
 				<div>
@@ -143,7 +143,7 @@
 		</div>
 	</div>
 	<div
-		class="w-1/6 text-center mt-7 rounded-lg border-2 border-black w-full max-w-64 h-auto max-h-70"
+		class=" text-center mt-7 rounded-lg border-2 border-black w-2/6 max-w-96 h-full max-h-70 mx-3"
 	>
 		<p>การใช้งาน</p>
 		<div class="chart-container">
@@ -153,7 +153,7 @@
 	</div>
 </div>
 
-<div class="flex justify-start ... text-2xl font-sans ... font-bold ...">
+<div class="flex justify-start ... text-2xl font-sans ... font-bold ... mt-10">
 	<h1>ธนาคาร</h1>
 </div>
 <div class="rounded-lg border-2 border-black w-100 h-52 max-h-72 mx-8 my-8">
@@ -188,7 +188,8 @@
 <div class="flex justify-start ... text-2xl font-sans ... font-bold ...">
 	<h1>รายการย้อนหลัง</h1>
 </div>
-<div class="rounded-lg border-2 border-black w-100 h-full mx-8 my-8">
+<div class="rounded-lg border-2 border-black w-100 h-full mx-8 my-8 flex justify-center">
+	<div class="w-full">
 	{#each items as item}
 		<div class="bg-slate-300 my-5 mx-5 rounded-xl ">
 			<div class="flex justify-around  h-full">
@@ -199,7 +200,7 @@
 
 				<AlertDialog.Root >
 					<AlertDialog.Trigger><Button variant="outline" class="bg-orange-500 w-full h-100">ดูรายการ</Button></AlertDialog.Trigger>
-					<AlertDialog.Content class="bg-slate-300 rounded-lg p-4 h-full my-10 " style="width:auto;height:auto">
+					<AlertDialog.Content class="bg-slate-300 rounded-lg p-4 w-full my-10 h-full max-w-3/5 " style="width:auto;height:auto">
 						<AlertDialog.Header >
 							<AlertDialog.Title >
                                 <div class="flex" >
@@ -210,7 +211,7 @@
                                     </div>
                                     <div>เลขบัญชี</div>
                                     <div class="ms-44"><AlertDialog.Action
-                                        class="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-700"
+                                        class="px-4 py-2 font-semibold text-white bg-blue-500 rounded hover:bg-blue-700 absolute top-0 right-0"
                                     >
                                         x
                                     </AlertDialog.Action></div>
@@ -218,9 +219,9 @@
                             </AlertDialog.Title>
 							<AlertDialog.Description>
 								<div class="flex justify-around">
-                                    <div class="content-center" style="width: 190px;"><div class="flex justify-center">IMG</div></div>
-                                    <div class="h-100 bg-black" >.</div>
-                                    <div class="text-start mx-5" style="width: 190px;">
+                                    <div class="content-center w-full max-w-3/5 h-full max-h-4/5"><div class="flex justify-center content-center"><img src={logo} style="width:250px; height:auto"></div></div>
+                                    <div class="h-100 bg-black mx-5" >.</div>
+                                    <div class="text-start " style="width: 400px;">
 
                                         <div>...</div>
                                         <div>.....</div>
@@ -254,6 +255,7 @@
 			</div>
 		</div>
 	{/each}
+</div>
 </div>
 {/if}
 
