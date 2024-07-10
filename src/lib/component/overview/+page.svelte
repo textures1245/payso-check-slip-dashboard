@@ -1,5 +1,5 @@
 
-<script>
+<script lang="ts">
     import { Button } from '$lib/components/ui/button';
 	import logo from"$lib/image/pack.png";
     import * as Card from "$lib/components/ui/card";
@@ -40,26 +40,28 @@
 
 
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mx-5">
-    <Card.Root>
+    <Card.Root >
         <Card.Header
             class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-            <Card.Title class="text-sm font-medium">หัวข้อ</Card.Title>
+            <Card.Title class="text-lg font-medium">จำนวนรายการที่เป็นของจริงทั้งหมด</Card.Title>
             
         </Card.Header>
-        <Card.Content>
+        <Card.Content class="text-center ">
+			<div class="content-center ">
             <div class="text-2xl font-bold">$45,231.89</div>
             <p class="text-xs text-muted-foreground">+20.1% from last month</p>
+			</div>
         </Card.Content>
     </Card.Root>
     <Card.Root>
         <Card.Header
             class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-            <Card.Title class="text-sm font-medium">หัวข้อ</Card.Title>
+            <Card.Title class="text-sm font-medium">จำนวนรายการที่เป็นของปลอมทั้งหมด</Card.Title>
            
         </Card.Header>
-        <Card.Content>
+        <Card.Content class="text-center ">
             <div class="text-2xl font-bold">+2350</div>
             <p class="text-xs text-muted-foreground">+180.1% from last month</p>
         </Card.Content>
@@ -68,12 +70,12 @@
         <Card.Header
             class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-            <Card.Title class="text-sm font-medium">จำนวนทั้งหมด</Card.Title>
+            <Card.Title class="text-sm font-medium">จำนวนยอดเงินทั้งหมดที่ใช้งาน</Card.Title>
             
         </Card.Header>
-        <Card.Content>
+        <Card.Content class="text-center ">
             <div>
-                <p class=" w-100 h-32 content-center">359 bath</p>
+                <p class=" w-100 h-32 content-center text-4xl">359 bath</p>
                 </div>
                 <div class=" w-100"><Button variant="outline" class="w-4/5 h-12 bg-orange-500">Dowload Excel</Button></div>
         </Card.Content>
@@ -88,7 +90,7 @@
         <Card.Content class="flex justify-center" >
             <div>
             <div class="chart-container">
-                <Pie {data} {options}  style="width:70%"/>
+                <Pie {data} {options}  style="width:80%"/>
               </div>
               <div>
             <p class="text-center">{datatoo}/{max}</p></div>
@@ -96,3 +98,5 @@
         </Card.Content>
     </Card.Root>
 </div>
+
+
