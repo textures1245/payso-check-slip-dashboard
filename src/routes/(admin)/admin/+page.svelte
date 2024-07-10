@@ -55,6 +55,16 @@
 </script>
 
 <div style="width: max-auto; margin:30px">
+	<div class="mb-4 flex items-center gap-4"><Input
+		class="max-w-sm"
+		placeholder="Search"
+		type="text"
+		
+	  />
+	  <Button>Submit</Button>
+	  <Button class='outline outline-offset-2 outline-blue-500'>Clear</Button>
+	</div> 
+	  
 	<Table.Root>
 		<Table.Header class="bg-sky-700 ">
 			<Table.Row>
@@ -130,4 +140,6 @@
 		padding: 7px;
 		border-radius: 1rem;
 	}
-</style>
+</style> 
+
+
