@@ -22,7 +22,7 @@
         }
       
     }
-    console.log(currentDate ,' currentIndex  : ',currentDayIndex,currentMonthIndex ,currentYear)
+    // console.log(currentDate ,' currentIndex  : ',currentDayIndex,currentMonthIndex ,currentYear)
     return labels;
   };
     // Sample data for the bar chart
@@ -30,14 +30,14 @@
       labels: getLabels(),
       datasets: [
         {
-          label: 'Sales',
+          label: 'สลิปจริง',
           data: [{ x: 'Jul 7', y: 15 }, { x: 'Jul 9', y: 8 }, { x: 'Jul 10', y: 9 }, { x: 'Nov 8', y: 9 }, { x: 'Jul 5', y: 9 }, { x: 'Jul 1', y: 9 },{ x: 'Jul 2', y: 9 },1,1,1],
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1
         },
         {
-          label: 'Sales (Extra)',
+          label: 'สลิปปลอม',
           data: [8, 8, 8, 8, 8, 8,9,9,9,9], // ตั้งค่าให้มีค่าเท่ากันสำหรับทุกเดือน
           backgroundColor: 'rgba(255, 159, 64, 0.2)',
           borderColor: 'rgba(255, 159, 64, 1)',
@@ -101,8 +101,6 @@
   
   </script>
 
-  <div class="w-full">
-  
-</div>
+
 <Bar {data} {options}  />
 
