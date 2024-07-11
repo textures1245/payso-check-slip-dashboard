@@ -17,40 +17,49 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
+	import logo from '../../lib/image/editing.png'
+	import { Badge } from '$lib/components/ui/badge';
 
 	type Payment = {
 		id: string;
-		amount: number;
+		amount: string;
 		status: 'Pending' | 'Processing' | 'Success' | 'Failed';
 		email: string;
         password : string;
+		testheadder : string;
 	};
 
 	const data: Payment[] = [
 		{
 			id: 'm5gr84i9',
-			amount: 316,
+			amount: logo,
 			status: 'Success',
 			email: 'ken99@yssahoo.com',
-            password : 'ccsdadfghmhgfgdsgjhgfdsgjhgfdsghmjmhgfdsg'
+            password : '1',
+			testheadder : "11"
+
 		},
         {
 			id: 'm5gr84icc9',
-			amount: 316,
+			amount: logo,
 			status: 'Success',
 			email: 'ken99@yahsssdasdasdasoo.com',
-            password : 'ccsdadfghmhgfgdsgjhgfdsgjhgfdsghmjmhgfdsg'
+            password : '1',
+			testheadder : "12"
 		},
         {
 			id: 'm5gssr84i9',
-			amount: 316,
+			amount: logo,
 			status: 'Success',
 			email: 'ken99@yahoo.com',
-            password : 'ccsdadfghmhgfgdsgjhgfdsgjhgfdsghmjmhgfdsg'
+            password : '2',
+			testheadder : "13"
 		},
+		
 		
 
 	];
+	console.log(data)
 
 	const table = createTable(readable(data), {
 		sort: addSortBy({ disableMultiSort: true }),
@@ -93,16 +102,25 @@
 				}
 			}
 		}),
+		table.column({
+			header: 'TestHeader',
+			accessor: 'testheadder',
+			cell: ({ value }) => value.toLowerCase(),
+			plugins: {
+				filter: {
+					getFilterValue(value) {
+						return value.toLowerCase();
+					}
+				}
+			}
+		}),
     
 		table.column({
 			header: 'Amount',
 			accessor: 'amount',
 			cell: ({ value }) => {
-				const formatted = new Intl.NumberFormat('en-US', {
-					style: 'currency',
-					currency: 'USD'
-				}).format(value);
-				return formatted;
+				
+				return value;
 			},
 			plugins: {
 				sort: {
@@ -164,6 +182,7 @@
 										{#if cell.id === 'amount'}
 											<div class="text-right">
 												<Render of={cell.render()} />
+												
 											</div>
 										{:else if cell.id === 'email'}
 											<Button variant="ghost" on:click={props.sort.toggle}>
@@ -176,6 +195,16 @@
 												/>
 											</Button>
 											{:else if cell.id === 'password'}
+											<Button variant="ghost" on:click={props.sort.toggle}>
+												<Render of={cell.render()} />
+												<CaretSort
+													class={cn(
+														$sortKeys[0]?.id === cell.id && 'text-foreground',
+														'ml-2 h-4 w-4'
+													)}
+												/>
+											</Button>
+											{:else if cell.id === 'testheadder'}
 											<Button variant="ghost" on:click={props.sort.toggle}>
 												<Render of={cell.render()} />
 												<CaretSort
@@ -202,10 +231,14 @@
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>
 									<Table.Cell class="[&:has([role=checkbox])]:pl-3" {...attrs}>
-										{#if cell.id === 'amount'}
+										
+										{#if cell.id === 'password'}
 											<div class="text-right font-medium">
-												<Render of={cell.render()} />
+												<Button><img style="width: 20px;" src={logo} alt=""></Button>
+												
 											</div>
+											
+
 										{:else}
 											<Render of={cell.render()} />
 										{/if}
