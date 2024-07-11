@@ -13,6 +13,7 @@
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@iconify/svelte": "^4.0.2",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
@@ -38,13 +39,13 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@iconify/svelte": "^4.0.2",
 		"@radix-ui/react-dialog": "^1.1.1",
 		"bits-ui": "^0.21.12",
 		"chart.js": "^4.4.3",
 		"clsx": "^2.1.1",
 		"embla-carousel-svelte": "^8.1.6",
 		"lucide-svelte": "^0.407.0",
+		"paneforge": "^0.0.5",
 		"recharts": "^2.12.7",
 		"svelte-chartjs": "^3.1.5",
 		"svelte-radix": "^1.1.0",
