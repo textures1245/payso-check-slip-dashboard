@@ -1,0 +1,114 @@
+<script lang="ts">
+    import { Bar } from 'svelte-chartjs';
+    import logo from"$lib/image/pack.png";
+    import { Button } from '$lib/components/ui/button';
+    import * as Card from "$lib/components/ui/card";
+	import * as Carousel from '$lib/components/ui/carousel/index.js';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+    // Register Chart.js components
+    import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+ 
+  const tags = Array.from({ length: 50 }).map(
+    (_, i, a) => `v1.2.0-beta.${a.length - i}`
+  );
+  const items = [
+		{
+			title: 'Item 1',
+			description: 'This is the first item',
+			imageUrl: logo,
+			package: '1'
+		},
+		{
+			title: 'Item 2',
+			description: 'This is the second item',
+			imageUrl: logo,
+			package: '2'
+		},
+		{
+			title: 'Item 3',
+			description: 'This is the third item',
+			imageUrl: logo,
+			package: '3'
+		},
+		{
+			title: 'Item 4',
+			description: 'This is the fourth item',
+			imageUrl: logo,
+			package: '4'
+		},
+		{
+			title: 'Item 5',
+			description: 'This is the fifth item',
+			imageUrl: logo,
+			package: '5'
+		},
+		{
+			title: 'Item 5',
+			description: 'This is the fifth item',
+			imageUrl: logo,
+			package: '5'
+		},
+		{
+			title: 'Item 5',
+			description: 'This is the fifth item',
+			imageUrl: logo,
+			package: '5'
+		}
+	];
+  </script>
+
+<div class="rounded-lg border-2 border-black w-100 h-34  mx-8 mb-2 w-100" >
+    <div class=" flex justify-center my-2">
+        <Carousel.Root class="w-full">
+            <Carousel.Content class="-ml-1">
+                {#each items as item}
+                    <Carousel.Item class="pl-1 md:basis-1/2 lg:basis-1/2">
+                        <div class="p-1">
+                            <Card.Root>
+                                <Card.Content
+                                    class="aspect-square items-center justify-center my-2 h-28 max-h-72 w-full"
+                                >
+                                    <div class="flex">
+                                        <div style="width:50%;height:24%">
+                                            <img src={logo} class="w-3/4 h-2/5 my-0" />
+                                        </div>
+                                        <div class="mx-3 w-72 text-left">
+                                            <div class="text-sm font-semibold"><article class="text-wrap ...">
+                                                <p>{item.title}</p>
+                                              </article></div>
+                                            
+                                        </div>
+                                    </div>
+                                </Card.Content>
+                            </Card.Root>
+                        </div>
+                    </Carousel.Item>
+                {/each}
+            </Carousel.Content>
+            <Carousel.Previous />
+            <Carousel.Next />
+        </Carousel.Root>
+    </div>
+</div>
+
+<ScrollArea class="h-72 w-100 rounded-md border ">
+<div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1 ">
+<div class="rounded-lg border-2 border-black w-100 mx-8 snap-y">
+    {#each items as item}
+        <div class=" my-5 mx-5 rounded-xl snap-start text-sm">
+            <div class="flex justify-between h-full">
+                <div>
+                <div class="content-end">ผู้ส่ง : {item.title}</div>
+                <div class="content-end">จาก: XXX-X-XX... , MR....</div>
+            </div>
+                <div class="content-center">จำนวนเงิน : {item.package}</div>
+                <div >
+                <Button variant="outline" class="bg-orange-500 w-50 h-50 flex justify-end">ดูรายการ</Button
+                    ></div>
+                
+            </div>
+        </div>
+    {/each}
+</div>
+</div>
+</ScrollArea>
