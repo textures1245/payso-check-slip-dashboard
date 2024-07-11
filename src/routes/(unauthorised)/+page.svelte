@@ -16,7 +16,7 @@
 </script>
 
 <div
-	class="bg-gradient-to-tr from-destructive via-primary via-70% to-secondary grid lg:grid-cols-3"
+	class="bg-gradient-to-tr h-dvh from-destructive via-primary via-70% to-secondary grid lg:grid-cols-3"
 >
 	<div class=" lg:col-span-2">
 		<img class="hidden lg:block object-cover w-full h-full" src={bg} alt="background" />
@@ -78,15 +78,11 @@
 </div>
 
 <style lang="postcss">
-	:global(html) {
-		background-color: theme(colors.gray.100);
-	}
-
-	.bg-blur-radial {
+	/* .bg-blur-radial {
 		background:
 			radial-gradient(black 15%, transparent 16%) 0 0,
 			radial-gradient(black 15%, transparent 16%) 8px 8px,
 			radial-gradient(rgba(255, 255, 255, 0.1) 15%, transparent 20%) 0 1px,
 			radial-gradient(rgba(255, 255, 255, 0.1) 15%, transparent 20%) 8px 9px;
-	}
+	} */
 </style>
