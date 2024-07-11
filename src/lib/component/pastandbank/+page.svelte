@@ -55,6 +55,12 @@
 			package: '5'
 		}
 	];
+
+    function sendData(param1: string) {
+    
+    console.log(param1)  // Replace with your actual URL
+    sessionStorage.setItem('id_detail', param1);    
+  }
   </script>
 
 <div class="rounded-lg border-2 border-black w-100 h-34  mx-8 mb-2 w-100" >
@@ -103,8 +109,10 @@
             </div>
                 <div class="content-center">จำนวนเงิน : {item.package}</div>
                 <div >
-                <Button variant="outline" class="bg-orange-500 w-50 h-50 flex justify-end">ดูรายการ</Button
-                    ></div>
+                    <a href="/detail">
+                <Button variant="outline" class="bg-orange-500 w-50 h-50 flex justify-end" on:click={() => sendData(item.package)}>ดูรายการ</Button
+                    >
+                </a></div>
                 
             </div>
         </div>
