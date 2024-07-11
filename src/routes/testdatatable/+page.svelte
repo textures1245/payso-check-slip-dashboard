@@ -23,6 +23,7 @@
 		amount: number;
 		status: 'Pending' | 'Processing' | 'Success' | 'Failed';
 		email: string;
+        password : string;
 	};
 
 	const data: Payment[] = [
@@ -30,69 +31,25 @@
 			id: 'm5gr84i9',
 			amount: 316,
 			status: 'Success',
-			email: 'ken99@yahoo.com'
-		},
-		{
-			id: '3u1reuv4',
-			amount: 242,
-			status: 'Success',
-			email: 'Abe45@gmail.com'
-		},
-		{
-			id: 'derv1ws0',
-			amount: 837,
-			status: 'Processing',
-			email: 'Monserrat44@gmail.com'
-		},
-		{
-			id: '5kma53ae',
-			amount: 874,
-			status: 'Success',
-			email: 'Silas22@gmail.com'
-		},
-		{
-			id: 'bhqecj4p',
-			amount: 721,
-			status: 'Failed',
-			email: 'carmella@hotmail.com'
+			email: 'ken99@yssahoo.com',
+            password : 'ccsdadfghmhgfgdsgjhgfdsgjhgfdsghmjmhgfdsg'
 		},
         {
-			id: '5kma53ae',
-			amount: 874,
+			id: 'm5gr84icc9',
+			amount: 316,
 			status: 'Success',
-			email: 'Silas22@gmail.com'
+			email: 'ken99@yahsssdasdasdasoo.com',
+            password : 'ccsdadfghmhgfgdsgjhgfdsgjhgfdsghmjmhgfdsg'
 		},
         {
-			id: '5kma53ae',
-			amount: 874,
+			id: 'm5gssr84i9',
+			amount: 316,
 			status: 'Success',
-			email: 'Silas22@gmail.com'
+			email: 'ken99@yahoo.com',
+            password : 'ccsdadfghmhgfgdsgjhgfdsgjhgfdsghmjmhgfdsg'
 		},
-        {
-			id: '5kma53ae',
-			amount: 874,
-			status: 'Success',
-			email: 'Silas22@gmail.com'
-		},
-        {
-			id: '5kma53ae',
-			amount: 874,
-			status: 'Success',
-			email: 'Silas22@gmail.com'
-		},
-        {
-			id: '5kma53ae',
-			amount: 874,
-			status: 'Success',
-			email: 'Silas22@gmail.com'
-		},
-        {
-			id: '5kma53ae',
-			amount: 874,
-			status: 'Success',
-			email: 'Silas22@gmail.com'
-		},
-        
+		
+
 	];
 
 	const table = createTable(readable(data), {
@@ -107,34 +64,22 @@
 
 	const columns = table.createColumns([
 		table.column({
-			header: (_, { pluginStates }) => {
-				const { allPageRowsSelected } = pluginStates.select;
-				return createRender(DataTableCheckbox, {
-					checked: allPageRowsSelected
-				});
-			},
-			accessor: 'id',
-			cell: ({ row }, { pluginStates }) => {
-				const { getRowState } = pluginStates.select;
-				const { isSelected } = getRowState(row);
-
-				return createRender(DataTableCheckbox, {
-					checked: isSelected
-				});
-			},
-			plugins: {
-				sort: {
-					disable: true
-				},
-				filter: {
-					exclude: true
-				}
-			}
-		}),
-		table.column({
 			header: 'Status',
 			accessor: 'status',
+            cell: ({value}) => value.toLocaleLowerCase(),
 			plugins: { sort: { disable: true }, filter: { exclude: true } }
+		}),
+        table.column({
+			header: 'password',
+			accessor: 'password',
+			cell: ({ value }) => value.toLowerCase(),
+			plugins: {
+				filter: {
+					getFilterValue(value) {
+						return value.toLowerCase();
+					}
+				}
+			}
 		}),
 		table.column({
 			header: 'Email',
@@ -148,6 +93,7 @@
 				}
 			}
 		}),
+    
 		table.column({
 			header: 'Amount',
 			accessor: 'amount',
@@ -205,22 +151,6 @@
 <div class="w-full py-4">
 	<div class="mb-4 flex items-center gap-4">
 		<Input class="max-w-sm" placeholder="Filter emails..." type="text" bind:value={$filterValue} />
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger asChild let:builder>
-				<Button variant="outline" class="ml-auto" builders={[builder]}>
-					Columns <ChevronDown class="ml-2 h-4 w-4" />
-				</Button>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				{#each flatColumns as col}
-					{#if hideableCols.includes(col.id)}
-						<DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
-							{col.header}
-						</DropdownMenu.CheckboxItem>
-					{/if}
-				{/each}
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
 	</div>
 	<div class="rounded-md border">
 		<Table.Root {...$tableAttrs}>
@@ -236,6 +166,16 @@
 												<Render of={cell.render()} />
 											</div>
 										{:else if cell.id === 'email'}
+											<Button variant="ghost" on:click={props.sort.toggle}>
+												<Render of={cell.render()} />
+												<CaretSort
+													class={cn(
+														$sortKeys[0]?.id === cell.id && 'text-foreground',
+														'ml-2 h-4 w-4'
+													)}
+												/>
+											</Button>
+											{:else if cell.id === 'password'}
 											<Button variant="ghost" on:click={props.sort.toggle}>
 												<Render of={cell.render()} />
 												<CaretSort
