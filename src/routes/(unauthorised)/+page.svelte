@@ -16,7 +16,7 @@
 </script>
 
 <div
-	class="bg-gradient-to-tr from-destructive via-primary via-70% to-secondary i grid lg:grid-cols-3 h-full"
+	class="bg-gradient-to-tr from-destructive via-primary via-70% to-secondary grid lg:grid-cols-3"
 >
 	<div class=" lg:col-span-2">
 		<img class="hidden lg:block object-cover w-full h-full" src={bg} alt="background" />

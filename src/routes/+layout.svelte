@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { accounts, mails } from './(layouts)/data';
+
+	import LayoutResizer from './(layouts)/LayoutResizer.svelte';
 	import '../app.postcss';
 	import Navbar, { type NavItem } from '$lib/component/navbar.svelte';
+	import { Separator } from '$lib/components/ui/separator';
 
 	let navItems: NavItem[] = [
 		{ id: 1, title: 'หน้าแรก', link: '/' },
@@ -8,6 +12,34 @@
 		{ id: 3, title: 'Package', link: '/Packagebuy' },
 		{ id: 4, title: 'test', link: '/testdashboard' }
 	];
+
+	let subPaths = {
+		'': [
+			{ id: 1, title: 'หน้าแรก', link: '/' },
+			{ id: 2, title: 'Dashboard', link: '/dashboard' },
+			{ id: 3, title: 'Package', link: '/Packagebuy' },
+			{ id: 4, title: 'test', link: '/testdashboard' }
+		],
+		dashboard: [
+			{ id: 1, title: 'หน้าแรก', link: '/' },
+			{ id: 2, title: 'Dashboard', link: '/dashboard' },
+			{ id: 3, title: 'Package', link: '/Packagebuy' },
+			{ id: 4, title: 'test', link: '/testdashboard' }
+		],
+		Packagebuy: [
+			{ id: 1, title: 'หน้าแรก', link: '/' },
+			{ id: 2, title: 'Dashboard', link: '/dashboard' },
+			{ id: 3, title: 'Package', link: '/Packagebuy' },
+			{ id: 4, title: 'test', link: '/testdashboard' }
+		],
+		testdashboard: [
+			{ id: 1, title: 'หน้าแรก', link: '/' },
+			{ id: 2, title: 'Dashboard', link: '/dashboard' },
+			{ id: 3, title: 'Package', link: '/Packagebuy' },
+			{ id: 4, title: 'test', link: '/testdashboard' }
+		]
+	};
+
 	let role = 'admin';
 	if (role == 'admin') {
 		navItems = navItems.slice(0, 2);
@@ -16,7 +48,14 @@
 	}
 </script>
 
-<div class="h-dvh">
+<div>
 	<Navbar {navItems} />
-	<slot></slot>
+	<Separator />
+	<LayoutResizer {accounts} subLinks={subPaths} navCollapsedSize={3}>
+		<!-- <div slot="navbar">
+		</div> -->
+		<div class="*:min-h-dvh">
+			<slot></slot>
+		</div>
+	</LayoutResizer>
 </div>
