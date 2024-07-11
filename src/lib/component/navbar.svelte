@@ -7,6 +7,8 @@
 </script>
 
 <script lang="ts">
+	import * as Tabs from '$lib/components/ui/tabs';
+
 	import logo from '$lib/image/paysologo.jpg';
 
 	export let navItems: NavItem[] = [];
@@ -17,9 +19,9 @@
 	}
 </script>
 
-<nav class="bg-gray-800">
-	<div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-		<div class="relative flex h-16 items-center justify-between">
+<nav class="bg-card">
+	<div class="mx-auto max-w-7xl px-2">
+		<div class="relative flex h-10 items-center justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
 				<!-- Mobile menu button-->
 				<button
@@ -71,19 +73,16 @@
 				<div class="flex flex-shrink-0 items-center">
 					<img class="h-8 w-auto" src={logo} alt="Your Company" />
 				</div>
-				<div class="hidden sm:ml-6 sm:block">
-					<div class="flex space-x-4">
-						<ul class="flex text-amber-500">
-							{#each navItems as item}
-								<li class="mx-3">
-									<a href={item.link}>{item.title}</a>
-								</li>
-							{/each}
-						</ul>
-					</div>
+				<div class="hidden gap-6 items-center sm:ml-6 sm:flex text-card-foreground">
+					{#each navItems as item}
+						<a
+							class="text-xs md:text-sm font-medium transition-colors hover:text-primary"
+							href={item.link}>{item.title}</a
+						>
+					{/each}
 				</div>
 			</div>
-			<div
+			<!-- <div
 				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
 			>
 				<button
@@ -108,7 +107,6 @@
 					</svg>
 				</button>
 
-				<!-- Profile dropdown -->
 				<div class="relative ml-3">
 					<div>
 						<button
@@ -128,7 +126,7 @@
 						</button>
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 	</div>
 
