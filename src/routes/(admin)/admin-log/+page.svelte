@@ -15,125 +15,49 @@
 	import * as Table from '$lib/components/ui/table';
 	import editicon from '../../../lib/image/editing.png'
 
-	type UserData = {
-		merchantId: string;
-		merchantName: string;
-		package: string;
-		quota : number;
-		amount: number;
-		email: string;
-		editbutton : string;
+	type LogData = {
+	    logId: string;
+		role: string;
+		datetime: string;
+		action: string;
 	};
 
-	const data: UserData[] = [
+	const data: LogData[] = [
 		{
-			merchantId: '1',
-			merchantName : "Mick Magien",
-			package: 'Package1',
-			quota : 5,
-			amount: 316,
-			email: 'ken99@yahoo.com',
-			editbutton : 'sss'
+			logId: '1',
+			role : "Admin",
+			datetime: '2024-07-16',
+			action : 'action',
 		},
-		{
-			merchantId: '2',
-			merchantName : "Phark EIEI",
-			package: 'Package2',
-			quota : 6,
-			amount: 316,
-			email: 'Aeiou99@yahoo.com',
-			editbutton : ''
-
+        {
+			logId: '2',
+			role : "Admin",
+			datetime: '2024-07-16',
+			action : 'action',
 		},
-		{
-			merchantId: '3',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
+        {
+			logId: '3',
+			role : "Admin",
+			datetime: '2024-07-16',
+			action : 'action',
 		},
-		{
-			merchantId: '4',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
+        {
+			logId: '4',
+			role : "Admin",
+			datetime: '2024-07-16',
+			action : 'action',
 		},
-		{
-			merchantId: '5',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
+        {
+			logId: '5',
+			role : "Admin",
+			datetime: '2024-07-16',
+			action : 'action',
 		},
-		{
-			merchantId: '6',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
-		},
-		{
-			merchantId: '7',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
-		},
-		{
-			merchantId: '8',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
-		},
-		{
-			merchantId: '9',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
-		},
-		{
-			merchantId: '10',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
-		},
-		{
-			merchantId: '11',
-			merchantName : "Got EIEI",
-			package: 'Package3',
-			quota : 9,
-			amount: 316,
-			email: 'poiofview@yahoo.com',
-			editbutton : ''
-
+        {
+			logId: '6',
+			role : "Admin",
+			datetime: '2024-07-16',
+			action : 'action',
 		},
 		
 	];
@@ -150,8 +74,8 @@
 
 	const columns = table.createColumns([
 		table.column({
-			header: 'MerchantID',
-			accessor: 'merchantId',
+			header: 'LogId',
+			accessor: 'logId',
 			cell: ({ value }) => value.toLowerCase(),
 			plugins: {
 				filter: {
@@ -163,8 +87,8 @@
 		}),
 		
 		table.column({
-			header: 'MerchantName',
-			accessor: 'merchantName',
+			header: 'role',
+			accessor: 'role',
 			cell: ({ value }) => value.toLowerCase(),
 			plugins: {
 				filter: {
@@ -176,8 +100,8 @@
 		}),
 		
 		table.column({
-			header: 'Quota',
-			accessor: 'quota',
+			header: 'action',
+			accessor: 'action',
 			cell: ({ value }) => {
 				return value;
 			},
@@ -190,35 +114,7 @@
 				}
 			}
 		}),
-		table.column({
-			header: 'Package',
-			accessor: 'package',
-			cell: ({ value }) => value.toLowerCase(),
-			plugins: {
-				filter: {
-					getFilterValue(value) {
-						return value.toLowerCase();
-					}
-				}
-			}
-		}),
-	
-		table.column({
-			header: '',
-			accessor: 'editbutton',
-			cell: ({ value }) => {
-				
-				return value;
-			},
-			plugins: {
-				sort: {
-					disable: true
-				},
-				filter: {
-					exclude: true
-				}
-			}
-		}),
+		
 		
 		
 	]);
@@ -309,7 +205,7 @@
 									<Table.Cell {...attrs}>
 										{#if cell.id === 'editbutton'}
 											<div>
-												<Button><a href="/admin-update"><img style="width: 15px;" src={editicon} alt=""></a></Button>
+
 											</div>
 										{:else}
 											<Render of={cell.render()} />
