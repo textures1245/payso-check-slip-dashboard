@@ -39,7 +39,7 @@
 
 
 
-<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mx-5">
+<div class="grid gap-4 md:grid-cols-1 lg:grid-cols-4" style="width: 100%;">
     <Card.Root >
         <Card.Header
             class="flex flex-row items-center justify-between space-y-0 pb-2"
@@ -49,12 +49,11 @@
         </Card.Header>
         <Card.Content class="text-center ">
 			<div class="content-center ">
-            <div class="text-2xl font-bold">$45,231.89</div>
-            <p class="text-xs text-muted-foreground">+20.1% from last month</p>
+            <div class="text-2xl font-bold content-center w-100 h-20" >33333</div>
 			</div>
         </Card.Content>
     </Card.Root>
-    <Card.Root>
+    <Card.Root >
         <Card.Header
             class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
@@ -62,20 +61,19 @@
            
         </Card.Header>
         <Card.Content class="text-center ">
-            <div class="text-2xl font-bold">+2350</div>
-            <p class="text-xs text-muted-foreground">+180.1% from last month</p>
+            <div class="text-2xl font-bold content-center  w-100 h-36">11111</div>
         </Card.Content>
     </Card.Root>
     <Card.Root>
         <Card.Header
             class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-            <Card.Title class="text-sm font-medium">จำนวนยอดเงินทั้งหมดที่ใช้งาน</Card.Title>
+            <Card.Title class="text-sm font-medium">จำนวนทั้งหมดที่ใช้งาน</Card.Title>
             
         </Card.Header>
         <Card.Content class="text-center ">
             <div>
-                <p class=" w-100 h-32 content-center text-4xl">359 bath</p>
+                <p class=" w-100 h-32 content-center text-4xl">2222</p>
                 </div>
                 <div class=" w-100"><Button variant="outline" class="w-4/5 h-12 bg-orange-500">Dowload Excel</Button></div>
         </Card.Content>
@@ -87,10 +85,10 @@
             <Card.Title class="text-sm font-medium">การใช้งาน</Card.Title>
             
         </Card.Header>
-        <Card.Content class="flex justify-center" >
+        <Card.Content class="flex justify-center w-100 h-100" >
             <div>
-            <div class="chart-container">
-                <Pie {data} {options}  style="width:80%"/>
+            <div class="chart-container w-64">
+                <Pie {data} {options} class="w-9/12"/>
               </div>
               <div>
             <p class="text-center">{datatoo}/{max}</p></div>

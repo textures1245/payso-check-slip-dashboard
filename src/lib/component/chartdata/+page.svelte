@@ -31,7 +31,7 @@
       datasets: [
         {
           label: 'สลิปจริง',
-          data: [{ x: 'Jul 7', y: 15 }, { x: 'Jul 9', y: 8 }, { x: 'Jul 10', y: 9 }, { x: 'Nov 8', y: 9 }, { x: 'Jul 5', y: 9 }, { x: 'Jul 1', y: 9 },{ x: 'Jul 2', y: 9 },1,1,1],
+          data: [{ x: 'Jul 7', y: 15 }, { x: 'Jul 9', y: 8 }, { x: 'Jul 10', y: 9 }, { x: 'Nov 8', y: 9 }, { x: 'Jul 5', y: 9 }, { x: 'Jul 1', y: 9 },{ x: 'Jul 2', y: 9 },{ x: 'Jul 18', y: 9 },1,1,1],
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1
@@ -75,7 +75,7 @@
       ticks: {
         color: 'black', // ตั้งค่าสีของอักษรบนแกน x
         font: {
-          size: 16, // ตั้งค่าขนาดตัวอักษร
+          size: 10, // ตั้งค่าขนาดตัวอักษร
           weight: 'normal' // ตั้งค่าความหนาของตัวอักษร
         }
       },
@@ -87,7 +87,7 @@
       ticks: {
         color: 'black', // ตั้งค่าสีของอักษรบนแกน y
         font: {
-          size: 16, // ตั้งค่าขนาดตัวอักษร
+          size: 10, // ตั้งค่าขนาดตัวอักษร
           weight: 'normal' // ตั้งค่าความหนาของตัวอักษร
         }
       },
@@ -102,5 +102,4 @@
   </script>
 
 
-<Bar {data} {options}  />
-
+<Bar {data} {options}  style="height:300px;width:100%"/>
