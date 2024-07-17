@@ -11,7 +11,7 @@
 
 <div >
     <div ><CardGropAdminDashbord/> </div>
-   <div class="my-5"><ChartGropAdminDashbord/></div>
+   <div class="m-5"><ChartGropAdminDashbord/></div>
    <div ><TableGropAdminDashbord/></div>
    
    

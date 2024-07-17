@@ -48,7 +48,7 @@
 
 
 
-    <Pie {data} {options} />
+    <Pie {data} {options}/>
 
   
   
