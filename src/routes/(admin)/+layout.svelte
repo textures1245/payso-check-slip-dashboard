@@ -13,7 +13,9 @@
 		{ id: 4, title: 'test', link: '/testdashboard' },
 		{ id: 5, title: 'admin', link: '/admin' },
 		{ id: 6, title: 'Log', link: '/admin-log' },
-		{id : 7 , title: 'adminupdate' , link: '/admin-update'}
+		{id : 7 , title: 'admindashbord' , link: '/admin-dashbord'},
+		{id : 8 , title: 'adminupdate' , link: '/admin-update'},
+		
 
 	];
 
@@ -31,7 +33,7 @@
 
 	let role = 'admin';
 	if (role == 'admin') {
-		navItems = navItems.slice(0, 6);
+		navItems = navItems.slice(0, 7);
 	} else {
 		navItems = navItems.slice(2);
 	}
