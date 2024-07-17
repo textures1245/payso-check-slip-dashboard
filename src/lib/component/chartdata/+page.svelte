@@ -18,7 +18,6 @@
     for (let day = 1; day <= daysInMonth; day++) {
         if(day <= currentDayIndex){
             labels.push(`${month} ${day}`);
-            console.log(labels)
         }
       
     }

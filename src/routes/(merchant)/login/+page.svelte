@@ -4,7 +4,7 @@ let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
 let clientId = '2005856083';
 let redirectUri = 'http://localhost:5173/dashboard';
 let state = 'randomState';
-let scope = 'profile openid email';
+let scope = 'profile%20openid%20email';
 
 let loginUrl = generateLoginUrl(lineLoginUrl, clientId, redirectUri, state, scope);
 
@@ -15,18 +15,15 @@ let loginUrl = generateLoginUrl(lineLoginUrl, clientId, redirectUri, state, scop
 	
 }
 
+
 const line = async () => {
 			window.location.replace(loginUrl);
 			console.log("1")
 	
 	};
 
-    onMount(() => {
-        line()
-        
-  });
 
-  
 </script>
 
 <button on:click={line}>asdadada</button>
+

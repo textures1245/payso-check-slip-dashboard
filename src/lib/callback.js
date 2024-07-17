@@ -29,13 +29,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const profileData = await profileResponse.json();
             console.log('Profile data:', profileData);
-            localStorage.setItem('profile', JSON.stringify(profileData));
-            sessionStorage.setItem('profile', JSON.stringify(profileData));
 
+            // Store user profile data in localStorage (or other storage)
+            localStorage.setItem('profile Data ', JSON.stringify(profileData));
+            sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+
+        
+
+
+            
+        
+           
         } catch (error) {
             console.error('Error:', error);
             // @ts-ignore
             document.getElementById('result').innerText = 'Error during login process';
+            
         }
     } else {
         // @ts-ignore

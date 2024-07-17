@@ -7,6 +7,7 @@
 	import PastandBank from "$lib/component/pastandbank/+page.svelte";
 	
 	
+
 </script>
 
 
@@ -45,5 +46,4 @@
     
 </div>
 
-<input type="text" hidden name="uid" id="emailInputline" />
-<input type="text" hidden name="name" id="nameInputline" />
+

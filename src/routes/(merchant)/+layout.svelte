@@ -13,14 +13,13 @@
 		{ id: 3, title: 'Package', link: '/Packagebuy' },
 		{ id: 4, title: 'profile', link: '/profile' },
 		{ id: 5, title: 'test', link: '/admin' },
-		{ id: 6, title: 'logintest', link: '/loginline' }
+		{ id: 6, title: 'logintest', link: '/login' }
 	];
 
 	let subPaths = {
 		dashboard: [
-			{ id: 1, title: 'หน้าแรก', link: '/' },
-			{ id: 2, title: 'Dashboard', link: '/dashboard' },
-			{ id: 3, title: 'profile', link: '/profile' }
+			{ id: 3, title: 'profile', link: '/profile' },
+			{ id: 4, title: 'logintest', link: '/login' }
 		],
         testdashboard: [
 			{ id: 1, title: 'หน้าแรก', link: '/' },
