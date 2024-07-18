@@ -16,7 +16,7 @@
     <Card.Header
         class="flex flex-row items-center justify-between space-y-0 pb-2"
     >
-        <Card.Title class="text-lg font-medium">ผู้ใช้ใหม่</Card.Title>
+        <Card.Title class="text-sm">ผู้ใช้ใหม่</Card.Title>
         
     </Card.Header>
     <Card.Content class="text-center ">

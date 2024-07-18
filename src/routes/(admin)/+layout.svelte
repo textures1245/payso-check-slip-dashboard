@@ -8,9 +8,6 @@
 
 	let navItems: NavItem[] = [
 		{ id: 1, title: 'หน้าแรก',	 link: '/admin' },
-		{ id: 2, title: 'Dashboard', link: '/dashboard' },
-		{ id: 3, title: 'Package', link: '/Packagebuy' },
-		{ id: 4, title: 'test', link: '/testdashboard' },
 		{ id: 5, title: 'admin', link: '/admin' },
 		{ id: 6, title: 'Log', link: '/admin-log' },
 		{id : 7 , title: 'admindashbord' , link: '/admin-dashbord'},
@@ -33,7 +30,7 @@
 
 	let role = 'admin';
 	if (role == 'admin') {
-		navItems = navItems.slice(0, 7);
+		navItems = navItems.slice(0, 4);
 	} else {
 		navItems = navItems.slice(2);
 	}

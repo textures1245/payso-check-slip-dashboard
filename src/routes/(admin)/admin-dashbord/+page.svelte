@@ -10,7 +10,7 @@
 
 
 <div >
-    <div ><CardGropAdminDashbord/> </div>
+    <div class="m-3"><CardGropAdminDashbord/> </div>
    <div class="m-5"><ChartGropAdminDashbord/></div>
    <div ><TableGropAdminDashbord/></div>
    

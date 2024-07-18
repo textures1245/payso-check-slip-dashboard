@@ -20,6 +20,7 @@
 		role: string;
 		datetime: string;
 		action: string;
+		remark : string;
 	};
 
 	const data: LogData[] = [
@@ -28,36 +29,47 @@
 			role : "Admin",
 			datetime: '2024-07-16',
 			action : 'action',
+			remark : 'remark'
 		},
         {
 			logId: '2',
 			role : "Admin",
 			datetime: '2024-07-16',
 			action : 'action',
+			remark : 'remark'
+
 		},
         {
 			logId: '3',
 			role : "Admin",
 			datetime: '2024-07-16',
 			action : 'action',
+			remark : 'remark'
+
 		},
         {
 			logId: '4',
 			role : "Admin",
 			datetime: '2024-07-16',
 			action : 'action',
+			remark : 'remark'
+
 		},
         {
 			logId: '5',
 			role : "Admin",
 			datetime: '2024-07-16',
 			action : 'action',
+			remark : 'remark'
+
 		},
         {
 			logId: '6',
 			role : "Admin",
 			datetime: '2024-07-16',
 			action : 'action',
+			remark : 'remark'
+
 		},
 		
 	];
@@ -102,6 +114,36 @@
 		table.column({
 			header: 'action',
 			accessor: 'action',
+			cell: ({ value }) => {
+				return value;
+			},
+			plugins: {
+				sort: {
+					disable: true
+				},
+				filter: {
+					exclude: true
+				}
+			}
+		}),
+		table.column({
+			header: 'date',
+			accessor: 'datetime',
+			cell: ({ value }) => {
+				return value;
+			},
+			plugins: {
+				sort: {
+					disable: true
+				},
+				filter: {
+					exclude: true
+				}
+			}
+		}),
+		table.column({
+			header: 'remark',
+			accessor: 'remark',
 			cell: ({ value }) => {
 				return value;
 			},
