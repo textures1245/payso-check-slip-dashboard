@@ -309,7 +309,7 @@
 									<Table.Cell {...attrs}>
 										{#if cell.id === 'editbutton'}
 											<div>
-												<Button><a href="/admin-update"><img style="width: 15px;" src={editicon} alt=""></a></Button>
+												<Button><a href="/admin-update"><img style="width: 20px;" src={editicon} alt=""></a></Button>
 											</div>
 										{:else}
 											<Render of={cell.render()} />
