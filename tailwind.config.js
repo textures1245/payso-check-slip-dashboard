@@ -1,4 +1,6 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
+import daisyui from "daisyui"
+
 
 /** @type {import('tailwindcss').Config} */
 const config = {
@@ -64,7 +66,10 @@ const config = {
 				sans: [...fontFamily.sans]
 			}
 		}
-	}
+	},
+	plugins: [
+		daisyui,
+	]
 };
 
 export default config;

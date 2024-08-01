@@ -11,7 +11,9 @@
 		{ id: 5, title: 'admin', link: '/admin' },
 		{ id: 6, title: 'Log', link: '/admin-log' },
 		{id : 7 , title: 'admindashbord' , link: '/admin-dashbord'},
-		{id : 8 , title: 'adminupdate' , link: '/admin-update'},
+		{id : 8 , title : 'admin-manage-package ,' , link: '/admin-manage-package'},
+		{id : 9 , title: 'adminupdate' , link: '/admin-update'},
+		
 		
 
 	];
@@ -24,13 +26,19 @@
 			{ id: 4, title: 'test', link: '/testdashboard' },
 			
 			
-		]
+		] ,
+		'admin-dashbord':[] ,
+		'admin-log':[],
+		'admin-manage-package':[],
+		'adminupdate':[]
+
+		
 		
 	};
 
 	let role = 'admin';
 	if (role == 'admin') {
-		navItems = navItems.slice(0, 4);
+		navItems = navItems.slice(0, 5);
 	} else {
 		navItems = navItems.slice(2);
 	}
