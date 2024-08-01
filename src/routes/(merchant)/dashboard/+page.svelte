@@ -5,7 +5,8 @@
 	import Chartdata from "$lib/component/chartdata/+page.svelte";
 	import Overview from "$lib/component/overview/+page.svelte";
 	import PastandBank from "$lib/component/pastandbank/+page.svelte";
-	
+	import { onMount } from 'svelte';
+
 	
 
 </script>
@@ -34,7 +35,7 @@
 		<Card.Root style="height:100%;width:100%" >
 			<Card.Content class="flex justify-center" style="height:100%;width:100%" >
 				<div>
-				<div class="chart-container w-100 max-w-96 my-1" style="width: 100%;">
+				<div class="chart-container w-100 max-w-80 my-1" style="width: 100%;">
 					<PastandBank />
 				  </div>
 				  <div>

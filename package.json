@@ -44,11 +44,13 @@
 		"chart.js": "^4.4.3",
 		"clsx": "^2.1.1",
 		"embla-carousel-svelte": "^8.1.6",
+		"firebase": "^10.12.4",
 		"lucide-svelte": "^0.407.0",
 		"paneforge": "^0.0.5",
 		"recharts": "^2.12.7",
 		"svelte-chartjs": "^3.1.5",
 		"svelte-radix": "^1.1.0",
+		"svelte-spa-router": "^4.0.1",
 		"tailwind-merge": "^2.3.0",
 		"tailwind-variants": "^0.2.1",
 		"zod": "^3.23.8"

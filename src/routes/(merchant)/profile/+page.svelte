@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import logo from '$lib/image/merchant.png';
-
+    import { onMount } from 'svelte';
     const items = [
     {
         id: 1,
@@ -54,10 +54,60 @@
         usernameLine: 'somying202'
     }
 ];
+onMount(() => {
+   GetProfile();
+  });
+    
+   
+   const GetProfile= async () => {
+      const  email = sessionStorage.getItem('email')
+      const  id = sessionStorage.getItem('id') //รอรับ id จากหน้าอื่น
+    console.log("email : ", email,'id : ',id);
+    console.log('checking register');
+    
+    // สร้างพารามิเตอร์ URL จากข้อมูลฟอร์ม
+   
+    if(email){
+        console.log("Get by Email")
+        let config = {
+        method: 'GET', // เปลี่ยนจาก POST เป็น GET
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+    
+        var result = await fetch(`http://127.0.0.1:4567/api/v1/profileemail/${email}`, config);
+        const data = await result.json();
+        console.log(data);
+    }else{
+        console.log("Get by Merchant Id")
+        let config = {
+        method: 'GET', // เปลี่ยนจาก POST เป็น GET
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+    
+        var result = await fetch(`http://127.0.0.1:4567/api/v1/profileid/${id}`, config);
+        const data = await result.json();
+        console.log(data);
+    }
+    
+};
+  
 
+
+
+    // $: list = merchantList.data;
 let example =1
 
 </script>
+
+
+<form id="myForm" method="post" action="?/GetProfile">
+	<input type="text" hidden name="uid" id="emailInput" >
+
+</form>
 
 
 {#each items as item}

@@ -16,43 +16,43 @@
 			title: 'Item 1',
 			description: 'This is the first item',
 			imageUrl: logo,
-			package: '1'
+			status: 'success'
 		},
 		{
 			title: 'Item 2',
 			description: 'This is the second item',
 			imageUrl: logo,
-			package: '2'
+			status: 'faild'
 		},
 		{
 			title: 'Item 3',
 			description: 'This is the third item',
 			imageUrl: logo,
-			package: '3'
+			status: 'success'
 		},
 		{
 			title: 'Item 4',
 			description: 'This is the fourth item',
 			imageUrl: logo,
-			package: '4'
+			status: 'success'
 		},
 		{
 			title: 'Item 5',
 			description: 'This is the fifth item',
 			imageUrl: logo,
-			package: '5'
+			status: 'faild'
 		},
 		{
 			title: 'Item 5',
 			description: 'This is the fifth item',
 			imageUrl: logo,
-			package: '5'
+			status: 'success'
 		},
 		{
 			title: 'Item 5',
 			description: 'This is the fifth item',
 			imageUrl: logo,
-			package: '5'
+			status: 'faild'
 		}
 	];
 
@@ -110,10 +110,10 @@
                 <div class="content-end">ผู้ส่ง : {item.title}</div>
                 <div class="content-end">จาก: XXX-X-XX... , MR....</div>
             </div>
-                <div class="content-center">จำนวนเงิน : {item.package}</div>
+                <div class="content-center">{item.status}</div>
                 <div >
                     <a href="/detail">
-                <Button variant="outline" class="bg-orange-500 w-50 h-50 flex justify-end" on:click={() => sendData(item.package)}>ดูรายการ</Button
+                <Button variant="outline" class="bg-orange-500 w-50  h-50 flex justify-end" on:click={() => sendData(item.package)}>ดูรายการ</Button
                     >
                 </a></div>
                 

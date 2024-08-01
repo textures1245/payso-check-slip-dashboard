@@ -49,7 +49,11 @@
         </Card.Header>
         <Card.Content class="text-center ">
 			<div class="content-center ">
-            <div class="text-2xl font-bold content-center w-100 h-20" >33333</div>
+            <div class=" content-center w-100 h-24" >
+                <div class="text-2xl font-bold w-100">33333</div>
+                <div class="text-xs w-100 text-stone-400" >%สลิปที่ถูกต้องต่อสลิปทั้งหมด</div>
+            </div>
+            
 			</div>
         </Card.Content>
     </Card.Root>
@@ -61,7 +65,10 @@
            
         </Card.Header>
         <Card.Content class="text-center ">
-            <div class="text-2xl font-bold content-center  w-100 h-36">11111</div>
+            <div class=" content-center  w-100 h-40">
+                <div class="text-2xl font-bold w-100">1111</div>
+                <div class="text-xs  w-100 text-stone-400" >%สลิปที่ผิดต่อสลิปทั้งหมด</div>
+            </div>
         </Card.Content>
     </Card.Root>
     <Card.Root>

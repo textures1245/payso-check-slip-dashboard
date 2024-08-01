@@ -17,6 +17,12 @@
 	import Icon from '@iconify/svelte';
 
 	export let pkg: PackageCardProp;
+
+
+	function sendData(param1: string) {
+    console.log(param1)  // Replace with your actual URL
+    sessionStorage.setItem('package', param1);    
+  }
 </script>
 
 <Card.Root class="space-y-8 w-[380px]">
@@ -54,7 +60,7 @@
 		</div>
 	</Card.Content>
 	<Card.Footer>
-		<Button size="lg" class="w-full">
+		<Button size="lg" class="w-full" on:click={() => sendData(pkg.title)}>
 			<Check class="mr-2 h-4 w-4" /> PURCHASE
 		</Button>
 	</Card.Footer>

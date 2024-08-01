@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: new URLSearchParams({
                     grant_type: 'authorization_code',
                     code,
-                    redirect_uri: 'http://localhost:5173/dashboard',
+                    redirect_uri: 'http://localhost:5173/login',
                     client_id: '2005856083',
                     client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
                 })
@@ -34,20 +34,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('profile Data ', JSON.stringify(profileData));
             sessionStorage.setItem('profile Data', JSON.stringify(profileData));
 
-        
-
-
+            document.getElementById('emailInputline').value = profileData.userId;
+			document.getElementById('nameInputline').value = profileData.displayName;
+            localStorage.setItem('Login line', JSON.stringify(true));
+            sessionStorage.setItem('Login line', JSON.stringify(true));
+            // profileData.userId = document.getElementById('uid').value;
+            // profileData.displayName = document.getElementById('name').value;
+            //  console.log(document.getElementById('uid') , document.getElementById('name'))
+             document.getElementById('mylineForm').submit();
             
+           
         
            
         } catch (error) {
-            console.error('Error:', error);
-            // @ts-ignore
-            document.getElementById('result').innerText = 'Error during login process';
+
+            console.log(error)
+            
             
         }
-    } else {
-        // @ts-ignore
-        document.getElementById('result').innerText = 'No code found in the URL';
     }
 });
+
