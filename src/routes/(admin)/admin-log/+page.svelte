@@ -99,7 +99,7 @@
 		}),
 		
 		table.column({
-			header: 'role',
+			header: 'Actor name',
 			accessor: 'role',
 			cell: ({ value }) => value.toLowerCase(),
 			plugins: {

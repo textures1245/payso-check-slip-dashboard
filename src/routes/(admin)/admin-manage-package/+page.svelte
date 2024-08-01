@@ -50,6 +50,24 @@
 			editbutton : ''
 
 		},
+		{
+			packageId: '3',
+			packageName : "Package3",
+			status: 'ไม่ใช้งาน',
+			quota : 60,
+            price : 500 ,
+			editbutton : ''
+
+		},
+		{
+			packageId: '4',
+			packageName : "Package4",
+			status: 'ใช้งาน',
+			quota : 62,
+            price : 300 ,
+			editbutton : ''
+
+		},
 		
 		
 	];
@@ -201,7 +219,6 @@
                   </div>
               </div>
               <Dialog.Footer>
-                <Button type="submit" variant='outline'>Cancle</Button>
                 <Button type="submit">Save changes</Button>
               </Dialog.Footer>
             </Dialog.Content>
@@ -277,7 +294,41 @@
 									<Table.Cell {...attrs}>
 										{#if cell.id === 'editbutton'}
 											<div>
-												<Button><a href="/admin-update"><img style="width: 20px;" src={editicon} alt=""></a></Button>
+												<Dialog.Root>
+            
+													<Dialog.Trigger class={buttonVariants({variant: "outline"})}
+													  >Edit</Dialog.Trigger
+													>
+													<Dialog.Content class="sm:max-w-[425px]">
+													  <Dialog.Header>
+														<Dialog.Title>Edit Package</Dialog.Title>
+														<Dialog.Description>
+														  คุณสามารถเปลี่ยนเพจเกจใหม่ได้.
+														</Dialog.Description>
+													  </Dialog.Header>
+													  <div class="grid gap-4 py-4">
+														<div class="grid grid-cols-4 items-center gap-4">
+														  <Label for="Package Name" class="text-right">Package Name</Label>
+														  <Input id="name" placeholder="Packagename" class="col-span-3" />
+														</div>
+														<div class="grid grid-cols-4 items-center gap-4">
+															<Label for="username" class="text-right">Quota</Label>
+															<Input id="username" type="number" placeholder="100" class="col-span-3" />
+														  </div>
+														  <div class="grid grid-cols-4 items-center gap-4">
+															<Label for="username" class="text-right">Price</Label>
+															<Input id="username" type="number" placeholder="200" class="col-span-3" />
+														  </div>
+														  <div class="grid grid-cols-4 items-center gap-4">
+															<Label for="username" class="text-right">Status</Label>
+															<Switch/>
+														  </div>
+													  </div>
+													  <Dialog.Footer>
+														<Button type="submit">Save changes</Button>
+													  </Dialog.Footer>
+													</Dialog.Content>
+												  </Dialog.Root>
 											</div>
                                             {:else if cell.id === 'status'}
                                             {#if cell.render() === 'ใช้งาน'}

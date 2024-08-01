@@ -26,7 +26,13 @@
 			{ id: 4, title: 'test', link: '/testdashboard' },
 			
 			
-		]
+		] ,
+		'admin-dashbord':[] ,
+		'admin-log':[],
+		'admin-manage-package':[],
+		'adminupdate':[]
+
+		
 		
 	};
 
