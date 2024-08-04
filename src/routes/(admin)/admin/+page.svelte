@@ -6,7 +6,9 @@
 	let searchInpage = '';
 	let editingUser: UserData | null = null;
 	let currentPage = 1;
-	let limit = 10;
+	let limit = 10; 
+	let filteredData: UserData[] = [];
+	let merchantname = ''
 
 	onMount(async () => {
 		await fetchData();
@@ -33,11 +35,51 @@
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
+	} 
+
+
+	async function searchfetchData(merchantname : string) {
+		try {
+			const response = await fetch(`http://127.0.0.1:4567/api/v1/searchgetmerchant?merchantname=${merchantname}`);
+			if (!response.ok) {
+				throw new Error('Failed to fetch data');
+			}
+			const data = await response.json();
+			if (!Array.isArray(data.result)) {
+				throw new Error('Result is not an array');
+			}
+			userData = data.result.map((item: UserData) => ({
+				Id: item.Id,
+				MerchantId: item.MerchantId,
+				MerchantName: item.MerchantName,
+				QuotaUsage: item.QuotaUsage,
+				PackageId: item.PackageId,
+				Status: item.Status
+			}));
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
 	}
+	function handleSearchClick() {
+    searchfetchData(searchInpage);
+  }
 
 	function clearSearch() {
 		searchInpage = '';
+		filteredData = [...userData];
+		location.reload()
 	}
+
+	function handleSearchInput(event: Event) {
+		const target = event.target as HTMLInputElement;
+		searchInpage = target.value;
+		filteredData = userData.filter((user) =>
+			user.MerchantName.toLowerCase().includes(searchInpage.toLowerCase())
+		);
+	}
+
+
+
 
 	function showModal(user: UserData) {
 		editingUser = { ...user };
@@ -107,20 +149,22 @@
 	<div style="margin-bottom: 30px; display: flex;">
 		<input
 			type="text"
-			placeholder="Search"
+			placeholder="Mercahnt Name"
 			class="input input-bordered w-full max-w-xs"
 			style="background-color: aliceblue;"
 			maxlength="100"
+			
 			bind:value={searchInpage}
+			
 		/>
-		<button class="btn btn-outline" style="margin-right:10px; margin-left:10px">search</button>
-		<button class="btn btn-outline" on:click={clearSearch}>clear</button>
+		<button class="btn btn-outline btn-primary" style="margin-left: 20px;" on:click={handleSearchClick}>Search</button>
+		<button class="btn btn-outline btn-primary" style="margin-left: 20px;" on:click={clearSearch}>Clear</button>
 	</div>
 	<div class="overflow-x-auto">
-		<table class="table">
-			<thead class="bg-sky-700 text-black">
+		<table class="table font-sans">
+			<thead class="  text-center bg-primary text-black " style="font-size:medium; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
 				<tr>
-					<th>ID</th>
+					<th class=" font-sans">ID</th>
 					<th>Merchant Id</th>
 					<th>Merchant Name</th>
 					<th>Package</th>
@@ -129,7 +173,7 @@
 					<th>Action</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody class=" text-center" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size:medium; width:40px">
 				{#each userData as item}
 					<tr>
 						<th>{item.Id}</th>
@@ -138,12 +182,14 @@
 						<td>{item.PackageId}</td>
 						<td>{item.QuotaUsage}</td>
 						<td>
-							<span 
+							<div class="flex justify-center">
+							<div style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;"
 								class:badge-success={item.Status === 'ACTIVE'}
 								class:badge-danger={item.Status !== 'ACTIVE'}
 							>
 								{item.Status}
-							</span>
+							</div>
+						</div>
 						</td>
 						<td>
 							<button class="btn-sm btn-outline" on:click={() => showModal(item)}>
@@ -172,8 +218,8 @@
 		</table>
 		<div class="w-100 flex justify-end mx-10">
 		<div class="join grid grid-cols-2 w-40">
-			<button class="join-item btn btn-outline" on:click={goToPreviousPage}>Previous page</button>
-			<button class="join-item btn btn-outline" on:click={goToNextPage}>Next</button>
+			<button class="join-item btn btn-outline btn-primary" on:click={goToPreviousPage}>Previous page</button>
+			<button class="join-item btn btn-outline btn-primary" on:click={goToNextPage}>Next</button>
 		  </div>
 		</div>
 	</div>
@@ -182,29 +228,31 @@
 <dialog id="my_modal_1" class="modal">
 	<div class="modal-box bg-white">
 		<div class="form-control">
-			<h5>Edit</h5>
+			<div style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size:30px">Edit</div>
 			{#if editingUser}
+			
 				<label class="label ">
-					<span class="label-text">Merchant Name:</span>
-					<input type="text" class="input input-bordered bg-white" bind:value={editingUser.MerchantName} />
+					<span class="label-text text-black">Merchant Name:</span>
+					<input type="text" class="input input-bordered bg-white disabled:bg-white disabled:text-black" disabled bind:value={editingUser.MerchantName} />
 				</label>
 				<label class="label">
-					<span class="label-text">Package:</span>
+					<span class="label-text text-black">Package:</span>
 					<input type="text" class="input input-bordered bg-white" bind:value={editingUser.PackageId} />
 				</label>
 				<label class="label">
-					<span class="label-text">Quota:</span>
+					<span class="label-text text-black">Quota:</span>
 					<input type="number" class="input input-bordered bg-white" bind:value={editingUser.QuotaUsage} />
 				</label>
-				<label class="label cursor-pointer">
-					<span class="label-text">Status</span>
-					<input type="checkbox" class="toggle bg-white toggle-success" bind:checked={isActive} on:change={toggleStatus} />
+				<label class="label cursor-pointer bg-white  flex justify-start gap-8">
+					<span class="label-text text-black mr-2">Status</span>
+					<input type="checkbox" class="toggle [--tglbg:white] toggle-success"  bind:checked={isActive} on:change={toggleStatus} />
 				</label>
+			
 				<div class="modal-action">
 					<form method="dialog">
-						<button class="btn btn-outline">Close</button>
+						<button class="btn btn-outline btn-primary">Close</button>
 					</form>
-					<button class="btn btn-outline" on:click={updateUser}>Save</button>
+					<button class="btn btn-outline btn-primary" on:click={updateUser}>Save</button>
 				</div>
 			{/if}
 		</div>
@@ -216,11 +264,13 @@
 		background-color: green;
 		color: white; 
 		border-radius: 10px;
+		width: 60%;
 	}
 	.badge-danger {
 		background-color: red;
 		color: white;
 		border-radius: 10px;
+		width: 60%;
 
 	}
 </style>
