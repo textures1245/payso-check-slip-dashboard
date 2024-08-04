@@ -1,5 +1,5 @@
 // import { CookiesJsonParser } from '$lib/cookies';
-import { fail, redirect } from '@sveltejs/kit';
+import {  redirect } from '@sveltejs/kit';
 
 /** @type {import('@sveltejs/kit').Handle} */
 export const handle = async ({ resolve, event }) => {
@@ -22,15 +22,15 @@ export const handle = async ({ resolve, event }) => {
                 return redirect(302, '/');
             }
         }
-        if (isAdminPath) {
-            const token = event.cookies.get('merchant_account') || '';
-            // const paths = event.url.pathname
-            // const path = `/${paths}`;
-            // If no token is found, redirect to the login page
-            if (token || !token) {
-                return redirect(302, '/');
-            }
-        }
+        // if (isAdminPath) {
+        //     const token = event.cookies.get('merchant_account') || '';
+        //     // const paths = event.url.pathname
+        //     // const path = `/${paths}`;
+        //     // If no token is found, redirect to the login page
+        //     if (token || !token) {
+        //         return redirect(302, '/');
+        //     }
+        // }
         
             return await resolve(event);
 	} catch (error) {
