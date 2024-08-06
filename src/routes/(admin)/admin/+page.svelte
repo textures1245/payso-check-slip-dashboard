@@ -24,12 +24,13 @@
 			if (!Array.isArray(data.result)) {
 				throw new Error('Result is not an array');
 			}
+			console.log(data)
 			userData = data.result.map((item: UserData) => ({
 				Id: item.Id,
 				MerchantId: item.MerchantId,
 				MerchantName: item.MerchantName,
 				QuotaUsage: item.QuotaUsage,
-				PackageId: item.PackageId,
+				Name: item.Name,
 				Status: item.Status
 			}));
 		} catch (error) {
@@ -53,7 +54,7 @@
 				MerchantId: item.MerchantId,
 				MerchantName: item.MerchantName,
 				QuotaUsage: item.QuotaUsage,
-				PackageId: item.PackageId,
+				Name: item.Name,
 				Status: item.Status
 			}));
 		} catch (error) {
@@ -145,60 +146,66 @@
 	}
 </script>
 
-<div class="w-full py-4" style="margin: 20px;">
-	<div style="margin-bottom: 30px; display: flex;">
+<div class="w-full py-4  px-2 sm:px-4" style= "font-family: Ubuntu, sans-serif">
+	<div class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
 		<input
 			type="text"
-			placeholder="Mercahnt Name"
-			class="input input-bordered w-full max-w-xs"
+			placeholder="Merchant Id or Merchant Name"
+			class="input input-bordered w-full max-w-xs bg-blue-50"
 			style="background-color: aliceblue;"
 			maxlength="100"
-			
 			bind:value={searchInpage}
-			
 		/>
-		<button class="btn btn-outline btn-primary" style="margin-left: 20px;" on:click={handleSearchClick}>Search</button>
-		<button class="btn btn-outline btn-primary" style="margin-left: 20px;" on:click={clearSearch}>Clear</button>
+		<div class="flex space-x-2">
+			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={handleSearchClick}>Search</button>
+			<button class="btn btn-outline btn-warning text-xs sm:text-sm" on:click={clearSearch}>Clear</button>
+		</div>
 	</div>
-	<div class="overflow-x-auto">
-		<table class="table font-sans">
-			<thead class="  text-center bg-primary text-black " style="font-size:medium; font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">
+	<div class="overflow-x-hidden">
+		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
+			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
-					<th class=" font-sans">ID</th>
-					<th>Merchant Id</th>
-					<th>Merchant Name</th>
-					<th>Package</th>
-					<th>Quota</th>
-					<th>Status</th>
-					<th>Action</th>
+					<th class="p-1 sm:p-2 ">ID</th>
+					<th class="p-1 sm:p-2 text-wrap">
+						<div class="lg:block sm:block hidden">
+							Merchant Id
+						</div>
+						<div class="lg:hidden sm:hidden block" >
+							M.ID
+						</div></th>
+					<th class="p-1 sm:p-2 text-wrap "><div class="lg:block sm:block hidden">
+						Merchant Name
+					</div>
+					<div class="lg:hidden sm:hidden block" >
+						M.Name
+					</div></th>
+					<th class="p-1 sm:p-2">Package</th>
+					<th class="p-1 sm:p-2">Quota</th>
+					<th class="p-1 sm:p-2">Status</th>
+					<th class="p-1 sm:p-2"></th>
 				</tr>
 			</thead>
-			<tbody class=" text-center" style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size:medium; width:40px">
+			<tbody class="text-center">
 				{#each userData as item}
 					<tr>
-						<th>{item.Id}</th>
-						<td>{item.MerchantId}</td>
-						<td>{item.MerchantName}</td>
-						<td>{item.PackageId}</td>
-						<td>{item.QuotaUsage}</td>
-						<td>
+						<th class="p-1 sm:p-2 truncate">{item.Id}</th>
+						<td class="p-1 sm:p-2 truncate">{item.MerchantId}</td>
+						<td class="p-1 sm:p-2 truncate">{item.MerchantName}</td>
+						<td class="p-1 sm:p-2 truncate">{item.Name}</td>
+						<td class="p-1 sm:p-2 truncate">{item.QuotaUsage}</td>
+						<td class="p-1 sm:p-2 truncate">
 							<div class="flex justify-center">
-							<div style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;"
-								class:badge-success={item.Status === 'ACTIVE'}
-								class:badge-danger={item.Status !== 'ACTIVE'}
-							>
-								{item.Status}
+								<div class="badge-status text-xs sm:text-sm {item.Status === 'ACTIVE' ? 'badge-success' : 'badge-danger'}">
+									{item.Status}
+								</div>
 							</div>
-						</div>
 						</td>
-						<td>
-							<button class="btn-sm btn-outline" on:click={() => showModal(item)}>
+						<td class="p-1 sm:p-2">
+							<button class="btn btn-xs sm:btn-sm btn-outline" on:click={() => showModal(item)}>
 								<svg
-									class="w-6 h-6 text-gray-800 dark:text-white"
+									class="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 dark:text-white"
 									aria-hidden="true"
 									xmlns="http://www.w3.org/2000/svg"
-									width="24"
-									height="24"
 									fill="none"
 									viewBox="0 0 24 24"
 								>
@@ -216,43 +223,46 @@
 				{/each}
 			</tbody>
 		</table>
-		<div class="w-100 flex justify-end mx-10">
-		<div class="join grid grid-cols-2 w-40">
-			<button class="join-item btn btn-outline btn-primary" on:click={goToPreviousPage}>Previous page</button>
-			<button class="join-item btn btn-outline btn-primary" on:click={goToNextPage}>Next</button>
-		  </div>
+		<div class="w-full flex justify-end mt-4">
+			<div class="join grid grid-cols-2 w-full sm:w-auto">
+				<button class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary" on:click={goToPreviousPage}>Previous</button>
+				<button class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary" on:click={goToNextPage}>Next</button>
+			</div>
 		</div>
 	</div>
 </div>
 
 <dialog id="my_modal_1" class="modal">
-	<div class="modal-box bg-white">
+	<div class="modal-box bg-white w-11/12 max-w-md">
 		<div class="form-control">
-			<div style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size:30px">Edit</div>
+			<h2 class="text-2xl font-bold mb-4">Edit</h2>
 			{#if editingUser}
-			
-				<label class="label ">
-					<span class="label-text text-black">Merchant Name:</span>
-					<input type="text" class="input input-bordered bg-white disabled:bg-white disabled:text-black" disabled bind:value={editingUser.MerchantName} />
+			<div></div>
+				<label class="label">
+					<span class="label-text text-black w-2/5">Merchant Name:</span>
+					<input type="text" class="input input-bordered bg-white disabled:bg-white disabled:text-black w-80" disabled bind:value={editingUser.MerchantName} />
 				</label>
 				<label class="label">
-					<span class="label-text text-black">Package:</span>
-					<input type="text" class="input input-bordered bg-white" bind:value={editingUser.PackageId} />
+					<span class="label-text text-black w-2/5">Package:</span>
+					<input type="text" class="input input-bordered bg-white w-80" bind:value={editingUser.PackageId} />
 				</label>
 				<label class="label">
-					<span class="label-text text-black">Quota:</span>
-					<input type="number" class="input input-bordered bg-white" bind:value={editingUser.QuotaUsage} />
+					<span class="label-text text-black w-2/5">Quota:</span>
+					<input type="number" class="input input-bordered bg-white w-80" bind:value={editingUser.QuotaUsage} />
 				</label>
-				<label class="label cursor-pointer bg-white  flex justify-start gap-8">
-					<span class="label-text text-black mr-2">Status</span>
-					<input type="checkbox" class="toggle [--tglbg:white] toggle-success"  bind:checked={isActive} on:change={toggleStatus} />
+				<label class="label cursor-pointer bg-white flex  ">
+					<span class="label-text text-black w-2/5">Status</span>
+					<div class="w-80">
+						<input type="checkbox" class="toggle [--tglbg:white] toggle-success " bind:checked={isActive} on:change={toggleStatus}  />
+
+					</div>
 				</label>
 			
 				<div class="modal-action">
-					<form method="dialog">
-						<button class="btn btn-outline btn-primary">Close</button>
+					<form method="dialog" class="flex space-x-2">
+						<button class="btn btn-outline btn-error">Close</button>
+						<button class="btn btn-outline btn-primary" on:click={updateUser}>Save</button>
 					</form>
-					<button class="btn btn-outline btn-primary" on:click={updateUser}>Save</button>
 				</div>
 			{/if}
 		</div>
@@ -260,17 +270,22 @@
 </dialog>
 
 <style>
-	.badge-success {
-		background-color: green;
-		color: white; 
-		border-radius: 10px;
+	.badge-status {
+		@apply py-1 px-2 rounded-full text-white;
 		width: 60%;
+	}
+	.badge-success {
+		@apply bg-green-600;
 	}
 	.badge-danger {
-		background-color: red;
-		color: white;
-		border-radius: 10px;
-		width: 60%;
-
+		@apply bg-red-600;
 	}
+	@media (max-width: 640px) {
+		.badge-status {
+			width: 100%;
+		}
+	} 
+
+	@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+	
 </style>

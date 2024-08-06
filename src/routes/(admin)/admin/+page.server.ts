@@ -3,7 +3,7 @@ export type UserData = {
     Id: number;
     MerchantId: string;
     MerchantName: string;
-    packageId: string;
+    Name: string;
     QuotaUsage: number;
     PackageId: number;
     Status: string;

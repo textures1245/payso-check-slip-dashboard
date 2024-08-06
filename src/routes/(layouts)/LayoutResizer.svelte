@@ -58,7 +58,7 @@
 			<AccountSwitcher {isCollapsed} {accounts} />
 		</div>
 		<Separator />
-		<Sidebar {isCollapsed} routes={primaryRoutes} />
+		<Sidebar {isCollapsed} routes={subLinks[currentSubPath]} />
 	</Resizable.Pane>
 	<Resizable.Handle class="invisible md:visible" withHandle />
 	<Resizable.Pane defaultSize={defaultLayout[1]} minSize={30}>
@@ -68,7 +68,7 @@
 			>
 				<div class="flex items-center px-4 gap-4 py-2">
 					<div class="w-42 bg-card/80 rounded-md">
-						<AccountSwitcher {isCollapsed} {accounts} />
+						
 					</div>
 
 					<div class="flex gap-4 overflow-x-auto">
