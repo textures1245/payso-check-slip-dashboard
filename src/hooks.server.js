@@ -1,5 +1,5 @@
 // import { CookiesJsonParser } from '$lib/cookies';
-import { fail, redirect } from '@sveltejs/kit';
+import {  redirect } from '@sveltejs/kit';
 
 /** @type {import('@sveltejs/kit').Handle} */
 export const handle = async ({ resolve, event }) => {
@@ -35,6 +35,7 @@ export const handle = async ({ resolve, event }) => {
             }
             
         }
+
         
             return await resolve(event);
 	} catch (error) {
