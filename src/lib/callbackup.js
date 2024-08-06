@@ -1,10 +1,10 @@
 // @ts-nocheck
 
 document.addEventListener('DOMContentLoaded', async () => {
-	console.log("login")
 	const urlParams = new URLSearchParams(window.location.search);
 	const code = urlParams.get('code');
 	let returnedState = urlParams.get('state');
+    
 	console.log(returnedState);
 	if (code) {
 		try {
@@ -17,9 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 				body: new URLSearchParams({
 					grant_type: 'authorization_code',
 					code: code,
-					redirect_uri: 'http://localhost:5173/',
-					client_id: '2005856083',
-					client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
+					redirect_uri: 'http://localhost:5173/profile',
+					client_id: '2006015671',
+					client_secret: '14ad9236387e9250c4ae32c12219ab02'
 				})
 			});
 

@@ -56,6 +56,7 @@
 	>
 		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px]' : 'px-2')}>
 			<AccountSwitcher {isCollapsed} {accounts} />
+			
 		</div>
 		<Separator />
 		<Sidebar {isCollapsed} routes={primaryRoutes} />
@@ -69,6 +70,7 @@
 				<div class="flex items-center px-4 gap-4 py-2">
 					<div class="w-42 bg-card/80 rounded-md">
 						<AccountSwitcher {isCollapsed} {accounts} />
+						
 					</div>
 
 					<div class="flex gap-4 overflow-x-auto">

@@ -126,11 +126,13 @@ export const actions = {
 			cookies.set('merchant_account', JSON.stringify(datalogin.result[1]), cookiesConfig);
             console.log("ใช้งาน มี Merchant")
             return {
-                data:datalogin.result[0]
+                data:datalogin.result[0],
+                status:'create'
             }
 			
 		}
 
-	}
+	},
+    
 
 };
