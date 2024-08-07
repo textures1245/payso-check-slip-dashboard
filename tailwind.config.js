@@ -4,9 +4,7 @@ import daisyui from "daisyui"
 
 /** @type {import('tailwindcss').Config} */
 const config = {
-	darkMode: ['class'],
 	content: ['./src/**/*.{html,js,svelte,ts}'],
-	safelist: ['dark'],
 	theme: {
 		container: {
 			center: true,
@@ -68,8 +66,12 @@ const config = {
 		}
 	},
 	plugins: [
-		daisyui,
-	]
+		daisyui
+	],
+	daisyui: {
+		themes: ["light"],
+	  },
+	
 };
 
 export default config;
