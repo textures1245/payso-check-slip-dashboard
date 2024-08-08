@@ -1,17 +1,32 @@
 
 <script lang="ts">
+    type Transaction = {
+		Email: string;
+		MerchantName: string;
+		QuotaLimit: number;
+		QuotaUsage: number;
+		Total_count: string;
+        false_count:string;
+        pending_count:string;
+
+	};
     import { Button } from '$lib/components/ui/button';
 	import logo from"$lib/image/pack.png";
     import * as Card from "$lib/components/ui/card";
 	import { Pie } from 'svelte-chartjs';
 	import 'chart.js/auto';
-    let max = 300;
-	let datatoo=200;
+
+
+    export let dataOverview: Transaction;
+    console.log("overview :",dataOverview)
+    let max = dataOverview.QuotaLimit;
+	let datatoo=dataOverview.QuotaUsage;
 	let maxr=max-datatoo
 	if(max-datatoo<0){
 		datatoo=max
-		max=0
+		maxr=0
 		
+
 	}
     let data = {
 	  labels: ['จำนวนที่ใช้', 'จำนวนทั้งหมด'],
@@ -50,8 +65,8 @@
         <Card.Content class="text-center ">
 			<div class="content-center ">
             <div class=" content-center w-100 h-24" >
-                <div class="text-2xl font-bold w-100">33333</div>
-                <div class="text-xs w-100 text-stone-400" >%สลิปที่ถูกต้องต่อสลิปทั้งหมด</div>
+                <div class="text-2xl font-bold w-100">{dataOverview.pending_count}</div>
+                <div class="text-xs w-100 text-stone-400" >สลิปที่ถูกต้องต่อสลิปทั้งหมด {(dataOverview.pending_count/dataOverview.Total_count)*100}%</div>
             </div>
             
 			</div>
@@ -66,8 +81,8 @@
         </Card.Header>
         <Card.Content class="text-center ">
             <div class=" content-center  w-100 h-40">
-                <div class="text-2xl font-bold w-100">1111</div>
-                <div class="text-xs  w-100 text-stone-400" >%สลิปที่ผิดต่อสลิปทั้งหมด</div>
+                <div class="text-2xl font-bold w-100">{dataOverview.false_count}</div>
+                <div class="text-xs  w-100 text-stone-400" >สลิปที่ผิดต่อสลิปทั้งหมด {(dataOverview.false_count/dataOverview.Total_count)*100}%</div>
             </div>
         </Card.Content>
     </Card.Root>
@@ -80,9 +95,9 @@
         </Card.Header>
         <Card.Content class="text-center ">
             <div>
-                <p class=" w-100 h-32 content-center text-4xl">2222</p>
+                <p class=" w-100 h-32 content-center text-4xl">{dataOverview.Total_count}</p>
                 </div>
-                <div class=" w-100"><Button variant="outline" class="w-4/5 h-12 bg-orange-500">Dowload Excel</Button></div>
+                <div class=" w-100 my-2"><Button variant="outline" class="w-4/5 h-12 bg-orange-500">Dowload Excel</Button></div>
         </Card.Content>
     </Card.Root>
     <Card.Root>
@@ -94,7 +109,7 @@
         </Card.Header>
         <Card.Content class="flex justify-center w-100 h-100" >
             <div>
-            <div class="chart-container w-64">
+            <div class="chart-container lg:w-60">
                 <Pie {data} {options} class="w-9/12"/>
               </div>
               <div>

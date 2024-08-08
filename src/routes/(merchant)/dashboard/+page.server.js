@@ -1,4 +1,3 @@
-
 /** @type {import('./$types').Actions} */
 export const actions = {
 
@@ -18,7 +17,7 @@ export const actions = {
                 MerchantId: id
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/updateUid`, config);
+		var result = await fetch(`http://127.0.0.1:4567/api/v1/updateUid`, config);
         console.log(result)
 
 	},

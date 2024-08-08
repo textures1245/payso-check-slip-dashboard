@@ -63,63 +63,27 @@
   }
   </script>
 
-<div class="rounded-lg  mx-2 "  style="width:96%;height:80%">
-    <div class=" flex justify-center my-2">
-        <Carousel.Root class="w-full">
-            <Carousel.Content class="-ml-1">
-                {#each items as item}
-                    <Carousel.Item >
-                        <div class="p-1">
-                            <Card.Root>
-                                <Card.Content
-                                    class="aspect-square items-center justify-center my-2 h-28 max-h-72"
-                                >
-                                    <div class="flex w-64 mx-2" >
-                                        <div style="width:50%;height:24%">
-                                            <img src={logo} class="w-11/12 h-2/5 my-0" />
-                                        </div>
-                                        <div class="mx-3 w-72 text-left">
-                                            <div class="text-sm font-semibold"><article class="text-wrap ...">
-                                                <p>{item.title} : 12313asdada</p>
-                                                <p>{item.title}</p>
-                                                <p>{item.title}</p>
-                                                <p>{item.title}</p>
-                                              </article></div>
-                                            
-                                        </div>
-                                    </div>
-                                </Card.Content>
-                            </Card.Root>
-                        </div>
-                    </Carousel.Item>
-                {/each}
-            </Carousel.Content>
-            <Carousel.Previous />
-            <Carousel.Next />
-        </Carousel.Root>
-    </div>
-</div>
 
-<ScrollArea class="h-72 mx-2 rounded-md border " style="width:96%;">
-<div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1 ">
-<div class="rounded-lg snap-y" style="width:100%">
-    {#each items as item}
-        <div class=" my-5 mx-5 rounded-xl snap-start text-sm">
-            <div class="flex justify-between h-full">
-                <div>
-                <div class="content-end">ผู้ส่ง : {item.title}</div>
-                <div class="content-end">จาก: XXX-X-XX... , MR....</div>
+<ScrollArea class="h-96 mx-2 rounded-md border " style="width:96%;">
+    <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1 ">
+    <div class="rounded-lg snap-y" style="width:100%">
+        {#each items as item}
+            <div class=" my-5 mx-5 rounded-xl snap-start text-sm">
+                <div class="flex justify-between h-full">
+                    <div>
+                    <div class="content-end">ผู้ส่ง : {item.title}</div>
+                    <div class="content-end">จาก: XXX-X-XX... , MR....</div>
+                </div>
+                    <div class="content-center">{item.status}</div>
+                    <div >
+                        <a href="/detail">
+                    <Button variant="outline" class="bg-orange-500 w-50  h-50 flex justify-end" on:click={() => sendData(item.package)}>ดูรายการ</Button
+                        >
+                    </a></div>
+                    
+                </div>
             </div>
-                <div class="content-center">{item.status}</div>
-                <div >
-                    <a href="/detail">
-                <Button variant="outline" class="bg-orange-500 w-50  h-50 flex justify-end" on:click={() => sendData(item.package)}>ดูรายการ</Button
-                    >
-                </a></div>
-                
-            </div>
-        </div>
-    {/each}
-</div>
-</div>
-</ScrollArea>
+        {/each}
+    </div>
+    </div>
+    </ScrollArea>

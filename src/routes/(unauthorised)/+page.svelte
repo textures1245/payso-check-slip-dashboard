@@ -96,6 +96,7 @@
 		if (form) {
 			if(form.data){
 				sessionStorage.setItem('email', form.data.Email);  
+				sessionStorage.setItem('merchant_id', form.data.Id); 
 		  if (form.data.PackageId == "2") {
 		    window.location.href = "/package";
 		  }else  {

@@ -31,7 +31,7 @@ export const actions = {
                 Email: email
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/login`, config);
+		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/login`, config);
 		const datalogin = await result.json();
 		console.log(datalogin);
 
@@ -49,7 +49,7 @@ export const actions = {
                     Email: email
                 })
             };
-            var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/create`, config);
+            var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/merchant/create`, config);
             const datacreate = await resultcreate.json();
             cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
             
@@ -96,7 +96,7 @@ export const actions = {
                 Email: uid
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/login`, config);
+		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/login`, config);
 		const datalogin = await result.json();
 		console.log(datalogin);
 
@@ -114,7 +114,7 @@ export const actions = {
                     Email: uid
                 })
             };
-            var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/create`, config);
+            var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/merchant/create`, config);
             const datacreate = await resultcreate.json();
             cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
             console.log(datacreate)

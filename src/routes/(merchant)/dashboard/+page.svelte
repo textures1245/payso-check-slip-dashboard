@@ -7,15 +7,58 @@
 	import PastandBank from "$lib/component/pastandbank/+page.svelte";
 	import { onMount } from 'svelte';
 
+	// let datas = {
+    //     totalRealItems: 33333,
+    //     totalFakeItems: 1111,
+    //     totalUsed: 2222,
+    //     max: 300,
+    //     used: 200
+    // };
+	let dataOverview: any[] = [];
+	onMount(async () => {
+		try {
+			const data = await GetTransactionByid();
+			// Use profileData here
+			dataOverview =data;
+			console.log('profile : ',dataOverview);
+			
+			
+		} catch (error) {
+			console.error('Error fetching profile:', error);
+		}
+
+
+	});
+
+
+	const GetTransactionByid = async () => {
+		const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
+		console.log( 'id: ', id , typeof(id));
+		
+		console.log('checking register');
+
+		// Create URL parameters from form data
+		let config = {
+			method: 'GET', //การทำงาน get post update delete
+			headers: {
+                'Content-Type': 'application/json'
+            }
+		};
+		var result = await fetch(`http://127.0.0.1:4567/api/v1/trasactionid/${id}`, config);
+		const datas = await result.json();
+        console.log(datas)
+		return datas.result[0]
+
 	
+	};
 
 </script>
 
 
 <div class="mx-5" >
-<Overview />
+<Overview {dataOverview}/>
 </div>
-<div class="grid gap-2 md:grid-cols-2 lg:grid-cols-2 mx-5 my-6 ">
+<div class="grid gap-2 md:grid-cols-1 lg:grid-cols-2 mx-5 my-6 ">
     <div>
 		
 		<Card.Root class="w-100" style="height:100%;" >
@@ -34,10 +77,10 @@
 	<div>
 		<Card.Root style="height:100%;width:100%" >
 			<Card.Content class="flex justify-center" style="height:100%;width:100%" >
-				<div>
-				<div class="chart-container w-100 max-w-80 my-1" style="width: 100%;">
+				<div style="height: 100%;width:100%">
+				
 					<PastandBank />
-				  </div>
+			
 				  <div>
 			</div>
 			</Card.Content>
