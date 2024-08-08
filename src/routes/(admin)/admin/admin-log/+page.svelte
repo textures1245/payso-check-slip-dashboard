@@ -13,7 +13,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import * as Table from '$lib/components/ui/table';
-	import editicon from '../../../lib/image/editing.png'
 
 	type LogData = {
 	    logId: string;

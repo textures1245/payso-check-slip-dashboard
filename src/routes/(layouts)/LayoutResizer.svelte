@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { primaryRoutes } from './routes';
+	import { type Route } from './routes';
 	// import { mailStore } from '../store.js';
 	import type { Account, Mail } from './data';
 	import { cn } from '$lib/utils.js';
@@ -19,7 +19,7 @@
 	export let navCollapsedSize: number;
 
 	export let subLinks: {
-		[key: string]: NavItem[];
+		[key: string]: Route[];
 	};
 
 	let isCollapsed = defaultCollapsed;
@@ -37,6 +37,10 @@
 	function onExpand() {
 		isCollapsed = false;
 		document.cookie = `PaneForge:collapsed=${false}`;
+	}
+
+	function getRootPath(currP: string) {
+		return currP.split('/')[0];
 	}
 </script>
 
@@ -56,21 +60,18 @@
 	>
 		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px]' : 'px-2')}>
 			<AccountSwitcher {isCollapsed} {accounts} />
-			
 		</div>
 		<Separator />
-		<Sidebar {isCollapsed} routes={subLinks[currentSubPath]} />
+		<Sidebar {isCollapsed} routes={subLinks[getRootPath(currentSubPath)]} />
 	</Resizable.Pane>
 	<Resizable.Handle class="invisible md:visible" withHandle />
 	<Resizable.Pane defaultSize={defaultLayout[1]} minSize={30}>
-		<div class=" relative mx-4 md:hidden">
+		<!-- <div class=" relative mx-4 md:hidden">
 			<div
 				class="absolute z-10 mx-2 min-h-10 bg-card/40 shadow-lg ring-1 ring-black/5 mt-1 backdrop-blur-xl w-full rounded-lg"
 			>
 				<div class="flex items-center px-4 gap-4 py-2">
-					<div class="w-42 bg-card/80 rounded-md">
-						
-					</div>
+					<div class="w-42 bg-card/80 rounded-md"></div>
 
 					<div class="flex gap-4 overflow-x-auto">
 						{#each subLinks[currentSubPath] as l}
@@ -79,7 +80,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 		<Tabs.Root class="" value="all">
 			<div class="hidden md:flex items-center px-4 py-2">
@@ -96,13 +97,6 @@
 			<Tabs.Content value="all" class="!overflow-y-scroll m-0">
 				<slot></slot>
 			</Tabs.Content>
-			<!-- <Tabs.Content value="unread" class="m-0">
-					<MailList items={mails.filter((item) => !item.read)} />
-				</Tabs.Content> -->
 		</Tabs.Root>
 	</Resizable.Pane>
-	<!-- <Resizable.Handle withHandle />
-		<Resizable.Pane defaultSize={defaultLayout[2]}>
-			<MailDisplay mail={mails.find((item) => item.id === $mailStore.selected) || null} />
-		</Resizable.Pane> -->
 </Resizable.PaneGroup>
