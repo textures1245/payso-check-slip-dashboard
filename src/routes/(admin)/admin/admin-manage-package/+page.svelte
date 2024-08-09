@@ -190,6 +190,9 @@
 			<button class="btn btn-outline btn-warning text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
 			>
+			
+		</div>
+		<div class="flex justify-end " style="width: 100%;">
 			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={showModalCreate}
 				>Create</button
 			>
