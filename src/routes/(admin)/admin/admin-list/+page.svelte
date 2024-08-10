@@ -18,7 +18,7 @@
 	async function fetchData(offset = 0, limit = 10) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/getmerchant?offset=${offset}&limit=${limit}`
+				`http://127.0.0.1:4567/api/v1/merchant/get-merchants-with-pkg?Offset=${offset}&Limit=${limit}`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -35,7 +35,7 @@
 				QuotaUsage: item.QuotaUsage,
 				QuotaLimit: item.QuotaLimit,
 				PackageId: item.PackageId,
-				Name: item.Name,
+				PackageName: item.PackageName,
 				BalanceQuotaLeft: item.BalanceQuotaLeft,
 				Status: item.Status
 			}));
@@ -61,7 +61,7 @@
 				MerchantId: item.MerchantId,
 				MerchantName: item.MerchantName,
 				QuotaUsage: item.QuotaUsage,
-				Name: item.Name,
+				PackageName: item.PackageName,
 				Status: item.Status
 			}));
 		} catch (error) {
@@ -123,7 +123,7 @@
 		} catch (error) {
 			console.error('Error updating user:', error);
 		}
-		location.reload();
+		// location.reload();
 	}
 	$: isActive = editingUser?.Status === 'ACTIVE';
 
@@ -160,10 +160,10 @@
 			bind:value={searchInpage}
 		/>
 		<div class="flex space-x-2">
-			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
+			<button class="btn  bg-primary text-white btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
 				>Search</button
 			>
-			<button class="btn btn-outline btn-warning text-xs sm:text-sm" on:click={clearSearch}
+			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
 			>
 		</div>
@@ -196,8 +196,8 @@
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantId}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Name}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaUsage + item.BalanceQuotaLeft}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.PackageName}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaUsage}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
@@ -210,7 +210,7 @@
 							</div>
 						</td>
 						<td class="p-1 sm:p-2">
-							<button class="btn btn-xs sm:btn-sm btn-outline" on:click={() => showModal(item)}>
+							<button class="btn btn-xs sm:btn-sm bg-primary" on:click={() => showModal(item)}>
 								<svg
 									class="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 dark:text-white"
 									aria-hidden="true"
@@ -271,9 +271,7 @@
 				</label>
 				<label class="label">
 					<span class="label-text text-black w-2/5">Package:</span>
-
 					<select class="select max-w-xs w-80 bg-white" bind:value={editingUser.PackageId}>
-						<option disabled selected value=""></option>
 						<option value={1}>Silver</option>
 						<option value={2}>Bronz</option>
 						<option value={3}>pkh1</option>
@@ -295,7 +293,7 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn btn-outline btn-primary" on:click={updateUser}>Save</button>
+						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>Save</button>
 					</form>
 				</div>
 			{/if}
