@@ -202,7 +202,7 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
-					<th class="p-1 sm:p-2">ID</th>
+					<th class="p-1 sm:p-2 w-10">ID</th>
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden">Package Name</div>
 						<div class="lg:hidden sm:hidden block">P.Name</div></th
@@ -213,7 +213,7 @@
 						<div class="lg:hidden sm:hidden block">Q.Limit</div></th
 					>
 					<th class="p-1 sm:p-2">Status</th>
-					<th class="p-1 sm:p-2"></th>
+					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -226,7 +226,7 @@
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
-									class="badge-status text-xs sm:text-sm {item.Status === 'ACTIVE'
+									class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status === 'ACTIVE'
 										? 'badge-success'
 										: 'badge-danger'}"
 								>
@@ -381,8 +381,8 @@
 
 <style>
 	.badge-status {
-		@apply py-1 px-2 rounded-full text-white;
-		width: 60%;
+		@apply py-1 px-2 rounded-full text-white lg:w-40 md:w-32 sm:w-28 w-24 ; 
+		
 	}
 	.badge-success {
 		@apply bg-green-600;

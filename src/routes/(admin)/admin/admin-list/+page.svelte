@@ -86,6 +86,7 @@
 
 	function showModal(user: UserData) {
 		editingUser = user;
+		console.log(typeof editingUser.Id);
 		const modal = document.getElementById('my_modal_1');
 		// @ts-ignore
 		modal.showModal();
@@ -95,27 +96,45 @@
 		if (!editingUser) return;
 
 		try {
-			const response = await fetch(`http://127.0.0.1:4567/api/update/merchant/${editingUser.Id}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(editingUser)
-			});
+			const updatePackageResponse = await fetch(
+				`http://127.0.0.1:4567/api/v1/merchant/updatepackage`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						PackageId: editingUser.PackageId,
+						MerchantId: editingUser.Id
+					})
+				}
+			);
 
-			console.log('update user = ', editingUser, typeof selectionvalue);
+			if (!updatePackageResponse.ok) {
+				throw new Error('Failed to update package');
+			}
 
-			if (!response.ok) {
-				throw new Error('Failed to update user');
+			const updateStatusResponse = await fetch(
+				`http://127.0.0.1:4567/api/v1/merchant/updatestatus/${editingUser.Id}`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ Status: editingUser.Status })
+				}
+			);
+
+			if (!updateStatusResponse.ok) {
+				throw new Error('Failed to update status');
 			}
 
 			const index = userData.findIndex((user) => user.Id === editingUser?.Id);
 			if (index !== -1) {
 				userData[index] = { ...editingUser };
-				userData = [...userData]; // Trigger Svelte reactivity
+				userData = [...userData];
 			}
 
-			// Close the modal
 			const modal = document.getElementById('my_modal_1');
 			// @ts-ignore
 			modal.close();
@@ -123,8 +142,10 @@
 		} catch (error) {
 			console.error('Error updating user:', error);
 		}
-		// location.reload();
+
+		location.reload();
 	}
+
 	$: isActive = editingUser?.Status === 'ACTIVE';
 
 	function toggleStatus() {
@@ -160,8 +181,9 @@
 			bind:value={searchInpage}
 		/>
 		<div class="flex space-x-2">
-			<button class="btn  bg-primary text-white btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
-				>Search</button
+			<button
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
+				on:click={handleSearchClick}>Search</button
 			>
 			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
@@ -172,7 +194,7 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
-					<th class="p-1 sm:p-2">ID</th>
+					<th class="p-1 sm:p-2 w-10">ID</th>
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden">Merchant Id</div>
 						<div class="lg:hidden sm:hidden block">M.ID</div></th
@@ -187,7 +209,7 @@
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
 					<th class="p-1 sm:p-2">Status</th>
-					<th class="p-1 sm:p-2"></th>
+					<th class="p-1 w-20 sm:p-2"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -197,11 +219,13 @@
 						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantId}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantName}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.PackageName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaUsage}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaUsage + item.BalanceQuotaLeft}</td
+						>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
-									class="badge-status text-xs sm:text-sm {item.Status === 'ACTIVE'
+									class="badge-status lg:text-sm md:text-xs sm:text-xxs text-xs {item.Status ===
+									'ACTIVE'
 										? 'badge-success'
 										: 'badge-danger'}"
 								>
@@ -293,7 +317,8 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>Save</button>
+						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>Save</button
+						>
 					</form>
 				</div>
 			{/if}
@@ -318,5 +343,7 @@
 		}
 	}
 
-	@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+	.text-xxs {
+		font-size: 0.625rem;
+	}
 </style>
