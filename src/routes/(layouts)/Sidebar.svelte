@@ -12,9 +12,7 @@
 </script>
 
 <div data-collapsed={isCollapsed} class="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2">
-	<nav
-		class="grid gap-3  group-[[data-collapsed=true]]:justify-center"
-	>
+	<nav class="grid gap-3 group-[[data-collapsed=true]]:justify-center">
 		{#each routes as route}
 			{#if isCollapsed}
 				<Tooltip.Root openDelay={0}>
@@ -24,10 +22,7 @@
 							builders={[builder]}
 							size="icon"
 							variant="ghost"
-							class={cn(
-								'size-9',
-								'dark:bg-muted text-center dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white'
-							)}
+							class={cn('size-9', ' text-center ')}
 						>
 							<Icon icon={route.icon} class={cn(isCollapsed ? 'ml-2' : '')} />
 
@@ -42,10 +37,7 @@
 				<Button
 					href={route.link}
 					variant="ghost"
-					class={cn(
-						'justify-start text-sm lg:text-base',
-						'dark:bg-muted text-center dark:text-white dark:hover:bg-muted dark:hover:text-white'
-					)}
+					class={cn('justify-start text-sm lg:text-base', ' text-center')}
 				>
 					<Icon icon={route.icon} class="mr-2 size-4" aria-hidden="true" />
 
