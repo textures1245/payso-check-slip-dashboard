@@ -63,7 +63,7 @@ const config = {
 	},
 	plugins: [daisyui],
 	daisyui: {
-		themes: ['light']
+		themes: false
 	}
 };
 
