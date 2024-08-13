@@ -59,7 +59,7 @@
 		{onExpand}
 	>
 		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px]' : 'px-2')}>
-			<AccountSwitcher {isCollapsed} {accounts} />
+			<span>Menu</span>
 		</div>
 		<Separator />
 		<Sidebar {isCollapsed} routes={subLinks[getRootPath(currentSubPath)]} />
@@ -83,7 +83,7 @@
 		</div> -->
 
 		<Tabs.Root class="" value="all">
-			<div class="hidden md:flex items-center px-4 py-2">
+			<!-- <div class="hidden md:flex items-center px-4 py-2">
 				<h1 class="text-xl font-bold">Inbox</h1>
 				<Tabs.List class="ml-auto">
 					<Tabs.Trigger value="all" class="text-zinc-600 dark:text-zinc-200">All mail</Tabs.Trigger>
@@ -91,10 +91,12 @@
 						Unread
 					</Tabs.Trigger>
 				</Tabs.List>
-			</div>
+			</div> -->
+			
 			<Separator />
 
 			<Tabs.Content value="all" class="!overflow-y-scroll m-0">
+
 				<slot></slot>
 			</Tabs.Content>
 		</Tabs.Root>

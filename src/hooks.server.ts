@@ -6,6 +6,7 @@ export const handle = async ({ resolve, event }) => {
 	const adminPaths = [
 		'/admin/admin-list',
 		'/admin/admin-dashboard',
+		'/admin/admin-manage-package',
 		'/admin/admin-log',
 		'/admin/admin-update'
 	];

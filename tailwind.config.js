@@ -1,6 +1,5 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
-import daisyui from "daisyui"
-
+import daisyui from 'daisyui';
 
 /** @type {import('tailwindcss').Config} */
 const config = {
@@ -9,14 +8,11 @@ const config = {
 		container: {
 			center: true,
 			padding: {
-				DEFAULT: '1rem',
-				sm: '2rem',
-				lg: '4rem',
-				xl: '5rem',
-				'2xl': '6rem'
-			},
-			screens: {
-				'2xl': '1400px'
+				DEFAULT: '0.5rem',
+				sm: '1rem',
+				lg: '2rem',
+				xl: '3rem',
+				'2xl': '4rem'
 			}
 		},
 		extend: {
@@ -65,13 +61,10 @@ const config = {
 			}
 		}
 	},
-	plugins: [
-		daisyui
-	],
+	plugins: [daisyui],
 	daisyui: {
-		themes: ["light"],
-	  },
-	
+		themes: ['light']
+	}
 };
 
 export default config;
