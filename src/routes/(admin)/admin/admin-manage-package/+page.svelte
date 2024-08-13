@@ -184,13 +184,16 @@
 			bind:value={searchInpage}
 		/>
 		<div class="flex justify-end space-x-2">
-			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
+			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
 				>Search</button
 			>
-			<button class="btn btn-outline btn-warning text-xs sm:text-sm" on:click={clearSearch}
+			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
 			>
-			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={showModalCreate}
+			
+		</div>
+		<div class="flex lg:justify-end md:justify-end sm:justify-center justify-center" style="width: 100%;">
+			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm " on:click={showModalCreate}
 				>Create</button
 			>
 		</div>
@@ -232,7 +235,7 @@
 							</div>
 						</td>
 						<td class="p-1 sm:p-2">
-							<button class="btn btn-xs sm:btn-sm btn-outline" on:click={() => showModalEdit(item)}>
+							<button class="btn btn-xs sm:btn-sm  bg-primary" on:click={() => showModalEdit(item)}>
 								<svg
 									class="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 dark:text-white"
 									aria-hidden="true"
@@ -315,7 +318,7 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn btn-outline btn-primary" on:click={updatePackage}>Save</button>
+						<button class="btn  bg-primary text-white btn-primary" on:click={updatePackage}>Save</button>
 					</form>
 				</div>
 			{/if}
@@ -369,7 +372,7 @@
 			<div class="modal-action">
 				<form method="dialog" class="flex space-x-2">
 					<button class="btn btn-outline btn-error">Close</button>
-					<button class="btn btn-outline btn-primary" on:click={createPackage}>Save</button>
+					<button class="btn  bg-primary text-white btn-primary" on:click={createPackage}>Save</button>
 				</form>
 			</div>
 		</div>
