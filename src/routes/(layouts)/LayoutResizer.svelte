@@ -95,7 +95,7 @@
 			
 			<Separator />
 
-			<Tabs.Content value="all" class="!overflow-y-scroll m-0">
+			<Tabs.Content value="all" class=" m-0">
 
 				<slot></slot>
 			</Tabs.Content>

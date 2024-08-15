@@ -7,4 +7,16 @@ export type Packageactive ={
     CreatedAt : Date
     UpdatedAt : Date
     Status : string
+} 
+
+
+
+
+export type Logdata = {
+    Id : number ;
+    Timestamp : Date;
+    Action : string;
+    MethodName : string;
+    SqlData : string;
+    ActorName : string;
 }
