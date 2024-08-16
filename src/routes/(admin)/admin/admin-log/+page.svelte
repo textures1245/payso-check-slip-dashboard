@@ -138,9 +138,9 @@
 		</table>
 
 		<div class="grid col-2 w-full justify-end sm:w-auto">
-			<span class="text-center">Page {currentPage} of {totalPages}</span>
+			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
 			<div class="flex">
-				<select class="select-sm w-full max-w-xs h-1 rounded-md bg-white" bind:value={limit}>
+				<select class="select-sm w-full max-w-xs h-1 rounded-md bg-white " bind:value={limit} on:change={prevPage}>
 					<option value="5">5</option>
 					<option value="10">10</option>
 					<option value="15">15</option>
