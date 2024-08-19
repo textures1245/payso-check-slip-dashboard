@@ -58,7 +58,7 @@
 		class="hidden md:block"
 		{onExpand}
 	>
-		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px]' : 'px-2')}>
+		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px] hidden' : 'px-2 ')}>
 			<span>Menu</span>
 		</div>
 		<Separator />
