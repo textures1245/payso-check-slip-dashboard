@@ -10,6 +10,9 @@
 	let packagename = '';
 	let searchInpage = '';
 	let filteredData: PackageData[] = [];
+	let alertMessage: string | null = null; // ตัวแปรสำหรับเก็บข้อความ alert
+	let alertType: 'success' | 'error' | null = null; // ตัวแปรสำหรับประเภท alert
+	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
 
 	onMount(async () => {
 		await fetchData();
@@ -88,6 +91,16 @@
 	}
 
 	async function createPackage() {
+		const trimmedName = newPackage.Name.trim();
+
+		// Check if the name is empty after trimming
+		if (trimmedName === '') {
+			alertMessage = 'Package name cannot be empty or just spaces.';
+			alertType = 'error';
+			showAlertModal = true;
+			return;
+		}
+
 		try {
 			const response = await fetch(`http://127.0.0.1:4567/api/v1/package/create/packages`, {
 				method: 'POST',
@@ -104,19 +117,40 @@
 			// Add the new package to the local packageData array
 			packageData = [...packageData, newPackage];
 
+			// ตั้งค่าข้อความและประเภท alert
+			alertMessage = 'Package created successfully!';
+			alertType = 'success';
+			showAlertModal = true; // แสดง modal
+
 			// Close the modal
-			const modal = document.getElementById('create_modal');
-			// @ts-ignore
-			modal.close();
+			const createModal = document.getElementById('create_modal');
+			if (createModal) {
+				// @ts-ignore
+				createModal.close();
+			}
 			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
 		} catch (error) {
 			console.error('Error creating package:', error);
+			alertMessage =
+				'Failed to create package: ' + (error instanceof Error ? error.message : 'Unknown error');
+			alertType = 'error';
+			showAlertModal = true; // แสดง modal
 		}
 		location.reload();
 	}
 
 	async function updatePackage() {
 		if (!editingPackage) return;
+
+		const trimmedName = editingPackage.Name.trim();
+
+		// Check if the name is empty after trimming
+		if (trimmedName === '') {
+			alertMessage = 'Package name cannot be empty or just spaces.';
+			alertType = 'error';
+			showAlertModal = true;
+			return;
+		}
 
 		try {
 			const response = await fetch(
@@ -131,7 +165,7 @@
 			);
 
 			if (!response.ok) {
-				throw new Error('Failed to update user');
+				throw new Error('Failed to update package');
 			}
 
 			const index = packageData.findIndex((pkg) => pkg.Id === editingPackage?.Id);
@@ -140,21 +174,33 @@
 				packageData = [...packageData]; // Trigger Svelte reactivity
 			}
 
+			// ตั้งค่าข้อความและประเภท alert
+			alertMessage = 'Package updated successfully!';
+			alertType = 'success';
+			showAlertModal = true; // แสดง modal
+
 			// Close the modal
-			const modal = document.getElementById('my_modal_1');
-			// @ts-ignore
-			modal.close();
+			const editModal = document.getElementById('my_modal_1');
+			if (editModal) {
+				// @ts-ignore
+				editModal.close();
+				location.reload();
+			}
 			editingPackage = null;
 		} catch (error) {
-			console.error('Error updating user:', error);
+			console.error('Error updating package:', error);
+			alertMessage =
+				'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
+			alertType = 'error';
+			showAlertModal = true; // แสดง modal
+			location.reload();
 		}
+		
 	}
-	$: isActive = editingPackage?.Status === 'ACTIVE';
 
 	function toggleStatus() {
-		isActive = !isActive;
 		if (editingPackage) {
-			editingPackage.Status = isActive ? 'ACTIVE' : 'INACTIVE';
+			editingPackage.Status = editingPackage.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 		}
 	}
 
@@ -169,9 +215,57 @@
 		currentPage += 1;
 		fetchData((currentPage - 1) * limit, limit);
 	}
+
+	function validatePriceInput(event: Event): void {
+	const input = event.target as HTMLInputElement;
+	let value: string = input.value;
+
+	// If the input contains a negative sign or the value is less than 1, set the value to 1
+	if (value.includes('-') || Number(value) < 1) {
+		value = '1';
+	}
+
+	// Limit the value to 9999999
+	if (Number(value) > 9999999) {
+		value = '9999999';
+	}
+
+	// Update the value of editingPackage.Price
+	if (editingPackage) {
+		editingPackage.Price = Number(value);
+	}
+
+	// Update the input value to reflect the changes
+	input.value = value;
+}
+
+	function validateQuotaInput(event: Event) {
+		const input = event.target as HTMLInputElement;
+		let value = input.value;
+
+		if (value.includes('-') || Number(value) < 1) {
+		value = '1';
+	}
+
+	// Limit the value to 9999999
+	if (Number(value) > 9999) {
+		value = '9999';
+	}
+
+	// Update the value of editingPackage.Price
+	if (editingPackage) {
+		editingPackage.QuotaLimit = Number(value);
+	}
+
+	// Update the input value to reflect the changes
+	input.value = value;
+	}
+
+
+	
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
+<div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif;">
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
@@ -184,17 +278,21 @@
 			bind:value={searchInpage}
 		/>
 		<div class="flex justify-end space-x-2">
-			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
-				>Search</button
+			<button
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
+				on:click={handleSearchClick}>Search</button
 			>
 			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
 			>
-			
 		</div>
-		<div class="flex lg:justify-end md:justify-end sm:justify-center justify-center" style="width: 100%;">
-			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm " on:click={showModalCreate}
-				>Create</button
+		<div
+			class="flex lg:justify-end md:justify-end sm:justify-center justify-center"
+			style="width: 100%;"
+		>
+			<button
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
+				on:click={showModalCreate}>Create</button
 			>
 		</div>
 	</div>
@@ -202,16 +300,16 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
-					<th class="p-1 sm:p-2 w-10">ID</th>
-					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">Package Name</div>
-						<div class="lg:hidden sm:hidden block">P.Name</div></th
-					>
-					<th class="p-1 sm:p-2">Price</th>
-					<th class="p-1 sm:p-2 text-wrap">
+					<th class="p-1 sm:p-2 w-16">ID</th>
+					<th class="p-1 sm:p-2 text-left text-wrap w-[50%] ">
+						<div class="lg:block sm:block hidden ">Package Name</div>
+						<div class="lg:hidden sm:hidden block">P.Name</div>
+					</th>
+					<th class="p-1 sm:p-2 text-right">Price</th>
+					<th class="p-1 sm:p-2 text-right text-wrap">
 						<div class="lg:block sm:block hidden">Quota Limit</div>
-						<div class="lg:hidden sm:hidden block">Q.Limit</div></th
-					>
+						<div class="lg:hidden sm:hidden block">Q.Limit</div>
+					</th>
 					<th class="p-1 sm:p-2">Status</th>
 					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
@@ -220,13 +318,14 @@
 				{#each packageData as item}
 					<tr>
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Name}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Price}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaLimit}</td>
+						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
+						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price}</td>
+						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.QuotaLimit}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
-									class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status === 'ACTIVE'
+									class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status ===
+									'ACTIVE'
 										? 'badge-success'
 										: 'badge-danger'}"
 								>
@@ -235,7 +334,7 @@
 							</div>
 						</td>
 						<td class="p-1 sm:p-2">
-							<button class="btn btn-xs sm:btn-sm  bg-primary" on:click={() => showModalEdit(item)}>
+							<button class="btn btn-xs sm:btn-sm bg-primary" on:click={() => showModalEdit(item)}>
 								<svg
 									class="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 dark:text-white"
 									aria-hidden="true"
@@ -272,6 +371,27 @@
 	</div>
 </div>
 
+<dialog id="alert_modal" class="modal" open={showAlertModal}>
+	<div class="modal-box bg-white w-11/12 max-w-md">
+		<div class="form-control">
+			<h2 class="text-2xl font-bold mb-4">{alertType === 'success' ? 'Success' : 'Error'}</h2>
+			<p>{alertMessage}</p>
+			<div class="modal-action">
+				<button
+					class="btn"
+					on:click={() => {
+						showAlertModal = false;
+						alertMessage = null;
+						alertType = null;
+					}}
+				>
+					Close
+				</button>
+			</div>
+		</div>
+	</div>
+</dialog>
+
 <dialog id="edit_modal" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">
 		<div class="form-control">
@@ -283,6 +403,7 @@
 					<input
 						type="text"
 						class="input input-bordered bg-white w-80"
+						maxlength="250"
 						bind:value={editingPackage.Name}
 					/>
 				</label>
@@ -291,16 +412,24 @@
 					<span class="label-text text-black w-2/5">Price:</span>
 					<input
 						type="number"
+						maxlength="8"
+						max="9999999"
+						min="1"
 						class="input input-bordered bg-white w-80"
 						bind:value={editingPackage.Price}
+						on:input={validatePriceInput}
 					/>
 				</label>
 				<label class="label">
 					<span class="label-text text-black w-2/5">QuotaLimit:</span>
 					<input
 						type="number"
+						maxlength="4"
+						min="1"
+						max="9999"
 						class="input input-bordered bg-white w-80"
 						bind:value={editingPackage.QuotaLimit}
+						on:input={validateQuotaInput}
 					/>
 				</label>
 				<label class="label cursor-pointer bg-white flex">
@@ -309,7 +438,7 @@
 						<input
 							type="checkbox"
 							class="toggle [--tglbg:white] toggle-success"
-							bind:value={editingPackage.Status}
+							checked={editingPackage.Status === 'ACTIVE'}
 							on:change={toggleStatus}
 						/>
 					</div>
@@ -318,7 +447,9 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn  bg-primary text-white btn-primary" on:click={updatePackage}>Save</button>
+						<button class="btn bg-primary text-white btn-primary" on:click={updatePackage}
+							>Save</button
+						>
 					</form>
 				</div>
 			{/if}
@@ -338,6 +469,7 @@
 					type="text"
 					class="input input-bordered bg-white w-80"
 					bind:value={newPackage.Name}
+					maxlength="250"
 				/>
 			</label>
 
@@ -347,6 +479,7 @@
 					type="number"
 					class="input input-bordered bg-white w-80"
 					bind:value={newPackage.Price}
+					min="0"
 				/>
 			</label>
 			<label class="label">
@@ -355,6 +488,7 @@
 					type="number"
 					class="input input-bordered bg-white w-80"
 					bind:value={newPackage.QuotaLimit}
+					min="0"
 				/>
 			</label>
 			<label class="label cursor-pointer bg-white flex">
@@ -372,7 +506,9 @@
 			<div class="modal-action">
 				<form method="dialog" class="flex space-x-2">
 					<button class="btn btn-outline btn-error">Close</button>
-					<button class="btn  bg-primary text-white btn-primary" on:click={createPackage}>Save</button>
+					<button class="btn bg-primary text-white btn-primary" on:click={createPackage}
+						>Save</button
+					>
 				</form>
 			</div>
 		</div>
@@ -381,8 +517,7 @@
 
 <style>
 	.badge-status {
-		@apply py-1 px-2 rounded-full text-white lg:w-40 md:w-32 sm:w-28 w-24 ; 
-		
+		@apply py-1 px-2 rounded-full text-white lg:w-36 md:w-32 sm:w-28 w-24;
 	}
 	.badge-success {
 		@apply bg-green-600;
@@ -396,5 +531,13 @@
 		}
 	}
 
-	@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+	.overflow-y-hidden {
+		overflow-y: scroll;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.overflow-y-hidden::-webkit-scrollbar {
+		display: none;
+	}
 </style>

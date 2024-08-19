@@ -1,10 +1,8 @@
-
-export type Packageactive ={
+export type LogAdmin ={
     Id : number;
-    Name : string
-    Price : number
-    QuotaLimit : number
-    CreatedAt : Date
-    UpdatedAt : Date
-    Status : string
+    Timestamp : string;
+    Action : string
+    MethodName : string
+    SqlData : string
+    ActorName : string
 }

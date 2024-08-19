@@ -1,115 +1,137 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Packageactive } from './+page.server.ts';
+	import type { LogAdmin } from './+page.server';
+	import { Value } from 'svelte-radix';
 
-	let packageactive: Packageactive[] = [];
-	let searchInpage = '';
-	let editingPackageactive: Packageactive | null = null;
-	let currentPage = 1;
+	let LogAdmin: LogAdmin[] = [];
+	let offset = 1;
 	let limit = 10;
-	let filteredData: Packageactive[] = [];
-	let merchantname = '';
-	let selectionvalue = '';
+	let totalItems = 0;
+	let loading = false;
+	let currentPage = 1;
+	let value = '10';
 
-	onMount(async () => {
-		await fetchData();
-	});
+	$: totalPages = Math.ceil(totalItems / limit);
 
-	async function fetchData(offset = 0, limit = 10) {
+	async function fetchData(currentOffset: number, currentLimit: number) {
+		loading = true;
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/package/packageactive`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin?offset=${currentOffset}&limit=${currentLimit}&role=admin`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
 			const data = await response.json();
-			if (!Array.isArray(data.result)) {
+			if (!Array.isArray(data.result.data)) {
 				throw new Error('Result is not an array');
 			}
-			console.log(data);
-			packageactive = data.result.map((item: Packageactive) => ({
+			LogAdmin = data.result.data.map((item: LogAdmin) => ({
 				Id: item.Id,
-				Name : item.Name,
-    			Price : item.Price,
-   				QuotaLimit : item.QuotaLimit,
-    			CreatedAt : item.CreatedAt,
-    			UpdatedAt : item.UpdatedAt,
-    			Status : item.Status
+				Timestamp: formatDateToGMT8(item.Timestamp),
+				Action: item.Action,
+				MethodName: item.MethodName,
+				SqlData: item.SqlData,
+				ActorName: item.ActorName
 			}));
+			totalItems = data.result.total || LogAdmin.length;
 		} catch (error) {
 			console.error('Error fetching data:', error);
+		} finally {
+			loading = false;
 		}
 	}
 
-	// async function searchfetchData(merchantname: string) {
-	// 	try {
-	// 		const response = await fetch(
-	// 			`http://127.0.0.1:4567/api/v1/searchgetmerchant?merchantname=${merchantname}`
-	// 		);
-	// 		if (!response.ok) {
-	// 			throw new Error('Failed to fetch data');
-	// 		}
-	// 		const data = await response.json();
-	// 		if (!Array.isArray(data.result)) {
-	// 			throw new Error('Result is not an array');
-	// 		}
-	// 		userData = data.result.map((item: UserData) => ({
-	// 			Id: item.Id,
-	// 			MerchantId: item.MerchantId,
-	// 			MerchantName: item.MerchantName,
-	// 			QuotaUsage: item.QuotaUsage,
-	// 			PackageName: item.PackageName,
-	// 			Status: item.Status
-	// 		}));
-	// 	} catch (error) {
-	// 		console.error('Error fetching data:', error);
-	// 	}
-	// }
-	// function handleSearchClick() {
-	// 	searchfetchData(searchInpage);
-	// }
+	function formatDateToGMT8(dateString: string): string {
+		const date = new Date(dateString);
+		const gmt8Date = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+		return gmt8Date
+			.toISOString()
+			.replace('T', ' ')
+			.replace(/\.\d+Z$/, '');
+	}
 
-	// function clearSearch() {
-	// 	searchInpage = '';
-	// 	filteredData = [...userData];
-	// 	location.reload();
-	// }
+	function nextPage() {
+		if (currentPage < totalPages) {
+			offset++;
+			currentPage++;
+		}
+	}
 
-	// function handleLimitChange(event: Event) {
-	// 	const target = event.target as HTMLSelectElement;
-	// 	limit = parseInt(target.value);
-	// 	fetchData((currentPage - 1) * limit, limit);
-	// }
+	function prevPage() {
+		if (currentPage > 1) {
+			offset--;
+			currentPage--;
+		}
+	}
 
-	// function showModal(user: UserData) {
-	// 	editingUser = user;
-	// 	const modal = document.getElementById('my_modal_1');
-	// 	// @ts-ignore
-	// 	modal.showModal();
-	// }
+	$: {
+		console.log(`Page changed: currentPage=${currentPage}, offset=${offset}, limit=${limit}`);
+		fetchData(offset, limit);
+	}
 
-	
-	// $: isActive = editingUser?.Status === 'ACTIVE';
+	onMount(() => {
+		console.log('Component mounted');
+		fetchData(offset, limit);
+	});
 
-	// function toggleStatus() {
-	// 	isActive = !isActive;
-	// 	if (editingUser) {
-	// 		editingUser.Status = isActive ? 'ACTIVE' : 'INACTIVE';
-	// 	}
-	// }
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	// function goToPreviousPage() {
-	// 	if (currentPage > 1) {
-	// 		currentPage -= 1;
-	// 		fetchData((currentPage - 1) * limit, limit);
-	// 	}
-	// }
+	let startDate = '';
+	let endDate = '';
 
-	// function goToNextPage() {
-	// 	currentPage += 1;
-	// 	fetchData((currentPage - 1) * limit, limit);
-	// }
+	function formatDateInput(date: string | number | Date) {
+		return date ? new Date(date).toISOString() : '';
+	}
+
+	async function fetchDataSearch(start = '', end = '') {
+		loading = true;
+		try {
+			const formattedStartDate = formatDateInput(start);
+			const formattedEndDate = formatDateInput(end);
+			const response = await fetch(
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+			);
+
+			if (!response.ok) {
+				const contentType = response.headers.get("content-type");
+				if (contentType && contentType.includes("application/json")) {
+					const errorData = await response.json();
+					throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
+				} else {
+					const errorText = await response.text();
+					throw new Error(`Error ${response.status}: ${errorText}`);
+				}
+			}
+
+			const data = await response.json();
+
+			// Format the output dates to GMT+8
+			LogAdmin = (data.result || []).map((item: { Timestamp: string; }) => ({
+				...item,
+				Timestamp: formatDateToGMT8(item.Timestamp)
+			}));
+		} catch (error) {
+			console.error('Error fetching data:', error);
+			alert(`Failed to fetch data Please try again.`);
+		} finally {
+			loading = false;
+		}
+	}
+
+	function handleSearch() {
+		if (startDate && endDate) {
+			fetchDataSearch(startDate, endDate);
+		} else {
+			alert('Please select both start and end dates');
+		}
+	}
+
+	function handleClear() {
+		startDate = '';
+		endDate = '';
+		fetchDataSearch();
+	}
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
@@ -118,26 +140,23 @@
 	>
 		<input
 			type="date"
-			placeholder="Merchant Id or Merchant Name"
+			bind:value={startDate}
 			class="input input-bordered w-full max-w-xs bg-blue-50"
-			style="background-color: aliceblue;"
 			maxlength="100"
-			
 		/>
-		
+
 		<input
 			type="date"
-			placeholder="Merchant Id or Merchant Name"
+			bind:value={endDate}
 			class="input input-bordered w-full max-w-xs bg-blue-50"
-			style="background-color: aliceblue;"
 			maxlength="100"
-			
 		/>
 		<div class="flex space-x-2">
-			<button class="btn  bg-primary text-white btn-primary text-xs sm:text-sm" 
-				>Search</button
+			<button
+				on:click={handleSearch}
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm">Search</button
 			>
-			<button class="btn btn-outline btn-primary text-xs sm:text-sm" 
+			<button on:click={handleClear} class="btn btn-outline btn-primary text-xs sm:text-sm"
 				>Clear</button
 			>
 		</div>
@@ -148,87 +167,67 @@
 				<tr>
 					<th class="p-1 sm:p-2 w-10">ID</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">Package Name</div>
-						<div class="lg:hidden sm:hidden block">P.Name</div></th
-					>
-					<th class="p-1 sm:p-2">Price</th>
+						<div class="lg:block sm:block hidden">Time Stamp</div>
+						<div class="lg:hidden sm:hidden block">Time</div>
+					</th>
+					<th class="p-1 sm:p-2">Action</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">Quota Limit</div>
-						<div class="lg:hidden sm:hidden block">Q.Limit</div></th
-					>
-					<th class="p-1 sm:p-2">Status</th>
-					<th class="p-1 sm:p-2">CreateAt</th>
-					<th class="p-1 sm:p-2">UpdatedAt</th>
-
+						<div class="lg:block sm:block hidden">Method Name</div>
+						<div class="lg:hidden sm:hidden block">Method</div>
+					</th>
+					<th class="p-1 sm:p-2">Sql Data</th>
+					<th class="p-1 sm:p-2 text-wrap">
+						<div class="lg:block sm:block hidden">Actor Name</div>
+						<div class="lg:hidden sm:hidden block">Name</div>
+					</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
-				{#each packageactive as item}
-					<tr>
-						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Name}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Price}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaLimit}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">
-							<div class="flex justify-center">
-								<div
-									class="badge-status text-xs sm:text-sm {item.Status === 'ACTIVE'
-										? 'badge-success'
-										: 'badge-danger'}"
-								>
-									{item.Status}
-								</div>
-							</div>
-						</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.CreatedAt}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.UpdatedAt}</td>
-
-
-						
-					</tr>
-				{/each}
+				{#if loading}
+					<tr><td colspan="6">Loading...</td></tr>
+				{:else if LogAdmin.length === 0}
+					<tr><td colspan="6">No data available</td></tr>
+				{:else}
+					{#each LogAdmin as item}
+						<tr>
+							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Timestamp}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Action}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MethodName}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.SqlData}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.ActorName}</td>
+						</tr>
+					{/each}
+				{/if}
 			</tbody>
 		</table>
-		<div class="w-full flex justify-end mt-4">
-			<div class="join grid grid-cols-2 w-full sm:w-auto">
-				<!-- <select class="select w-full max-w-xs bg-white" bind:value={limit} on:change={handleLimitChange}>
+
+		<div class="grid col-2 w-full justify-end sm:w-auto">
+			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
+			<div class="flex">
+				<select
+					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+					bind:value={value}
+					on:change={prevPage}
+					placeholder=value
+				>
 					<option value="10">10</option>
 					<option value="15">15</option>
 					<option value="20">20</option>
 					<option value="25">25</option>
 					<option value="30">30</option>
-				  </select> -->
+				</select>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					>Previous</button
+					on:click={prevPage}
+					disabled={currentPage === 1}>Previous</button
 				>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					>Next</button
+					on:click={nextPage}
+					disabled={currentPage === totalPages}>Next</button
 				>
 			</div>
 		</div>
 	</div>
 </div>
-
-
-
-<style>
-	.badge-status {
-		@apply py-1 px-2 rounded-full text-white;
-		width: 60%;
-	}
-	.badge-success {
-		@apply bg-green-600;
-	}
-	.badge-danger {
-		@apply bg-red-600;
-	}
-	@media (max-width: 640px) {
-		.badge-status {
-			width: 100%;
-		}
-	}
-
-	@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
-</style>
