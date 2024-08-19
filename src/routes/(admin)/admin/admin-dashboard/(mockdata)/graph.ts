@@ -1,10 +1,10 @@
-import type { ChartDataset } from 'chart.js';
+import type { ChartConfiguration, ChartDataset } from 'chart.js';
 
 export type GCanvasConfig = {
 	height: number;
 };
 
-export const packageUsage = {
+export const packageUsage: ChartConfiguration['data'] = {
 	datasets: [
 		{
 			data: [40, 50, 80, 30, 100],
@@ -44,6 +44,10 @@ export const transactionDaily = {
 			pointRadius: 1,
 			pointHitRadius: 10,
 			data: [65, 59, 80, 81, 56, 55, 40],
+			datalabels: {
+				align: 'end',
+				anchor: 'end'
+			},
 			borderRadius: 100
 		} as ChartDataset
 	]
@@ -72,7 +76,11 @@ export const merchantQuotaComparisonDataset = {
 			pointRadius: 1,
 			pointHitRadius: 10,
 			borderRadius: 100,
-			data: [65, 59, 80, 81, 56, 55, 40]
+			data: [65, 59, 80, 81, 56, 55, 40],
+			datalabels: {
+				align: 'center',
+				anchor: 'start'
+			}
 		} as ChartDataset,
 		{
 			label: 'Quota ที่ใช้ได้ในแต่ละเดือน',
@@ -92,30 +100,11 @@ export const merchantQuotaComparisonDataset = {
 			pointHoverBorderWidth: 2,
 			pointRadius: 1,
 			pointHitRadius: 10,
-			borderRadius: 100
+			borderRadius: 100,
+			datalabels: {
+				align: 'end',
+				anchor: 'end'
+			}
 		} as ChartDataset
-	],
-	options: {
-		maintainAspectRatio: false,
-		spanGaps: false,
-		elements: {
-			line: {
-				tension: 0.000001
-			}
-		},
-		plugins: {
-			filler: {
-				propagate: false
-			}
-		},
-		scales: {
-			xAxes: [
-				{
-					ticks: {
-						autoSkip: false
-					}
-				}
-			]
-		}
-	}
+	]
 };
