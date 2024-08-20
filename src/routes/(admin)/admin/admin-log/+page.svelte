@@ -5,11 +5,10 @@
 
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
-	let limit = 10;
+	let limit = 5;
 	let totalItems = 0;
 	let loading = false;
 	let currentPage = 1;
-	let value = '10';
 
 	$: totalPages = Math.ceil(totalItems / limit);
 
@@ -28,7 +27,7 @@
 			}
 			LogAdmin = data.result.data.map((item: LogAdmin) => ({
 				Id: item.Id,
-				Timestamp: formatDateToGMT8(item.Timestamp),
+				Timestamp: formatDateToGMT7(item.Timestamp),
 				Action: item.Action,
 				MethodName: item.MethodName,
 				SqlData: item.SqlData,
@@ -42,10 +41,10 @@
 		}
 	}
 
-	function formatDateToGMT8(dateString: string): string {
+	function formatDateToGMT7(dateString: string): string {
 		const date = new Date(dateString);
-		const gmt8Date = new Date(date.getTime() + 8 * 60 * 60 * 1000);
-		return gmt8Date
+		const gmt7Date = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+		return gmt7Date
 			.toISOString()
 			.replace('T', ' ')
 			.replace(/\.\d+Z$/, '');
@@ -94,8 +93,8 @@
 			);
 
 			if (!response.ok) {
-				const contentType = response.headers.get("content-type");
-				if (contentType && contentType.includes("application/json")) {
+				const contentType = response.headers.get('content-type');
+				if (contentType && contentType.includes('application/json')) {
 					const errorData = await response.json();
 					throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
 				} else {
@@ -107,9 +106,9 @@
 			const data = await response.json();
 
 			// Format the output dates to GMT+8
-			LogAdmin = (data.result || []).map((item: { Timestamp: string; }) => ({
+			LogAdmin = (data.result || []).map((item: { Timestamp: string }) => ({
 				...item,
-				Timestamp: formatDateToGMT8(item.Timestamp)
+				Timestamp: formatDateToGMT7(item.Timestamp)
 			}));
 		} catch (error) {
 			console.error('Error fetching data:', error);
@@ -130,7 +129,7 @@
 	function handleClear() {
 		startDate = '';
 		endDate = '';
-		fetchDataSearch();
+		fetchData(offset, limit)
 	}
 </script>
 
@@ -207,15 +206,15 @@
 			<div class="flex">
 				<select
 					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-					bind:value={value}
+					bind:value={limit}
 					on:change={prevPage}
-					placeholder=value
 				>
-					<option value="10">10</option>
-					<option value="15">15</option>
-					<option value="20">20</option>
-					<option value="25">25</option>
-					<option value="30">30</option>
+					<option value={5}>5</option>
+					<option value={10}>10</option>
+					<option value={15}>15</option>
+					<option value={20}>20</option>
+					<option value={25}>25</option>
+					<option value={30}>30</option>
 				</select>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
