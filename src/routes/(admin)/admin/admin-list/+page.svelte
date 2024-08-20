@@ -15,10 +15,10 @@
 		await fetchData();
 	});
 
-	async function fetchData(offset = 0, limit = 10) {
+	async function fetchData(offset = 1, limit = 10) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/merchant/get-merchants-with-pkg?Offset=${offset}&Limit=${limit}`
+				`http://127.0.0.1:4567/api/v1/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
