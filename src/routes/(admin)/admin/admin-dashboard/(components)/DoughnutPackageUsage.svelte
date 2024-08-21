@@ -10,14 +10,9 @@
 		CategoryScale,
 		type ChartData
 	} from 'chart.js';
-	import { packageUsage } from '../(mockdata)/graph';
 	import type { GCanvasConfig } from '../(mockdata)/graph';
 	import ChartDataLabels from 'chartjs-plugin-datalabels';
 	import type { PackageUsage } from '$lib/utils/external-api-type/adminDashboard';
-	import { onMount } from 'svelte';
-	import type { Package } from '$lib/utils/external-api-type/package';
-	import { enhance } from '$app/forms';
-	import Swal from 'sweetalert2';
 
 	export let conf: GCanvasConfig = {
 		height: 260
@@ -28,32 +23,44 @@
 
 	ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, ChartDataLabels);
 
-	const maxCountUsed = Math.max(...pData.map((d) => d.CountUsed));
+	function getRandomColor() {
+		const r = Math.floor(Math.random() * 36);
+		const g = Math.floor(Math.random() * 99);
+		const b = Math.floor(Math.random() * 225);
+		return { r, g, b };
+	}
 
-	let labels: string[] = [];
-	let data: number[] = [];
+	function updateDataset<T extends PackageUsage>(pData: T[]): any {
+		const maxCountUsed = Math.max(...pData.map((d) => d.CountUsed));
 
-	let backgroundColor: string[] = [];
+		let labels: string[] = [];
+		let data: number[] = [];
 
-	const baseColor = { r: 36, g: 99, b: 225 }; // Base color (blue)
+		let backgroundColor: string[] = [];
 
-	pData.forEach(({ PackageName, CountUsed }) => {
-		labels.push(PackageName);
-		data.push(CountUsed);
+		const baseColor = { r: 36, g: 99, b: 225 }; // Base color (blue)
+		pData.forEach(({ PackageName, CountUsed }) => {
+			labels.push(PackageName);
+			data.push(CountUsed);
 
-		const intensity = Math.floor((CountUsed / maxCountUsed) * 255);
-		const color = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${intensity / 255}`;
-		backgroundColor.push(color);
-	});
-	dataset = {
-		labels,
-		datasets: [
-			{
-				data,
-				backgroundColor
-			}
-		]
-	};
+			const { r, g, b } = getRandomColor();
+
+			const intensity = Math.floor((CountUsed / maxCountUsed) * 255) + 80;
+			const color = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${intensity / 255}`;
+			backgroundColor.push(color);
+		});
+		return {
+			labels,
+			datasets: [
+				{
+					data,
+					backgroundColor
+				}
+			]
+		};
+	}
+
+	dataset = updateDataset(pData.filter((d) => d.CountUsed > 0));
 </script>
 
 <Doughnut
@@ -74,7 +81,7 @@
 					var dataset = context.dataset;
 					var count = dataset.data.length;
 					var value = dataset.data[context.dataIndex];
-					return true;
+					return value;
 				},
 				font: {
 					weight: 'bold'

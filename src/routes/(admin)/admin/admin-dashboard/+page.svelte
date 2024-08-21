@@ -13,18 +13,6 @@
 	import Swal from 'sweetalert2';
 
 	export let data: PageData;
-
-	const toast = Swal.mixin({
-		toast: true,
-		position: 'top-end',
-		showConfirmButton: false,
-		timer: 3000,
-		timerProgressBar: true,
-		didOpen: (toast) => {
-			toast.onmouseenter = Swal.stopTimer;
-			toast.onmouseleave = Swal.resumeTimer;
-		}
-	});
 </script>
 
 <div class="container space-y-6 mx-auto">
@@ -119,7 +107,7 @@
 	<div id="charts-container" class="text-center *:h-96 items-center gap-4 grid lg:grid-cols-2">
 		<div class="card bg-base-100 col-span-full shadow-md p-4">
 			<h1 class="text-base xl:text-lg font-semibold">ยอดการใช้งานรายวัน</h1>
-			<p class="text-muted-foreground text-sm xl:text-base">ยอดจำนวนโอนล่าสุดภายใน 15 วัน</p>
+			<p class="text-muted-foreground text-sm xl:text-base">ยอดจำนวนโอนล่าสุดภายใน {data.defaultOpt?.dateCountInterval} วัน</p>
 			<div id="line-chart-container" class="chart-container">
 				<LineTransactionDaily pData={data.transactionDailyCount ?? []}></LineTransactionDaily>
 			</div>
@@ -147,7 +135,7 @@
 		<div class="card bg-base-100 h-full shadow-md p-4">
 			<h1 class="text-base xl:text-lg font-semibold">อัตราสัดส่วนแพ็คเกจที่ลูกค้าใช้งาน</h1>
 			<div class="chart-container h-full">
-				<BarOverviewMonthly pData={data.transactionDailyCount ?? []}></BarOverviewMonthly>
+				<BarOverviewMonthly pData={data.monthlyOverview ?? []}></BarOverviewMonthly>
 			</div>
 		</div>
 	</div>
@@ -189,6 +177,6 @@
 	.chart-container {
 		position: relative;
 		width: 100%;
-		height: 100%
+		height: 100%;
 	}
 </style>

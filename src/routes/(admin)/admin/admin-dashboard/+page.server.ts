@@ -9,6 +9,7 @@ import { fail } from '@sveltejs/kit';
 import type { MerchantPKG } from '$lib/utils/external-api-type/merchant';
 import type {
 	AdminDBStats,
+	MerchantTransactionMonthly,
 	PackageUsage,
 	QuotaAndMerchantUsage,
 	TransactionCountRecord
@@ -28,8 +29,13 @@ export const load: PageServerLoad = async () => {
 	console.log('=- load admin-db data -=');
 
 	const defaultOpt = {
-		quotaAndMerchantUsagePkgSelect: 2,
-		dateCountInterval: 15
+		// GetTransactionDailyCount
+		quotaAndMerchantUsagePkgSelect: 1,
+		dateCountInterval: 15,
+
+		// GetMonthlyOverviewStat
+		monthCountInterval: 6,
+		year: new Date().toISOString().split('T')[0]
 	};
 	const formOpt = {
 		packages: [] as unknown as Package[]
@@ -43,6 +49,7 @@ export const load: PageServerLoad = async () => {
 	let pkgUsageRatio: DataResponse<PackageUsage[]>;
 	let transactionDailyCount: DataResponse<TransactionCountRecord[]>;
 	let quotaAndMerchantUsage: DataResponse<QuotaAndMerchantUsage[]>;
+	let monthlyOverview: DataResponse<MerchantTransactionMonthly[]>;
 
 	try {
 		statData = await ep.adminDb.GetStats();
@@ -63,7 +70,7 @@ export const load: PageServerLoad = async () => {
 			},
 			p: {
 				offset: 1,
-				limit: 7
+				limit: 10
 			}
 		});
 		topMerchantQuotaSpendListReport = await ep.merchant.GetMerchantsDetail({
@@ -98,6 +105,11 @@ export const load: PageServerLoad = async () => {
 			}
 		});
 		formOpt.packages = pkgs.result ?? [];
+
+		monthlyOverview = await ep.adminDb.GetMonthlyOverviewStat(
+			defaultOpt.monthCountInterval,
+			defaultOpt.year.toString()
+		);
 	} catch (err) {
 		const axiosErr = err as AxiosError;
 		console.error(`-= Error while trying to send request to endpoint =-`);
@@ -135,6 +147,7 @@ export const load: PageServerLoad = async () => {
 		pkgUsageRatio: pkgUsageRatio.result ?? [],
 		transactionDailyCount: transactionDailyCount.result ?? [],
 		quotaAndMerchantUsage: quotaAndMerchantUsage.result ?? [],
+		monthlyOverview: monthlyOverview.result ?? [],
 		formOpt,
 		defaultOpt
 	};
@@ -146,7 +159,7 @@ export const actions: Actions = {
 			pkgIdSelected: string;
 		};
 
-        console.log("request", pkgIdSelected);
+		console.log('request', pkgIdSelected);
 
 		if (
 			isNaN(Number(pkgIdSelected)) &&
@@ -164,9 +177,7 @@ export const actions: Actions = {
 		let updateQuotaAndMerchantUsage: DataResponse<QuotaAndMerchantUsage[]>;
 
 		try {
-			updateQuotaAndMerchantUsage = await ep.adminDb.GetQuotaAndMerchantUsage(
-				+pkgIdSelected
-			);
+			updateQuotaAndMerchantUsage = await ep.adminDb.GetQuotaAndMerchantUsage(+pkgIdSelected);
 		} catch (err) {
 			const axiosErr = err as AxiosError;
 			console.error(`-= Error while trying to send request to endpoint =-`);
@@ -176,19 +187,19 @@ export const actions: Actions = {
 			});
 		}
 
-        if (updateQuotaAndMerchantUsage.status_code != 200) {
-            console.error(`-= ErrorResult given from endpoint =-`);
-            console.error('ErrorContext:', updateQuotaAndMerchantUsage.status_code);
-            return fail(500, {
-                message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
-            });
-        }
+		if (updateQuotaAndMerchantUsage.status_code != 200) {
+			console.error(`-= ErrorResult given from endpoint =-`);
+			console.error('ErrorContext:', updateQuotaAndMerchantUsage.status_code);
+			return fail(500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
 
-        console.log(updateQuotaAndMerchantUsage)
+		console.log(updateQuotaAndMerchantUsage);
 
-        return {
-            updateQuotaAndMerchantUsage: updateQuotaAndMerchantUsage.result ?? [],
-            success: true
-        }
+		return {
+			updateQuotaAndMerchantUsage: updateQuotaAndMerchantUsage.result ?? [],
+			success: true
+		};
 	}
 };

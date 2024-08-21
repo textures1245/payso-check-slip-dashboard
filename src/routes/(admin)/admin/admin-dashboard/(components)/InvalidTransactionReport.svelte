@@ -18,7 +18,8 @@
 			<div
 				class:text-success={t.Status.toLocaleUpperCase() === 'SUCCESS'}
 				class:text-warning={t.Status.toLocaleUpperCase() === 'PENDING'}
-				class:text-destructive={t.Status.toLocaleUpperCase() === 'REJECT'}
+				class:text-destructive={t.Status.toLocaleUpperCase() === 'FAILED' ||
+					t.Status.toLocaleUpperCase() === 'REJECTED'}
 				class="ml-auto font-medium badge badge-sm badge-ghost uppercase"
 			>
 				{t.Status}

@@ -12,7 +12,6 @@
 		PointElement,
 		CategoryScale,
 		Filler,
-		type ChartData,
 		type ChartDataset
 	} from 'chart.js';
 	import type { QuotaAndMerchantUsage } from '$lib/utils/external-api-type/adminDashboard';
@@ -58,8 +57,10 @@
 				PackagePrice,
 				PackageQuotaLimit
 			}) => {
+				let calcMerchantQuotaUsageCount =  PackageQuotaLimit - QuotaUsage;
+
 				mLabels.push(`${MerchantId} - ${MerchantName}`);
-				mData.push(QuotaUsage);
+				mData.push(calcMerchantQuotaUsageCount);
 				pkgLabels.push(`${PackageName} - ฿${PackagePrice}`);
 				pkgData.push(PackageQuotaLimit);
 			}
@@ -88,7 +89,7 @@
 					pointRadius: 1,
 					pointHitRadius: 10,
 					borderRadius: 100,
-					data: [65, 59, 80, 81, 56, 55, 40],
+					data: mData,
 					datalabels: {
 						align: 'center',
 						anchor: 'start'
@@ -96,7 +97,7 @@
 				} as ChartDataset,
 				{
 					label: 'Quota ที่ใช้ได้ในแต่ละเดือน',
-					data: [90, 200, 150, 1000, 400, 500, 600],
+					data: pkgData,
 					fill: '-1',
 					borderColor: 'rgb(75, 192, 192)',
 					backgroundColor: 'rgba(75, 200, 192, 0.1)',

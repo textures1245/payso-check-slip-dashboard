@@ -17,107 +17,145 @@
 		BarElement
 	} from 'chart.js';
 	import { onMount } from 'svelte';
-	import type { TransactionCountRecord } from '$lib/utils/external-api-type/adminDashboard';
+	import type {
+		MerchantTransactionMonthly,
+		TransactionCountRecord
+	} from '$lib/utils/external-api-type/adminDashboard';
 
 	export let conf: GCanvasConfig = {
 		height: 200
 	};
 
-	const d = {
-		labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-		datasets: [
-			{
-				label: '% of Votes',
-				data: [12, 19, 3, 5, 2, 3],
-				backgroundColor: [
-					'rgba(255, 134,159,0.4)',
-					'rgba(98,  182, 239,0.4)',
-					'rgba(255, 218, 128,0.4)',
-					'rgba(113, 205, 205,0.4)',
-					'rgba(170, 128, 252,0.4)',
-					'rgba(255, 177, 101,0.4)'
-				],
-				borderWidth: 2,
-				borderColor: [
-					'rgba(255, 134, 159, 1)',
-					'rgba(98,  182, 239, 1)',
-					'rgba(255, 218, 128, 1)',
-					'rgba(113, 205, 205, 1)',
-					'rgba(170, 128, 252, 1)',
-					'rgba(255, 177, 101, 1)'
-				]
-			},
-			{
-				label: '% of Votes',
-				data: [20, 15, 7, 20, 6, 8],
-				backgroundColor: [
-					'rgba(255, 134,159,0.4)',
-					'rgba(98,  182, 239,0.4)',
-					'rgba(255, 218, 128,0.4)',
-					'rgba(113, 205, 205,0.4)',
-					'rgba(170, 128, 252,0.4)',
-					'rgba(255, 177, 101,0.4)'
-				],
-				borderWidth: 2,
-				borderColor: [
-					'rgba(255, 134, 159, 1)',
-					'rgba(98,  182, 239, 1)',
-					'rgba(255, 218, 128, 1)',
-					'rgba(113, 205, 205, 1)',
-					'rgba(170, 128, 252, 1)',
-					'rgba(255, 177, 101, 1)'
-				]
-			}
-		]
-	};
+	export let pData: MerchantTransactionMonthly[];
 
-	export let pData: TransactionCountRecord[];
 	let dataset: ChartData;
 
 	ChartJS.register(Title, Tooltip, Legend, BarElement, LinearScale, CategoryScale, ChartDataLabels);
 
-	let labels: string[] = [];
-	let data: number[] = [];
+	function getMonthName(monthLang: 'en' | 'th', monthNumber: number) {
+		const m = {
+			en: [
+				'January',
+				'February',
+				'March',
+				'April',
+				'May',
+				'June',
+				'July',
+				'August',
+				'September',
+				'October',
+				'November',
+				'December'
+			],
+			th: [
+				'มกราคม', // January
+				'กุมภาพันธ์', // February
+				'มีนาคม', // March
+				'เมษายน', // April
+				'พฤษภาคม', // May
+				'มิถุนายน', // June
+				'กรกฎาคม', // July
+				'สิงหาคม', // August
+				'กันยายน', // September
+				'ตุลาคม', // October
+				'พฤศจิกายน', // November
+				'ธันวาคม' // December
+			]
+		};
+		return m[monthLang][monthNumber - 1];
+	}
 
-	pData.forEach((d) => {
-		labels.push(new Date(d.Date).toLocaleDateString('en-EN'));
-		data.push(d.RecordCount);
-	});
-	dataset = {
-		labels,
-		datasets: [
-			{
-				label: 'ยอดการตรวจสอบรายวัน',
-				fill: true,
-				lineTension: 0.1,
-				backgroundColor: 'rgba(225, 204,230, .3)',
-				borderColor: 'rgb(205, 130, 158)',
-				borderCapStyle: 'butt',
-				borderDash: [],
-				borderDashOffset: 0.0,
-				borderJoinStyle: 'miter',
-				pointBorderColor: 'rgb(205, 130,1 58)',
-				pointBackgroundColor: 'rgb(255, 255, 255)',
-				pointBorderWidth: 5,
-				pointHoverRadius: 5,
-				pointHoverBackgroundColor: 'rgb(0, 0, 0)',
-				pointHoverBorderColor: 'rgba(220, 220, 220,1)',
-				pointHoverBorderWidth: 2,
-				pointRadius: 1,
-				pointHitRadius: 10,
-				data,
-				datalabels: {
-					align: 'end',
-					anchor: 'end'
+	function getRandomColor(tone = 1) {
+		const r = Math.floor(Math.random() * 30 * tone);
+		const g = Math.floor(Math.random() * 30 * tone);
+		const b = Math.floor(Math.random() * 225);
+		return { r, g, b };
+	}
+
+	function generateColors(dataSize: number, tone = 1) {
+		let bgColor = [];
+		let brColor = [];
+
+		for (let i = 0; i < dataSize; i++) {
+			const { r, g, b } = getRandomColor(tone);
+			bgColor.push(`rgba(${r}, ${g}, ${b}, 0.6)`);
+			brColor.push(`rgba(${r}, ${g}, ${b}, 1)`);
+		}
+
+		return { bgColor, brColor };
+	}
+
+	function updateDataset(args: MerchantTransactionMonthly[]) {
+		let labels: string[] = [];
+		let merchantRegisterData: number[] = [];
+		let transTotal: number[] = [];
+		let invalidTransTotal: number[] = [];
+		let pendingTransTotal: number[] = [];
+		let validTransTotal: number[] = [];
+
+		args.forEach(({ Merchant, Transaction, Month, Year }) => {
+			labels.push(getMonthName('th', +Month));
+			merchantRegisterData.push(Merchant.RegisterTotal);
+			transTotal.push(Transaction.TotalCount);
+			invalidTransTotal.push(Transaction.InvalidCount);
+			pendingTransTotal.push(Transaction.PendingCount);
+			validTransTotal.push(Transaction.ValidCount);
+		});
+
+		const dataset = {
+			labels,
+			datasets: [
+				{
+					label: 'ลูกค้าใหม่',
+					data: merchantRegisterData,
+					backgroundColor: 'rgba(61, 194, 236, 0.4)',
+					borderWidth: 2,
+					borderColor: 'rgba(61, 194, 236, 1)',
+					stack: 'Stack 0'
 				},
-				borderRadius: 100
-			} as ChartDataset
-		]
-	};
+				{
+					label: 'จำนวนสลิปที่ตรวจสอบ',
+					data: transTotal,
+					backgroundColor: 'rgba(75, 112, 245, 0.6)',
+					borderWidth: 2,
+					borderColor: 'rgb(75, 112, 245)',
+					stack: 'Stack 0'
+				},
+				{
+					label: 'สลิปที่ถูกต้อง',
+					data: validTransTotal,
+					backgroundColor: "rgba(65, 176, 110, 0.6)",
+					borderWidth: 2,
+					borderColor: 'rgb(65, 176, 110)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'สลิปที่ไม่ถูกต้อง',
+					data: invalidTransTotal,
+					backgroundColor: 'rgba(205, 24, 24, 0.6)',
+					borderWidth: 2,
+					borderColor: 'rgb(205, 24, 24)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'สลิปที่ดำเนินการ',
+					data: pendingTransTotal,
+					backgroundColor: 'rgba(243, 149, 13, 0.6)',
+					borderWidth: 2,
+					borderColor: 'rgb(243, 149, 13)',
+					stack: 'Stack 1'
+				}
+			]
+		};
+		return dataset;
+	}
+
+	dataset = updateDataset(pData);
 </script>
 
 <Bar
-	data={d}
+	data={dataset}
 	height={conf.height}
 	options={{
 		maintainAspectRatio: false,
@@ -126,13 +164,13 @@
 			datalabels: {
 				color: 'white',
 				display: function (context) {
-					return context.dataset.data[context.dataIndex] > 15;
+					return context.dataset.data[context.dataIndex] > 0;
 				},
 				font: {
 					weight: 'bold'
 				},
 				formatter: Math.round
-			},
+			}
 		},
 		aspectRatio: 5 / 3,
 		layout: {

@@ -6,9 +6,9 @@
 </script>
 
 <Table.Root>
-	<Table.Caption>A list of your recent invoices.</Table.Caption>
 	<Table.Header>
 		<Table.Row class="text-xs md:text-sm">
+			<Table.Head></Table.Head>
 			<Table.Head>หมายเลข</Table.Head>
 			<Table.Head>ชื่อ</Table.Head>
 			<Table.Head>อีเมล์</Table.Head>
@@ -17,10 +17,11 @@
 		</Table.Row>
 	</Table.Header>
 	<Table.Body>
-		{#each props as m}
+		{#each props as m, i (i)}
 			<!-- content here -->
 			<Table.Row class="text-xs">
-				<Table.Cell class="font-medium">{m.Id}</Table.Cell>
+				<Table.Cell class="font-medium">{i + 1}</Table.Cell>
+				<Table.Cell>{m.Id}</Table.Cell>
 				<Table.Cell>{m.MerchantName}</Table.Cell>
 				<Table.Cell>{m.Email}</Table.Cell>
 				<Table.Cell>{m.PackageName}</Table.Cell>
