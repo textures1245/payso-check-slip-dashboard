@@ -4,24 +4,48 @@
 
 	let packageData: PackageData[] = [];
 	let currentPage = 1;
+	let offset = 1
 	let limit = 10;
-	let editingPackage: PackageData | null = null;
-	let newPackage: PackageData = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
+	let editingPackage: PackageData ;
+	let newPackage: PackageData = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' ,TotalCount: 0};
 	let packagename = '';
 	let searchInpage = '';
 	let filteredData: PackageData[] = [];
 	let alertMessage: string | null = null; // ตัวแปรสำหรับเก็บข้อความ alert
 	let alertType: 'success' | 'error' | null = null; // ตัวแปรสำหรับประเภท alert
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
+	let totalItems = 0;
+
+	$: totalPages = Math.ceil(totalItems / limit);
+	console.log("total item",totalItems)
+
+	function nextPage() {
+		if (currentPage < totalPages) {
+			offset++;
+			currentPage++;
+		}
+	}
+
+	function prevPage() {
+		if (currentPage > 1) {
+			offset--;
+			currentPage--;
+		}
+	}
+
+	$: {
+		console.log(`Page changed: currentPage=${currentPage}, offset=${offset}, limit=${limit}`);
+		fetchData(offset, limit);
+	}
 
 	onMount(async () => {
-		await fetchData();
+		fetchData(offset, limit);
 	});
 
-	async function fetchData(offset = 0, limit = 10) {
+	async function fetchData(currentOffset: number, currentLimit: number) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/package/getpackage?offset=${offset}&limit=${limit}`
+				`http://127.0.0.1:4567/api/v1/package/getpackage?offset=${currentOffset}&limit=${currentLimit}`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -30,14 +54,17 @@
 			if (!Array.isArray(data.result)) {
 				throw new Error('Result is not an array');
 			}
-			console.log(data);
+			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
+			
 			packageData = data.result.map((item: PackageData) => ({
 				Id: item.Id,
 				Name: item.Name,
 				Price: item.Price,
 				QuotaLimit: item.QuotaLimit,
-				Status: item.Status
+				Status: item.Status,
+				TotalCount : item.TotalCount
 			}));
+			totalPages = Math.ceil(totalCount / currentLimit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
@@ -84,7 +111,7 @@
 		modal.showModal();
 	}
 	function showModalCreate() {
-		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
+		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE',TotalCount: 0 };
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
 		modal.showModal();
@@ -102,6 +129,7 @@
 		}
 
 		try {
+			newPackage.Name = newPackage.Name.trim()
 			const response = await fetch(`http://127.0.0.1:4567/api/v1/package/create/packages`, {
 				method: 'POST',
 				headers: {
@@ -128,7 +156,7 @@
 				// @ts-ignore
 				createModal.close();
 			}
-			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
+			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE',TotalCount: 0 };
 		} catch (error) {
 			console.error('Error creating package:', error);
 			alertMessage =
@@ -153,6 +181,7 @@
 		}
 
 		try {
+			editingPackage.Name = editingPackage.Name.trim()
 			const response = await fetch(
 				`http://127.0.0.1:4567/api/update/package/${editingPackage.Id}`,
 				{
@@ -186,7 +215,6 @@
 				editModal.close();
 				location.reload();
 			}
-			editingPackage = null;
 		} catch (error) {
 			console.error('Error updating package:', error);
 			alertMessage =
@@ -204,62 +232,44 @@
 		}
 	}
 
-	function goToPreviousPage() {
-		if (currentPage > 1) {
-			currentPage -= 1;
-			fetchData((currentPage - 1) * limit, limit);
-		}
-	}
 
-	function goToNextPage() {
-		currentPage += 1;
-		fetchData((currentPage - 1) * limit, limit);
-	}
+	function validateDecimalInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
 
-	function validatePriceInput(event: Event): void {
-	const input = event.target as HTMLInputElement;
-	let value: string = input.value;
+    // ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขทศนิยมที่ไม่เกิน 7 หลักและไม่มีค่าติดลบ
+    const regex = /^(?:\d{1,7}|\d{1,7}\.\d{0,2})?$/;
 
-	// If the input contains a negative sign or the value is less than 1, set the value to 1
-	if (value.includes('-') || Number(value) < 1) {
-		value = '1';
-	}
+    // ตรวจสอบว่าไม่เริ่มต้นด้วยเครื่องหมายลบ
+    if (value.startsWith('-') || !regex.test(value)) {
+      input.value = '';
+    }
+  }
 
-	// Limit the value to 9999999
-	if (Number(value) > 9999999) {
-		value = '9999999';
-	}
+  function validateInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
 
-	// Update the value of editingPackage.Price
-	if (editingPackage) {
-		editingPackage.Price = Number(value);
-	}
+    // ลบจุดทศนิยมออกจากค่า
+    value = value.replace(/\./g, '');
 
-	// Update the input value to reflect the changes
-	input.value = value;
-}
+    // ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขจำนวนเต็มที่ไม่เกิน 4 หลัก
+    const regex = /^[1-9]\d{0,3}$/;
 
-	function validateQuotaInput(event: Event) {
-		const input = event.target as HTMLInputElement;
-		let value = input.value;
+    if (!regex.test(value)) {
+      input.value = '';
+    } else {
+      input.value = value;  // อัปเดตค่าที่แก้ไขแล้ว (ถ้าไม่มีปัญหา)
+    }
+  }
 
-		if (value.includes('-') || Number(value) < 1) {
-		value = '1';
-	}
+  console.log('Current Page:', currentPage);
+console.log('Offset:', offset);
+console.log('Limit:', limit);
+	
+	
 
-	// Limit the value to 9999999
-	if (Number(value) > 9999) {
-		value = '9999';
-	}
-
-	// Update the value of editingPackage.Price
-	if (editingPackage) {
-		editingPackage.QuotaLimit = Number(value);
-	}
-
-	// Update the input value to reflect the changes
-	input.value = value;
-	}
+	
 
 
 	
@@ -301,7 +311,7 @@
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
 					<th class="p-1 sm:p-2 w-16">ID</th>
-					<th class="p-1 sm:p-2 text-left text-wrap w-[50%] ">
+					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap  ">
 						<div class="lg:block sm:block hidden ">Package Name</div>
 						<div class="lg:hidden sm:hidden block">P.Name</div>
 					</th>
@@ -319,7 +329,7 @@
 					<tr>
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
 						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price}</td>
+						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
 						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.QuotaLimit}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
@@ -356,15 +366,30 @@
 				{/each}
 			</tbody>
 		</table>
-		<div class="w-full flex justify-end mt-4">
-			<div class="join grid grid-cols-2 w-full sm:w-auto">
+		<div class="grid col-3 w-full justify-end sm:w-auto">
+			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
+			<div class="flex">
+				<select
+					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+					bind:value={limit}
+					on:change={prevPage}
+				>
+					<option value={5}>5</option>
+					<option value={10}>10</option>
+					<option value={15}>15</option>
+					<option value={20}>20</option>
+					<option value={25}>25</option>
+					<option value={30}>30</option>
+				</select>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					on:click={goToPreviousPage}>Previous</button
+					on:click={prevPage}
+					disabled={currentPage === 1}>Previous</button
 				>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					on:click={goToNextPage}>Next</button
+					on:click={nextPage}
+					disabled={currentPage === totalPages}>Next</button
 				>
 			</div>
 		</div>
@@ -405,6 +430,7 @@
 						class="input input-bordered bg-white w-80"
 						maxlength="250"
 						bind:value={editingPackage.Name}
+						
 					/>
 				</label>
 
@@ -417,7 +443,9 @@
 						min="1"
 						class="input input-bordered bg-white w-80"
 						bind:value={editingPackage.Price}
-						on:input={validatePriceInput}
+						on:input={validateDecimalInput}
+						
+						
 					/>
 				</label>
 				<label class="label">
@@ -429,7 +457,8 @@
 						max="9999"
 						class="input input-bordered bg-white w-80"
 						bind:value={editingPackage.QuotaLimit}
-						on:input={validateQuotaInput}
+						on:input={validateInput}
+						
 					/>
 				</label>
 				<label class="label cursor-pointer bg-white flex">
@@ -479,7 +508,8 @@
 					type="number"
 					class="input input-bordered bg-white w-80"
 					bind:value={newPackage.Price}
-					min="0"
+					min="1"
+					on:input={validateDecimalInput}
 				/>
 			</label>
 			<label class="label">
@@ -488,7 +518,9 @@
 					type="number"
 					class="input input-bordered bg-white w-80"
 					bind:value={newPackage.QuotaLimit}
-					min="0"
+					min="1"
+					on:input={validateInput}
+
 				/>
 			</label>
 			<label class="label cursor-pointer bg-white flex">
@@ -517,7 +549,7 @@
 
 <style>
 	.badge-status {
-		@apply py-1 px-2 rounded-full text-white lg:w-36 md:w-32 sm:w-28 w-24;
+		@apply py-1 px-2 rounded-full text-white lg:w-24 md:w-32 sm:w-28 w-20;
 	}
 	.badge-success {
 		@apply bg-green-600;

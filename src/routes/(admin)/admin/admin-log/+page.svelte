@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { LogAdmin } from './+page.server';
-	import { Value } from 'svelte-radix';
 
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
@@ -9,46 +8,80 @@
 	let totalItems = 0;
 	let loading = false;
 	let currentPage = 1;
-	let value = '10';
+	let startDate = '';
+	let endDate = '';
+	let actorName = '';
+	let methodName = '';
 
 	$: totalPages = Math.ceil(totalItems / limit);
 
-	async function fetchData(currentOffset: number, currentLimit: number) {
+	function formatDateInput(date: string | number | Date) {
+		return date ? new Date(date).toISOString() : '';
+	}
+
+	async function fetchData(start = '', end = '', offset = 1, limit = 5, actor = '', method = '') {
 		loading = true;
 		try {
+			const formattedStartDate = formatDateInput(start);
+			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin?offset=${currentOffset}&limit=${currentLimit}&role=admin`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}`
 			);
+
 			if (!response.ok) {
-				throw new Error('Failed to fetch data');
+				const contentType = response.headers.get('content-type');
+				if (contentType && contentType.includes('application/json')) {
+					const errorData = await response.json();
+					throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
+				} else {
+					const errorText = await response.text();
+					throw new Error(`Error ${response.status}: ${errorText}`);
+				}
 			}
+
 			const data = await response.json();
-			if (!Array.isArray(data.result.data)) {
-				throw new Error('Result is not an array');
-			}
-			LogAdmin = data.result.data.map((item: LogAdmin) => ({
-				Id: item.Id,
-				Timestamp: formatDateToGMT8(item.Timestamp),
+
+			// Format the output dates to GMT+8
+			LogAdmin = (data.result || []).map((item: LogAdmin, index: number) => ({
+				index: index + (offset - 1) * limit + 1,
+				Timestamp: formatDateToGMT7(item.Timestamp),
 				Action: item.Action,
 				MethodName: item.MethodName,
 				SqlData: item.SqlData,
 				ActorName: item.ActorName
 			}));
-			totalItems = data.result.total || LogAdmin.length;
+			totalItems = data.total || LogAdmin.length;
+			console.log('Input', startDate, endDate, offset, limit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
+			// alert(`Failed to fetch data Please try again.`);
 		} finally {
 			loading = false;
 		}
 	}
 
-	function formatDateToGMT8(dateString: string): string {
+	function newIndex(index: number, currentPage: number, limit: number) {
+		(currentPage - 1) * limit + index + 1;
+	}
+
+	function formatDateToGMT7(dateString: string): string {
 		const date = new Date(dateString);
-		const gmt8Date = new Date(date.getTime() + 8 * 60 * 60 * 1000);
-		return gmt8Date
+		const gmt7Date = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+		return gmt7Date
 			.toISOString()
 			.replace('T', ' ')
 			.replace(/\.\d+Z$/, '');
+	}
+
+	function handleSearch() {
+		fetchData(startDate, endDate, offset, limit, actorName, methodName);
+	}
+	function handleClear() {
+		startDate = '';
+		endDate = '';
+		actorName = '';
+		methodName = '';
+		fetchData('', '', offset, limit, '', '');
 	}
 
 	function nextPage() {
@@ -67,97 +100,85 @@
 
 	$: {
 		console.log(`Page changed: currentPage=${currentPage}, offset=${offset}, limit=${limit}`);
-		fetchData(offset, limit);
+		fetchData('', '', offset, limit);
 	}
 
 	onMount(() => {
 		console.log('Component mounted');
-		fetchData(offset, limit);
+		fetchData('', '', offset, limit);
 	});
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	function handleInputActor(event) {
+		// Get the current value of the input
+		let value = event.target.value;
 
-	let startDate = '';
-	let endDate = '';
+		// Remove any non-letter and non-space characters
+		value = value.replace(/[^A-Za-z\s]/g, '');
 
-	function formatDateInput(date: string | number | Date) {
-		return date ? new Date(date).toISOString() : '';
+		// Remove leading spaces
+		value = value.replace(/^\s+/, '');
+
+		// Update the input value and bound variable
+		actorName = value;
+		event.target.value = value;
 	}
+	function handleInputMethod(event) {
+		// Get the current value of the input
+		let value = event.target.value;
 
-	async function fetchDataSearch(start = '', end = '') {
-		loading = true;
-		try {
-			const formattedStartDate = formatDateInput(start);
-			const formattedEndDate = formatDateInput(end);
-			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
-			);
+		// Remove any non-letter and non-space characters
+		value = value.replace(/[^A-Za-z\s]/g, '');
 
-			if (!response.ok) {
-				const contentType = response.headers.get("content-type");
-				if (contentType && contentType.includes("application/json")) {
-					const errorData = await response.json();
-					throw new Error(`Error ${response.status}: ${errorData.message || response.statusText}`);
-				} else {
-					const errorText = await response.text();
-					throw new Error(`Error ${response.status}: ${errorText}`);
-				}
-			}
+		// Remove leading spaces
+		value = value.replace(/^\s+/, '');
 
-			const data = await response.json();
-
-			// Format the output dates to GMT+8
-			LogAdmin = (data.result || []).map((item: { Timestamp: string; }) => ({
-				...item,
-				Timestamp: formatDateToGMT8(item.Timestamp)
-			}));
-		} catch (error) {
-			console.error('Error fetching data:', error);
-			alert(`Failed to fetch data Please try again.`);
-		} finally {
-			loading = false;
-		}
-	}
-
-	function handleSearch() {
-		if (startDate && endDate) {
-			fetchDataSearch(startDate, endDate);
-		} else {
-			alert('Please select both start and end dates');
-		}
-	}
-
-	function handleClear() {
-		startDate = '';
-		endDate = '';
-		fetchDataSearch();
+		// Update the input value and bound variable
+		methodName = value;
+		event.target.value = value;
 	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
+<div class="w-full py-4 sm:px-4" style="font-family: Ubuntu, sans-serif">
 	<div
-		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
+		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4"
 	>
 		<input
 			type="date"
 			bind:value={startDate}
-			class="input input-bordered w-full max-w-xs bg-blue-50"
+			class="input input-bordered bg-blue-50 my-1 mx-2"
 			maxlength="100"
 		/>
-
 		<input
 			type="date"
 			bind:value={endDate}
-			class="input input-bordered w-full max-w-xs bg-blue-50"
+			class="input input-bordered bg-blue-50 my-1 mx-2"
 			maxlength="100"
 		/>
-		<div class="flex space-x-2">
+		<input
+			type="text"
+			placeholder="Method"
+			bind:value={methodName}
+			on:input={handleInputMethod}
+			class="input input-bordered bg-blue-50 my-1 mx-2"
+			maxlength="100"
+		/>
+		<input
+			type="text"
+			placeholder="Actor"
+			bind:value={actorName}
+			on:input={handleInputActor}
+			class="input input-bordered bg-blue-50 my-1 mx-2"
+			maxlength="250"
+		/>
+
+		<div class="flex flex-col sm:flex-row lg:col-span-2">
 			<button
 				on:click={handleSearch}
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm">Search</button
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2">Search</button
 			>
-			<button on:click={handleClear} class="btn btn-outline btn-primary text-xs sm:text-sm"
-				>Clear</button
+			<button
+				on:click={handleClear}
+				class="btn btn-outline btn-primary text-xs sm:text-sm my-1 mx-2">Clear</button
 			>
 		</div>
 	</div>
@@ -165,7 +186,7 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
-					<th class="p-1 sm:p-2 w-10">ID</th>
+					<th class="p-1 sm:p-2 w-10">No</th>
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden">Time Stamp</div>
 						<div class="lg:hidden sm:hidden block">Time</div>
@@ -190,7 +211,7 @@
 				{:else}
 					{#each LogAdmin as item}
 						<tr>
-							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
+							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Timestamp}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Action}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MethodName}</td>
@@ -207,24 +228,26 @@
 			<div class="flex">
 				<select
 					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-					bind:value={value}
-					on:change={prevPage}
-					placeholder=value
+					bind:value={limit}
+					on:change={handleSearch}
 				>
-					<option value="10">10</option>
-					<option value="15">15</option>
-					<option value="20">20</option>
-					<option value="25">25</option>
-					<option value="30">30</option>
+					<option value={5}>5</option>
+					<option value={10}>10</option>
+					<option value={15}>15</option>
+					<option value={20}>20</option>
+					<option value={25}>25</option>
+					<option value={30}>30</option>
 				</select>
 				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
 					on:click={prevPage}
+					on:click={handleSearch}
 					disabled={currentPage === 1}>Previous</button
 				>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
 					on:click={nextPage}
+					on:click={handleSearch}
 					disabled={currentPage === totalPages}>Next</button
 				>
 			</div>
