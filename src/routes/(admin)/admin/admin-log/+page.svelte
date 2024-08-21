@@ -113,7 +113,7 @@
 		fetchData('', '', offset, limit);
 	});
 
-	function handleInputActor(event) {
+	function handleInputActor(event: any) {
 		// Get the current value of the input
 		let value = event.target.value;
 
@@ -127,7 +127,7 @@
 		actorName = value;
 		event.target.value = value;
 	}
-	function handleInputMethod(event) {
+	function handleInputMethod(event: any) {
 		// Get the current value of the input
 		let value = event.target.value;
 
