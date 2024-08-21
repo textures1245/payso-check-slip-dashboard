@@ -111,6 +111,8 @@
 				...item,
 				Timestamp: formatDateToGMT7(item.Timestamp)
 			}));
+
+			totalItems = data.result.total || LogAdmin.length;
 		} catch (error) {
 			console.error('Error fetching data:', error);
 			alert(`Failed to fetch data Please try again.`);
