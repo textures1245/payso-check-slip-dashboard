@@ -1,8 +1,8 @@
 export type LogAdmin ={
-    Id : number;
+    index : number;
     Timestamp : string;
-    Action : string
-    MethodName : string
-    SqlData : string
-    ActorName : string
+    Action : string;
+    MethodName : string;
+    SqlData : string;
+    ActorName : string;
 }
