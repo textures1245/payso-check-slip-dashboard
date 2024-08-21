@@ -19,6 +19,28 @@ type TStat = {
 	PendingTotal: number;
 };
 
+export type MerchantOverviewStat = {
+	RegisterTotal: number;
+	Year: string;
+	Month: string;
+};
+
+export type TransactionOverviewStat = {
+	TotalCount: number;
+	ValidCount: number;
+	InvalidCount: number;
+	PendingCount: number;
+	Year: string;
+	Month: string;
+};
+
+export type MerchantTransactionMonthly = {
+	Merchant: MerchantOverviewStat;
+	Transaction: TransactionOverviewStat;
+	Month: string;
+	Year: string;
+};
+
 export type AdminDBStats = {
 	PackageStat: PkgStat;
 	MerchantStat: MerchantStat;
@@ -26,24 +48,24 @@ export type AdminDBStats = {
 };
 
 export type QuotaAndMerchantUsage = {
-    MerchantId: number;
-    MerchantRole: string;
-    MerchantName: string;
-    QuotaUsage: number;
-    QuotaSpending: number;
-    PackageId: number;
-    PackageName: string;
-    PackagePrice: string;
-    PackageQuotaLimit: number;
+	MerchantId: number;
+	MerchantRole: string;
+	MerchantName: string;
+	QuotaUsage: number;
+	QuotaSpending: number;
+	PackageId: number;
+	PackageName: string;
+	PackagePrice: string;
+	PackageQuotaLimit: number;
 };
 
 export type PackageUsage = {
-    PackageName: string;
-    UsedRatio: number;
-    CountUsed: number;
+	PackageName: string;
+	UsedRatio: number;
+	CountUsed: number;
 };
 
 export type TransactionCountRecord = {
-    RecordCount: number;
-    Date: string;
+	RecordCount: number;
+	Date: string;
 };

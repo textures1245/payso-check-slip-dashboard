@@ -3,6 +3,7 @@ import { API_ENDPOINT } from '$env/static/private';
 import axios, { type AxiosRequestConfig } from 'axios';
 import type {
 	AdminDBStats,
+	MerchantTransactionMonthly,
 	PackageUsage,
 	QuotaAndMerchantUsage,
 	TransactionCountRecord
@@ -18,6 +19,10 @@ interface AdminDBController {
 		pkgId: number,
 		qOpt?: QueryOpt
 	) => Promise<DataResponse<QuotaAndMerchantUsage[]>>;
+	GetMonthlyOverviewStat: (
+		monthCountInterval: number,
+		year: string
+	) => Promise<DataResponse<MerchantTransactionMonthly[]>>;
 }
 
 export class AdminDBExternalAPI implements AdminDBController {
@@ -31,6 +36,24 @@ export class AdminDBExternalAPI implements AdminDBController {
 			this.endpoint = this.endpoint.slice(0, -1);
 		}
 	}
+	GetMonthlyOverviewStat = async (
+		monthCountInterval: number,
+		year: string
+	): Promise<DataResponse<MerchantTransactionMonthly[]>> => {
+		console.log(monthCountInterval, year);
+
+		const config: AxiosRequestConfig = {
+			method: 'GET',
+			url: `${this.endpoint}/admin-db/get-monthly-overview?month_count=${monthCountInterval}&year=${year}`,
+			headers: {
+				'Access-Control-Allow-Origin': this.endpoint,
+				'Content-Type': 'application/json'
+			}
+		};
+		return axios(config).then((response) => {
+			return response.data;
+		});
+	};
 	GetPackageUsageRatio = async (): Promise<DataResponse<PackageUsage[]>> => {
 		const config: AxiosRequestConfig = {
 			method: 'GET',

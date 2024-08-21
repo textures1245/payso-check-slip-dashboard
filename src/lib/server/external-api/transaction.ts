@@ -29,6 +29,7 @@ export class TransactionExternalAPI implements TransactionController {
 			}
 		};
 		return axios(config).then((response) => {
+			console.log(response.data)
 			return response.data;
 		});
 	};
