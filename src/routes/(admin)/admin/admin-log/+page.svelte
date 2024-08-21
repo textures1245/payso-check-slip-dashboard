@@ -5,12 +5,13 @@
 
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
-	let limit = 5;
+	let limit = 10;
 	let totalItems = 0;
 	let loading = false;
 	let currentPage = 1;
 
 	$: totalPages = Math.ceil(totalItems / limit);
+	
 
 	async function fetchData(currentOffset: number, currentLimit: number) {
 		loading = true;
@@ -83,13 +84,13 @@
 		return date ? new Date(date).toISOString() : '';
 	}
 
-	async function fetchDataSearch(start = '', end = '') {
+	async function fetchDataSearch(start = '', end = '',offset = 0 , limit = 10) {
 		loading = true;
 		try {
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}`
 			);
 
 			if (!response.ok) {
@@ -120,7 +121,7 @@
 
 	function handleSearch() {
 		if (startDate && endDate) {
-			fetchDataSearch(startDate, endDate);
+			fetchDataSearch(startDate, endDate,offset ,limit);
 		} else {
 			alert('Please select both start and end dates');
 		}

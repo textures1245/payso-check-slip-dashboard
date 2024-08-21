@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { UserData } from './+page.server.ts';
+	import type {PackageData} from './+page.server.ts'
 
 	let userData: UserData[] = [];
 	let searchInpage = '';
@@ -10,7 +11,10 @@
 	let filteredData: UserData[] = [];
 	let merchantname = '';
 	let selectionvalue = '';
-
+	let packageData : PackageData[] = []
+	
+	
+	
 	onMount(async () => {
 		await fetchData();
 	});
@@ -68,6 +72,34 @@
 			console.error('Error fetching data:', error);
 		}
 	}
+
+	async function fetchDataPkg() {
+		try {
+			const response = await fetch(
+				`http://127.0.0.1:4567/api/v1/merchant/packages`
+			);
+			if (!response.ok) {
+				throw new Error('Failed to fetch data');
+			}
+			const data = await response.json();
+			if (!Array.isArray(data.result)) {
+				throw new Error('Result is not an array');
+			}
+			
+			packageData = data.result.map((item: PackageData) => ({
+				Id: item.Id,
+				Name: item.Name,
+				Price: item.Price,
+				QuotaLimit: item.QuotaLimit,
+				Status: item.Status
+			}));
+			
+
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
+	}
+	fetchDataPkg()
 	function handleSearchClick() {
 		searchfetchData(searchInpage);
 	}
@@ -195,16 +227,16 @@
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
 					<th class="p-1 sm:p-2 w-10">ID</th>
-					<th class="p-1 sm:p-2 text-wrap">
+					<th class="p-1 sm:p-2 text-wrap text-left">
 						<div class="lg:block sm:block hidden">Merchant Id</div>
 						<div class="lg:hidden sm:hidden block">M.ID</div></th
 					>
-					<th class="p-1 sm:p-2 text-wrap"
+					<th class="p-1 sm:p-2 text-wrap text-left"
 						><div class="lg:block sm:block hidden">Merchant Name</div>
 						<div class="lg:hidden sm:hidden block">M.Name</div></th
 					>
-					<th class="p-1 sm:p-2">Package</th>
-					<th class="p-1 sm:p-2 text-wrap">
+					<th class="p-1 sm:p-2 text-left">Package</th>
+					<th class="p-1 sm:p-2 text-wrap text-right">
 						<div class="lg:block sm:block hidden">QuotaToUse</div>
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
@@ -216,10 +248,10 @@
 				{#each userData as item}
 					<tr>
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantId}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.PackageName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaUsage + item.BalanceQuotaLeft}</td
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantName}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.PackageName}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.QuotaUsage + item.BalanceQuotaLeft}</td
 						>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
@@ -295,11 +327,14 @@
 				</label>
 				<label class="label">
 					<span class="label-text text-black w-2/5">Package:</span>
+					
+						
 					<select class="select max-w-xs w-80 bg-white" bind:value={editingUser.PackageId}>
-						<option value={1}>Silver</option>
-						<option value={2}>Bronz</option>
-						<option value={3}>pkh1</option>
+						{#each packageData as pkgdata }
+						<option  value={pkgdata.Id}>{pkgdata.Name}</option>
+						{/each}
 					</select>
+					
 				</label>
 
 				<label class="label cursor-pointer bg-white flex">

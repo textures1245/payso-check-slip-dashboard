@@ -4,27 +4,48 @@
 
 	let packageData: PackageData[] = [];
 	let currentPage = 1;
+	let offset = 1
 	let limit = 10;
 	let editingPackage: PackageData ;
-	let newPackage: PackageData = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
+	let newPackage: PackageData = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' ,TotalCount: 0};
 	let packagename = '';
 	let searchInpage = '';
 	let filteredData: PackageData[] = [];
 	let alertMessage: string | null = null; // ตัวแปรสำหรับเก็บข้อความ alert
 	let alertType: 'success' | 'error' | null = null; // ตัวแปรสำหรับประเภท alert
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
-	let totalItems = 100;
-	let totalPages = Math.ceil(totalItems / limit);
-	
+	let totalItems = 0;
+
+	$: totalPages = Math.ceil(totalItems / limit);
+	console.log("total item",totalItems)
+
+	function nextPage() {
+		if (currentPage < totalPages) {
+			offset++;
+			currentPage++;
+		}
+	}
+
+	function prevPage() {
+		if (currentPage > 1) {
+			offset--;
+			currentPage--;
+		}
+	}
+
+	$: {
+		console.log(`Page changed: currentPage=${currentPage}, offset=${offset}, limit=${limit}`);
+		fetchData(offset, limit);
+	}
 
 	onMount(async () => {
-		await fetchData();
+		fetchData(offset, limit);
 	});
 
-	async function fetchData(offset = 0, limit = 10) {
+	async function fetchData(currentOffset: number, currentLimit: number) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/package/getpackage?offset=${offset}&limit=${limit}`
+				`http://127.0.0.1:4567/api/v1/package/getpackage?offset=${currentOffset}&limit=${currentLimit}`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -33,14 +54,17 @@
 			if (!Array.isArray(data.result)) {
 				throw new Error('Result is not an array');
 			}
+			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 			
 			packageData = data.result.map((item: PackageData) => ({
 				Id: item.Id,
 				Name: item.Name,
 				Price: item.Price,
 				QuotaLimit: item.QuotaLimit,
-				Status: item.Status
+				Status: item.Status,
+				TotalCount : item.TotalCount
 			}));
+			totalPages = Math.ceil(totalCount / currentLimit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
@@ -87,7 +111,7 @@
 		modal.showModal();
 	}
 	function showModalCreate() {
-		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
+		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE',TotalCount: 0 };
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
 		modal.showModal();
@@ -132,7 +156,7 @@
 				// @ts-ignore
 				createModal.close();
 			}
-			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' };
+			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE',TotalCount: 0 };
 		} catch (error) {
 			console.error('Error creating package:', error);
 			alertMessage =
@@ -208,18 +232,6 @@
 		}
 	}
 
-	function goToPreviousPage() {
-		if (currentPage > 1) {
-			currentPage -= 1;
-			fetchData((currentPage - 1) * limit, limit);
-		}
-	}
-
-	function goToNextPage() {
-		currentPage += 1;
-		fetchData((currentPage - 1) * limit, limit);
-	}
-	console.log(currentPage)
 
 	function validateDecimalInput(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -250,6 +262,10 @@
       input.value = value;  // อัปเดตค่าที่แก้ไขแล้ว (ถ้าไม่มีปัญหา)
     }
   }
+
+  console.log('Current Page:', currentPage);
+console.log('Offset:', offset);
+console.log('Limit:', limit);
 	
 	
 
@@ -350,19 +366,31 @@
 				{/each}
 			</tbody>
 		</table>
-		<div class="w-full flex justify-end mt-4">
-			<div class="join grid grid-cols-2 w-full sm:w-auto">
-				{#if currentPage > 1}
-					<button
-						class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-						on:click={goToPreviousPage}>Previous</button>
-				{/if}
-		
-				{#if currentPage < totalPages}
-					<button
-						class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-						on:click={goToNextPage}>Next</button>
-				{/if}
+		<div class="grid col-3 w-full justify-end sm:w-auto">
+			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
+			<div class="flex">
+				<select
+					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+					bind:value={limit}
+					on:change={prevPage}
+				>
+					<option value={5}>5</option>
+					<option value={10}>10</option>
+					<option value={15}>15</option>
+					<option value={20}>20</option>
+					<option value={25}>25</option>
+					<option value={30}>30</option>
+				</select>
+				<button
+					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					on:click={prevPage}
+					disabled={currentPage === 1}>Previous</button
+				>
+				<button
+					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					on:click={nextPage}
+					disabled={currentPage === totalPages}>Next</button
+				>
 			</div>
 		</div>
 	</div>
