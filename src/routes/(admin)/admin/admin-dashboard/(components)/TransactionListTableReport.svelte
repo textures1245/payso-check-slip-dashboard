@@ -12,7 +12,8 @@
 			<Table.Head>เลขรายการ</Table.Head>
 			<Table.Head>เลข MID</Table.Head>
 			<Table.Head>สถานะ</Table.Head>
-			<Table.Head>หมายเลยคิวอา</Table.Head>
+			<Table.Head>โค๊ดแบงค์</Table.Head>
+			<Table.Head>Transfer Bank Id</Table.Head>
 			<Table.Head class=" text-right">เวลาที่ถูกตรวจสอบ</Table.Head>
 		</Table.Row>
 	</Table.Header>
@@ -34,7 +35,8 @@
 						{t.Status}
 					</span>
 				</Table.Cell>
-				<Table.Cell>{t.QrCode}</Table.Cell>
+				<Table.Cell>{t.QrCode.slice(0, 3)}</Table.Cell>
+				<Table.Cell>{t.TransferRefId}</Table.Cell>
 				<Table.Cell class=" text-right"
 					>{t.VerifiedDate ? new Date(t.VerifiedDate).toLocaleDateString('en-EN') : '-'}
 				</Table.Cell>

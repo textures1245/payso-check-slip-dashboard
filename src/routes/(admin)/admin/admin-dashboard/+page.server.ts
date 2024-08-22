@@ -28,10 +28,17 @@ const ep = {
 export const load: PageServerLoad = async () => {
 	console.log('=- load admin-db data -=');
 
+	const date15DaysAgo = new Date();
+	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+
 	const defaultOpt = {
 		// GetTransactionDailyCount
 		quotaAndMerchantUsagePkgSelect: 1,
-		dateCountInterval: 15,
+
+		dailyTrans: {
+			startDate: date15DaysAgo.toISOString().split('T')[0],
+			endDate: new Date().toISOString().split('T')[0]
+		},
 
 		// GetMonthlyOverviewStat
 		monthCountInterval: 6,
@@ -94,13 +101,22 @@ export const load: PageServerLoad = async () => {
 			}
 		});
 		pkgUsageRatio = await ep.adminDb.GetPackageUsageRatio();
-		transactionDailyCount = await ep.adminDb.GetTransactionDailyCount(defaultOpt.dateCountInterval);
+		transactionDailyCount = await ep.adminDb.GetTransactionDailyCount(
+			defaultOpt.dailyTrans.startDate,
+			defaultOpt.dailyTrans.endDate
+		);
 		quotaAndMerchantUsage = await ep.adminDb.GetQuotaAndMerchantUsage(
-			defaultOpt.quotaAndMerchantUsagePkgSelect
+			defaultOpt.quotaAndMerchantUsagePkgSelect,
+			{
+				ft: {
+					order_field: 'QuotaUsage',
+					order_by: 'ASC'
+				}
+			}
 		);
 		const pkgs = await ep.package.GetPackages({
 			p: {
-				offset: 0,
+				offset: 1,
 				limit: 100
 			}
 		});
@@ -128,10 +144,10 @@ export const load: PageServerLoad = async () => {
 		console.error(`-= ErrorResult given from endpoint =-`);
 		console.error(
 			'ErrorContext:',
-			statData.status_code,
-			recentlyInvalidTransListReport.status_code,
-			merchantListReport.status_code,
-			topMerchantQuotaSpendListReport.status_code
+			statData.message,
+			recentlyInvalidTransListReport.message,
+			merchantListReport.message,
+			topMerchantQuotaSpendListReport.message
 		);
 		return fail(500, {
 			message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
@@ -177,7 +193,12 @@ export const actions: Actions = {
 		let updateQuotaAndMerchantUsage: DataResponse<QuotaAndMerchantUsage[]>;
 
 		try {
-			updateQuotaAndMerchantUsage = await ep.adminDb.GetQuotaAndMerchantUsage(+pkgIdSelected);
+			updateQuotaAndMerchantUsage = await ep.adminDb.GetQuotaAndMerchantUsage(+pkgIdSelected, {
+				ft: {
+					order_field: 'QuotaUsage',
+					order_by: 'ASC'
+				}
+			});
 		} catch (err) {
 			const axiosErr = err as AxiosError;
 			console.error(`-= Error while trying to send request to endpoint =-`);
@@ -189,7 +210,7 @@ export const actions: Actions = {
 
 		if (updateQuotaAndMerchantUsage.status_code != 200) {
 			console.error(`-= ErrorResult given from endpoint =-`);
-			console.error('ErrorContext:', updateQuotaAndMerchantUsage.status_code);
+			console.error('ErrorContext:', updateQuotaAndMerchantUsage.message);
 			return fail(500, {
 				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
 			});
@@ -199,6 +220,92 @@ export const actions: Actions = {
 
 		return {
 			updateQuotaAndMerchantUsage: updateQuotaAndMerchantUsage.result ?? [],
+			success: true
+		};
+	},
+
+	updateTransactionDailyCount: async ({ request }) => {
+		const { startDate, endDate } = Object.fromEntries(await request.formData()) as {
+			startDate: string;
+			endDate: string;
+		};
+
+		console.log('request ', startDate, endDate);
+
+		let updateTransactionDailyCount: DataResponse<TransactionCountRecord[]>;
+
+		try {
+			updateTransactionDailyCount = await ep.adminDb.GetTransactionDailyCount(startDate, endDate);
+		} catch (err) {
+			const axiosErr = err as AxiosError;
+			console.error(`-= Error while trying to send request to endpoint =-`);
+			console.error('ErrorStack:', axiosErr);
+			return fail(axiosErr.status || 500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		if (updateTransactionDailyCount.status_code != 200) {
+			console.error(`-= ErrorResult given from endpoint =-`);
+			console.error('ErrorContext:', updateTransactionDailyCount.message);
+			return fail(500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		return {
+			updateTransactionDailyCount: updateTransactionDailyCount.result ?? [],
+			success: true
+		};
+	},
+
+	updateMonthlyOverview: async ({ request }) => {
+		const { monthInterval, year } = Object.fromEntries(await request.formData()) as {
+			filterSelected: string;
+			monthInterval: string;
+			year: string;
+		};
+
+		console.log('request', monthInterval, year);
+
+		let updateMonthlyOverview: DataResponse<MerchantTransactionMonthly[]>;
+
+		if (
+			isNaN(Number(monthInterval)) &&
+			!Number.isInteger(Number(monthInterval) && +monthInterval < 0)
+		) {
+			console.error(
+				`-= Error while trying to parse minFreq =- \n  expected non-negative integer number but got ${monthInterval}`
+			);
+			return fail(401, {
+				message:
+					'เกิดข้อผิดพลาดระหว่างการส่งข้อมูลจากหน้าบ้าน ไม่สามารถดึงรายการข้อมูลได้ โปรดลองอีกครั้ง '
+			});
+		}
+
+		try {
+			updateMonthlyOverview = await ep.adminDb.GetMonthlyOverviewStat(+monthInterval, year);
+		} catch (err) {
+			const axiosErr = err as AxiosError;
+			console.error(`-= Error while trying to send request to endpoint =-`);
+			console.error('ErrorStack:', axiosErr);
+			return fail(axiosErr.status || 500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		if (updateMonthlyOverview.status_code != 200) {
+			console.error(`-= ErrorResult given from endpoint =-`);
+			console.error('ErrorContext:', updateMonthlyOverview.status_code);
+			return fail(500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		console.log(updateMonthlyOverview);
+
+		return {
+			updateMonthlyOverview: updateMonthlyOverview.result ?? [],
 			success: true
 		};
 	}

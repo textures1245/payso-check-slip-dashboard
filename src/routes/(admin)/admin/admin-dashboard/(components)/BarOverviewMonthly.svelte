@@ -21,14 +21,26 @@
 		MerchantTransactionMonthly,
 		TransactionCountRecord
 	} from '$lib/utils/external-api-type/adminDashboard';
+	import { enhance } from '$app/forms';
+	import Swal from 'sweetalert2';
 
 	export let conf: GCanvasConfig = {
 		height: 200
 	};
 
 	export let pData: MerchantTransactionMonthly[];
+	let form: HTMLFormElement;
+	let chart: ChartJS;
 
-	let dataset: ChartData;
+	let opt = {
+		ALL: 'ทั้งหมด',
+		NEW_REGISTER: 'ลูกค้าใหม่',
+		TRANSACTION_COUNT: 'จำนวนสลิปที่ตรวจสอบ',
+		VALID_TRANSACTION_COUNT: 'สลิปถูกต้อง',
+		INVALID_TRANSACTION_COUNT: 'สลิปถูกปฏิเสธ',
+		PENDING_TRANSACTION_COUNT: 'สลิปที่ดำเนินการ'
+	};
+	let optSelected: keyof typeof opt = 'ALL';
 
 	ChartJS.register(Title, Tooltip, Legend, BarElement, LinearScale, CategoryScale, ChartDataLabels);
 
@@ -125,7 +137,7 @@
 				{
 					label: 'สลิปที่ถูกต้อง',
 					data: validTransTotal,
-					backgroundColor: "rgba(65, 176, 110, 0.6)",
+					backgroundColor: 'rgba(65, 176, 110, 0.6)',
 					borderWidth: 2,
 					borderColor: 'rgb(65, 176, 110)',
 					stack: 'Stack 1'
@@ -151,52 +163,128 @@
 		return dataset;
 	}
 
-	dataset = updateDataset(pData);
+	function onFilterDataset(dat: ChartData, filterBy: keyof typeof opt): ChartData {
+		switch (filterBy) {
+			case 'ALL':
+				return dat;
+			case 'INVALID_TRANSACTION_COUNT':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'สลิปที่ไม่ถูกต้อง')
+				};
+			case 'NEW_REGISTER':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'ลูกค้าใหม่')
+				};
+
+			case 'PENDING_TRANSACTION_COUNT':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'สลิปที่ดำเนินการ')
+				};
+
+			case 'TRANSACTION_COUNT':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'จำนวนสลิปที่ตรวจสอบ')
+				};
+			case 'VALID_TRANSACTION_COUNT':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'สลิปที่ถูกต้อง')
+				};
+		}
+	}
+
+	let defaultDataset = updateDataset(pData);
+	$: dataset = onFilterDataset(defaultDataset, optSelected);
 </script>
 
-<Bar
-	data={dataset}
-	height={conf.height}
-	options={{
-		maintainAspectRatio: false,
-		responsive: true,
-		plugins: {
-			datalabels: {
-				color: 'white',
-				display: function (context) {
-					return context.dataset.data[context.dataIndex] > 0;
-				},
-				font: {
-					weight: 'bold'
-				},
-				formatter: Math.round
-			}
-		},
-		aspectRatio: 5 / 3,
-		layout: {
-			padding: {
-				top: 24,
-				right: 16,
-				bottom: 0,
-				left: 8
-			}
-		},
-		elements: {
-			line: {
-				fill: false
+<div class="relative h-80">
+	<div class="form-control items-center">
+		<form
+			bind:this={form}
+			method="POST"
+			action="?/updateQuotaAndMerchantUsage"
+			use:enhance={() => {
+				return async ({ result }) => {
+					if (result.type === 'failure') {
+						Swal.fire(
+							'เกิดข้อผิดพลาด',
+							result.data?.message || 'เกิดข้อผิดพลาดในการทำรายการ',
+							'error'
+						);
+					}
+
+					if (result.type === 'success') {
+						// @ts-ignore
+						dataset = updateDataset(result.data.updateQuotaAndMerchantUsage);
+						chart.update();
+					}
+				};
+			}}
+		>
+			<select
+				bind:value={optSelected}
+				on:change={(v) => {
+					dataset = onFilterDataset(defaultDataset, optSelected);
+					chart.update();
+				}}
+				name="pkgIdSelected"
+				class="select select-xs select-bordered w-full max-w-xs"
+			>
+				{#each Object.keys(opt) as optKey}
+					<option value={optKey} selected={optKey === optSelected}>{opt[optKey]}</option>
+				{/each}
+			</select>
+		</form>
+	</div>
+	<Bar
+		bind:chart
+		data={dataset}
+		height={conf.height}
+		options={{
+			maintainAspectRatio: false,
+			responsive: true,
+			plugins: {
+				datalabels: {
+					color: 'white',
+					display: function (context) {
+						return context.dataset.data[context.dataIndex] > 0;
+					},
+					font: {
+						weight: 'bold'
+					},
+					formatter: Math.round
+				}
 			},
-			point: {
-				hoverRadius: 7,
-				radius: 5
-			}
-		},
-		scales: {
-			x: {
-				stacked: true
+			aspectRatio: 5 / 3,
+			layout: {
+				padding: {
+					top: 24,
+					right: 16,
+					bottom: 0,
+					left: 8
+				}
 			},
-			y: {
-				stacked: true
+			elements: {
+				line: {
+					fill: false
+				},
+				point: {
+					hoverRadius: 7,
+					radius: 5
+				}
+			},
+			scales: {
+				x: {
+					stacked: true
+				},
+				y: {
+					stacked: true
+				}
 			}
-		}
-	}}
-/>
+		}}
+	/>
+</div>

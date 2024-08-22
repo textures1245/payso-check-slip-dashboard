@@ -24,9 +24,9 @@
 	ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, ChartDataLabels);
 
 	function getRandomColor() {
-		const r = Math.floor(Math.random() * 36);
-		const g = Math.floor(Math.random() * 99);
-		const b = Math.floor(Math.random() * 225);
+		const r = Math.floor(Math.random() * 200);
+		const g = Math.floor(Math.random() * 200);
+		const b = Math.floor(Math.random() * 200);
 		return { r, g, b };
 	}
 
@@ -46,7 +46,7 @@
 			const { r, g, b } = getRandomColor();
 
 			const intensity = Math.floor((CountUsed / maxCountUsed) * 255) + 80;
-			const color = `rgba(${baseColor.r}, ${baseColor.g}, ${baseColor.b}, ${intensity / 255}`;
+			const color = `rgba(${r}, ${g}, ${b}, ${intensity / 255}`;
 			backgroundColor.push(color);
 		});
 		return {

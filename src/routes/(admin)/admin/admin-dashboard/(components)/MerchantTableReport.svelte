@@ -12,7 +12,10 @@
 			<Table.Head>หมายเลข</Table.Head>
 			<Table.Head>ชื่อ</Table.Head>
 			<Table.Head>อีเมล์</Table.Head>
+			<Table.Head>ประเภทลูกค้า</Table.Head>
 			<Table.Head>ชื่อแพ็คเก็จ</Table.Head>
+			<Table.Head>โค้วต้าที่ใช้ไป</Table.Head>
+			<Table.Head>Bill Date</Table.Head>
 			<Table.Head class="text-right">วันที่สมัคร</Table.Head>
 		</Table.Row>
 	</Table.Header>
@@ -24,7 +27,10 @@
 				<Table.Cell>{m.Id}</Table.Cell>
 				<Table.Cell>{m.MerchantName}</Table.Cell>
 				<Table.Cell>{m.Email}</Table.Cell>
+				<Table.Cell>{m.MerchantRole}</Table.Cell>
 				<Table.Cell>{m.PackageName}</Table.Cell>
+				<Table.Cell>{m.QuotaSpending}</Table.Cell>
+				<Table.Cell>{m.BillDate}</Table.Cell>
 				<Table.Cell class="text-right">
 					{m.RegisterDate ? new Date(m.RegisterDate).toLocaleDateString('en-EN') : '-'}
 				</Table.Cell>
