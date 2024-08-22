@@ -21,7 +21,7 @@
 	} = {
 		admin: [
 			{
-				title: 'รายชื่อแอดมิน',
+				title: 'รายชื่อผู้ใช้',
 				link: '/admin/admin-list',
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
@@ -31,7 +31,7 @@
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
 			{
-				title: 'แอดมินแพ็คเก็จ',
+				title: 'จัดการแพ็คเก็จ',
 				link: '/admin/admin-manage-package',
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
@@ -40,11 +40,7 @@
 				link: '/admin/admin-log',
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
-			{
-				title: 'หน้าจัดการ',
-				link: '/admin/admin-update',
-				icon: 'material-symbols-light:admin-panel-settings-rounded',
-			}
+			
 		]
 	};
 </script>

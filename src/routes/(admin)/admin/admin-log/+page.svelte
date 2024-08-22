@@ -89,6 +89,7 @@
 			offset++;
 			currentPage++;
 		}
+		handleSearch();
 	}
 
 	function prevPage() {
@@ -96,11 +97,15 @@
 			offset--;
 			currentPage--;
 		}
+		handleSearch();
 	}
 
-	$: {
-		console.log(`Page changed: currentPage=${currentPage}, offset=${offset}, limit=${limit}`);
-		fetchData('', '', offset, limit);
+	function firstPage() {
+		if (currentPage > 1) {
+			offset = 1;
+			currentPage = 1;
+		}
+		handleSearch();
 	}
 
 	onMount(() => {
@@ -108,7 +113,7 @@
 		fetchData('', '', offset, limit);
 	});
 
-	function handleInputActor(event) {
+	function handleInputActor(event: any) {
 		// Get the current value of the input
 		let value = event.target.value;
 
@@ -122,7 +127,7 @@
 		actorName = value;
 		event.target.value = value;
 	}
-	function handleInputMethod(event) {
+	function handleInputMethod(event: any) {
 		// Get the current value of the input
 		let value = event.target.value;
 
@@ -173,7 +178,7 @@
 
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
 			<button
-				on:click={handleSearch}
+				on:click={firstPage}
 				class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2">Search</button
 			>
 			<button
@@ -193,13 +198,13 @@
 					</th>
 					<th class="p-1 sm:p-2">Action</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">Method Name</div>
-						<div class="lg:hidden sm:hidden block">Method</div>
+						<div class="lg:block sm:block hidden text-left">Method Name</div>
+						<div class="lg:hidden sm:hidden block text-left">Method</div>
 					</th>
-					<th class="p-1 sm:p-2">Sql Data</th>
+					<th class="p-1 sm:p-2 text-left">Sql Data</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">Actor Name</div>
-						<div class="lg:hidden sm:hidden block">Name</div>
+						<div class="lg:block sm:block hidden text-left">Actor Name</div>
+						<div class="lg:hidden sm:hidden block text-left">Name</div>
 					</th>
 				</tr>
 			</thead>
@@ -214,9 +219,9 @@
 							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Timestamp}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Action}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MethodName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.SqlData}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.ActorName}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MethodName}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.SqlData}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.ActorName}</td>
 						</tr>
 					{/each}
 				{/if}
@@ -241,13 +246,11 @@
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
 					on:click={prevPage}
-					on:click={handleSearch}
 					disabled={currentPage === 1}>Previous</button
 				>
 				<button
 					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
 					on:click={nextPage}
-					on:click={handleSearch}
 					disabled={currentPage === totalPages}>Next</button
 				>
 			</div>
