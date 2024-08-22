@@ -3,9 +3,37 @@ export type Pagination = {
 	limit: number;
 };
 
+type RangeField =
+	| 'Id'
+	| 'CreatedAt'
+	| 'UpdatedAt'
+	// Transaction
+	| 'VerifiedDate'
+	// Merchant
+	| 'QuotaSpending'
+	| 'RegisterDate'
+	| 'BillDate'
+	// Log
+	| 'Timestamp';
+
+type OrderField =
+	| 'Id'
+	| 'CreatedAt'
+	| 'UpdatedAt'
+	| 'VerifiedDate'
+	| 'QuotaSpending'
+	| 'RegisterDate'
+	| 'QuotaUsage'
+	| 'BillDate';
+
 export type Filter = {
 	order_by: 'DESC' | 'ASC';
-	order_field: 'Id' | 'CreatedAt' | 'UpdatedAt' | 'VerifiedDate' | 'QuotaSpending' | 'RegisterDate';
+	order_field: OrderField;
+	range?: {
+		range_field: RangeField;
+		start_date: string;
+		end_date: string;
+	};
 };
 
 export type QueryOpt = {
@@ -28,6 +56,9 @@ export function getQueryFilterParams(q?: QueryOpt, prefix?: boolean): string {
 		}
 		if (q.ft) {
 			query += `&order_by=${q.ft.order_by}&order_field=${q.ft.order_field}`;
+			if (q.ft.range) {
+				query += `&range_field=${q.ft.range.range_field}&start_date=${q.ft.range.start_date}&end_Date=${q.ft.range.end_date}`;
+			}
 		}
 	}
 

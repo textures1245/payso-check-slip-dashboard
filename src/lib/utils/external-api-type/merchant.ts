@@ -11,8 +11,8 @@ export type MerchantPKG = {
 	BillDate: string;
 	BalanceQuotaLeft: number;
 	QuotaSpending: number;
-	PackageId: number;
+	PackageId?: number;
 	PackageName: string;
-	QuotaLimit: number;
+	QuotaLimit?: number;
 	TotalCount: number;
 };

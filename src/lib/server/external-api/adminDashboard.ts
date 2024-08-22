@@ -13,7 +13,8 @@ interface AdminDBController {
 	GetStats: () => Promise<DataResponse<AdminDBStats>>;
 	GetPackageUsageRatio: () => Promise<DataResponse<PackageUsage[]>>;
 	GetTransactionDailyCount: (
-		dateCountInterval: number
+		startDate: string,
+		endDate: string
 	) => Promise<DataResponse<TransactionCountRecord[]>>;
 	GetQuotaAndMerchantUsage: (
 		pkgId: number,
@@ -68,11 +69,12 @@ export class AdminDBExternalAPI implements AdminDBController {
 		});
 	};
 	GetTransactionDailyCount = async (
-		dateCountInterval: number
+		startDate: string,
+		endDate: string
 	): Promise<DataResponse<TransactionCountRecord[]>> => {
 		const config: AxiosRequestConfig = {
 			method: 'GET',
-			url: `${this.endpoint}/admin-db/get-transaction-daily-records?date_num_count_interval=${dateCountInterval}`,
+			url: `${this.endpoint}/admin-db/get-transaction-daily-records?start_date=${startDate}&end_date=${endDate}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json'
