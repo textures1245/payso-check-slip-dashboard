@@ -112,7 +112,7 @@
 /** @type {CookiesConfig} */
 export const cookiesConfig = {
 	path: '/',
-	httpOnly: true,
+	httpOnly: false,
 	sameSite: 'strict',
 	secure: process.env.NODE_ENV === 'production',
 	maxAge: 60 * 60 * 24 * 7 // 1 week
@@ -129,6 +129,7 @@ export const cookiesConfig = {
  * @returns {{ [J in K]: TypeMap[J] }}
  * @throws {Error}
  */
+
 export function CookiesJsonParser(cookies, ...cKeys) {
 	if (cKeys.length < 1 || !cookies) {
 		throw new Error('No cookies or json provided');
@@ -146,3 +147,5 @@ export function CookiesJsonParser(cookies, ...cKeys) {
 
 	return /** @type {{ [J in K]: TypeMap[J] }} */ (dict);
 }
+
+	

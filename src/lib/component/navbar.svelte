@@ -19,7 +19,7 @@
 	}
 </script>
 
-<nav class="bg-card">
+<nav class="bg-card bg-blue-800" >
 	<div class="mx-auto max-w-7xl px-2">
 		<div class="relative flex h-10 items-center justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -73,10 +73,10 @@
 				<div class="flex flex-shrink-0 items-center">
 					<img class="h-8 w-auto" src={logo} alt="Your Company" />
 				</div>
-				<div class="hidden gap-6 items-center sm:ml-6 sm:flex text-card-foreground">
+				<div class="hidden gap-6 items-center sm:ml-6 sm:flex text-card-foreground text-white">
 					{#each navItems as item}
 						<a
-							class="text-xs md:text-sm font-medium transition-colors hover:text-primary"
+							class="text-xs md:text-sm font-medium transition-colors hover:text-black"
 							href={item.link}>{item.title}</a
 						>
 					{/each}
@@ -134,10 +134,10 @@
 	{#if isMenuOpen}
 		<div class="sm:hidden" id="mobile-menu">
 			<div class="space-y-1 px-2 pb-3 pt-2">
-				<ul class="text-amber-500">
+				<ul class=" text-white">
 					{#each navItems as item}
 						<li>
-							<a href={item.link}>{item.title}</a>
+							<a  href={item.link}>{item.title}</a>
 						</li>
 					{/each}
 				</ul>
@@ -145,3 +145,9 @@
 		</div>
 	{/if}
 </nav>
+
+
+<style>
+
+
+</style>

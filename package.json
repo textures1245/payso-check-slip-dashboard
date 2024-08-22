@@ -44,6 +44,7 @@
 		"bits-ui": "^0.21.12",
 		"chart.js": "^4.4.3",
 		"clsx": "^2.1.1",
+		"cookie": "^0.6.0",
 		"embla-carousel-svelte": "^8.1.6",
 		"firebase": "^10.12.4",
 		"lucide-svelte": "^0.407.0",

@@ -1,25 +1,21 @@
-/** @type {import('./$types').Actions} */
-export const actions = {
+// /** @type {import('./$types').Actions} */
+// export const actions = {
 
-	UpdateLine: async ({ request}) => {
-		const { uid, id } = Object.fromEntries(await request.formData());
+// 	Chartdata: async ({ request}) => {
+// 		const formData = await request.formData();
+//     const email = formData.get('email');
+// 		console.log(email)
+//     // ทำ POST request ไปยัง API endpoint จริง
+//     	const response = await fetch('https://your-api-endpoint.com/api/checkslipmerchant', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
+//         },
+//         body: JSON.stringify({ email })
+//     });
 
-		console.log("email : ",uid," name :",id)
-		console.log('checking update line');
-		// Append key-value pairs to the FormData object
-        let config = {
-			method: 'POST', //การทำงาน get post update delete
-			headers: {
-                'Content-Type': 'application/json'
-            },
-			body: JSON.stringify({
-                LineUserId: uid, // ใช้ชื่อจากข้อมูลฟอร์ม
-                MerchantId: id
-            })
-		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/updateUid`, config);
-        console.log(result)
 
-	},
+// 	},
     
-};
+// };

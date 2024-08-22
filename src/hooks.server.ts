@@ -1,8 +1,8 @@
-// import { CookiesJsonParser } from '$lib/cookies';
-import { redirect } from '@sveltejs/kit';
 
+import { redirect } from '@sveltejs/kit';
 export const handle = async ({ resolve, event }) => {
 	console.log('server hook');
+	
 	const adminPaths = [
 		'/admin/admin-list',
 		'/admin/admin-dashboard',

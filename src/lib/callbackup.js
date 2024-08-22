@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
 				document.getElementById('inputuid').value = profileData.userId;
                 document.getElementById('inputid').value = returnedState;
+				document.getElementById('inputname').value = profileData.displayName;
 				// @ts-ignore
 				document.getElementById('updateline').submit();
             }

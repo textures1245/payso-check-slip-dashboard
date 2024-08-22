@@ -8,16 +8,11 @@
 		{ id: 1, title: 'HOME',	 link: '/' },
 		{ id: 2, title: 'Dashboard', link: '/dashboard' },
 		{ id: 3, title: 'Package', link: '/package' },
-		{ id: 4, title: 'profile', link: '/profile' },
+		{ id: 4, title: 'Profile', link: '/profile' },
 	];
 
 
-	let role = 'admin';
-	if (role == 'admin') {
-		navItems = navItems.slice(0, 8);
-	} else {
-		navItems = navItems.slice(2);
-	}
+	
 </script>
 
 <div >

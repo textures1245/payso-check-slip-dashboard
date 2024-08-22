@@ -41,6 +41,9 @@ export const actions = {
                 method: 'POST', //การทำงาน get post update delete
                 headers: {
                     'Content-Type': 'application/json'
+                    // 'Actor-Id': 'your-actor-id',
+                    // 'Actor-Name': String(name),
+                    // 'Actor-Role': 'MERCHANT'
                 },
                 body: JSON.stringify({
                     MerchantName: name, // ใช้ชื่อจากข้อมูลฟอร์ม
@@ -132,6 +135,76 @@ export const actions = {
 			
 		}
 
+	},
+    signInPayso: async ({ request,cookies}) => {
+		const { username, password } = Object.fromEntries(await request.formData());
+
+		console.log("username : ",username," password :",password)
+		console.log('checking login ');
+		// Append key-value pairs to the FormData object
+
+        // เส้น login Payso
+		// let config = {
+		// 	method: 'POST', //การทำงาน get post update delete
+		// 	headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+		// 	body: JSON.stringify({
+        //         MerchantId: 155
+        //     })
+		// };
+		// var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/loginPayso`, config);
+		// const data = await result.json();
+
+        // const data = {
+        //     MerchantName: name,  // Use the name from the form data
+        //     MerchantRole: 'ACTIVE',  // Replace 'your_merchant_role_here' with the actual value
+        //     Status: 'NOT_PAYSO',  // Assuming status is 'true'
+        //     Email: email  // Use the email from the form data
+        // };
+        // const jsonString = JSON.stringify(data);
+
+		console.log('username:', username);
+		let config = {
+			method: 'POST', //การทำงาน get post update delete
+			headers: {
+                'Content-Type': 'application/json'
+            },
+			body: JSON.stringify({
+                MerchantId: 155
+            })
+		};
+		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/loginPayso`, config);
+		const data = await result.json();
+		console.log(data);
+        // if (data.message == 'Non Merchant') {
+        //     console.log("ใช้งาน แบบ ไม่มี Merchant")
+        //     let config = {
+        //         method: 'POST', //การทำงาน get post update delete
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //            MerchantName: username, // ใช้ชื่อจากข้อมูลฟอร์ม
+                // MerchantRole: 'ACTIVE', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
+                // Status: 'PAYSO', // สมมติว่าสถานะเป็น 'true'
+                // Email: "-",
+                // MerchaId: 155
+        //         })
+        //     };
+        //     var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/merchant/create`, config);
+        //     const datacreate = await resultcreate.json();
+        //     cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
+        //     console.log(datacreate)
+        //     return {
+        //         data:datacreate.result[0]
+        //     }
+		// } else {
+
+		//   return{data : data}
+			
+		// }
+		
 	},
     
 

@@ -16,9 +16,12 @@
 
 	export let pkg: PackageCardProp, maxIndex: number ,index:number;
 	
-	function sendData(param1: string) {
-		console.log(param1); // Replace with your actual URL
-		sessionStorage.setItem('package', param1);
+	function sendData(packagePrice: any,packageName:string,packageId:any) {
+		// console.log(param1); // Replace with your actual URL
+		sessionStorage.setItem('packageprice', packagePrice);
+		sessionStorage.setItem('packagename', packageName);
+		sessionStorage.setItem('packageId', packageId);
+		window.location.assign("/payment")
 	}
 
 	const colors = [
@@ -43,8 +46,7 @@ function getRandomColor() {
 
 
 let randomColor = getRandomColor();
-console.log("color",randomColor);
-console.log("pkg",maxIndex );
+
 
 </script>
 
@@ -67,39 +69,39 @@ console.log("pkg",maxIndex );
   </div> -->
   
   
-<Card.Root class="relative w-100 rounded-xl overflow-hidden text-center " style="height:100%">
+<Card.Root class="relative w-100 rounded-xl overflow-hidden text-center  shadow-none " style="height:100%">
 	{#if pkg.Name == 'Silver'}
-	<Card.Header class={'rounded-t-xl relative overflow-hidden bg-gradient-to-r from-zinc-500 via-zinc-100 to-zinc-400'}>
+	<Card.Header class={'rounded-t-xl relative overflow-hidden bg-gradient-to-r from-zinc-500 via-zinc-100 to-zinc-400'} style="height:100px">
 		
 		<div class="flex justify-center">
 			<div class="text-3xl font-bold uppercase">{pkg.Name}</div>
 		</div>
 	</Card.Header>
 	{:else if pkg.Name == 'Bronz'}
-	<Card.Header class={'rounded-t-xl relative overflow-hidden bg-gradient-to-r from-amber-800 via-amber-400 to-amber-600' }>
+	<Card.Header class={'rounded-t-xl relative overflow-hidden bg-gradient-to-r from-amber-800 via-amber-400 to-amber-600' } style="height:100px">
 		
 		<div class="flex justify-center">
 			<div class="text-3xl font-bold uppercase">{pkg.Name}</div>
 		</div>
 	</Card.Header>
 	{:else if pkg.Name == 'Gold'}
-	<Card.Header class={'rounded-t-xl relative overflow-hidden bg-gradient-to-r from-yellow-600 via-yellow-200 to-yellow-500' }>
+	<Card.Header class={'rounded-t-xl relative overflow-hidden bg-gradient-to-r from-yellow-600 via-yellow-200 to-yellow-500' } style="height:100px">
 		
 		<div class="flex justify-center">
 			<div class="text-3xl font-bold uppercase">{pkg.Name}</div>
 		</div>
 	</Card.Header>
 	{:else}
-	<Card.Header class={'rounded-t-xl relative overflow-hidden ' + randomColor}>
+	<Card.Header class={'rounded-t-xl relative overflow-hidden ' + randomColor} style="height:100px">
 		
 		<div class="flex justify-center">
-			<div class="text-3xl font-bold uppercase">{pkg.Name}</div>
+			<div class="text-3xl font-bold uppercase w-72 truncate">{pkg.Name}</div>
 		</div>
 	</Card.Header>
 	{/if}
 	<Card.Content class="px-4 py-2 z-0">
 		<div class="gap-1 text-3xl text-center py-4">
-			<p class="font-medium leading-none text-6xl">{pkg.Price}</p>
+			<p class="font-medium leading-none text-6xl" >{pkg.Price.toFixed(2)}</p>
 			<p class="text-sm">THB/month</p>
 		</div>
 		<div class="gap-1 text-3xl text-center py-4">
@@ -110,6 +112,7 @@ console.log("pkg",maxIndex );
 		<small class="justify-center text-md items-center py-4">
 			This package can send request {pkg.QuotaLimit} times/month
 		</small>
+
 	</Card.Content>
 
 	<Card.Footer>
@@ -118,7 +121,7 @@ console.log("pkg",maxIndex );
 			<Check class="me-2 h-4 w-4" /> PURCHASE
 		</Button>
 		{:else}
-		<Button size="lg" variant="outline" class="w-full" on:click={() => sendData(pkg.Name)}>
+		<Button size="lg" variant="outline" class="w-full" on:click={() => sendData(pkg.Price.toFixed(2),pkg.Name,pkg.Id)}>
 			<Check class="me-2 h-4 w-4" /> PURCHASE
 		</Button>
 	{/if}
