@@ -4,5 +4,6 @@ export type PackageData = {
 	Name : string;      
 	Price : number;     
 	QuotaLimit : number;  
-	Status : string;    
+	Status : string; 
+	TotalCount : number;   
 }

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { UserData } from './+page.server.ts';
+	import type {PackageData} from './+page.server.ts'
 
 	let userData: UserData[] = [];
 	let searchInpage = '';
@@ -10,15 +11,18 @@
 	let filteredData: UserData[] = [];
 	let merchantname = '';
 	let selectionvalue = '';
-
+	let packageData : PackageData[] = []
+	
+	
+	
 	onMount(async () => {
 		await fetchData();
 	});
 
-	async function fetchData(offset = 0, limit = 10) {
+	async function fetchData(offset = 1, limit = 10) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/merchant/get-merchants-with-pkg?Offset=${offset}&Limit=${limit}`
+				`http://127.0.0.1:4567/api/v1/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -64,10 +68,39 @@
 				PackageName: item.PackageName,
 				Status: item.Status
 			}));
+			console.log("user data", userData)
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	}
+
+	async function fetchDataPkg() {
+		try {
+			const response = await fetch(
+				`http://127.0.0.1:4567/api/v1/merchant/packages`
+			);
+			if (!response.ok) {
+				throw new Error('Failed to fetch data');
+			}
+			const data = await response.json();
+			if (!Array.isArray(data.result)) {
+				throw new Error('Result is not an array');
+			}
+			
+			packageData = data.result.map((item: PackageData) => ({
+				Id: item.Id,
+				Name: item.Name,
+				Price: item.Price,
+				QuotaLimit: item.QuotaLimit,
+				Status: item.Status
+			}));
+			
+
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
+	}
+	fetchDataPkg()
 	function handleSearchClick() {
 		searchfetchData(searchInpage);
 	}
@@ -86,6 +119,7 @@
 
 	function showModal(user: UserData) {
 		editingUser = user;
+		console.log(typeof editingUser.Id);
 		const modal = document.getElementById('my_modal_1');
 		// @ts-ignore
 		modal.showModal();
@@ -95,27 +129,45 @@
 		if (!editingUser) return;
 
 		try {
-			const response = await fetch(`http://127.0.0.1:4567/api/update/merchant/${editingUser.Id}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(editingUser)
-			});
+			const updatePackageResponse = await fetch(
+				`http://127.0.0.1:4567/api/v1/merchant/updatepackage`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						PackageId: editingUser.PackageId,
+						MerchantId: editingUser.Id
+					})
+				}
+			);
 
-			console.log('update user = ', editingUser, typeof selectionvalue);
+			if (!updatePackageResponse.ok) {
+				throw new Error('Failed to update package');
+			}
 
-			if (!response.ok) {
-				throw new Error('Failed to update user');
+			const updateStatusResponse = await fetch(
+				`http://127.0.0.1:4567/api/v1/merchant/updatestatus/${editingUser.Id}`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ Status: editingUser.Status })
+				}
+			);
+
+			if (!updateStatusResponse.ok) {
+				throw new Error('Failed to update status');
 			}
 
 			const index = userData.findIndex((user) => user.Id === editingUser?.Id);
 			if (index !== -1) {
 				userData[index] = { ...editingUser };
-				userData = [...userData]; // Trigger Svelte reactivity
+				userData = [...userData];
 			}
 
-			// Close the modal
 			const modal = document.getElementById('my_modal_1');
 			// @ts-ignore
 			modal.close();
@@ -123,8 +175,10 @@
 		} catch (error) {
 			console.error('Error updating user:', error);
 		}
-		// location.reload();
+
+		location.reload();
 	}
+
 	$: isActive = editingUser?.Status === 'ACTIVE';
 
 	function toggleStatus() {
@@ -160,8 +214,9 @@
 			bind:value={searchInpage}
 		/>
 		<div class="flex space-x-2">
-			<button class="btn  bg-primary text-white btn-primary text-xs sm:text-sm" on:click={handleSearchClick}
-				>Search</button
+			<button
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
+				on:click={handleSearchClick}>Search</button
 			>
 			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
@@ -172,36 +227,38 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
-					<th class="p-1 sm:p-2">ID</th>
-					<th class="p-1 sm:p-2 text-wrap">
+					<th class="p-1 sm:p-2 w-10">ID</th>
+					<th class="p-1 sm:p-2 text-wrap text-left">
 						<div class="lg:block sm:block hidden">Merchant Id</div>
 						<div class="lg:hidden sm:hidden block">M.ID</div></th
 					>
-					<th class="p-1 sm:p-2 text-wrap"
+					<th class="p-1 sm:p-2 text-wrap text-left"
 						><div class="lg:block sm:block hidden">Merchant Name</div>
 						<div class="lg:hidden sm:hidden block">M.Name</div></th
 					>
-					<th class="p-1 sm:p-2">Package</th>
-					<th class="p-1 sm:p-2 text-wrap">
+					<th class="p-1 sm:p-2 text-left">Package</th>
+					<th class="p-1 sm:p-2 text-wrap text-right">
 						<div class="lg:block sm:block hidden">QuotaToUse</div>
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
 					<th class="p-1 sm:p-2">Status</th>
-					<th class="p-1 sm:p-2"></th>
+					<th class="p-1 w-20 sm:p-2"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
 				{#each userData as item}
 					<tr>
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantId}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.MerchantName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.PackageName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.QuotaUsage}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantName}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.PackageName}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.QuotaUsage + item.BalanceQuotaLeft}</td
+						>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
-									class="badge-status text-xs sm:text-sm {item.Status === 'ACTIVE'
+									class="badge-status lg:text-sm md:text-xs sm:text-xxs text-xs {item.Status ===
+									'ACTIVE'
 										? 'badge-success'
 										: 'badge-danger'}"
 								>
@@ -271,11 +328,14 @@
 				</label>
 				<label class="label">
 					<span class="label-text text-black w-2/5">Package:</span>
+					
+						
 					<select class="select max-w-xs w-80 bg-white" bind:value={editingUser.PackageId}>
-						<option value={1}>Silver</option>
-						<option value={2}>Bronz</option>
-						<option value={3}>pkh1</option>
+						{#each packageData as pkgdata }
+						<option  value={pkgdata.Id}>{pkgdata.Name}</option>
+						{/each}
 					</select>
+					
 				</label>
 
 				<label class="label cursor-pointer bg-white flex">
@@ -293,7 +353,8 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>Save</button>
+						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>Save</button
+						>
 					</form>
 				</div>
 			{/if}
@@ -318,5 +379,7 @@
 		}
 	}
 
-	@import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+	.text-xxs {
+		font-size: 0.625rem;
+	}
 </style>
