@@ -46,7 +46,7 @@
 </script>
 
 <div>
-	<Navbar />
+	<Navbar/>
 	<Separator />
 	<LayoutResizer {accounts} subLinks={subPaths} navCollapsedSize={3}>
 		<div class="py-4 bg-primary-foreground min-h-dvh">

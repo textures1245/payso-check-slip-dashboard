@@ -144,6 +144,8 @@
 </script>
 
 <div class="w-full py-4 sm:px-4" style="font-family: Ubuntu, sans-serif">
+	<span class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center">Log</span>
+
 	<div
 		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4"
 	>
@@ -201,7 +203,7 @@
 						<div class="lg:block sm:block hidden text-left">Method Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Method</div>
 					</th>
-					<th class="p-1 sm:p-2 text-left">Sql Data</th>
+					
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden text-left">Actor Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Name</div>
@@ -220,7 +222,6 @@
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Timestamp}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Action}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MethodName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.SqlData}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.ActorName}</td>
 						</tr>
 					{/each}

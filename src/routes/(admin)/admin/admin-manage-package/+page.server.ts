@@ -1,9 +1,9 @@
 
 export type PackageData = {
-    Id : number;    
+    Id? : number;    
 	Name : string;      
 	Price : number;     
-	QuotaLimit : number;  
+	QuotaLimit? : number;  
 	Status : string; 
 	TotalCount : number;   
 }

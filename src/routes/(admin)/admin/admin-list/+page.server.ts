@@ -1,13 +1,13 @@
 // +page.server.ts
 export type UserData = {
-    Id: number;
+    Id: string;
     MerchantId: string;
     MerchantName: string;
     PackageName: string;
-    QuotaUsage: number;
-    QuotaLimit: number;
-    PackageId: number;
-    BalanceQuotaLeft : number ;
+    QuotaUsage: string;
+    QuotaLimit: string;
+    PackageId: string;
+    BalanceQuotaLeft : string ;
     Status: string;
 
    

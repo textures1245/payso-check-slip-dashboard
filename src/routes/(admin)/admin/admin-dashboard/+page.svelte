@@ -16,6 +16,8 @@
 </script>
 
 <div class="container space-y-6 mx-auto">
+	<span class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center">Dashbord</span>
+
 	<div class="grid auto-rows-fr justify-center sm:grid-cols-2 xl:grid-cols-4 gap-4">
 		<div
 			class="overflow-auto stats stats-vertical justify-center flex flex-col p-4 gap-2 grid-cols-2 shadow"

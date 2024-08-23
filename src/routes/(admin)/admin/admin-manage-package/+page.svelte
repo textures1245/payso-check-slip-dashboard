@@ -4,10 +4,17 @@
 
 	let packageData: PackageData[] = [];
 	let currentPage = 1;
-	let offset = 1
+	let offset = 1;
 	let limit = 10;
-	let editingPackage: PackageData ;
-	let newPackage: PackageData = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE' ,TotalCount: 0};
+	let editingPackage: PackageData;
+	let newPackage: PackageData = {
+		Id: 0,
+		Name: '',
+		Price: 0,
+		QuotaLimit: 0,
+		Status: 'INACTIVE',
+		TotalCount: 0
+	};
 	let packagename = '';
 	let searchInpage = '';
 	let filteredData: PackageData[] = [];
@@ -17,13 +24,14 @@
 	let totalItems = 0;
 
 	$: totalPages = Math.ceil(totalItems / limit);
-	console.log("total item",totalItems)
+	console.log('total item', totalItems);
 
 	function nextPage() {
 		if (currentPage < totalPages) {
 			offset++;
 			currentPage++;
 		}
+		handleSearch();
 	}
 
 	function prevPage() {
@@ -31,71 +39,65 @@
 			offset--;
 			currentPage--;
 		}
+		handleSearch();
+	}
+	function firstPage() {
+		if (currentPage > 1) {
+			offset = 1;
+			currentPage = 1;
+		}
+		handleSearch();
 	}
 
-	$: {
-		console.log(`Page changed: currentPage=${currentPage}, offset=${offset}, limit=${limit}`);
-		fetchData(offset, limit);
+	function handleSearch() {
+		searchfetchData(searchInpage, offset, limit);
 	}
 
 	onMount(async () => {
-		fetchData(offset, limit);
+		searchfetchData(packagename, offset, limit);
 	});
 
-	async function fetchData(currentOffset: number, currentLimit: number) {
+	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/package/getpackage?offset=${currentOffset}&limit=${currentLimit}`
+				`http://127.0.0.1:4567/api/v1/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				}
 			);
+
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
+
 			const data = await response.json();
+
 			if (!Array.isArray(data.result)) {
 				throw new Error('Result is not an array');
 			}
+
 			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
-			
+
 			packageData = data.result.map((item: PackageData) => ({
 				Id: item.Id,
 				Name: item.Name,
 				Price: item.Price,
 				QuotaLimit: item.QuotaLimit,
 				Status: item.Status,
-				TotalCount : item.TotalCount
+				TotalCount: item.TotalCount
 			}));
+
 			totalPages = Math.ceil(totalCount / currentLimit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	}
 
-	async function searchfetchData(packagename: string) {
-		try {
-			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/package/search/getpackage?searchpackage=${packagename}`
-			);
-			if (!response.ok) {
-				throw new Error('Failed to fetch data');
-			}
-			const data = await response.json();
-			if (!Array.isArray(data.result)) {
-				throw new Error('Result is not an array');
-			}
-			packageData = data.result.map((item: PackageData) => ({
-				Id: item.Id,
-				Name: item.Name,
-				Price: item.Price,
-				QuotaLimit: item.QuotaLimit,
-				Status: item.Status
-			}));
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
-	}
-
 	function handleSearchClick() {
-		searchfetchData(searchInpage);
+		searchfetchData(searchInpage, offset, limit);
 	}
 
 	function clearSearch() {
@@ -111,7 +113,7 @@
 		modal.showModal();
 	}
 	function showModalCreate() {
-		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE',TotalCount: 0 };
+		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE', TotalCount: 0 };
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
 		modal.showModal();
@@ -129,11 +131,14 @@
 		}
 
 		try {
-			newPackage.Name = newPackage.Name.trim()
+			newPackage.Name = newPackage.Name.trim();
 			const response = await fetch(`http://127.0.0.1:4567/api/v1/package/create/packages`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'Actor-Id': '1',
+					'Actor-Name': 'test',
+					'Actor-Role': 'ADMIN'
 				},
 				body: JSON.stringify(newPackage)
 			});
@@ -156,7 +161,7 @@
 				// @ts-ignore
 				createModal.close();
 			}
-			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE',TotalCount: 0 };
+			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE', TotalCount: 0 };
 		} catch (error) {
 			console.error('Error creating package:', error);
 			alertMessage =
@@ -181,13 +186,16 @@
 		}
 
 		try {
-			editingPackage.Name = editingPackage.Name.trim()
+			editingPackage.Name = editingPackage.Name.trim();
 			const response = await fetch(
 				`http://127.0.0.1:4567/api/update/package/${editingPackage.Id}`,
 				{
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Actor-Id': '1',
+						'Actor-Name': 'test',
+						'Actor-Role': 'ADMIN'
 					},
 					body: JSON.stringify(editingPackage)
 				}
@@ -223,7 +231,6 @@
 			showAlertModal = true; // แสดง modal
 			location.reload();
 		}
-		
 	}
 
 	function toggleStatus() {
@@ -232,50 +239,43 @@
 		}
 	}
 
-
 	function validateDecimalInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
+		const input = event.target as HTMLInputElement;
+		const value = input.value;
 
-    // ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขทศนิยมที่ไม่เกิน 7 หลักและไม่มีค่าติดลบ
-    const regex = /^(?:\d{1,7}|\d{1,7}\.\d{0,2})?$/;
+		// ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขทศนิยมที่ไม่เกิน 7 หลักและไม่มีค่าติดลบ
+		const regex = /^(?:\d{1,7}|\d{1,7}\.\d{0,2})?$/;
 
-    // ตรวจสอบว่าไม่เริ่มต้นด้วยเครื่องหมายลบ
-    if (value.startsWith('-') || !regex.test(value)) {
-      input.value = '';
-    }
-  }
+		// ตรวจสอบว่าไม่เริ่มต้นด้วยเครื่องหมายลบ
+		if (value.startsWith('-') || !regex.test(value)) {
+			input.value = '';
+		}
+	}
 
-  function validateInput(event: Event) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value;
+	function validateInput(event: Event) {
+		const input = event.target as HTMLInputElement;
+		let value = input.value;
 
-    // ลบจุดทศนิยมออกจากค่า
-    value = value.replace(/\./g, '');
+		// ลบจุดทศนิยมออกจากค่า
+		value = value.replace(/\./g, '');
 
-    // ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขจำนวนเต็มที่ไม่เกิน 4 หลัก
-    const regex = /^[1-9]\d{0,3}$/;
+		// ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขจำนวนเต็มที่ไม่เกิน 4 หลัก
+		const regex = /^[1-9]\d{0,3}$/;
 
-    if (!regex.test(value)) {
-      input.value = '';
-    } else {
-      input.value = value;  // อัปเดตค่าที่แก้ไขแล้ว (ถ้าไม่มีปัญหา)
-    }
-  }
-
-  console.log('Current Page:', currentPage);
-console.log('Offset:', offset);
-console.log('Limit:', limit);
-	
-	
-
-	
-
-
-	
+		if (!regex.test(value)) {
+			input.value = '';
+		} else {
+			input.value = value; // อัปเดตค่าที่แก้ไขแล้ว (ถ้าไม่มีปัญหา)
+		}
+	}
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif;">
+	<span
+		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		>Package</span
+	>
+
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
@@ -288,9 +288,8 @@ console.log('Limit:', limit);
 			bind:value={searchInpage}
 		/>
 		<div class="flex justify-end space-x-2">
-			<button
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
-				on:click={handleSearchClick}>Search</button
+			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={firstPage}
+				>Search</button
 			>
 			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
@@ -311,8 +310,8 @@ console.log('Limit:', limit);
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
 					<th class="p-1 sm:p-2 w-16">ID</th>
-					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap  ">
-						<div class="lg:block sm:block hidden ">Package Name</div>
+					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap">
+						<div class="lg:block sm:block hidden">Package Name</div>
 						<div class="lg:hidden sm:hidden block">P.Name</div>
 					</th>
 					<th class="p-1 sm:p-2 text-right">Price</th>
@@ -327,10 +326,10 @@ console.log('Limit:', limit);
 			<tbody class="text-center">
 				{#each packageData as item}
 					<tr>
-						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
+						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id || '-'}</th>
 						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
 						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.QuotaLimit}</td>
+						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.QuotaLimit || '-'}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
@@ -366,13 +365,13 @@ console.log('Limit:', limit);
 				{/each}
 			</tbody>
 		</table>
-		<div class="grid col-3 w-full justify-end sm:w-auto">
+		<div class="grid col-2 w-full justify-end sm:w-auto">
 			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
 			<div class="flex">
 				<select
 					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
 					bind:value={limit}
-					on:change={prevPage}
+					on:change={firstPage}
 				>
 					<option value={5}>5</option>
 					<option value={10}>10</option>
@@ -382,7 +381,7 @@ console.log('Limit:', limit);
 					<option value={30}>30</option>
 				</select>
 				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
 					on:click={prevPage}
 					disabled={currentPage === 1}>Previous</button
 				>
@@ -430,7 +429,6 @@ console.log('Limit:', limit);
 						class="input input-bordered bg-white w-80"
 						maxlength="250"
 						bind:value={editingPackage.Name}
-						
 					/>
 				</label>
 
@@ -444,8 +442,6 @@ console.log('Limit:', limit);
 						class="input input-bordered bg-white w-80"
 						bind:value={editingPackage.Price}
 						on:input={validateDecimalInput}
-						
-						
 					/>
 				</label>
 				<label class="label">
@@ -458,7 +454,6 @@ console.log('Limit:', limit);
 						class="input input-bordered bg-white w-80"
 						bind:value={editingPackage.QuotaLimit}
 						on:input={validateInput}
-						
 					/>
 				</label>
 				<label class="label cursor-pointer bg-white flex">
@@ -520,7 +515,6 @@ console.log('Limit:', limit);
 					bind:value={newPackage.QuotaLimit}
 					min="1"
 					on:input={validateInput}
-
 				/>
 			</label>
 			<label class="label cursor-pointer bg-white flex">

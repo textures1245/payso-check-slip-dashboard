@@ -33,15 +33,15 @@
 			}
 			console.log(data);
 			userData = data.result.map((item: UserData) => ({
-				Id: item.Id,
-				MerchantId: item.MerchantId,
-				MerchantName: item.MerchantName,
-				QuotaUsage: item.QuotaUsage,
-				QuotaLimit: item.QuotaLimit,
-				PackageId: item.PackageId,
-				PackageName: item.PackageName,
-				BalanceQuotaLeft: item.BalanceQuotaLeft,
-				Status: item.Status
+				Id: parseInt(item.Id, 10),
+			MerchantId: parseInt(item.MerchantId, 10),
+			MerchantName: item.MerchantName,
+			QuotaUsage: parseInt(item.QuotaUsage, 10),
+			QuotaLimit: parseInt(item.QuotaLimit, 10),
+			PackageId: parseInt(item.PackageId, 10),
+			PackageName: item.PackageName,
+			BalanceQuotaLeft: parseInt(item.BalanceQuotaLeft, 10),
+			Status: item.Status
 			}));
 		} catch (error) {
 			console.error('Error fetching data:', error);
@@ -134,7 +134,11 @@
 				{
 					method: 'PUT',
 					headers: {
-						'Content-Type': 'application/json'
+						'Content-Type': 'application/json',
+						'Actor-Id': editingUser.Id,
+                    	'Actor-Name': editingUser.MerchantName,
+                    	'Actor-Role': 'ADMIN'
+						
 					},
 					body: JSON.stringify({
 						PackageId: editingUser.PackageId,
@@ -202,6 +206,7 @@
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
+	<span class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center">Merchant</span>
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
