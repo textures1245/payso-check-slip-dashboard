@@ -63,9 +63,18 @@ export type PackageUsage = {
 	PackageName: string;
 	UsedRatio: number;
 	CountUsed: number;
+	OrderAmount: number;	
 };
 
 export type TransactionCountRecord = {
 	RecordCount: number;
 	Date: string;
 };
+
+export type ReceiptStat = {
+    TotalCount: number;
+    TotalAmountFromPackage: number;
+    Month: string;
+    Year: string;
+};
+
