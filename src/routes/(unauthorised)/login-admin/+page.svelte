@@ -22,7 +22,7 @@
 		console.log("form admin : ",form)
 		if(form){
 			if(form.message != "Non Admin"){
-				window.location.assign("/admin")
+				window.location.assign("/admin/admin-dashboard")
 			}else{
 				alert("username และ  password ไม่ถูกต้อง")
 			}

@@ -9,7 +9,7 @@
 <script lang="ts">
 	import * as Tabs from '$lib/components/ui/tabs';
 
-	import logo from '$lib/image/paysologo.jpg';
+	import logo from '$lib/image/paysologo.png';
 
 	export let navItems: NavItem[] = [];
 	let isMenuOpen = false;
