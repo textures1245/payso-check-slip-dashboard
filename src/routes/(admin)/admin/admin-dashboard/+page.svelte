@@ -11,12 +11,68 @@
 	import MerchantTableReport from './(components)/MerchantTableReport.svelte';
 	import type { PageData } from './$types';
 	import BarOverviewMonthly from './(components)/BarOverviewMonthly.svelte';
+	import BarIncomeOverview from './(components)/BarIncomeOverview.svelte';
+	import DoughnutPackageOrderAmount from './(components)/DoughnutPackageOrderAmount.svelte';
 
 	export let data: PageData;
 </script>
 
 <div class="container space-y-6 mx-auto">
+	<span
+		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		><span class="drop-shadow-md">Dashboard</span></span
+	>
+
 	<div class="grid auto-rows-fr justify-center sm:grid-cols-2 xl:grid-cols-4 gap-4">
+		{#if data.receiptIncomeOverview}
+			{@const currentMonth = Math.max(...data.receiptIncomeOverview.map((item) => +item.Month))}
+			{@const currentIncome =
+				data.receiptIncomeOverview
+					.filter((d) => +d.Month == currentMonth)
+					.reduce((acc, curr) => acc + curr.TotalAmountFromPackage, 0) ?? 0}
+			{@const previousIncome =
+				data.receiptIncomeOverview
+					.filter((d) => +d.Month == currentMonth - 1)
+					.reduce((acc, curr) => acc + curr.TotalAmountFromPackage, 0) ?? 0}
+			<div
+				class="overflow-auto stats stats-vertical justify-center flex flex-col p-4 gap-2 grid-cols-2 col-span-full shadow"
+			>
+				<div class="text-center place-self-center">
+					<div class=" text-lg md:text-base text-secondary-foreground font-semibold">
+						รายได้เดือนนี้
+					</div>
+					<div class="stat-value text-primary">
+						{currentIncome} ฿
+					</div>
+				</div>
+				<div class="text-xs stat text-center sm:grid-cols-2 md:text-sm gap-1 grid">
+					<div class="">
+						<div class=" text-secondary-foreground font-semibold">รายได้เดือนก่อนหน้านั้น</div>
+						<div
+							
+							
+							class="text-center text-warning !text-xl font-semibold"
+						>
+							{previousIncome} ฿
+						</div>
+					</div>
+					<div class="">
+						<div class=" text-secondary-foreground font-semibold">
+							{currentIncome > previousIncome ? 'มากกว่าเดือนที่แล้ว' : 'น้อยกว่าเดือนที่แล้ว'}
+						</div>
+						<div
+							class:text-destructive={currentIncome < previousIncome}
+							class:text-success={currentIncome > previousIncome}
+							class="text-center !text-xl text-destructive font-semibold"
+						>
+							{#if previousIncome !== 0}
+								{(((currentIncome - previousIncome) / previousIncome) * 100).toFixed(2)}%
+							{/if}
+						</div>
+					</div>
+				</div>
+			</div>
+		{/if}
 		<div
 			class="overflow-auto stats stats-vertical justify-center flex flex-col p-4 gap-2 grid-cols-2 shadow"
 		>
@@ -104,7 +160,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="charts-container" class="text-center *:h-96 items-center gap-4 grid lg:grid-cols-2">
+	<div id="charts-container" class="text-center *:h-[26rem] items-center gap-4 grid lg:grid-cols-2">
 		<div class="card bg-base-100 col-span-full shadow-md p-4">
 			<h1 class="text-base xl:text-lg font-semibold">ยอดการใช้งานรายวัน</h1>
 			<div class="chart-container" id="line-chart-container">
@@ -112,6 +168,15 @@
 					defaultOpt={data.defaultOpt?.dailyTrans}
 					pData={data.transactionDailyCount ?? []}
 				></LineTransactionDaily>
+			</div>
+		</div>
+		<div class="card bg-base-100 col-span-full shadow-md p-4">
+			<h1 class="text-base xl:text-lg font-semibold">สถิติรายได้แบบรายเดือน (บาท)</h1>
+			<div class="chart-container" id="line-chart-container">
+				<BarIncomeOverview
+					defaultOpt={data.defaultOpt?.receiptIncome}
+					pData={data.receiptIncomeOverview ?? []}
+				></BarIncomeOverview>
 			</div>
 		</div>
 		<!-- <div class="card bg-base-100 col-span-full shadow-md p-4">
@@ -123,16 +188,22 @@
 				></MerchantQuotaComparisonLineChart>
 			</div>
 		</div> -->
+		<div class="card bg-base-100 col-span-full h-full shadow-md p-4">
+			<h1 class="text-base xl:text-lg font-semibold">สถิติโดยรวมแบบรายเดือน</h1>
+			<div class="chart-container h-full">
+				<BarOverviewMonthly pData={data.monthlyOverview ?? []}></BarOverviewMonthly>
+			</div>
+		</div>
 		<div class="card bg-base-100 shadow-md p-4">
-			<h1 class="text-base xl:text-lg font-semibold">อัตราสัดส่วนแพ็คเกจที่ลูกค้าใช้งาน</h1>
+			<h1 class="text-base xl:text-lg font-semibold">อัตราสัดส่วนแพ็คเกจที่ลูกค้าใช้งานในขณะนี้</h1>
 			<div class="chart-container">
 				<DoughnutPackageUsage pData={data.pkgUsageRatio ?? []}></DoughnutPackageUsage>
 			</div>
 		</div>
-		<div class="card bg-base-100 h-full shadow-md p-4">
-			<h1 class="text-base xl:text-lg font-semibold">อัตราสัดส่วนแพ็คเกจที่ลูกค้าใช้งาน</h1>
-			<div class="chart-container h-full">
-				<BarOverviewMonthly pData={data.monthlyOverview ?? []}></BarOverviewMonthly>
+		<div class="card bg-base-100 shadow-md p-4">
+			<h1 class="text-base xl:text-lg font-semibold">อัตราสัดส่วนแพ็คเกจที่ถูกซื้อ</h1>
+			<div class="chart-container">
+				<DoughnutPackageOrderAmount pData={data.pkgUsageRatio ?? []}></DoughnutPackageOrderAmount>
 			</div>
 		</div>
 	</div>
@@ -143,10 +214,11 @@
 			>
 
 			<Card.Content>
-				<MerchantPackageComparison 
-				selectedPkg={data.defaultOpt?.quotaAndMerchantUsagePkgSelect || 1}
-				packageOpt={data.formOpt?.packages ?? []}
-				pData={data.quotaAndMerchantUsage ?? []} />
+				<MerchantPackageComparison
+					selectedPkg={data.defaultOpt?.quotaAndMerchantUsagePkgSelect || 1}
+					packageOpt={data.formOpt?.packages ?? []}
+					pData={data.quotaAndMerchantUsage ?? []}
+				/>
 			</Card.Content>
 		</Card.Root>
 	</div>

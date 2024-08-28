@@ -36,17 +36,21 @@
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
 			{
-				title: 'Log',
+				title: 'Admin Log',
 				link: '/admin/admin-log',
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
-			
+			{
+				title: 'Merchant Log',
+				link: '/admin/merchant-log',
+				icon: 'material-symbols-light:admin-panel-settings-rounded',
+			},
 		]
 	};
 </script>
 
 <div>
-	<Navbar />
+	<Navbar/>
 	<Separator />
 	<LayoutResizer {accounts} subLinks={subPaths} navCollapsedSize={3}>
 		<div class="py-4 bg-primary-foreground min-h-dvh">

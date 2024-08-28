@@ -6,6 +6,7 @@ export type Package = {
 	CreatedAt: string;
 	UpdatedAt: string;
 	Status: string;
+	OrderAmount: number;
 
 	// utils
 	TotalCount: number;

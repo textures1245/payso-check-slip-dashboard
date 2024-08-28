@@ -10,7 +10,7 @@
 		<Table.Row class="text-xs md:text-sm">
 			<Table.Head></Table.Head>
 			<Table.Head>หมายเลข</Table.Head>
-			<Table.Head>ชื่อ</Table.Head>
+			<Table.Head class="w-[30px ]">ชื่อ</Table.Head>
 			<Table.Head>อีเมล์</Table.Head>
 			<Table.Head>ประเภทลูกค้า</Table.Head>
 			<Table.Head>ชื่อแพ็คเก็จ</Table.Head>
@@ -25,7 +25,7 @@
 			<Table.Row class="text-xs">
 				<Table.Cell class="font-medium">{i + 1}</Table.Cell>
 				<Table.Cell>{m.Id}</Table.Cell>
-				<Table.Cell>{m.MerchantName}</Table.Cell>
+				<Table.Cell class="w-[100px] inline-block">{m.MerchantName}</Table.Cell>
 				<Table.Cell>{m.Email}</Table.Cell>
 				<Table.Cell>{m.MerchantRole}</Table.Cell>
 				<Table.Cell>{m.PackageName}</Table.Cell>

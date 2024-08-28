@@ -201,7 +201,7 @@
 	$: dataset = onFilterDataset(defaultDataset, optSelected);
 </script>
 
-<div class="relative h-80">
+<div class="relative h-[18rem]">
 	<div class="form-control items-center">
 		<form
 			bind:this={form}

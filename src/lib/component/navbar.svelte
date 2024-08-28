@@ -19,7 +19,9 @@
 	}
 </script>
 
+
 <nav class="bg-card"  style="background-color:  #0033FF;">
+
 	<div class="mx-auto max-w-7xl px-2">
 		<div class="relative flex h-10 items-center justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">

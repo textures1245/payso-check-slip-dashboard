@@ -12,6 +12,7 @@ import type {
 	MerchantTransactionMonthly,
 	PackageUsage,
 	QuotaAndMerchantUsage,
+	ReceiptStat,
 	TransactionCountRecord
 } from '$lib/utils/external-api-type/adminDashboard';
 import type { Transaction } from '$lib/utils/external-api-type/transaction';
@@ -31,12 +32,20 @@ export const load: PageServerLoad = async () => {
 	const date15DaysAgo = new Date();
 	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
 
+    const dateSixMonthsAgo = new Date();
+	dateSixMonthsAgo.setMonth(dateSixMonthsAgo.getMonth() - 6)
+
 	const defaultOpt = {
 		// GetTransactionDailyCount
 		quotaAndMerchantUsagePkgSelect: 1,
 
 		dailyTrans: {
 			startDate: date15DaysAgo.toISOString().split('T')[0],
+			endDate: new Date().toISOString().split('T')[0]
+		},
+
+		receiptIncome: {
+			startDate: 	dateSixMonthsAgo.toISOString().split('T')[0],
 			endDate: new Date().toISOString().split('T')[0]
 		},
 
@@ -57,6 +66,7 @@ export const load: PageServerLoad = async () => {
 	let transactionDailyCount: DataResponse<TransactionCountRecord[]>;
 	let quotaAndMerchantUsage: DataResponse<QuotaAndMerchantUsage[]>;
 	let monthlyOverview: DataResponse<MerchantTransactionMonthly[]>;
+	let receiptIncomeOverview: DataResponse<ReceiptStat[]>;
 
 	try {
 		statData = await ep.adminDb.GetStats();
@@ -126,6 +136,11 @@ export const load: PageServerLoad = async () => {
 			defaultOpt.monthCountInterval,
 			defaultOpt.year.toString()
 		);
+
+		receiptIncomeOverview = await ep.adminDb.GetReceiptStats(
+			defaultOpt.receiptIncome.startDate,
+			defaultOpt.receiptIncome.endDate,
+		)
 	} catch (err) {
 		const axiosErr = err as AxiosError;
 		console.error(`-= Error while trying to send request to endpoint =-`);
@@ -139,7 +154,8 @@ export const load: PageServerLoad = async () => {
 		statData.status_code != 200 ||
 		recentlyInvalidTransListReport.status_code !== 200 ||
 		merchantListReport.status_code != 200 ||
-		topMerchantQuotaSpendListReport.status_code != 200
+		topMerchantQuotaSpendListReport.status_code != 200 ||
+		receiptIncomeOverview.status_code !== 200
 	) {
 		console.error(`-= ErrorResult given from endpoint =-`);
 		console.error(
@@ -147,7 +163,8 @@ export const load: PageServerLoad = async () => {
 			statData.message,
 			recentlyInvalidTransListReport.message,
 			merchantListReport.message,
-			topMerchantQuotaSpendListReport.message
+			topMerchantQuotaSpendListReport.message,
+			receiptIncomeOverview.message
 		);
 		return fail(500, {
 			message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
@@ -164,6 +181,7 @@ export const load: PageServerLoad = async () => {
 		transactionDailyCount: transactionDailyCount.result ?? [],
 		quotaAndMerchantUsage: quotaAndMerchantUsage.result ?? [],
 		monthlyOverview: monthlyOverview.result ?? [],
+		receiptIncomeOverview: receiptIncomeOverview.result ?? [],
 		formOpt,
 		defaultOpt
 	};
@@ -255,6 +273,41 @@ export const actions: Actions = {
 
 		return {
 			updateTransactionDailyCount: updateTransactionDailyCount.result ?? [],
+			success: true
+		};
+	},
+	
+	updateReceiptIncomeOverview: async ({ request }) => {
+		const { startDate, endDate } = Object.fromEntries(await request.formData()) as {
+			startDate: string;
+			endDate: string;
+		};
+
+		console.log('request ', startDate, endDate);
+
+		let updateReceiptIncomeOverview: DataResponse<ReceiptStat[]>;
+
+		try {
+			updateReceiptIncomeOverview = await ep.adminDb.GetReceiptStats(startDate, endDate);
+		} catch (err) {
+			const axiosErr = err as AxiosError;
+			console.error(`-= Error while trying to send request to endpoint =-`);
+			console.error('ErrorStack:', axiosErr);
+			return fail(axiosErr.status || 500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		if (updateReceiptIncomeOverview.status_code != 200) {
+			console.error(`-= ErrorResult given from endpoint =-`);
+			console.error('ErrorContext:', updateReceiptIncomeOverview.message);
+			return fail(500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		return {
+			updateReceiptIncomeOverview: updateReceiptIncomeOverview.result ?? [],
 			success: true
 		};
 	},
