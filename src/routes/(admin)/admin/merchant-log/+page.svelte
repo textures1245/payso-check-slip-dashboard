@@ -12,6 +12,7 @@
 	let endDate = '';
 	let actorName = '';
 	let methodName = '';
+	let role = 'admin';
 
 	$: totalPages = Math.ceil(totalItems / limit);
 
@@ -19,13 +20,21 @@
 		return date ? new Date(date).toISOString() : '';
 	}
 
-	async function fetchData(start = '', end = '', offset = 1, limit = 5, actor = '', method = '') {
+	async function fetchData(
+		start = '',
+		end = '',
+		offset = 1,
+		limit = 5,
+		actor = '',
+		method = '',
+		role = 'admin'
+	) {
 		loading = true;
 		try {
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=admin`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=${role}`
 			);
 
 			if (!response.ok) {
@@ -108,9 +117,27 @@
 		handleSearch();
 	}
 
+	let isAdmin = true;
+	let isMerchant = false;
+	function updateRole() {
+		if (isAdmin && isMerchant) {
+			role = '';
+		} else if (isAdmin) {
+			role = 'admin';
+		} else if (isMerchant) {
+			role = 'merchant';
+		} else {
+			role = '';
+		}
+		handleSearch();
+		console.log(role);
+		
+	}
+
 	onMount(() => {
-		console.log('Component mounted');
+		console.log('Component mounted', role);
 		fetchData('', '', offset, limit);
+		updateRole()
 	});
 
 	function handleInputActor(event: any) {
@@ -144,7 +171,10 @@
 </script>
 
 <div class="w-full py-4 sm:px-4" style="font-family: Ubuntu, sans-serif">
-	<span class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center">Log</span>
+	<span
+		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		>Log</span
+	>
 
 	<div
 		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4"
@@ -187,8 +217,32 @@
 				on:click={handleClear}
 				class="btn btn-outline btn-primary text-xs sm:text-sm my-1 mx-2">Clear</button
 			>
+			<!--  -->
+			<div class="grid grid-cols-2 sm:grid-cols-1 sm:justify-items-start justify-items-center">
+				<div class="flex items-center">
+					<input
+						class="form-check-input"
+						type="checkbox"
+						id="adminCheckbox"
+						bind:checked={isAdmin}
+						on:change={updateRole}
+					/>
+					<label class="ml-2" for="adminCheckbox">Admin</label>
+				</div>
+				<div class="flex items-center">
+					<input
+						class="form-check-input"
+						type="checkbox"
+						id="merchantCheckbox"
+						bind:checked={isMerchant}
+						on:change={updateRole}
+					/>
+					<label class="ml-2" for="merchantCheckbox">Merchant</label>
+				</div>
+			</div>
 		</div>
 	</div>
+
 	<div class="overflow-x-hidden">
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
@@ -203,7 +257,7 @@
 						<div class="lg:block sm:block hidden text-left">Method Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Method</div>
 					</th>
-					
+
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden text-left">Actor Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Name</div>

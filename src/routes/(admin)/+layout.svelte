@@ -36,11 +36,15 @@
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
 			{
-				title: 'Log',
+				title: 'Admin Log',
 				link: '/admin/admin-log',
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
-			
+			{
+				title: 'Merchant Log',
+				link: '/admin/merchant-log',
+				icon: 'material-symbols-light:admin-panel-settings-rounded',
+			},
 		]
 	};
 </script>
