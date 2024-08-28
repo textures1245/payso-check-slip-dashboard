@@ -8,7 +8,7 @@ export type Transaction = {
 	VerifiedDate?: string;
 	CreatedAt: string;
 	UpdatedAt: string;
-	BankResponded: string;
 	LineUserId: string;
 	TotalCount: number;
+	BankRespondedId?: number;
 };
