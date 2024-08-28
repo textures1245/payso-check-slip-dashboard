@@ -3,6 +3,6 @@ export type LogAdmin ={
     Timestamp : string;
     Action : string;
     MethodName : string;
-    SqlData : string;
+    DataRequest : string;
     ActorName : string;
 }

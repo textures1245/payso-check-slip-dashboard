@@ -11,7 +11,8 @@
 	let startDate = '';
 	let endDate = '';
 	let actorName = '';
-	let methodName = '';
+	let action = '';
+	let role = '';
 
 	$: totalPages = Math.ceil(totalItems / limit);
 
@@ -19,13 +20,22 @@
 		return date ? new Date(date).toISOString() : '';
 	}
 
-	async function fetchData(start = '', end = '', offset = 1, limit = 5, actor = '', method = '') {
+	async function fetchData(
+		start = '',
+		end = '',
+		offset = 1,
+		limit = 5,
+		actor = '',
+		action = '',
+		role = ''
+	) {
+		console.log('Fetch Input', start, end, offset, limit, actor, action, role);
 		loading = true;
 		try {
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=admin`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&action=${actor}&action=${action}&actor_role=${role}`
 			);
 
 			if (!response.ok) {
@@ -47,11 +57,11 @@
 				Timestamp: formatDateToGMT7(item.Timestamp),
 				Action: item.Action,
 				MethodName: item.MethodName,
-				SqlData: item.SqlData,
+				DataRequest: item.DataRequest,
 				ActorName: item.ActorName
 			}));
 			totalItems = data.total || LogAdmin.length;
-			console.log('Input', startDate, endDate, offset, limit);
+			console.log('Input', startDate, endDate, action, actorName, offset, limit, role);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 			// alert(`Failed to fetch data Please try again.`);
@@ -74,14 +84,17 @@
 	}
 
 	function handleSearch() {
-		fetchData(startDate, endDate, offset, limit, actorName, methodName);
+		fetchData(startDate, endDate, offset, limit, actorName, action, role);
+		console.log('Selected role:', role);
 	}
+
 	function handleClear() {
 		startDate = '';
 		endDate = '';
 		actorName = '';
-		methodName = '';
-		fetchData('', '', offset, limit, '', '');
+		action = '';
+		role = '';
+		fetchData('', '', offset, limit, '', '', '');
 	}
 
 	function nextPage() {
@@ -110,6 +123,7 @@
 
 	onMount(() => {
 		console.log('Component mounted');
+		console.log(role);
 		fetchData('', '', offset, limit);
 	});
 
@@ -127,7 +141,7 @@
 		actorName = value;
 		event.target.value = value;
 	}
-	function handleInputMethod(event: any) {
+	function handleInputAction(event: any) {
 		// Get the current value of the input
 		let value = event.target.value;
 
@@ -138,13 +152,16 @@
 		value = value.replace(/^\s+/, '');
 
 		// Update the input value and bound variable
-		methodName = value;
+		action = value;
 		event.target.value = value;
 	}
 </script>
 
-<div class="w-full py-4 sm:px-4" style="font-family: Ubuntu, sans-serif">
-	<span class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center">Log</span>
+<div class="w-full py-4 sm:px-4 overflow-x-auto" style="font-family: Ubuntu, sans-serif">
+	<span
+		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		>Log</span
+	>
 
 	<div
 		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4"
@@ -163,9 +180,9 @@
 		/>
 		<input
 			type="text"
-			placeholder="Method"
-			bind:value={methodName}
-			on:input={handleInputMethod}
+			placeholder="Action"
+			bind:value={action}
+			on:input={handleInputAction}
 			class="input input-bordered bg-blue-50 my-1 mx-2"
 			maxlength="100"
 		/>
@@ -187,9 +204,18 @@
 				on:click={handleClear}
 				class="btn btn-outline btn-primary text-xs sm:text-sm my-1 mx-2">Clear</button
 			>
+			<select
+				class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+				bind:value={role}
+				on:change={handleSearch}
+			>
+				<option value="ADMIN">Admin</option>
+				<option value="MERCHANT">Merchant</option>
+				<option value="">All</option>
+			</select>
 		</div>
 	</div>
-	<div class="overflow-x-hidden">
+	<div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
 			<thead class="text-center bg-primary text-white lg:text-base">
 				<tr>
@@ -203,11 +229,12 @@
 						<div class="lg:block sm:block hidden text-left">Method Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Method</div>
 					</th>
-					
+
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden text-left">Actor Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Name</div>
 					</th>
+					<th class="p-1 sm:p-2 text-left w-96">Data</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -217,12 +244,17 @@
 					<tr><td colspan="6">No data available</td></tr>
 				{:else}
 					{#each LogAdmin as item}
-						<tr>
-							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
-							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Timestamp}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.Action}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MethodName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.ActorName}</td>
+						<tr class="odd:bg-primary-content/50">
+							<td class="p-1 sm:p-2 lg:text-sm">{item.index}</td>
+							<td class="p-1 sm:p-2 lg:text-sm">{item.Timestamp}</td>
+							<td class="p-1 sm:p-2 lg:text-sm">{item.Action}</td>
+							<td class="p-1 sm:p-2 lg:text-sm break-words text-pretty text-left"
+								>{item.MethodName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.ActorName}</td>
+							<td class="p-1 sm:p-2 lg:text-sm inline-block w-96 text-left text-pretty break-words"
+								>{item.DataRequest}</td
+							>
 						</tr>
 					{/each}
 				{/if}
