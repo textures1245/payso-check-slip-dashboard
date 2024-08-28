@@ -3,30 +3,65 @@
 	import type { UserData } from './+page.server.ts';
 	import type { PackageData } from './+page.server.ts';
 	import cookie from 'cookie';
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 
 	let userData: UserData[] = [];
 	let searchInpage = '';
 	let editingUser: UserData | null = null;
 	let currentPage = 1;
+	let offset = 1;
 	let limit = 10;
 	let filteredData: UserData[] = [];
 	let merchantname = '';
-	let selectionvalue = '';
+	let keyWord = '';
 	let packageData: PackageData[] = [];
+	let totalItems = 0;
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
 	}
 
 	onMount(async () => {
-		await fetchData();
+		await fetchData(offset,limit,keyWord);
 
 	});
 
-	async function fetchData(offset = 1, limit = 10) {
+	
+	$: totalPages = Math.ceil(totalItems / limit); 
+
+
+	function nextPage() {
+		if (currentPage < totalPages) {
+			offset++;
+			currentPage++;
+		}
+		handleSearch();
+	}
+
+	function prevPage() {
+		if (currentPage > 1) {
+			offset--;
+			currentPage--;
+		}
+		handleSearch();
+	}
+	function firstPage() {
+		if (currentPage > 1) {
+			offset = 1;
+			currentPage = 1;
+		}
+		handleSearch();
+	}
+
+	function handleSearch() {
+		fetchData(offset,limit,keyWord);
+	}
+
+
+	async function fetchData(currentOffset :number, currentLimit :number,searchMerchant:string) {
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}`
+				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -36,6 +71,7 @@
 				throw new Error('Result is not an array');
 			}
 			console.log(data);
+			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 			userData = data.result.map((item: UserData) => ({
 				Id: parseInt(item.Id, 10),
 				MerchantId: parseInt(item.MerchantId, 10),
@@ -47,40 +83,18 @@
 				BalanceQuotaLeft: parseInt(item.BalanceQuotaLeft, 10),
 				Status: item.Status
 			}));
+			totalPages = Math.ceil(totalCount / currentLimit);
+
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	}
 
-	async function searchfetchData(merchantname: string) {
-		try {
-			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/searchgetmerchant?merchantname=${merchantname}`
-			);
-			if (!response.ok) {
-				throw new Error('Failed to fetch data');
-			}
-			const data = await response.json();
-			if (!Array.isArray(data.result)) {
-				throw new Error('Result is not an array');
-			}
-			userData = data.result.map((item: UserData) => ({
-				Id: item.Id,
-				MerchantId: item.MerchantId,
-				MerchantName: item.MerchantName,
-				QuotaUsage: item.QuotaUsage,
-				PackageName: item.PackageName,
-				Status: item.Status
-			}));
-			console.log('user data', userData);
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
-	}
+	
 
 	async function fetchDataPkg() {
 		try {
-			const response = await fetch(`http://127.0.0.1:4567/api/v1/merchant/packages`);
+			const response = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/packages`);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
@@ -100,10 +114,11 @@
 			console.error('Error fetching data:', error);
 		}
 	}
+
+	
 	fetchDataPkg();
-	function handleSearchClick() {
-		searchfetchData(searchInpage);
-	}
+	
+	
 
 	function clearSearch() {
 		searchInpage = '';
@@ -111,11 +126,7 @@
 		location.reload();
 	}
 
-	function handleLimitChange(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		limit = parseInt(target.value);
-		fetchData((currentPage - 1) * limit, limit);
-	}
+	
 
 	function showModal(user: UserData) {
 		editingUser = user;
@@ -192,17 +203,7 @@
 		}
 	}
 
-	function goToPreviousPage() {
-		if (currentPage > 1) {
-			currentPage -= 1;
-			fetchData((currentPage - 1) * limit, limit);
-		}
-	}
-
-	function goToNextPage() {
-		currentPage += 1;
-		fetchData((currentPage - 1) * limit, limit);
-	}
+	
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
@@ -219,12 +220,12 @@
 			class="input input-bordered w-full max-w-xs bg-blue-50"
 			style="background-color: aliceblue;"
 			maxlength="100"
-			bind:value={searchInpage}
+			bind:value={keyWord}
 		/>
 		<div class="flex space-x-2">
 			<button
 				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
-				on:click={handleSearchClick}>Search</button
+				on:click={firstPage}>Search</button
 			>
 			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
@@ -299,9 +300,13 @@
 			</tbody>
 		</table>
 		<div class="grid col-2 w-full justify-end sm:w-auto">
-			<div class="text-right text-sm">Page 1 of 10</div>
+			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
 			<div class="flex">
-				<select class="select-sm w-full max-w-xs h-1 rounded-md bg-white">
+				<select
+					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+					bind:value={limit}
+					on:change={firstPage}
+				>
 					<option value={5}>5</option>
 					<option value={10}>10</option>
 					<option value={15}>15</option>
@@ -309,9 +314,16 @@
 					<option value={25}>25</option>
 					<option value={30}>30</option>
 				</select>
-				<button class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1">Previous</button
+				<button
+					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
+					on:click={prevPage}
+					disabled={currentPage === 1}>Previous</button
 				>
-				<button class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary">Next</button>
+				<button
+					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					on:click={nextPage}
+					disabled={currentPage === totalPages}>Next</button
+				>
 			</div>
 		</div>
 	</div>

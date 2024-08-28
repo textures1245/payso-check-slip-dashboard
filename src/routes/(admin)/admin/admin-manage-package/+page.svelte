@@ -104,9 +104,7 @@
 		}
 	}
 
-	function handleSearchClick() {
-		searchfetchData(searchInpage, offset, limit);
-	}
+	
 
 	function clearSearch() {
 		searchInpage = '';
