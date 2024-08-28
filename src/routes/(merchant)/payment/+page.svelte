@@ -3,6 +3,7 @@
 	import cookie from 'cookie';
 	// @ts-ignore
 	import { PUBLIC_oauth_KEY } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { onMount } from 'svelte';
     import * as Card from "$lib/components/ui/card";
 	const date = new Date();
@@ -60,11 +61,12 @@
 			body: JSON.stringify({
 				RefNo : refNo,
     			ProductId : Id,
-    			MerchantId : myCookie.Id
+    			MerchantId : myCookie.Id,
+				Total : price
             })
 		};
 		var result = await fetch(
-			`http://127.0.0.1:4567/api/v1/payment/create`,
+			`${PUBLIC_API_ENDPOINT}/payment/create`,
 			config
 		);
 
@@ -181,7 +183,7 @@
             })
 		};
 		var result = await fetch(
-			`http://127.0.0.1:4567/api/v1/payment/get`,
+			`${PUBLIC_API_ENDPOINT}/payment/get`,
 			config
 		);
 		// Create URL parameters from form data
@@ -227,7 +229,7 @@
                 MerchantId: parseInt(myCookie.Id, 10),
 			})
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/updatepackage`, config);
+		var result = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, config);
 
 		const data = await result.json();
 		console.log('Check data:', data);
@@ -274,4 +276,5 @@
     </div>
     </Card.Content>
 </Card.Root>
+
 </div>

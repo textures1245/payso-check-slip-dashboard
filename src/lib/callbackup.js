@@ -25,7 +25,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 			const tokenData = await tokenResponse.json();
 			console.log('Token data:', tokenData);
-
+			if (tokenData.error) {
+                console.log('Token error:', tokenData.error);
+                // คุณอาจต้องจัดการกับข้อผิดพลาดที่เกิดขึ้น เช่น แจ้งเตือนผู้ใช้
+                return;
+            }
 			const profileResponse = await fetch('https://api.line.me/v2/profile', {
 				headers: {
 					Authorization: `Bearer ${tokenData.access_token}`
@@ -33,11 +37,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 			});
 
 			const profileData = await profileResponse.json();
+			if (profileData.error) {
+                console.log('Profile error:', profileData.error);
+                // คุณอาจต้องจัดการกับข้อผิดพลาดที่เกิดขึ้น เช่น แจ้งเตือนผู้ใช้
+                return;
+            }
 			console.log('Profile data:', profileData);
+			let existingProfileData = JSON.parse(localStorage.getItem('DataUsers') || '[]');
+			const isDuplicate = existingProfileData.some(profile => profile.userId === profileData.userId);
 
+            // เพิ่มข้อมูลโปรไฟล์ใหม่เข้าไป
+			if (!isDuplicate) {
+                // เพิ่มข้อมูลโปรไฟล์ใหม่เข้าไป
+                existingProfileData = [...existingProfileData, profileData];
+
+                // เก็บข้อมูลโปรไฟล์ที่อัปเดตลงใน localStorage
+                localStorage.setItem('DataUsers', JSON.stringify(existingProfileData));
+            }
 			// Store user profile data in localStorage (or other storage)
-			localStorage.setItem('profile Data ', JSON.stringify(profileData));
-			sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+			sessionStorage.setItem('profileData', JSON.stringify(profileData));
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-expect-error
 			if (returnedState == '1010-1010') {
@@ -57,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('inputid').value = returnedState;
 				document.getElementById('inputname').value = profileData.displayName;
 				// @ts-ignore
-				document.getElementById('updateline').submit();
+				// document.getElementById('updateline').submit();
             }
 
 			// profileData.userId = document.getElementById('uid').value;

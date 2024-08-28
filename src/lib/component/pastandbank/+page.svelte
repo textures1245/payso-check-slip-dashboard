@@ -15,6 +15,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
     // Register Chart.js components
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { onMount } from 'svelte';
 	import cookie from 'cookie';
 	export let firstItem: Transaction;
@@ -97,7 +98,15 @@
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
 		
 		console.log('checking transaction month');
-
+		let apiUrl;
+    if (myCookie && myCookie.Type === "Line") {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusallline/${myCookie.Email}`;
+    } else if (myCookie) {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/${myCookie.Id}`;
+    } else {
+        console.error('No valid merchant account cookie found.');
+        return;
+    }
 		// Create URL parameters from form data
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
@@ -105,7 +114,7 @@
                 'Content-Type': 'application/json'
             }
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/trasaction/transactionstatusall/${myCookie.Id}`, config);
+		var result = await fetch(apiUrl, config);
 		const datas = await result.json();
 		return datas.result
 
@@ -119,7 +128,15 @@
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
 		
 		console.log('checking transaction month');
-
+		let apiUrl;
+    if (myCookie && myCookie.Type === "Line") {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}`;
+    } else if (myCookie) {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}`;
+    } else {
+        console.error('No valid merchant account cookie found.');
+        return;
+    }
 		// Create URL parameters from form data
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
@@ -127,7 +144,7 @@
                 'Content-Type': 'application/json'
             }
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/trasaction/transactionstatus/${myCookie.Id}/${param1}`, config);
+		var result = await fetch(apiUrl, config);
 		const datas = await result.json();
 		return datas.result
 

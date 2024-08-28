@@ -1,4 +1,5 @@
 import { cookiesConfig } from '$lib/cookies';
+import { API_ENDPOINT } from '$env/static/private';
 /** @type {import('./$types').Actions} */
 export const actions = {
 
@@ -28,10 +29,11 @@ export const actions = {
                 MerchantName: name, // ใช้ชื่อจากข้อมูลฟอร์ม
                 MerchantRole: 'ACTIVE', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
                 Status: 'NOT_PAYSO', // สมมติว่าสถานะเป็น 'true'
-                Email: email
+                Email: email,
+                Type:"Google Facebook"
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/login`, config);
+		var result = await fetch(`${API_ENDPOINT}/merchant/login`, config);
 		const datalogin = await result.json();
 		console.log(datalogin);
 
@@ -49,10 +51,11 @@ export const actions = {
                     MerchantName: name, // ใช้ชื่อจากข้อมูลฟอร์ม
                     MerchantRole: 'NOT_PAYSO', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
                     Status: 'ACTIVE', // สมมติว่าสถานะเป็น 'true'
-                    Email: email
+                    Email: email,
+                    Type:"Google Facebook"
                 })
             };
-            var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/merchant/create`, config);
+            var resultcreate = await fetch(`${ API_ENDPOINT}/merchant/create`, config);
             const datacreate = await resultcreate.json();
             cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
             
@@ -96,10 +99,11 @@ export const actions = {
                 MerchantName: name, // ใช้ชื่อจากข้อมูลฟอร์ม
                 MerchantRole: 'ACTIVE', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
                 Status: 'NOT_PAYSO', // สมมติว่าสถานะเป็น 'true'
-                Email: uid
+                Email: uid,
+                Type:"Line"
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/login`, config);
+		var result = await fetch(`${API_ENDPOINT}/merchant/login`, config);
 		const datalogin = await result.json();
 		console.log(datalogin);
 
@@ -114,10 +118,11 @@ export const actions = {
                     MerchantName: name, // ใช้ชื่อจากข้อมูลฟอร์ม
                     MerchantRole: 'NOT_PAYSO', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
                     Status: 'ACTIVE', // สมมติว่าสถานะเป็น 'true'
-                    Email: uid
+                    Email: uid,
+                    Type:"Line"
                 })
             };
-            var resultcreate = await fetch(`http://127.0.0.1:4567/api/v1/merchant/create`, config);
+            var resultcreate = await fetch(`${API_ENDPOINT}/merchant/create`, config);
             const datacreate = await resultcreate.json();
             cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
             console.log(datacreate)
@@ -174,7 +179,7 @@ export const actions = {
                 MerchantId: 155
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/loginPayso`, config);
+		var result = await fetch(`${API_ENDPOINT}/merchant/loginPayso`, config);
 		const data = await result.json();
 		console.log(data);
         // if (data.message == 'Non Merchant') {

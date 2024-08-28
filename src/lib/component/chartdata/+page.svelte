@@ -6,6 +6,7 @@
 	import { afterUpdate,onMount } from 'svelte';
   import { Button } from '$lib/components/ui/button';
   import cookie from 'cookie';
+  import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 
     // Register Chart.js components
     Chart.register(...registerables);
@@ -68,7 +69,15 @@ let chart: { update: () => void; };
     console.log("เดือน ",monthToSend,typeof(monthToSend))
 		const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		console.log( 'id: ', id , typeof(id));
-
+    let apiUrl;
+    if (myCookie && myCookie.Type === "Line") {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}`;
+    } else if (myCookie) {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}`;
+    } else {
+        console.error('No valid merchant account cookie found.');
+        return;
+    }
 		// Create URL parameters from form data
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
@@ -76,7 +85,7 @@ let chart: { update: () => void; };
                 'Content-Type': 'application/json'
             }
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/trasaction/transactionmonth/${myCookie.Id}/${month}`, config);
+		var result = await fetch(apiUrl, config);
 		const datas = await result.json();
     console.log('Fetched data:', datas.result); 
     if(datas){
@@ -226,13 +235,23 @@ async function SearchData(param1: number) {
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
         console.log("search ",myCookie.Id , param1 , typeof(param1))
+
+        let apiUrl;
+    if (myCookie && myCookie.Type === "Line") {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${param1}`;
+    } else if (myCookie) {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${param1}`;
+    } else {
+        console.error('No valid merchant account cookie found.');
+        return;
+    }
         const config = {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
             }
         };
-        const result = await fetch(`http://127.0.0.1:4567/api/v1/trasaction/transactionmonth/${myCookie.Id}/${param1}`, config);
+        const result = await fetch(apiUrl, config);
         const datas = await result.json();
         console.log("data res : ",datas.result)
         return datas.result;
