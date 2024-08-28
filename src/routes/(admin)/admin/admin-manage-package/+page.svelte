@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PackageData } from './+page.server.ts';
+	import cookie from 'cookie';
+	import { Cookie } from 'svelte-radix';
 
 	let packageData: PackageData[] = [];
 	let currentPage = 1;
@@ -25,6 +27,10 @@
 
 	$: totalPages = Math.ceil(totalItems / limit);
 	console.log('total item', totalItems);
+
+	function getCookies() {
+		return cookie.parse(document.cookie);
+	}
 
 	function nextPage() {
 		if (currentPage < totalPages) {
@@ -58,6 +64,8 @@
 	});
 
 	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
+	
+
 		try {
 			const response = await fetch(
 				`http://127.0.0.1:4567/api/v1/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
@@ -121,6 +129,8 @@
 
 	async function createPackage() {
 		const trimmedName = newPackage.Name.trim();
+		const cookies = getCookies();
+		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
 		// Check if the name is empty after trimming
 		if (trimmedName === '') {
@@ -136,8 +146,8 @@
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Actor-Id': '1',
-					'Actor-Name': 'test',
+					'Actor-Id': myCookie.Id,
+					'Actor-Name': myCookie.Email,
 					'Actor-Role': 'ADMIN'
 				},
 				body: JSON.stringify(newPackage)
@@ -174,6 +184,8 @@
 
 	async function updatePackage() {
 		if (!editingPackage) return;
+		const cookies = getCookies();
+		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
 		const trimmedName = editingPackage.Name.trim();
 
@@ -193,8 +205,8 @@
 					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
-						'Actor-Id': '1',
-						'Actor-Name': 'test',
+						'Actor-Id': myCookie.Id,
+						'Actor-Name': myCookie.Email,
 						'Actor-Role': 'ADMIN'
 					},
 					body: JSON.stringify(editingPackage)

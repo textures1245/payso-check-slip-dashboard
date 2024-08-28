@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { UserData } from './+page.server.ts';
-	import type {PackageData} from './+page.server.ts'
+	import type { PackageData } from './+page.server.ts';
+	import cookie from 'cookie';
 
 	let userData: UserData[] = [];
 	let searchInpage = '';
@@ -11,12 +12,15 @@
 	let filteredData: UserData[] = [];
 	let merchantname = '';
 	let selectionvalue = '';
-	let packageData : PackageData[] = []
-	
-	
-	
+	let packageData: PackageData[] = [];
+
+	function getCookies() {
+		return cookie.parse(document.cookie);
+	}
+
 	onMount(async () => {
 		await fetchData();
+
 	});
 
 	async function fetchData(offset = 1, limit = 10) {
@@ -34,14 +38,14 @@
 			console.log(data);
 			userData = data.result.map((item: UserData) => ({
 				Id: parseInt(item.Id, 10),
-			MerchantId: parseInt(item.MerchantId, 10),
-			MerchantName: item.MerchantName,
-			QuotaUsage: parseInt(item.QuotaUsage, 10),
-			QuotaLimit: parseInt(item.QuotaLimit, 10),
-			PackageId: parseInt(item.PackageId, 10),
-			PackageName: item.PackageName,
-			BalanceQuotaLeft: parseInt(item.BalanceQuotaLeft, 10),
-			Status: item.Status
+				MerchantId: parseInt(item.MerchantId, 10),
+				MerchantName: item.MerchantName,
+				QuotaUsage: parseInt(item.QuotaUsage, 10),
+				QuotaLimit: parseInt(item.QuotaLimit, 10),
+				PackageId: parseInt(item.PackageId, 10),
+				PackageName: item.PackageName,
+				BalanceQuotaLeft: parseInt(item.BalanceQuotaLeft, 10),
+				Status: item.Status
 			}));
 		} catch (error) {
 			console.error('Error fetching data:', error);
@@ -68,7 +72,7 @@
 				PackageName: item.PackageName,
 				Status: item.Status
 			}));
-			console.log("user data", userData)
+			console.log('user data', userData);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
@@ -76,9 +80,7 @@
 
 	async function fetchDataPkg() {
 		try {
-			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/merchant/packages`
-			);
+			const response = await fetch(`http://127.0.0.1:4567/api/v1/merchant/packages`);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
@@ -86,7 +88,7 @@
 			if (!Array.isArray(data.result)) {
 				throw new Error('Result is not an array');
 			}
-			
+
 			packageData = data.result.map((item: PackageData) => ({
 				Id: item.Id,
 				Name: item.Name,
@@ -94,13 +96,11 @@
 				QuotaLimit: item.QuotaLimit,
 				Status: item.Status
 			}));
-			
-
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	}
-	fetchDataPkg()
+	fetchDataPkg();
 	function handleSearchClick() {
 		searchfetchData(searchInpage);
 	}
@@ -127,6 +127,8 @@
 
 	async function updateUser() {
 		if (!editingUser) return;
+		const cookies = getCookies();
+		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
 		try {
 			const updatePackageResponse = await fetch(
@@ -135,10 +137,9 @@
 					method: 'PUT',
 					headers: {
 						'Content-Type': 'application/json',
-						'Actor-Id': editingUser.Id,
-                    	'Actor-Name': editingUser.MerchantName,
-                    	'Actor-Role': 'ADMIN'
-						
+						'Actor-Id': myCookie.Id,
+						'Actor-Name': myCookie.Email,
+						'Actor-Role': 'ADMIN'
 					},
 					body: JSON.stringify({
 						PackageId: editingUser.PackageId,
@@ -179,7 +180,6 @@
 		} catch (error) {
 			console.error('Error updating user:', error);
 		}
-
 		location.reload();
 	}
 
@@ -206,7 +206,10 @@
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
-	<span class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center">Merchant</span>
+	<span
+		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		>Merchant</span
+	>
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
@@ -257,7 +260,8 @@
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantName}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.PackageName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.QuotaUsage + item.BalanceQuotaLeft}</td
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
+							>{item.QuotaUsage + item.BalanceQuotaLeft}</td
 						>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
@@ -294,23 +298,20 @@
 				{/each}
 			</tbody>
 		</table>
-		<div class="w-full flex justify-end mt-4">
-			<div class="join grid grid-cols-2 w-full sm:w-auto">
-				<!-- <select class="select w-full max-w-xs bg-white" bind:value={limit} on:change={handleLimitChange}>
-					<option value="10">10</option>
-					<option value="15">15</option>
-					<option value="20">20</option>
-					<option value="25">25</option>
-					<option value="30">30</option>
-				  </select> -->
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					on:click={goToPreviousPage}>Previous</button
+		<div class="grid col-2 w-full justify-end sm:w-auto">
+			<div class="text-right text-sm">Page 1 of 10</div>
+			<div class="flex">
+				<select class="select-sm w-full max-w-xs h-1 rounded-md bg-white">
+					<option value={5}>5</option>
+					<option value={10}>10</option>
+					<option value={15}>15</option>
+					<option value={20}>20</option>
+					<option value={25}>25</option>
+					<option value={30}>30</option>
+				</select>
+				<button class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1">Previous</button
 				>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					on:click={goToNextPage}>Next</button
-				>
+				<button class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary">Next</button>
 			</div>
 		</div>
 	</div>
@@ -333,14 +334,12 @@
 				</label>
 				<label class="label">
 					<span class="label-text text-black w-2/5">Package:</span>
-					
-						
-					<select class="select max-w-xs w-80 bg-white" bind:value={editingUser.PackageId}>
-						{#each packageData as pkgdata }
-						<option  value={pkgdata.Id}>{pkgdata.Name}</option>
+
+					<select class="select max-w-xs w-80 bg-white overflow-y-auto" bind:value={editingUser.PackageId}>
+						{#each packageData as pkgdata}
+							<option value={pkgdata.Id}>{pkgdata.Name}</option>
 						{/each}
 					</select>
-					
 				</label>
 
 				<label class="label cursor-pointer bg-white flex">
