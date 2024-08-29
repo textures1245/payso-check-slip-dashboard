@@ -1,4 +1,5 @@
 import { cookiesConfig } from '$lib/cookies';
+import { API_ENDPOINT } from '$env/static/private';
 /** @type {import('./$types').Actions} */
 export const actions = {
 
@@ -16,7 +17,7 @@ export const actions = {
                 password: password
             })
 		};
-		var result = await fetch(`http://127.0.0.1:4567/api/v1/merchant/loginadmin`, config);
+		var result = await fetch(`${API_ENDPOINT}/merchant/loginadmin`, config);
 		const data = await result.json();
         console.log(data)
 		if(data.message !='Non Admin'){
