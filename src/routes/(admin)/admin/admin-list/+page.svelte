@@ -22,13 +22,10 @@
 	}
 
 	onMount(async () => {
-		await fetchData(offset,limit,keyWord);
-
+		await fetchData(offset, limit, keyWord);
 	});
 
-	
-	$: totalPages = Math.ceil(totalItems / limit); 
-
+	$: totalPages = Math.ceil(totalItems / limit);
 
 	function nextPage() {
 		if (currentPage < totalPages) {
@@ -54,11 +51,10 @@
 	}
 
 	function handleSearch() {
-		fetchData(offset,limit,keyWord);
+		fetchData(offset, limit, keyWord);
 	}
 
-
-	async function fetchData(currentOffset :number, currentLimit :number,searchMerchant:string) {
+	async function fetchData(currentOffset: number, currentLimit: number, searchMerchant: string) {
 		try {
 			const response = await fetch(
 				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`
@@ -72,7 +68,7 @@
 			}
 			console.log(data);
 			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
-			userData = data.result.map((item: UserData) => ({
+			userData = data.result.map((item: UserData, index: number) => ({
 				Id: parseInt(item.Id, 10),
 				MerchantId: parseInt(item.MerchantId, 10),
 				MerchantName: item.MerchantName,
@@ -81,16 +77,18 @@
 				PackageId: parseInt(item.PackageId, 10),
 				PackageName: item.PackageName,
 				BalanceQuotaLeft: parseInt(item.BalanceQuotaLeft, 10),
-				Status: item.Status
+				Status: item.Status,
+				MerchantRole: item.MerchantRole,
+				Email: item.Email,
+				BillDate: item.BillDate,
+				QuotaSpending: parseInt(item.QuotaSpending, 10),
+				index: index + (offset - 1) * limit + 1
 			}));
 			totalPages = Math.ceil(totalCount / currentLimit);
-
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	}
-
-	
 
 	async function fetchDataPkg() {
 		try {
@@ -115,18 +113,13 @@
 		}
 	}
 
-	
 	fetchDataPkg();
-	
-	
 
 	function clearSearch() {
 		searchInpage = '';
 		filteredData = [...userData];
 		location.reload();
 	}
-
-	
 
 	function showModal(user: UserData) {
 		editingUser = user;
@@ -142,29 +135,26 @@
 		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
 		try {
-			const updatePackageResponse = await fetch(
-				`http://127.0.0.1:4567/api/v1/merchant/updatepackage`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Actor-Id': myCookie.Id,
-						'Actor-Name': myCookie.Email,
-						'Actor-Role': 'ADMIN'
-					},
-					body: JSON.stringify({
-						PackageId: editingUser.PackageId,
-						MerchantId: editingUser.Id
-					})
-				}
-			);
+			const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'Actor-Id': myCookie.Id,
+					'Actor-Name': myCookie.Email,
+					'Actor-Role': 'ADMIN'
+				},
+				body: JSON.stringify({
+					PackageId: editingUser.PackageId,
+					MerchantId: editingUser.Id
+				})
+			});
 
 			if (!updatePackageResponse.ok) {
 				throw new Error('Failed to update package');
 			}
 
 			const updateStatusResponse = await fetch(
-				`http://127.0.0.1:4567/api/v1/merchant/updatestatus/${editingUser.Id}`,
+				`${PUBLIC_API_ENDPOINT}/merchant/updatestatus/${editingUser.Id}`,
 				{
 					method: 'PUT',
 					headers: {
@@ -202,8 +192,6 @@
 			editingUser.Status = isActive ? 'ACTIVE' : 'INACTIVE';
 		}
 	}
-
-	
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
@@ -214,60 +202,85 @@
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
-		<input
-			type="text"
-			placeholder="Merchant Id or Merchant Name"
-			class="input input-bordered w-full max-w-xs bg-blue-50"
-			style="background-color: aliceblue;"
-			maxlength="100"
-			bind:value={keyWord}
-		/>
+		<div class="relative w-full max-w-xs">
+			<input
+				type="text"
+				placeholder="Merchant Id or Merchant Name"
+				class="input input-bordered w-full pl-10 bg-white"
+				style="background-color: white;"
+				maxlength="100"
+				bind:value={keyWord}
+			/>
+			<!-- Search Icon -->
+			<div class="absolute inset-y-0 left-0 flex items-center pl-3">
+				<svg
+					class="w-5 h-5 text-gray-500"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M21 21l-4.35-4.35m2.35-7.65a7 7 0 11-14 0 7 7 0 0114 0z"
+					/>
+				</svg>
+			</div>
+		</div>
+
 		<div class="flex space-x-2">
-			<button
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
-				on:click={firstPage}>Search</button
+			<button class="btn bg-primary text-white text-xs sm:text-sm" on:click={firstPage}
+				>Search</button
 			>
-			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
-				>Clear</button
-			>
+			<button class="btn btn-outline text-xs sm:text-sm" on:click={clearSearch}>Clear</button>
 		</div>
 	</div>
-	<div class="overflow-x-hidden">
-		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
-			<thead class="text-center bg-primary text-white lg:text-base">
-				<tr>
-					<th class="p-1 sm:p-2 w-10">ID</th>
+	<div class="overflow-x-auto">
+		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
+			<thead class="text-center  text-gray-700 lg:text-base">
+				<tr class="border-b border-gray-300">
+					<th class="p-1 sm:p-2 w-8">No</th>
 					<th class="p-1 sm:p-2 text-wrap text-left">
 						<div class="lg:block sm:block hidden">Merchant Id</div>
 						<div class="lg:hidden sm:hidden block">M.ID</div></th
 					>
+					<th class="p-1 sm:p-2 text-left">Email</th>
+					<th class="p-1 sm:p-2 text-left">Type</th>
 					<th class="p-1 sm:p-2 text-wrap text-left"
 						><div class="lg:block sm:block hidden">Merchant Name</div>
 						<div class="lg:hidden sm:hidden block">M.Name</div></th
 					>
 					<th class="p-1 sm:p-2 text-left">Package</th>
 					<th class="p-1 sm:p-2 text-wrap text-right">
-						<div class="lg:block sm:block hidden">QuotaToUse</div>
+						<div class="lg:block sm:block hidden">QuotaLeft</div>
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
+					<th class="p-1 sm:p-2 text-left">QuotaSpending</th>
+					<th class="p-1 sm:p-2">Expire date</th>
 					<th class="p-1 sm:p-2">Status</th>
 					<th class="p-1 w-20 sm:p-2"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
 				{#each userData as item}
-					<tr>
-						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id}</th>
+					<tr class="border-b border-gray-300">
+						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.Email}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantName}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.PackageName}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
 							>{item.QuotaUsage + item.BalanceQuotaLeft}</td
 						>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.QuotaSpending}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.BillDate.split(' ')[0]}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
-									class="badge-status lg:text-sm md:text-xs sm:text-xxs text-xs {item.Status ===
+									class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
 									'ACTIVE'
 										? 'badge-success'
 										: 'badge-danger'}"
@@ -277,31 +290,30 @@
 							</div>
 						</td>
 						<td class="p-1 sm:p-2">
-							<button class="btn btn-xs sm:btn-sm bg-primary" on:click={() => showModal(item)}>
-								<svg
-									class="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 dark:text-white"
-									aria-hidden="true"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke="currentColor"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-									/>
-								</svg>
-							</button>
+							<svg
+								on:click={() => showModal(item)}
+								class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+								aria-hidden="true"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+								/>
+							</svg>
 						</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
-		<div class="grid col-2 w-full justify-end sm:w-auto">
-			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
-			<div class="flex">
+		<!-- <div class="grid w-full sm:w-auto bg-gray-100">
+			<div class="text-sm flex text-left">Page {currentPage} of {totalPages}</div>
+			<div class="flex justify-end">
 				<select
 					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
 					bind:value={limit}
@@ -315,15 +327,54 @@
 					<option value={30}>30</option>
 				</select>
 				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
+					class="join-item btn btn-xs sm:btn-sm btn-outline mx-1"
 					on:click={prevPage}
-					disabled={currentPage === 1}>Previous</button
+					disabled={currentPage === 1}
 				>
+					Previous
+				</button>
 				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					class="join-item btn btn-xs sm:btn-sm btn-outline"
 					on:click={nextPage}
-					disabled={currentPage === totalPages}>Next</button
+					disabled={currentPage === totalPages}
 				>
+					Next
+				</button>
+			</div>
+		</div> -->
+		<div class="grid w-full sm:w-auto mt-3">
+			<div class="flex items-center justify-between w-full">
+				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+
+				<div class="flex items-center space-x-2">
+					<select
+						class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+						bind:value={limit}
+						on:change={firstPage}
+					>
+						<option value={5}>5</option>
+						<option value={10}>10</option>
+						<option value={15}>15</option>
+						<option value={20}>20</option>
+						<option value={25}>25</option>
+						<option value={30}>30</option>
+					</select>
+
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={prevPage}
+						disabled={currentPage === 1}
+					>
+						Previous
+					</button>
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={nextPage}
+						disabled={currentPage === totalPages}
+					>
+						Next
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -347,7 +398,10 @@
 				<label class="label">
 					<span class="label-text text-black w-2/5">Package:</span>
 
-					<select class="select max-w-xs w-80 bg-white overflow-y-auto" bind:value={editingUser.PackageId}>
+					<select
+						class="select max-w-xs w-80 bg-white overflow-y-auto"
+						bind:value={editingUser.PackageId}
+					>
 						{#each packageData as pkgdata}
 							<option value={pkgdata.Id}>{pkgdata.Name}</option>
 						{/each}
@@ -381,13 +435,13 @@
 <style>
 	.badge-status {
 		@apply py-1 px-2 rounded-full text-white;
-		width: 60%;
+		width: 10 0%;
 	}
 	.badge-success {
-		@apply bg-green-600;
+		@apply border border-success text-success bg-transparent;
 	}
 	.badge-danger {
-		@apply bg-red-600;
+		@apply border  border-destructive text-destructive bg-transparent;
 	}
 	@media (max-width: 640px) {
 		.badge-status {

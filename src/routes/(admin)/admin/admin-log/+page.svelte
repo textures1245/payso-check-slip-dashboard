@@ -167,18 +167,18 @@
 	>
 
 	<div
-		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4"
+		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4 "
 	>
 		<input
 			type="date"
 			bind:value={startDate}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
 		/>
 		<input
 			type="date"
 			bind:value={endDate}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
 		/>
 		<input
@@ -186,7 +186,7 @@
 			placeholder="Action"
 			bind:value={action}
 			on:input={handleInputAction}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
 		/>
 		<input
@@ -194,7 +194,7 @@
 			placeholder="Actor"
 			bind:value={actorName}
 			on:input={handleInputActor}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="250"
 		/>
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
@@ -204,11 +204,11 @@
 			>
 			<button
 				on:click={handleClear}
-				class="btn btn-outline btn-primary text-xs sm:text-sm my-1 mx-2">Clear</button
+				class="btn btn-outline  text-xs sm:text-sm my-1 mx-2">Clear</button
 			>
 		</div>
 		<select
-			class="select w-100 rounded-md bg-blue-50 my-1 mx-2 outline outline-1 outline-gray-300"
+			class="select w-100 rounded-md bg-white my-1 mx-2 outline outline-1 outline-gray-300"
 			bind:value={role}
 			on:change={handleSearch}
 		>
@@ -218,8 +218,8 @@
 		</select>
 	</div>
 	<div>
-		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
-			<thead class="text-center text-black lg:text-base caption-bottom">
+		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
+			<thead class="text-center text-gray-700 lg:text-base caption-bottom">
 				<tr class="border-b border-gray-300">
 					<th class="p-1 sm:p-2 w-10">No</th>
 					<th class="p-1 sm:p-2 text-wrap">
@@ -255,7 +255,7 @@
 							>
 							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.ActorName}</td>
 							<td class="p-1 sm:p-2 lg:text-sm text-center">
-								<label for={`logDataModel-${i}`} class="btn"
+								<label for={`logDataModel-${i}`} class="btn bg-white"
 									><svg
 										class="w-6 h-6 text-gray-800 dark:text-gray-800"
 										aria-hidden="true"
@@ -287,7 +287,7 @@
 			</tbody>
 		</table>
 
-		<div class="grid col-2 w-full justify-end sm:w-auto">
+		<!-- <div class="grid col-2 w-full justify-end sm:w-auto">
 			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
 			<div class="flex">
 				<select
@@ -312,6 +312,41 @@
 					on:click={nextPage}
 					disabled={currentPage === totalPages}>Next</button
 				>
+			</div>
+		</div> -->
+		<div class="grid w-full sm:w-auto mt-3">
+			<div class="flex items-center justify-between w-full">
+				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+
+				<div class="flex items-center space-x-2">
+					<select
+						class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+						bind:value={limit}
+						on:change={firstPage}
+					>
+						<option value={5}>5</option>
+						<option value={10}>10</option>
+						<option value={15}>15</option>
+						<option value={20}>20</option>
+						<option value={25}>25</option>
+						<option value={30}>30</option>
+					</select>
+
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={prevPage}
+						disabled={currentPage === 1}
+					>
+						Previous
+					</button>
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={nextPage}
+						disabled={currentPage === totalPages}
+					>
+						Next
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
