@@ -51,7 +51,20 @@
     
 </div>
 </div>
+<div class="tooltip-container">
+    <div class="tooltip">
+        <button class="btn rounded-full  bg-black text-white">i</button>
+        <div class="tooltip-text">
+            <strong>คำแนะนำเบื้องต้น:</strong> <br>
+            ส่วนแรก : แสดงรายการตั้งแต่ วัน/เดือน/ปี ถึง วัน/เดือน/ปี ที่เลือก มีรายการที่จริง ปลอม และทั้งหมด และ โควต้าการใช้งาน
+            <br><br>  ส่วนสอง : แสดงรายการในแต่ละวัน โดยสามารถค้นหาได้ตามเดือนและปี ที่ต้องการ <br> กราฟเขียว จริง | กราฟแดง ปลอม
+            <br><br> ส่วนสาม : แสดงรายการตาม Status ที่เลือก ในรายการทั้งหมด
+        </div>
+    </div>
+</div>
+
 {/if}
+
 
 <style scoped>
 .spin {
@@ -62,6 +75,41 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+		.tooltip-container {
+        position: fixed; /* ใช้ fixed เพื่อให้อยู่ตำแหน่งเดิมเมื่อเลื่อนหน้า */
+        right: 10px; /* ปรับให้ปุ่มและ tooltip อยู่ด้านขวาของหน้าจอ */
+        top: 95%; /* ปรับตำแหน่งให้อยู่ตรงกลางตามแนวตั้ง */
+        transform: translateY(-50%); /* เลื่อนขึ้นครึ่งหนึ่งของความสูงเพื่อให้อยู่ตรงกลาง */
+        z-index: 1000;
+    }
 
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 250px;
+        max-height: 300px; /* กำหนดความสูงสูงสุดเพื่อให้มี scrollbar */
+        background-color: #555;
+        color: #fff;
+        text-align: left;
+        border-radius: 5px;
+        padding: 10px;
+        position: absolute;
+        right: 0; /* ให้ tooltip อยู่ชิดขวาของปุ่ม */
+        bottom: 100%; /* ให้ tooltip อยู่ด้านล่างของปุ่ม */
+        margin-top: 10px; /* ระยะห่างระหว่างปุ่มและ tooltip */
+        overflow-y: auto; /* เพิ่ม scrollbar ในแนวตั้ง */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
 </style>
 

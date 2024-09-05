@@ -22,9 +22,16 @@ export const actions = {
         console.log(data)
 		if(data.message !='Non Admin'){
 			cookies.set('admin_account', JSON.stringify(data.result[1]), cookiesConfig);
+			return data
+		}
+		if(data.message =='Non Admin'){
+			
+			return {
+				Status:false
+			}
 		}
 		
-        return data
+        
 		
 	},
     

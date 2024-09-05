@@ -19,8 +19,8 @@ export const handle = async ({ resolve, event }) => {
 		console.log(event.url.pathname);
 		if (event.url.pathname == '/') {
 			const token = event.cookies.get('merchant_account') || '';
-			const update = event.cookies.get('Status') || '';
-			if (token && !update) {
+
+			if (token) {
 				redirect(302, '/dashboard');
 			}
 		}
@@ -44,6 +44,13 @@ export const handle = async ({ resolve, event }) => {
 			if (!token) {
 				return redirect(302, '/login-admin');
 			}
+		}
+		if(event.url.pathname == '/login-admin'){
+			const token = event.cookies.get('admin_account') || '';
+			if (token ) {
+				redirect(302, '/admin/admin-dashboard');
+			}
+
 		}
 
 		return await resolve(event);

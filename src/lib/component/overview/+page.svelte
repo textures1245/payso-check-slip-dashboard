@@ -14,15 +14,29 @@
     let max = 0;
 	let datatoo=0;
 	let maxr=1;
-	
+    const today = new Date();
+  // Extract the current year and month
+    let lastMonth = today.getMonth() - 1; // คำนวณเดือนที่แล้ว (0-11)
+    let lastYear = today.getFullYear();
+
+// ตรวจสอบกรณีที่เดือนเป็นมกราคม (เดือน 0) และลดปีลง
+    if (lastMonth < 0) {
+    lastMonth = 11; // ตั้งค่าเป็นเดือนธันวาคม
+    lastYear -= 1; // ลดปีลง 1
+    }
+	let startDate = `${lastYear}-${(lastMonth + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+    let endDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+    console.log("rrrrr",startDate,endDate)
+
+
     let data = {
 	  labels: ['จำนวนที่ใช้', 'จำนวนทั้งหมด'],
 	  datasets: [{
 		label: '',
 		data: [datatoo,maxr],
 		backgroundColor: [
-		 'rgb(220, 20, 60)',   // สีแดงเข้ม (Crimson)
-  'rgb(0, 123, 255)',   // สีน้ำเงินเข้ม (Royal Blue)
+            'rgb(217, 45, 32)',   // แทนที่สีแดงเข้มเดิม (Crimson) ด้วย #D92D20
+            'rgb(17, 59, 212)',   // แทนที่สีน้ำเงินเข้มเดิม (Royal Blue) ด้วย #113BD4
 		  
 		],
 		hoverOffset: 4
@@ -95,9 +109,9 @@
 		// Create URL parameters from form data
 		let apiUrl;
     if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${startDate}/${endDate}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${startDate}/${endDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -183,10 +197,101 @@
 
 }
 let loading = true;
+const SearchTransaction = async (startDate:String,endDate:String) => {
+		// const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
+		// console.log( 'id: ', id , typeof(id));
+        const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		console.log("++++++++++",myCookie.Id , myCookie.Email);
+		
+		console.log('checking get transaction');
 
+		// Create URL parameters from form data
+		let apiUrl;
+    if (myCookie && myCookie.Type === "Line") {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${startDate}/${endDate}`;
+    } else if (myCookie) {
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${startDate}/${endDate}`;
+    } else {
+        console.error('No valid merchant account cookie found.');
+        return;
+    }
+
+    // Create configuration for the fetch request
+    let config = {
+        method: 'GET', // Use GET method
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    try {
+        // Make the fetch request
+        const result = await fetch(apiUrl, config);
+        const datas = await result.json();
+        console.log(datas);
+
+        if (datas.result) {
+            return datas.result[0];
+        }
+    } catch (error) {
+        console.error('Error fetching transaction data:', error);
+    }
+		
+
+	
+	};
+
+    let searchPerformed = false;
+
+    async function SearchData(startDate:String,endDate:String) {
+
+		const data = await SearchTransaction(startDate,endDate);
+		dataOverview = data
+		console.log("Search :" ,dataOverview)
+		searchPerformed = true;
+	
+	
+ // Replace with your actual URL
+
+  }
+
+	
 </script>
-<div class="flex justify-start ... text-2xl font-sans ... font-bold ...">
+
+<div class="lg:flex md:flex lg:justify-between md:justify-between font-bold ">
+    <div class="text-2xl content-center">
 	<h1>Dashboard</h1>
+</div>
+<div class="  grid gap-1 grid-cols-5 sm:grid-cols-6 md:grid-cols-6 lg:grid-cols-6 text-md my-3  ">
+    <div class="flex lg:justify-end md:justify-end sm:justify-end justify-center col-span-2 ">
+        <input type="date" bind:value={startDate} placeholder="DD/MM/YYYY" class="lg:w-32 md:w-32 sm:w-30 w-30 rounded-lg border border-stone-400 text-zinc-500  ps-2"/>
+        
+        
+    </div>
+    <div class=" lg:mx-5 md:mx-5 sm:mx-5  flex justify-center">
+        <h3 class="content-center">ถึง</h3>
+    </div>
+    <div class="flex col-span-2">
+      
+        <input type="date" bind:value={endDate} placeholder="DD/MM/YYYY" class="lg:w-32 md:w-32 sm:w-30 w-30 rounded-lg border border-stone-400  text-zinc-500 ps-2"/>
+    </div>
+    <div class="content-end flex justify-center lg:col-span-1 md:col-span-1 sm:col-span-1 col-span-5">
+        <Button
+    variant="outline"
+    class=" flex text-center py-0 px-0 mx-2   text-white hover:text-black bg-primary hover:bg-white"
+    on:click={() => SearchData(startDate,endDate)}
+    style="width:100%;height:30px;"
+    ><div class="mx-3 content-center"  style="width:100%;height:100%" >
+  
+      ค้นหา
+    </div>
+    </Button
+    >
+       
+    </div>
+    
+</div>
 </div>
 
 
@@ -305,7 +410,7 @@ let loading = true;
                {/if}
                 </p>
                 </div>
-                <div class=" w-100 mt-2 mb-3 "><Button variant="outline" class="w-4/5 h-12 bg-blue-500 text-white" on:click={dowloadExportExcel}>Dowload Excel</Button></div>
+                <div class=" w-100 mt-2 mb-3 " ><Button variant="outline" class="w-4/5 h-12 text-white hover:text-black  bg-primary" on:click={dowloadExportExcel} >Dowload Excel</Button></div>
         </Card.Content>
     </Card.Root>
     <Card.Root>

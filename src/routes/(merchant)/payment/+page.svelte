@@ -13,7 +13,8 @@
 
 	// Generate a random 4-digit number
 	const randomNumber = Math.floor(1000 + Math.random() * 9000).toString(); // Ensures a 4-digit number
-
+	let packageprice="";
+	let packagename="";
 	// Concatenate to form RefNo
 	let refNo = `${year}${month}${day}${randomNumber}`;
 
@@ -22,7 +23,7 @@
 		const name = sessionStorage.getItem('packagename');
         const cookies = getCookies();
 			const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		console.log('Package : ', price, name);
+		console.log('Package : ', price, name , myCookie.Email);
 		// Create URL parameters from form data
 		let config = {
 			method: 'POST',
@@ -32,11 +33,14 @@
 				Authorization: `Bearer ${PUBLIC_oauth_KEY}`
 			}
 		};
-		var result = await fetch(
-			`https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=napatone123@gmail.com&customerName=-&total=1&referenceNo=${refNo}`,
-			config
-		);
-
+		let url;
+		if(myCookie.Type != "Line"){
+			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=${myCookie.Email}&customerName=-&total=${price}&referenceNo=${refNo}`
+		}else{
+			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=napatone123@gmail.com&customerName=-&total=${price}&referenceNo=${refNo}`
+		}
+		console.log(" URL ",url)
+		const result = await fetch(url, config);
 		const data = await result.json();
 		console.log('Fetched data:', data);
 		if (data) {
@@ -80,7 +84,8 @@
 	let dataImg="";
 
 	onMount(async () => {
-		
+		packageprice = sessionStorage.getItem('packageprice');
+		packagename = sessionStorage.getItem('packagename');
 		const storedTime = localStorage.getItem('remainingTime');
 		const Img = localStorage.getItem('Img');
 		
@@ -130,7 +135,9 @@
                     UpdatePackage()
                     window.location.assign("/dashboard")
 				}
-				window.location.assign("/package")
+				if (seconds <= 0) {
+                    window.location.assign("/package")
+				}
 			}
 		}, 1000); // ทำงานทุกๆ 1 วินาที
 
@@ -254,7 +261,7 @@
     {/if}
 	<p>เวลาที่เหลือ: {formatTime(seconds)} วินาที</p>
 {/if} -->
-<div class="flex justify-center items-center" style="height: 500px;">
+<div class="flex justify-center items-center my-5" style="height: 500px;">
 <Card.Root class=" lg:w-2/5 md:w-4/5">
     <Card.Header
         class="p-0 items-center justify-center "
@@ -267,10 +274,18 @@
         <div>
         <p class="text-xl my-2">สแกนเพื่อชำระเงิน</p>
         {#if messageVisible}
+		
         {#if dataImg}
         <img src={dataImg} />
         {/if}
-        
+        <div class="text-xl flex justify-center items-center">
+			<span>Package Name:</span>
+			<p class="ml-2 text-2xl">{packagename}</p>
+		  </div>
+		<div class="text-xl flex justify-center items-center">
+			<span>ราคา</span>
+			<p class="ml-2 text-2xl">{packageprice} Bath</p>
+		  </div>
         <p class=" lg:text-4xl md:text-4xl text-2xl my-3"> {formatTime(seconds)}</p>
     {/if}
     </div>

@@ -94,6 +94,13 @@
 					window.location.href = '/dashboard';
 				}
 			}
+			if (form.Status == false) {
+				const modal = document.getElementById('my_modal_2');
+				if (modal) {
+					modal.showModal();
+				}
+			}
+			
 		}
 	});
 
@@ -193,8 +200,8 @@
 								<Button
 									type="submit"
 									variant="outline"
-									class="my-2 flex text-center py-0 px-0  bg-sky-400 rounded-2xl"
-									style="width:80%;height:40px">Sign In</Button
+									class="my-2 flex text-center py-0 px-0  text-white rounded-2xl hover:text-black bg-primary"
+									style="width:80%;height:40px;">Sign In</Button
 								>
 							</div>
 						</form>
@@ -237,7 +244,7 @@
 										></path>
 									</svg>
 								</div>
-								<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden">
+								<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden hover:text-black">
 									Login With Google
 								</div></Button
 							>
@@ -268,7 +275,7 @@
 								</div>
 								<div
 									style="width: 100%;"
-									class="content-center mx-2 lg:block md:block sm:block hidden"
+									class="content-center mx-2 lg:block md:block sm:block hidden hover:text-black"
 								>
 									Login With Facebook
 								</div></Button
@@ -301,7 +308,7 @@
 										></path>
 									</svg>
 								</div>
-								<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden">
+								<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden hover:text-black">
 									Login With Line
 								</div></Button
 							>
@@ -312,6 +319,37 @@
 		</Card.Root>
 	</div>
 </div>
+
+<dialog id="my_modal_2" class="modal">
+	<div class="modal-box lg:ml-20">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">Username / Password ไม่ถูกต้อง </p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>
 
 <form id="myForm" method="post" action="?/signInWithGoogle">
 	<input type="text" hidden name="email" id="emailInput" />

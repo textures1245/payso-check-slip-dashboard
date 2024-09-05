@@ -20,6 +20,7 @@ let newsuccessValues: number[] = [];
 let newfailedValues: number[] = [];
 let today = new Date();
 let month = today.getMonth() + 1;
+let year = today.getFullYear();
 let chart: { update: () => void; };
     onMount(async () => {
 		try {
@@ -29,15 +30,22 @@ let chart: { update: () => void; };
 			console.log('Chart : ',datachart);
       labels = Array.from(new Set(dataChart.map(item => formatDate(item.CreatedAt))));
       successValues = labels.map(label => {
-        return dataChart
-          .filter(item => formatDate(item.CreatedAt) === label && item.Status === 'SUCCESS' || item.Status === 'success')
-          .length; // นับจำนวนรายการที่สำเร็จ
-      });
-      failedValues = labels.map(label => {
-        return dataChart
-          .filter(item => formatDate(item.CreatedAt) === label && item.Status === 'FAILED')
-          .length; // นับจำนวนรายการที่ล้มเหลว
-      });
+    return dataChart
+        .filter(item => 
+            formatDate(item.CreatedAt) === label && 
+            (item.Status === 'SUCCESS' || item.Status === 'success')
+        )
+        .length; // Count the number of successful items
+});
+
+failedValues = labels.map(label => {
+    return dataChart
+        .filter(item => 
+            formatDate(item.CreatedAt) === label && 
+            item.Status === 'FAILED'
+        )
+        .length; // Count the number of failed items
+});
 
 
       data.labels = labels;
@@ -66,14 +74,15 @@ let chart: { update: () => void; };
       const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
-    console.log("เดือน ",monthToSend,typeof(monthToSend))
+    const [year, month] = monthToSend.split("-");
+    console.log("เดือน ",year, month,typeof(monthToSend))
 		const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		console.log( 'id: ', id , typeof(id));
     let apiUrl;
     if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -105,14 +114,14 @@ let chart: { update: () => void; };
         {
           label: 'สลิปจริง',
           data: successValues,
-          backgroundColor: 'rgba(0, 128, 0, 0.2)',  // Green background
+          backgroundColor: 'rgba(71, 205, 137, 0.8)',  // Green background
           borderColor: 'rgba(0, 128, 0, 1)',        // Green border
           borderWidth: 1
         },
         {
           label: 'สลิปปลอม',
           data: failedValues, // ตั้งค่าให้มีค่าเท่ากันสำหรับทุกเดือน
-          backgroundColor: 'rgba(255, 0, 0, 0.2)',  // Red background
+          backgroundColor: 'rgba(240, 68, 56, 0.8)',  // Red background
           borderColor: 'rgba(255, 0, 0, 1)',        // Red border
           borderWidth: 1
         }
@@ -178,43 +187,36 @@ let chart: { update: () => void; };
 
   
 
-  let monthToSend=month;
+  let monthToSend=`${year}-${month.toString().padStart(2, '0')}`;
 
-  const months = [
-  { value: 1, label: "January" },
-  { value: 2, label: "February" },
-  { value: 3, label: "March" },
-  { value: 4, label: "April" },
-  { value: 5, label: "May" },
-  { value: 6, label: "June" },
-  { value: 7, label: "July" },
-  { value: 8, label: "August" },
-  { value: 9, label: "September" },
-  { value: 10, label: "October" },
-  { value: 11, label: "November" },
-  { value: 12, label: "December" }
-];
+  
 let searchPerformed = false;
 let dataSearch: any[] = [];
-async function SearchData(param1: number) {
+async function SearchData(param1: string) {
 
 		const datasearch = await searchGetdata(param1);
 		
     dataSearch = datasearch
-    console.log("res : ",dataSearch)
+    console.log("res : ",dataSearch )
 		searchPerformed = true;
     newlabels = Array.from(new Set(dataSearch.map(item => formatDate(item.CreatedAt))));
-    newsuccessValues = labels.map(label => {
-        return dataSearch
-          .filter(item => formatDate(item.CreatedAt) === label && item.Status === 'SUCCESS' || item.Status === 'success')
-          .length; // นับจำนวนรายการที่สำเร็จ
-      });
+    newsuccessValues = newlabels.map(label => {
+            const successCount = dataSearch.filter(item => 
+                formatDate(item.CreatedAt) === label && 
+                (item.Status === 'SUCCESS' || item.Status === 'success')
+            ).length;
+            console.log(`Success count for ${label}: `, successCount);
+            return successCount;
+        });
 
-    newfailedValues = labels.map(label => {
-        return dataSearch
-          .filter(item => formatDate(item.CreatedAt) === label && item.Status === 'FAILED')
-          .length; // นับจำนวนรายการที่ล้มเหลว
-      });
+        newfailedValues = newlabels.map(label => {
+            const failedCount = dataSearch.filter(item => 
+                formatDate(item.CreatedAt) === label && 
+                item.Status === 'FAILED'
+            ).length;
+            console.log(`Failed count for ${label}: `, failedCount);
+            return failedCount;
+        });
       data.labels = newlabels;
       data.datasets[0].data = newsuccessValues;
       data.datasets[1].data = newfailedValues;
@@ -229,8 +231,11 @@ async function SearchData(param1: number) {
   function getCookies() {
   return cookie.parse(document.cookie);
 }
-  const searchGetdata = async (param1: number) => {
+  const searchGetdata = async (param1: string) => {
         // const id = sessionStorage.getItem('merchant_id');
+       
+        const [year, month] = param1.split("-");
+        console.log("param1",param1,year,month)
         const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
@@ -238,9 +243,9 @@ async function SearchData(param1: number) {
 
         let apiUrl;
     if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${param1}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${param1}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -275,21 +280,21 @@ async function SearchData(param1: number) {
 <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1 " style="height: 100%;">
   <div class="flex justify-between my-2 " style="height: 30px;width:96%">
     <div>
-      กราฟแสดงข้อมูลรายวัน
+      กราฟแสดงข้อมูลรายเดือน
     </div>
-    <div class="flex justify-end" >
-      <select bind:value={monthToSend} class="border-2 border-neutral-950 mx-2 rounded-lg">
-        <option value="" disabled selected >Select a status</option>
-        {#each months as month}
-          <option value="{month.value}">{month.label}</option>
-        {/each}
-        </select>
+    <div class="flex justify-end  relative" >
+      <input 
+      type="month" 
+      bind:value={monthToSend} 
+      class="border-2 border-neutral-950 rounded-lg lg:px-3 mx-2 border border-stone-400 text-zinc-500"
+  />
+        
         <Button
   variant="outline"
-  class=" flex text-center py-0 px-0 bg-blue-500 rounded-full text-white"
+  class=" flex text-center py-0 px-0  text-white hover:text-black  bg-primary "
   on:click={() => SearchData(monthToSend)}
-  style="width:40%;height:30px"
-  ><div class="mx-3 content-center"  style="width:100%;height:100%">
+  style="width:40%;height:30px;"
+  ><div class="mx-3 content-center"  style="width:100%;height:100%" >
 
     ค้นหา
   </div>
@@ -308,3 +313,5 @@ async function SearchData(param1: number) {
  
 </div>
 </div>
+
+

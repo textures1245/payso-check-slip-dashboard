@@ -2,7 +2,7 @@
 	import cookie from 'cookie';
 	import * as Card from '$lib/components/ui/card';
 	import logo from '$lib/image/merchant.png';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	let cookieValues = null;
@@ -13,21 +13,20 @@
 	let showConfirmButton = false;
 	export let form;
 	let profileData: { userId: string; pictureUrl: string; displayName: string }[] = [];
+	let lastProfileData: any[] = [];
+	let QuotaLimit=0;
+	let QuotaUse=0;
 	onMount(async () => {
-		profileData = getFromLocalStorage<{ userId: string; pictureUrl: string; displayName: string }>(
-			'DataUsers'
-		);
-		console.log('Initial Profile Data:', profileData);
-		console.log('Parsed data:', JSON.parse(localStorage.getItem('DataUsers') || '[]'));
-		checkCookie();
 
 		try {
 			console.log(profileData);
 			const data = await GetProfile();
 			// Use profileData here
 			profiles = data;
+			QuotaLimit = data.QuotaLimit
+			QuotaUse = data.QuotaUsage
 			id.push(data.Id);
-			console.log('profile : ', profiles, id, profileData);
+			console.log('profile : ', profiles, id, data);
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		} finally {
@@ -78,9 +77,6 @@
 		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
 			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
-		} else if (myCookie.Email) {
-			console.log('Get by Email');
-			url = `${PUBLIC_API_ENDPOINT}/merchant/profileemail/${myCookie.Email}`;
 		} else {
 			throw new Error('Neither email nor id is provided.');
 		}
@@ -117,53 +113,109 @@
 		window.location.replace(loginUrl);
 	};
 
-	function getFromLocalStorage<T>(key: string): T[] {
-		const item = localStorage.getItem(key);
-		console.log('Data retrieved from localStorage:', item);
-		if (item) {
-			try {
-				const parsedItem = JSON.parse(item);
-				// ตรวจสอบว่าข้อมูลที่แปลงแล้วเป็นอาร์เรย์
-				if (Array.isArray(parsedItem)) {
-					return parsedItem as T[];
-				} else {
-					console.error('Data is not an array:', parsedItem);
-					return [];
-				}
-			} catch (error) {
-				console.error('Error parsing localStorage item:', error);
-				return [];
-			}
-		}
-		return [];
-	}
-	function checkCookie() {
-		// อ่านค่าสถานะจากคุกกี้
-		const cookie = document.cookie.split('; ').find((row) => row.startsWith('Status='));
-		const status = cookie ? cookie.split('=')[1] : null;
 
-		// ตรวจสอบค่าสถานะ และกำหนดค่าให้กับ showConfirmButton
-		if (status) {
-			showConfirmButton = true;
-		}
-	}
 
-	function handleSubmit() {
-		// Clear localStorage
-		clearRemainingTime();
-		// Submit the form
-		deleteCookie('Status');
-		document.getElementById('updateline').submit();
-	}
-	function clearRemainingTime() {
-		localStorage.removeItem('DataUsers');
-	}
+	
+// 	function getFromLocalStorage<T>(key: string): T[] {
+// 		const item = localStorage.getItem(key);
+// 		// console.log('Data retrieved from localStorage:', item);
+// 		if (item) {
+// 			try {
+// 				const parsedItem = JSON.parse(item);
+// 				// ตรวจสอบว่าข้อมูลที่แปลงแล้วเป็นอาร์เรย์
+// 				if (Array.isArray(parsedItem)) {
+// 					return parsedItem as T[];
+// 				} else {
+// 					console.error('Data is not an array:', parsedItem);
+// 					return [];
+// 				}
+// 			} catch (error) {
+// 				console.error('Error parsing localStorage item:', error);
+// 				return [];
+// 			}
+// 		}
+// 		return [];
+// 	}
+	
+
+// 	function handleSubmit() {
+// 		// Clear localStorage
+// 		clearRemainingTime();
+// 		// Submit the form
+// 		deleteCookie('Status');
+// 		document.getElementById('updateline').submit();
+// 	}
+// 	function clearRemainingTime() {
+// 		localStorage.removeItem('DataUsers');
+// 	}
+	
+	
+// let intervalId: number | NodeJS.Timeout;
+
+// function startMonitoringLocalStorage(): number | NodeJS.Timeout {
+//         intervalId = setInterval(() => {
+//             const newProfileData = getFromLocalStorage<{ userId: string; pictureUrl: string; displayName: string }>('DataUsers');
+//             if (!arraysEqual(newProfileData, lastProfileData)) {
+// 				lastProfileData = newProfileData;
+//                 profileData = newProfileData;
+//                 console.log('Profile data updated:', profileData);
+//             }
+//         }, 1000);
+
+//         return intervalId;
+//     }
+// 	function stopMonitoringLocalStorage(intervalId: number | NodeJS.Timeout) {
+//     clearInterval(intervalId);
+// }
+
+
+// function arraysEqual(arr1: any[], arr2: any[]): boolean {
+//     if (arr1.length !== arr2.length) return false;
+
+//     for (let i = 0; i < arr1.length; i++) {
+//         if (arr1[i].userId !== arr2[i].userId ||
+//             arr1[i].pictureUrl !== arr2[i].pictureUrl ||
+//             arr1[i].displayName !== arr2[i].displayName) {
+//             return false;
+//         }
+//     }
+
+//     return true;
+// }
+// let lineAccounts: any[] = [];
+// function removeAccount(index: number) {
+//   lineAccounts.splice(index, 1);  // ลบบัญชีออกจาก lineAccounts
+
+//   // ดึงข้อมูลจาก localStorage ที่มีชื่อว่า "DataUsers"
+//   const storedData = getFromLocalStorage<Array<{ userId: string; pictureUrl: string; displayName: string }>>('DataUsers');
+  
+//   if (storedData) {
+//     console.log("StoredData", storedData);  // ตรวจสอบว่าดึงข้อมูลมาได้ถูกต้องหรือไม่
+
+//     // ลบข้อมูลตามลำดับที่ต้องการ
+//     storedData.splice(index, 1);
+
+//     // อัปเดตข้อมูลใน localStorage
+//     localStorage.setItem('DataUsers', JSON.stringify(storedData));
+//   } else {
+//     console.error("No data found in localStorage under 'DataUsers'");
+//   }
+// }
+// function handleRemove(event, index) {
+//         // Prevent form submission
+//         event.preventDefault();
+
+//         // Your logic to remove the account
+//         removeAccount(index);
+//     }
+	
+
+
 </script>
 
 <svelte:head>
 	<script src="../src/lib/callbackup.js"></script>
 </svelte:head>
-
 <!-- <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-3 w-100 overflow-x-hidden lg:h-screen  md:h-100 sm:h-100  bg-[url('$lib/image/back.jpg')] bg-cover bg-no-repeat bg-center shadow-inner  lg:content-center"  >
 <div class="my-10 mx-3  lg:h-96 backdrop-blur-xl bg-white/30 rounded-xl "><div
 	class="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 my-5 "
@@ -260,158 +312,182 @@
 >
 	<div class="flex justify-center bg-slate-100">
 		<div class="lg:my-0 md:my-0 sm:my-0 my-5">
-			<div class=" text-center text-3xl lg:ml-28 my-3">
-				<a class="font-bold">Profile</a>
+			<div class="flex my-3 justify-center">
+				<img src={logo} alt="" class="w-24 h-30 my-5" />
+				<div class="my-5 content-center mx-2">
+					<div class=" text-4xl font-bold">{profiles.MerchantName}</div>
+					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-2 my-2"><div class="text-lg">Merchant ID : {#if profiles.MerchantId != 0}{profiles.MerchantId}{:else}-{/if}</div><div class="flex justify-center mx-5">
+						{#if profiles.Status == 'ACTIVE'}
+							<div
+								class="  bg-green-500 text-center px-3  rounded-lg text-sm text-white"
+								style="height: 18px;"
+							>
+								ACTIVE
+							</div>
+						{:else}
+							<div
+								class="   bg-red-600 text-center px-3 rounded-lg text-sm text-white"
+								style="height: 18px;"
+							>
+								INACTIVE
+							</div>
+						{/if}
+					</div></div>
+				</div>
 			</div>
-
+			<Card.Root class="my-2 w-80 sm:w-full md:w-full lg:w-full">
+				<Card.Header>
+				  <Card.Title>
+					<div class="flex justify-between text-xl mx-5">
+						<div> Package</div>
+						<div>{profiles.PackageName}</div>
+					</div>
+					
+				  </Card.Title>
+				</Card.Header>
+				<Card.Content>
+				  <div class="flex justify-center"><progress class="progress progress-success w-96 mx-2" value={QuotaLimit-QuotaUse} max={QuotaLimit}></progress></div>
+				  <div class="flex justify-end w-100 lg:px-10 md:px-10 sm:px-10 px-2">
+					<div class="text-xs	my-2">used {parseInt(profiles.QuotaLimit-profiles.QuotaUsage)} of {parseInt(profiles.QuotaLimit)} requests</div>
+				  </div>
+				</Card.Content>
+				<Card.Footer>
+					
+				</Card.Footer>
+			  </Card.Root>
 			<div
-				class="  bg-white w-80 lg:my-0 md:my-5 sm:my-0 my-8 sm:w-96 md:w-96 lg:w-full rounded-2xl border border-slate-300 lg:mx-14"
+				class="  bg-white w-80 lg:my-3 md:my-5 sm:my-0 my-8 sm:w-96 md:w-full lg:w-full rounded-2xl border border-slate-300"
 			>
 				<div>
 					<div>
 						<Card.Content class="flex justify-center relative">
-							<div
-								class="bg-sky-500/40 filter blur-md rounded-full flex justify-center my-5 w-40"
-								style="height:30%"
-							>
-								<div
-									class="chart-container content-center flex justify-center"
-									style="height: 130px;"
-								>
-									.
-								</div>
-
-								<div></div>
-							</div>
-
-							<img src={logo} alt="" class="w-32 h-32 my-5 absolute bottom-50 left-50" />
+						
 						</Card.Content>
 					</div>
 				</div>
 				<div class="my-5">
 					{#if loading}
-						<div class="flex justify-center">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="spin"
-								x="0px"
-								y="0px"
-								width="100"
-								height="100"
-								viewBox="0 0 128 128"
-							>
-								<path
-									d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
-								></path>
-							</svg>
-						</div>
+					<div class="flex justify-center">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="spin"
+                            x="0px"
+                            y="0px"
+                            width="100"
+                            height="100"
+                            viewBox="0 0 128 128"
+                        >
+                            <path
+                                d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
+                            ></path>
+                        </svg>
+                    </div>
 					{:else}
-						<Card.Root class=" text-black mx-5 border-none shadow-none">
+						<Card.Root class=" text-black border-none shadow-none">
 							<Card.Content class="mx-3 my-3 flex px-3  ">
 								<div style="width: 100%;">
-									<div class="text-3xl text-center">{profiles.MerchantName}</div>
-									<div class="text-sm text-wrap text-center my-2">
-										Merchant ID : {#if profiles.MerchantId != 0}{profiles.MerchantId}{:else}-{/if}
-									</div>
-									<div class="flex justify-center my-2">
-										{#if profiles.Status == 'ACTIVE'}
-											<div
-												class="  bg-green-500 text-center px-3 rounded-2xl text-sm text-white"
-												style="height: 18px;"
-											>
-												ACTIVE
-											</div>
-										{:else}
-											<div
-												class="   bg-red-600 text-center px-3 rounded-2xl text-sm text-white"
-												style="height: 18px;"
-											>
-												INACTIVE
-											</div>
-										{/if}
+									<div class="text-3xl ">About</div>
+									<div class="text-sm text-wrap my-2 grid gap-4 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
+										<div class="text-lg">Email </div>
+										<div class=" col-span-2">{profiles.Email}</div>
+										<div class="text-lg">Phone </div>
+										<div class=" col-span-2">{profiles.MerchantTel}</div>
 									</div>
 								</div></Card.Content
 							>
 						</Card.Root>
-						<hr class=" bg-gray-400 my-3 mx-5" style="height: 3px;" />
-
+						<hr class=" bg-gray-300 my-3 mx-5" style="height: 2px;" />
 						<div class="mx-5">
-							<div class=" text-2xl text-center my-3">ข้อมูลส่วนตัว</div>
+							<div class=" text-3xl my-3">Address</div>
 
-							<div class=" grid gap-4 md:grid-cols-1 lg:grid-cols-2">
-								<div class="text-sm">
-									<div class=" text-gray-500">Email</div>
-									<div class="text-xs my-2">{profiles.Email}</div>
-								</div>
-								<div class="text-sm">
-									<div class=" text-gray-500">URL</div>
-									<div class="text-xs my-2">{profiles.MerchantURL}</div>
-								</div>
-								<div class="text-sm">
-									<div class=" text-gray-500">Company</div>
-									<div class="text-xs my-2">{profiles.MerchantCompany}</div>
-								</div>
-								<div class="text-sm">
-									<div class=" text-gray-500">Address</div>
-									<div class="text-xs my-2">{profiles.AddressTH}</div>
-								</div>
-								<div class="text-sm">
-									<div class=" text-gray-500">Phone</div>
-									<div class="text-xs my-2">{profiles.MerchantTel}</div>
-								</div>
+							<div class=" grid gap-4 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
+								
+									<div class="text-lg">URL</div>
+									<div class="text-sm break-words col-span-2">{profiles.MerchantURL}</div>
+								
+								
+									<div class="text-lg">Company</div>
+									<div class="text-sm col-span-2 break-words">{profiles.MerchantCompany}</div>
+								
+								
+									<div class="text-lg">Address</div>
+									<div class="text-sm2 col-span-2 break-words">{profiles.AddressTH}</div>
+							
+								
 							</div>
 						</div>
+					<hr class=" bg-gray-300 my-3 mx-5" style="height: 2px;" />
 					{/if}
-					<div class="text-center">
-						<form id="updateline" method="post" action="?/UpdateLine">
-							{#each profileData as profile}
-								<input type="text" hidden name="uid" value={profile.userId} />
-								<input type="text" hidden name="name" value={profile.displayName} />
-								<div class="avatar online">
-									<div class="w-10 rounded-full">
-										<img src={profile.pictureUrl} />
+					<div class="mx-5">
+						<div class=" text-2xl my-3">Links</div>
+
+						
+						
+								{#each profileData as profile , index}
+									
+									<div class=" grid gap-4 grid-cols-4 md:grid-cols-4 lg:grid-cols-4 border border-gray-300 rounded-lg">
+									<div class="avatar">
+										<div class="w-10 rounded-full mx-2 my-2">
+											<img src={profile.pictureUrl} />
+										</div>
 									</div>
+									<div class=" col-span-2 content-center">
+										{profile.displayName}
+									</div>
+									<div class="dropdown dropdown-bottom flex justify-end bg-none my-2 " >
+										<div tabindex="0" role="button" class="btn btn-sm m-1"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" {...$$props}>
+											<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+												<circle cx="8" cy="2.5" r=".75" />
+												<circle cx="8" cy="8" r=".75" />
+												<circle cx="8" cy="13.5" r=".75" />
+											</g>
+										</svg></div>
+										<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 shadow">
+										  <li><Button variant="ghost" class=" text-red-600 " on:click={(event) => handleRemove(event, index)}>ยกเลิกการเชื่อมต่อ</Button></li>
+										</ul>
+									  </div>
+									
 								</div>
-							{/each}
-							<input type="text" hidden name="id" id="inputid" />
-						</form>
+								{/each}
+					
+		
+						
+							
+						
 					</div>
-					<div class="flex justify-center">
+					<div class="flex justify-start">
 						<Button
 							variant="outline"
-							class="my-2 flex text-center py-0 px-0 bg-green-500 rounded-full"
+							class="my-2 mx-5 flex text-center py-0 px-0 bg-green-500 rounded-md lg:w-30 md:w-50"
 							on:click={line}
-							style="width:30%;height:30px"
-							><div style="width:100%;height:100%">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									x="0px"
-									y="0px"
-									width="100%"
-									height="100%"
-									viewBox="0 0 48 48"
-								>
-									<path
-										fill="#00c300"
-										d="M12.5,42h23c3.59,0,6.5-2.91,6.5-6.5v-23C42,8.91,39.09,6,35.5,6h-23C8.91,6,6,8.91,6,12.5v23C6,39.09,8.91,42,12.5,42z"
-									></path><path
-										fill="#fff"
-										d="M37.113,22.417c0-5.865-5.88-10.637-13.107-10.637s-13.108,4.772-13.108,10.637c0,5.258,4.663,9.662,10.962,10.495c0.427,0.092,1.008,0.282,1.155,0.646c0.132,0.331,0.086,0.85,0.042,1.185c0,0-0.153,0.925-0.187,1.122c-0.057,0.331-0.263,1.296,1.135,0.707c1.399-0.589,7.548-4.445,10.298-7.611h-0.001C36.203,26.879,37.113,24.764,37.113,22.417z M18.875,25.907h-2.604c-0.379,0-0.687-0.308-0.687-0.688V20.01c0-0.379,0.308-0.687,0.687-0.687c0.379,0,0.687,0.308,0.687,0.687v4.521h1.917c0.379,0,0.687,0.308,0.687,0.687C19.562,25.598,19.254,25.907,18.875,25.907z M21.568,25.219c0,0.379-0.308,0.688-0.687,0.688s-0.687-0.308-0.687-0.688V20.01c0-0.379,0.308-0.687,0.687-0.687s0.687,0.308,0.687,0.687V25.219z M27.838,25.219c0,0.297-0.188,0.559-0.47,0.652c-0.071,0.024-0.145,0.036-0.218,0.036c-0.215,0-0.42-0.103-0.549-0.275l-2.669-3.635v3.222c0,0.379-0.308,0.688-0.688,0.688c-0.379,0-0.688-0.308-0.688-0.688V20.01c0-0.296,0.189-0.558,0.47-0.652c0.071-0.024,0.144-0.035,0.218-0.035c0.214,0,0.42,0.103,0.549,0.275l2.67,3.635V20.01c0-0.379,0.309-0.687,0.688-0.687c0.379,0,0.687,0.308,0.687,0.687V25.219z M32.052,21.927c0.379,0,0.688,0.308,0.688,0.688c0,0.379-0.308,0.687-0.688,0.687h-1.917v1.23h1.917c0.379,0,0.688,0.308,0.688,0.687c0,0.379-0.309,0.688-0.688,0.688h-2.604c-0.378,0-0.687-0.308-0.687-0.688v-2.603c0-0.001,0-0.001,0-0.001c0,0,0-0.001,0-0.001v-2.601c0-0.001,0-0.001,0-0.002c0-0.379,0.308-0.687,0.687-0.687h2.604c0.379,0,0.688,0.308,0.688,0.687s-0.308,0.687-0.688,0.687h-1.917v1.23H32.052z"
-									></path>
-								</svg>
-							</div>
-						</Button>
-					</div>
-					{#if showConfirmButton}
-						<div class="flex justify-center">
-							<Button
-								variant="outline"
-								class="my-2 flex text-center py-0 px-3 text-white bg-green-500 rounded-full text-sm"
-								type="button"
-								on:click={handleSubmit}>ยืนยัน</Button
+							style="height:40px"
+							><div
+							class="lg:bg-green-800 md:bg-green-800 sm:bg-green-800 rounded-sm w-24 "
+							style="height:100%"
+						>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								x="0px"
+								y="0px"
+								width="100%"
+								height="100%"
+								viewBox="0 0 48 48"
 							>
+								<path
+									fill="#00c300"
+									d="M12.5,42h23c3.59,0,6.5-2.91,6.5-6.5v-23C42,8.91,39.09,6,35.5,6h-23C8.91,6,6,8.91,6,12.5v23C6,39.09,8.91,42,12.5,42z"
+								></path><path
+									fill="#fff"
+									d="M37.113,22.417c0-5.865-5.88-10.637-13.107-10.637s-13.108,4.772-13.108,10.637c0,5.258,4.663,9.662,10.962,10.495c0.427,0.092,1.008,0.282,1.155,0.646c0.132,0.331,0.086,0.85,0.042,1.185c0,0-0.153,0.925-0.187,1.122c-0.057,0.331-0.263,1.296,1.135,0.707c1.399-0.589,7.548-4.445,10.298-7.611h-0.001C36.203,26.879,37.113,24.764,37.113,22.417z M18.875,25.907h-2.604c-0.379,0-0.687-0.308-0.687-0.688V20.01c0-0.379,0.308-0.687,0.687-0.687c0.379,0,0.687,0.308,0.687,0.687v4.521h1.917c0.379,0,0.687,0.308,0.687,0.687C19.562,25.598,19.254,25.907,18.875,25.907z M21.568,25.219c0,0.379-0.308,0.688-0.687,0.688s-0.687-0.308-0.687-0.688V20.01c0-0.379,0.308-0.687,0.687-0.687s0.687,0.308,0.687,0.687V25.219z M27.838,25.219c0,0.297-0.188,0.559-0.47,0.652c-0.071,0.024-0.145,0.036-0.218,0.036c-0.215,0-0.42-0.103-0.549-0.275l-2.669-3.635v3.222c0,0.379-0.308,0.688-0.688,0.688c-0.379,0-0.688-0.308-0.688-0.688V20.01c0-0.296,0.189-0.558,0.47-0.652c0.071-0.024,0.144-0.035,0.218-0.035c0.214,0,0.42,0.103,0.549,0.275l2.67,3.635V20.01c0-0.379,0.309-0.687,0.688-0.687c0.379,0,0.687,0.308,0.687,0.687V25.219z M32.052,21.927c0.379,0,0.688,0.308,0.688,0.688c0,0.379-0.308,0.687-0.688,0.687h-1.917v1.23h1.917c0.379,0,0.688,0.308,0.688,0.687c0,0.379-0.309,0.688-0.688,0.688h-2.604c-0.378,0-0.687-0.308-0.687-0.688v-2.603c0-0.001,0-0.001,0-0.001c0,0,0-0.001,0-0.001v-2.601c0-0.001,0-0.001,0-0.002c0-0.379,0.308-0.687,0.687-0.687h2.604c0.379,0,0.688,0.308,0.688,0.687s-0.308,0.687-0.688,0.687h-1.917v1.23H32.052z"
+								></path>
+							</svg>
 						</div>
-					{/if}
+						<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden hover:text-black text-white">
+							Login With Line
+						</div>
+						</Button>
+						
+					</div>
 				</div>
 			</div>
 		</div>
@@ -420,7 +496,7 @@
 
 <!-- Open the modal using ID.showModal() method -->
 <dialog id="my_modal_2" class="modal">
-	<div class="modal-box lg:ml-20">
+	<div class="modal-box ">
 		<div class="text-lg font-bold flex justify-center">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -451,7 +527,7 @@
 </dialog>
 
 <dialog id="my_modal_3" class="modal">
-	<div class="modal-box lg:ml-20">
+	<div class="modal-box ">
 		<div class="text-lg font-bold flex justify-center">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -492,7 +568,24 @@
 		<button>close</button>
 	</form>
 </dialog>
+<div class="tooltip-container">
+    <div class="tooltip">
+        <button class="btn rounded-full  bg-black text-white">i</button>
+        <div class="tooltip-text">
+            <strong>คำแนะนำเบื้องต้น:</strong> <br>
+            แสดงข้อมูลเบื้องต้นของคนที่เข้ามาใช้งาน
+            <br><br>  กดปุ่ม Line --> Login Line --> แสดงรูป Line ( สามารถทำแบบเดิมเพื่อเพิ่มอีก Line ได้ )-->กดยืนยัน  
+            <br><br>  สามารถใช้งาน Check Slip ผ่านไลน์ได้แล้ว ( ถ้าไม่ได้ ต้องซื้อ โควต้า ที่หน้า Package )
+        </div>
+    </div>
+</div>
 
+<form id="updateline" method="post" action="?/UpdateLine">
+		<input type="text" hidden name="uid" id="inputuid" />
+		<input type="text" hidden name="name" id="inputname" />
+		<input type="text" hidden name="avatar" id="inputavatar" />
+		<input type="text" hidden name="id" id="inputid" />
+</form>
 <style scoped>
 	@media (min-width: 1024px) {
 		.lg\:h-screen {
@@ -516,4 +609,41 @@
 			transform: rotate(360deg);
 		}
 	}
+
+	.tooltip-container {
+        position: fixed; /* ใช้ fixed เพื่อให้อยู่ตำแหน่งเดิมเมื่อเลื่อนหน้า */
+        right: 10px; /* ปรับให้ปุ่มและ tooltip อยู่ด้านขวาของหน้าจอ */
+        top: 95%; /* ปรับตำแหน่งให้อยู่ตรงกลางตามแนวตั้ง */
+        transform: translateY(-50%); /* เลื่อนขึ้นครึ่งหนึ่งของความสูงเพื่อให้อยู่ตรงกลาง */
+        z-index: 1000;
+    }
+
+    .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 250px;
+        max-height: 300px; /* กำหนดความสูงสูงสุดเพื่อให้มี scrollbar */
+        background-color: #555;
+        color: #fff;
+        text-align: left;
+        border-radius: 5px;
+        padding: 10px;
+        position: absolute;
+        right: 0; /* ให้ tooltip อยู่ชิดขวาของปุ่ม */
+        bottom: 100%; /* ให้ tooltip อยู่ด้านล่างของปุ่ม */
+        margin-top: 10px; /* ระยะห่างระหว่างปุ่มและ tooltip */
+        overflow-y: auto; /* เพิ่ม scrollbar ในแนวตั้ง */
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
 </style>

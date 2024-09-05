@@ -19,12 +19,14 @@
 		
 		onMount(async() => {
 		console.log("form admin : ", form);
-		console.log("form admin : ",form)
 		if(form){
-			if(form.message != "Non Admin"){
-				window.location.assign("/admin/admin-dashboard")
+			if(form.Status == false){
+				const modal = document.getElementById('my_modal_2');
+				if (modal) {
+					modal.showModal();
+				}
 			}else{
-				alert("username และ  password ไม่ถูกต้อง")
+				window.location.assign("/admin/admin-dashboard")
 			}
 		}
 		
@@ -37,7 +39,16 @@
 			
 		};
 
-		
+		let showPassword = false;
+	let password = '';
+	function togglePasswordVisibility() {
+		showPassword = !showPassword;
+	}
+	function handlePasswordInput(event: { target: { value: string } }) {
+		// Remove spaces from the input value
+		password = event.target.value.replace(/\s+/g, '');
+		event.target.value = password;
+	}
 	
 	</script>
 	
@@ -70,10 +81,44 @@
 					<input type="text" name="username" placeholder="Username" id="uernameAdmin" style="width: 90%;height:40px" class="border border-spacing-10 px-5 rounded-2xl" />
 					</div>
 					<div class="flex justify-center">
-					<input type="text" name="password" placeholder="Password" id="passwordAdmin" style="width: 90%;height:40px" class="my-3 border border-spacing-10 px-5 rounded-2xl"/>
+						<div style="position: relative; width: 90%;">
+							<label style="display: block; position: relative;">
+								<input
+									type={showPassword ? 'text' : 'password'}
+									on:input={handlePasswordInput}
+									maxlength="150"
+									name="password"
+									placeholder="Password"
+									id="password"
+									style="width: 100%; height: 40px;"
+									class="my-3 border border-spacing-10 ps-5 pe-10 rounded-2xl"
+								/>
+								<!-- <input type="checkbox" on:change={togglePasswordVisibility} style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);" /> -->
+								<svg
+									class="eye-icon"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+									width="24"
+									height="24"
+									on:click={togglePasswordVisibility}
+									style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d={showPassword
+											? 'M12 4.5C7.305 4.5 3.12 7.59 1.68 12c1.44 4.41 5.625 7.5 10.32 7.5 5.67 0 10.8-3.09 12.24-7.5C22.5 7.59 17.36 4.5 12 4.5zM12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z'
+											: 'M12 4.5C7.305 4.5 3.12 7.59 1.68 12c1.44 4.41 5.625 7.5 10.32 7.5 5.67 0 10.8-3.09 12.24-7.5C22.5 7.59 17.36 4.5 12 4.5zM12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zM3 3l18 18'}
+									/>
+								</svg>
+							</label>
+						</div>
 					</div>
 					<div class="flex justify-center">
-						<Button type="submit" variant="outline" class="my-2 flex text-center py-0 px-0  bg-sky-400 rounded-2xl" style="width:90%;height:40px"  >Sign In</Button>
+						<Button type="submit" variant="outline" class="my-2 flex text-center py-0 px-0  bg-sky-400 rounded-2xl text-white bg-primary" style="width:90%;height:40px;"  >Sign In</Button>
 					</div>
 				</form>
 			  </div>
@@ -83,7 +128,36 @@
 			</Card.Root>
 		</div>
 	</div>
-	
+	<dialog id="my_modal_2" class="modal">
+		<div class="modal-box lg:ml-20">
+			<div class="text-lg font-bold flex justify-center">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					x="0px"
+					y="0px"
+					width="100"
+					height="100"
+					viewBox="0 0 48 48"
+				>
+					<path
+						fill="#f44336"
+						d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+					></path><path
+						fill="#fff"
+						d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+					></path><path
+						fill="#fff"
+						d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+					></path>
+				</svg>
+			</div>
+			<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+			<p class=" text-center">Username / Password ไม่ถูกต้อง</p>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button>close</button>
+		</form>
+	</dialog>
 	
 
 	

@@ -8,27 +8,65 @@
 
 <script lang="ts">
 	import * as Tabs from '$lib/components/ui/tabs';
-
+	import cookie from 'cookie';
 	import logo from '$lib/image/paysologo.png';
-
+	import logoCustomer from '$lib/image/customer_logo.png';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	let Username ="";
 	export let navItems: NavItem[] = [];
 	let isMenuOpen = false;
 
 	function toggleMenu() {
 		isMenuOpen = !isMenuOpen;
 	}
+	
+	let merchantName="";
+	let adminName="";
+	let displayName = '';
+
+// ฟังก์ชันสำหรับดึงข้อมูลจากคุกกี้
+function getCookies() {
+  return cookie.parse(document.cookie);
+}
+
+onMount(() => {
+    const cookies = getCookies();
+	const cookieData = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+	merchantName = cookieData?.MerchantName ?? null;
+
+	const adminData = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+    adminName = adminData?.MerchantName ?? null;
+	$page.url.pathname.includes('admin') 
+      ? displayName = adminName 
+      : displayName = merchantName;
+    console.log('Merchant Name:', merchantName);
+  });
+
+
+  function deleteCookie(name: string): void {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+  }
+
+  // ฟังก์ชันสำหรับการลบคุกกี้
+  function handleLogout() {
+    deleteCookie('merchant_account');
+    deleteCookie('admin_account');
+	window.location.assign("/")
+    // ทำการรีเฟรชหรือรีไดเร็กไปที่หน้าอื่นหลังจากลบคุกกี้
+  }
 </script>
 
 
-<nav class="bg-card"  style="background-color:  #0033FF;">
+<nav class="bg-card"  style="background-color:#1353ec;">
 
-	<div class="mx-auto max-w-7xl px-2">
+	<div class=" px-2">
 		<div class="relative flex h-10 items-center justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
 				<!-- Mobile menu button-->
 				<button
 					type="button"
-					class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+					class="relative inline-flex items-center justify-center rounded-md p-2 bg-black text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
 					aria-controls="mobile-menu"
 					aria-expanded="false"
 					on:click={toggleMenu}
@@ -73,16 +111,33 @@
 			</div>
 			<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
 				<div class="flex flex-shrink-0 items-center">
-					<img class="h-8 w-auto" src={logo} alt="Your Company" />
+					<img class="h-8 w-auto lg:ml-0 md:ml-0 sm:ml-10 ml-10" src={logo} alt="Your Company" />
 				</div>
-				<div class="hidden gap-6 items-center sm:ml-6 sm:flex text-card-foreground text-white">
+				<div class="hidden gap-6 items-center sm:ml-6 sm:flex text-card-foreground text-white ">
 					{#each navItems as item}
 						<a
-							class="text-xs md:text-sm font-medium transition-colors hover:text-black"
+							class="text-xs md:text-sm font-medium transition-colors hover:text-neutral-300 "
 							href={item.link}>{item.title}</a
 						>
 					{/each}
 				</div>
+			</div>
+			<div class="flex  justify-end"><div class="avatar lg:block md:block sm:hidden hidden">
+				<div class="w-10 rounded-full">
+				  <img src={logoCustomer} />
+				</div>
+			  </div>
+			  <div class="mx-3 text-white content-center">{displayName}</div>
+			  <div class="relative">
+				<details class="dropdown dropdown-bottom dropdown-end lg:block md:block sm:hidden hidden mx-2">
+				  <summary class="text-sm  py-2 rounded-2xl  ">
+				
+				  </summary>
+				  <ul class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
+					<li><a class="py-2 px-4 hover:bg-gray-100 rounded"><button on:click={handleLogout} style="color:#F04438;">Log Out</button></a></li>
+				  </ul>
+				</details>
+			  </div>
 			</div>
 			<!-- <div
 				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
@@ -142,6 +197,7 @@
 							<a  href={item.link}>{item.title}</a>
 						</li>
 					{/each}
+					<button on:click={handleLogout} style="color:#F04438;">Log Out</button>
 				</ul>
 			</div>
 		</div>
@@ -149,7 +205,26 @@
 </nav>
 
 
-<style>
+<style scoped>
+    .dropdown summary {
+  list-style: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  padding-right: 1.5rem; /* ให้พื้นที่สำหรับลูกศร */
+}
 
+.dropdown summary::after {
+  content: '\25BC'; /* Unicode สำหรับลูกศรชี้ลง */
+  position: absolute;
+  right: 0.5rem;
+  font-size: 0.75rem; /* ขนาดของลูกศร */
+  color: white; /* เปลี่ยนสีลูกศรเป็นสีขาว */
+  transition: color 0.2s ease; /* เพิ่มการเปลี่ยนแปลงของสี */
+}
 
-</style>
+.dropdown[open] summary::after {
+  content: '\25BC'; /* ลูกศรชี้ลงคงที่ (ไม่หมุน) */
+}
+
+  </style>

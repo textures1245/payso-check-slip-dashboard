@@ -43,40 +43,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 			console.log('Profile data:', profileData);
-			let existingProfileData = JSON.parse(localStorage.getItem('DataUsers') || '[]');
-			const isDuplicate = existingProfileData.some(profile => profile.userId === profileData.userId);
+			// let existingProfileData = JSON.parse(localStorage.getItem('DataUsers') || '[]');
+			// const isDuplicate = existingProfileData.some(profile => profile.userId === profileData.userId);
 
-            // เพิ่มข้อมูลโปรไฟล์ใหม่เข้าไป
-			if (!isDuplicate) {
-                // เพิ่มข้อมูลโปรไฟล์ใหม่เข้าไป
-                existingProfileData = [...existingProfileData, profileData];
+            // // เพิ่มข้อมูลโปรไฟล์ใหม่เข้าไป
+			// if (!isDuplicate) {
+            //     // เพิ่มข้อมูลโปรไฟล์ใหม่เข้าไป
+            //     existingProfileData = [...existingProfileData, profileData];
 
-                // เก็บข้อมูลโปรไฟล์ที่อัปเดตลงใน localStorage
-                localStorage.setItem('DataUsers', JSON.stringify(existingProfileData));
-            }
+            //     // เก็บข้อมูลโปรไฟล์ที่อัปเดตลงใน localStorage
+            //     localStorage.setItem('DataUsers', JSON.stringify(existingProfileData));
+            // }
+			localStorage.setItem('DataUsers', JSON.stringify(profileData));
 			// Store user profile data in localStorage (or other storage)
 			sessionStorage.setItem('profileData', JSON.stringify(profileData));
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-expect-error
-			if (returnedState == '1010-1010') {
+			
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-expect-error
-				document.getElementById('emailInputline').value = profileData.userId;
-				// @ts-ignore
-				document.getElementById('nameInputline').value = profileData.displayName;
-				console.log(profileData);
-				// @ts-ignore
-				document.getElementById('mylineForm').submit();
-			}else{
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-expect-error
-                
 				document.getElementById('inputuid').value = profileData.userId;
                 document.getElementById('inputid').value = returnedState;
 				document.getElementById('inputname').value = profileData.displayName;
+				document.getElementById('inputavatar').value = profileData.pictureUrl;
 				// @ts-ignore
-				// document.getElementById('updateline').submit();
-            }
+				document.getElementById('updateline').submit();
 
 			// profileData.userId = document.getElementById('uid').value;
 			// profileData.displayName = document.getElementById('name').value;
