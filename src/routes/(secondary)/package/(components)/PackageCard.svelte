@@ -51,7 +51,7 @@
 	<Card.Header class={'rounded-t-xl relative overflow-hidden '} style="height:80px;background-color:#D0D4DA">
 		
 		<div class="flex justify-center">
-			<div class="text-3xl font-bold uppercase w-72 truncate ">{pkg.Name}</div>
+			<div class="text-3xl font-bold uppercase w-72 truncate " title="{pkg.Name}">{pkg.Name}</div>
 		</div>
 	</Card.Header>
 
