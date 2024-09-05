@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { PackageData } from './+page.server.ts';
 	import cookie from 'cookie';
-	import { Cookie } from 'svelte-radix';
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 
 	let packageData: PackageData[] = [];
 	let currentPage = 1;
@@ -68,7 +68,7 @@
 
 		try {
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
+				`${PUBLIC_API_ENDPOINT}/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
 				{
 					method: 'GET',
 					headers: {
@@ -140,7 +140,7 @@
 
 		try {
 			newPackage.Name = newPackage.Name.trim();
-			const response = await fetch(`http://127.0.0.1:4567/api/v1/package/create/packages`, {
+			const response = await fetch(`${PUBLIC_API_ENDPOINT}/package/create/packages`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -198,7 +198,7 @@
 		try {
 			editingPackage.Name = editingPackage.Name.trim();
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/update/package/${editingPackage.Id}`,
+				`${PUBLIC_API_ENDPOINT}/update/package/${editingPackage.Id}`,
 				{
 					method: 'PUT',
 					headers: {
@@ -289,19 +289,38 @@
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
+	<div class="relative w-full max-w-xs">
 		<input
 			type="text"
-			placeholder="Package Id or Package Name"
-			class="input input-bordered w-full max-w-xs bg-blue-50"
-			style="background-color: aliceblue;"
+			placeholder="Package ID or Package Name"
+			class="input input-bordered w-full pl-10 bg-white"
+			style="background-color: white;"
 			maxlength="100"
 			bind:value={searchInpage}
 		/>
+		<!-- Search Icon -->
+		<div class="absolute inset-y-0 left-0 flex items-center pl-3">
+			<svg
+				class="w-5 h-5 text-gray-500"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 21l-4.35-4.35m2.35-7.65a7 7 0 11-14 0 7 7 0 0114 0z"
+				/>
+			</svg>
+		</div>
+	</div>
 		<div class="flex justify-end space-x-2">
 			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={firstPage}
 				>Search</button
 			>
-			<button class="btn btn-outline btn-primary text-xs sm:text-sm" on:click={clearSearch}
+			<button class="btn btn-outline  text-xs sm:text-sm" on:click={clearSearch}
 				>Clear</button
 			>
 		</div>
@@ -316,9 +335,9 @@
 		</div>
 	</div>
 	<div class="overflow-x-hidden">
-		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
-			<thead class="text-center bg-primary text-white lg:text-base">
-				<tr>
+		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
+			<thead class="text-center text-gray-700 lg:text-base">
+				<tr class="border-b border-gray-300">
 					<th class="p-1 sm:p-2 w-16">ID</th>
 					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap">
 						<div class="lg:block sm:block hidden">Package Name</div>
@@ -335,7 +354,7 @@
 			</thead>
 			<tbody class="text-center">
 				{#each packageData as item}
-					<tr>
+					<tr class="border-b border-gray-300">
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id || '-'}</th>
 						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
 						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
@@ -353,29 +372,30 @@
 							</div>
 						</td>
 						<td class="p-1 sm:p-2">
-							<button class="btn btn-xs sm:btn-sm bg-primary" on:click={() => showModalEdit(item)}>
-								<svg
-									class="w-4 h-4 sm:w-5 sm:h-5 text-gray-800 dark:text-white"
-									aria-hidden="true"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<path
-										stroke="currentColor"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-									/>
-								</svg>
-							</button>
+							
+							<svg
+							on:click={() => showModalEdit(item)}
+							class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+							aria-hidden="true"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke="currentColor"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+							/>
+						</svg>
+							
 						</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
-		<div class="grid col-2 w-full justify-end sm:w-auto">
+		<!-- <div class="grid col-2 w-full justify-end sm:w-auto">
 			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
 			<div class="flex">
 				<select
@@ -391,15 +411,50 @@
 					<option value={30}>30</option>
 				</select>
 				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
+					class="join-item btn btn-xs sm:btn-sm btn-outline  mx-1"
 					on:click={prevPage}
 					disabled={currentPage === 1}>Previous</button
 				>
 				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
+					class="join-item btn btn-xs sm:btn-sm btn-outline "
 					on:click={nextPage}
 					disabled={currentPage === totalPages}>Next</button
 				>
+			</div>
+		</div> -->
+		<div class="grid w-full sm:w-auto mt-3">
+			<div class="flex items-center justify-between w-full">
+				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+
+				<div class="flex items-center space-x-2">
+					<select
+						class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+						bind:value={limit}
+						on:change={firstPage}
+					>
+						<option value={5}>5</option>
+						<option value={10}>10</option>
+						<option value={15}>15</option>
+						<option value={20}>20</option>
+						<option value={25}>25</option>
+						<option value={30}>30</option>
+					</select>
+
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={prevPage}
+						disabled={currentPage === 1}
+					>
+						Previous
+					</button>
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={nextPage}
+						disabled={currentPage === totalPages}
+					>
+						Next
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -556,10 +611,10 @@
 		@apply py-1 px-2 rounded-full text-white lg:w-24 md:w-32 sm:w-28 w-20;
 	}
 	.badge-success {
-		@apply bg-green-600;
+		@apply border border-success text-success bg-transparent;
 	}
 	.badge-danger {
-		@apply bg-red-600;
+		@apply border  border-destructive text-destructive bg-transparent;
 	}
 	@media (max-width: 640px) {
 		.badge-status {

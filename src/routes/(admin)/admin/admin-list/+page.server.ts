@@ -9,6 +9,11 @@ export type UserData = {
     PackageId: string;
     BalanceQuotaLeft : string ;
     Status: string;
+    MerchantRole :string;
+    Email : string;
+    BillDate : string;
+    QuotaSpending : string;
+    index : number;
 
    
 }; 

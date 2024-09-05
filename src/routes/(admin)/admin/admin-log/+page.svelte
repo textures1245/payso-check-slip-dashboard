@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { LogAdmin } from './+page.server';
+	import JsonViewer from './(component)/JsonViewer.svelte';
+	import Modal from './(component)/Modal.svelte';
+	import * as Table from '$lib/components/ui/table';
 
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
@@ -29,13 +32,12 @@
 		action = '',
 		role = ''
 	) {
-		console.log('Fetch Input', start, end, offset, limit, actor, action, role);
 		loading = true;
 		try {
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&action=${actor}&action=${action}&actor_role=${role}`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actor=${actor}&action=${action}&actor_role=${role}`
 			);
 
 			if (!response.ok) {
@@ -53,6 +55,7 @@
 
 			// Format the output dates to GMT+8
 			LogAdmin = (data.result || []).map((item: LogAdmin, index: number) => ({
+				Id: item.Id,
 				index: index + (offset - 1) * limit + 1,
 				Timestamp: formatDateToGMT7(item.Timestamp),
 				Action: item.Action,
@@ -64,28 +67,18 @@
 			console.log('Input', startDate, endDate, action, actorName, offset, limit, role);
 		} catch (error) {
 			console.error('Error fetching data:', error);
-			// alert(`Failed to fetch data Please try again.`);
 		} finally {
 			loading = false;
 		}
 	}
 
-	function newIndex(index: number, currentPage: number, limit: number) {
-		(currentPage - 1) * limit + index + 1;
-	}
-
 	function formatDateToGMT7(dateString: string): string {
 		const date = new Date(dateString);
-		const gmt7Date = new Date(date.getTime() + 7 * 60 * 60 * 1000);
-		return gmt7Date
-			.toISOString()
-			.replace('T', ' ')
-			.replace(/\.\d+Z$/, '');
+		return date.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' });
 	}
 
 	function handleSearch() {
 		fetchData(startDate, endDate, offset, limit, actorName, action, role);
-		console.log('Selected role:', role);
 	}
 
 	function handleClear() {
@@ -155,6 +148,16 @@
 		action = value;
 		event.target.value = value;
 	}
+
+	let showModal: boolean = false;
+
+	const openModal = () => {
+		showModal = true;
+	};
+
+	const closeModal = () => {
+		showModal = false;
+	};
 </script>
 
 <div class="w-full py-4 sm:px-4 overflow-x-auto" style="font-family: Ubuntu, sans-serif">
@@ -164,18 +167,18 @@
 	>
 
 	<div
-		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4"
+		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4 "
 	>
 		<input
 			type="date"
 			bind:value={startDate}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
 		/>
 		<input
 			type="date"
 			bind:value={endDate}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
 		/>
 		<input
@@ -183,7 +186,7 @@
 			placeholder="Action"
 			bind:value={action}
 			on:input={handleInputAction}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
 		/>
 		<input
@@ -191,10 +194,9 @@
 			placeholder="Actor"
 			bind:value={actorName}
 			on:input={handleInputActor}
-			class="input input-bordered bg-blue-50 my-1 mx-2"
+			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="250"
 		/>
-
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
 			<button
 				on:click={firstPage}
@@ -202,23 +204,23 @@
 			>
 			<button
 				on:click={handleClear}
-				class="btn btn-outline btn-primary text-xs sm:text-sm my-1 mx-2">Clear</button
+				class="btn btn-outline  text-xs sm:text-sm my-1 mx-2">Clear</button
 			>
-			<select
-				class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-				bind:value={role}
-				on:change={handleSearch}
-			>
-				<option value="ADMIN">Admin</option>
-				<option value="MERCHANT">Merchant</option>
-				<option value="">All</option>
-			</select>
 		</div>
+		<select
+			class="select w-100 rounded-md bg-white my-1 mx-2 outline outline-1 outline-gray-300"
+			bind:value={role}
+			on:change={handleSearch}
+		>
+			<option value="ADMIN">Admin</option>
+			<option value="MERCHANT">Merchant</option>
+			<option value="">All</option>
+		</select>
 	</div>
 	<div>
-		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base">
-			<thead class="text-center bg-primary text-white lg:text-base">
-				<tr>
+		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
+			<thead class="text-center text-gray-700 lg:text-base caption-bottom">
+				<tr class="border-b border-gray-300">
 					<th class="p-1 sm:p-2 w-10">No</th>
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden">Time Stamp</div>
@@ -234,7 +236,7 @@
 						<div class="lg:block sm:block hidden text-left">Actor Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Name</div>
 					</th>
-					<th class="p-1 sm:p-2 text-left w-96">Data</th>
+					<th class="p-1 sm:p-2 text-center">Data</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -243,8 +245,8 @@
 				{:else if LogAdmin.length === 0}
 					<tr><td colspan="6">No data available</td></tr>
 				{:else}
-					{#each LogAdmin as item}
-						<tr class="odd:bg-primary-content/50">
+					{#each LogAdmin as item, i (i)}
+						<tr class="border-b border-gray-300">
 							<td class="p-1 sm:p-2 lg:text-sm">{item.index}</td>
 							<td class="p-1 sm:p-2 lg:text-sm">{item.Timestamp}</td>
 							<td class="p-1 sm:p-2 lg:text-sm">{item.Action}</td>
@@ -252,16 +254,40 @@
 								>{item.MethodName}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.ActorName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm inline-block w-96 text-left text-pretty break-words"
-								>{item.DataRequest}</td
-							>
+							<td class="p-1 sm:p-2 lg:text-sm text-center">
+								<label for={`logDataModel-${i}`} class="btn bg-white"
+									><svg
+										class="w-6 h-6 text-gray-800 dark:text-gray-800"
+										aria-hidden="true"
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										fill="none"
+										viewBox="0 0 30 30"
+									>
+										<path
+											stroke="currentColor"
+											stroke-width="2"
+											d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
+										/>
+										<path
+											stroke="currentColor"
+											stroke-width="2"
+											d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+										/>
+									</svg></label
+								>
+								<Modal index={i}>
+									<JsonViewer data={item.DataRequest} />
+								</Modal>
+							</td>
 						</tr>
 					{/each}
 				{/if}
 			</tbody>
 		</table>
 
-		<div class="grid col-2 w-full justify-end sm:w-auto">
+		<!-- <div class="grid col-2 w-full justify-end sm:w-auto">
 			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
 			<div class="flex">
 				<select
@@ -287,6 +313,49 @@
 					disabled={currentPage === totalPages}>Next</button
 				>
 			</div>
+		</div> -->
+		<div class="grid w-full sm:w-auto mt-3">
+			<div class="flex items-center justify-between w-full">
+				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+
+				<div class="flex items-center space-x-2">
+					<select
+						class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
+						bind:value={limit}
+						on:change={firstPage}
+					>
+						<option value={5}>5</option>
+						<option value={10}>10</option>
+						<option value={15}>15</option>
+						<option value={20}>20</option>
+						<option value={25}>25</option>
+						<option value={30}>30</option>
+					</select>
+
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={prevPage}
+						disabled={currentPage === 1}
+					>
+						Previous
+					</button>
+					<button
+						class="btn btn-xs sm:btn-sm btn-outline"
+						on:click={nextPage}
+						disabled={currentPage === totalPages}
+					>
+						Next
+					</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
+
+<dialog id="edit_modal" class="modal">
+	<div class="modal-box bg-white w-11/12 max-w-md">
+		<div class="form-control">
+			<h2 class="text-2xl font-bold mb-4">Edit</h2>
+		</div>
+	</div>
+</dialog>
