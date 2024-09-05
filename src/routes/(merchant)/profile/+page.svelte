@@ -376,7 +376,7 @@
 			<div class="flex my-3 justify-center">
 				<img src={logo} alt="" class="w-24 h-30 my-5" />
 				<div class="my-5 content-center mx-2">
-					<div class=" text-4xl font-bold">{profiles.MerchantName}</div>
+					<div class=" text-4xl font-bold truncate lg:w-96 md:w-96 sm:w-96 w-56">{profiles.MerchantName}</div>
 					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-2 my-2"><div class="text-lg">Merchant ID : {#if profiles.MerchantId != 0}{profiles.MerchantId}{:else}-{/if}</div><div class="flex justify-center mx-5">
 						{#if profiles.Status == 'ACTIVE'}
 							<div
