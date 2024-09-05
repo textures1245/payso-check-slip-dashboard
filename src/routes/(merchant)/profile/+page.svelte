@@ -149,7 +149,34 @@
 	};
 
 
+	const DeleteLineLink = async (id:String) => {
+		
+
+    // Create configuration for the fetch request
+    let config = {
+        method: 'DELETE', // Use GET method
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    try {
+        // Make the fetch request
+        const result = await fetch(`${PUBLIC_API_ENDPOINT}/delete/linedata/${id}`, config);
+        const datas = await result.json();
+        console.log(datas);
+        if (datas) {
+            linkline = linkline.filter(item => String(item.IdLinkLine
+			) !== String(id));
+			console.log("linkline ",linkline)
+        }
+    } catch (error) {
+        console.error('Error fetching transaction data:', error);
+    }
+		
+
 	
+	};
 // 	function getFromLocalStorage<T>(key: string): T[] {
 // 		const item = localStorage.getItem(key);
 // 		// console.log('Data retrieved from localStorage:', item);
@@ -342,7 +369,7 @@
 </div> -->
 
 <div
-	class=" grid gap-4 md:grid-cols-1 lg:grid-cols-1 overflow-x-hidden lg:h-screen md:screen sm:h-screen h-screen w-100"
+	class=" grid gap-4 md:grid-cols-1 lg:grid-cols-1 overflow-x-hidden lg:h-screen md:screen sm:h-screen h-screen w-100 bg-primary-foreground"
 >
 	<div class="flex justify-center bg-slate-100">
 		<div class="lg:my-0 md:my-0 sm:my-0 my-5">
@@ -372,7 +399,7 @@
 			<Card.Root class="my-2 w-80 sm:w-full md:w-full lg:w-full">
 				<Card.Header>
 				  <Card.Title>
-					<div class="flex justify-between text-xl mx-5">
+					<div class="flex justify-between textl-xl mx-5">
 						<div> Package</div>
 						<div>{profiles.PackageName}</div>
 					</div>
@@ -420,11 +447,11 @@
 						<Card.Root class=" text-black border-none shadow-none">
 							<Card.Content class="mx-3 my-3 flex px-3  ">
 								<div style="width: 100%;">
-									<div class="text-3xl ">About</div>
+									<div class="text-4xl font-bold">About</div>
 									<div class="text-sm text-wrap my-2 grid gap-4 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
-										<div class="text-lg">Email </div>
+										<div class="text-sm">Email </div>
 										<div class=" col-span-2">{profiles.Email}</div>
-										<div class="text-lg">Phone </div>
+										<div class="text-sm">Phone </div>
 										<div class=" col-span-2">{profiles.MerchantTel}</div>
 									</div>
 								</div></Card.Content
@@ -432,20 +459,20 @@
 						</Card.Root>
 						<hr class=" bg-gray-300 my-3 mx-5" style="height: 2px;" />
 						<div class="mx-5">
-							<div class=" text-3xl my-3">Address</div>
+							<div class=" text-4xl my-3 font-bold">Address</div>
 
 							<div class=" grid gap-4 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
 								
-									<div class="text-lg">URL</div>
+									<div class="text-sm">URL</div>
 									<div class="text-sm break-words col-span-2">{profiles.MerchantURL}</div>
 								
 								
-									<div class="text-lg">Company</div>
+									<div class="text-sm">Company</div>
 									<div class="text-sm col-span-2 break-words">{profiles.MerchantCompany}</div>
 								
 								
-									<div class="text-lg">Address</div>
-									<div class="text-sm2 col-span-2 break-words">{profiles.AddressTH}</div>
+									<div class="text-sm">Address</div>
+									<div class="text-sm col-span-2 break-words">{profiles.AddressTH}</div>
 							
 								
 							</div>
@@ -477,7 +504,7 @@
 											</g>
 										</svg></div>
 										<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 shadow">
-										  <li><Button variant="ghost" class=" text-red-600 " on:click={(event) => handleRemove(event, index)}>ยกเลิกการเชื่อมต่อ</Button></li>
+										  <li><Button variant="ghost" class=" text-red-600 " on:click={(event) => DeleteLineLink(profile.IdLinkLine)}>ยกเลิกการเชื่อมต่อ</Button></li>
 										</ul>
 									  </div>
 									

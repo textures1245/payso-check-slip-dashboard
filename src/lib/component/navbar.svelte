@@ -134,7 +134,8 @@ onMount(() => {
 				
 				  </summary>
 				  <ul class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
-					<li><a class="py-2 px-4 hover:bg-gray-100 rounded"><button on:click={handleLogout} style="color:#F04438;">Log Out</button></a></li>
+					<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button  >Profile</button></a></li>
+					<li><a class="py-2 px-4 hover:bg-gray-100 rounded"><button on:click={handleLogout} style="color:#F04438;">Side Out</button></a></li>
 				  </ul>
 				</details>
 			  </div>
@@ -197,7 +198,8 @@ onMount(() => {
 							<a  href={item.link}>{item.title}</a>
 						</li>
 					{/each}
-					<button on:click={handleLogout} style="color:#F04438;">Log Out</button>
+					<li><a class=" hover:bg-gray-100 rounded" href="/profile"><button>Profile</button></a></li>
+					<button on:click={handleLogout} style="color:#F04438;">Side Out</button>
 				</ul>
 			</div>
 		</div>

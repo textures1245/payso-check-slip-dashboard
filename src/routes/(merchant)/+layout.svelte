@@ -8,10 +8,8 @@
 	import type { Dashboard } from 'svelte-radix';
 
 	let navItems: NavItem[] = [
-		{ id: 1, title: 'HOME',	 link: '/' },
-		{ id: 2, title: 'Dashboard', link: '/dashboard' },
-		{ id: 3, title: 'Package', link: '/package' },
-		{ id: 4, title: 'Profile', link: '/profile' },
+		{ id: 1, title: 'Dashboard', link: '/dashboard' },
+		{ id: 2, title: 'Package', link: '/package' },
 	];
 
 	let subPaths = {
@@ -28,7 +26,7 @@
 	
 </script>
 
-<div >
+<div class="bg-primary-foreground">
 	<Navbar {navItems}/>
 	<Separator  />
 

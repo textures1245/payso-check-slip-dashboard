@@ -334,7 +334,7 @@ const SearchTransaction = async (startDate:String,endDate:String) => {
 			</div>
         </Card.Content>
         <Card.Footer class="flex justify-center content-end ">
-            <div class="text-xs w-100 text-stone-400" >สลิปที่ถูกต้องต่อสลิปทั้งหมด   {#if dataOverview}{(dataOverview.Success_count / dataOverview.Total_count * 100).toFixed(2)}{:else}0{/if}%</div>
+            <div class="text-xs w-100 text-stone-400" >สลิปที่ถูกต้องต่อสลิปทั้งหมด   {#if dataOverview && dataOverview.Success_count != 0}{(dataOverview.Success_count / dataOverview.Total_count * 100).toFixed(2)}{:else}0{/if}%</div>
             
         </Card.Footer>
     </Card.Root>
@@ -371,7 +371,7 @@ const SearchTransaction = async (startDate:String,endDate:String) => {
             </div>
         </Card.Content>
         <Card.Footer class="flex justify-center content-end ">
-            <div class="text-xs  w-100 text-stone-400" >สลิปที่ผิดต่อสลิปทั้งหมด {#if dataOverview}{((dataOverview.false_count/dataOverview.Total_count)*100).toFixed(2)}{:else}0{/if}%
+            <div class="text-xs  w-100 text-stone-400" >สลิปที่ผิดต่อสลิปทั้งหมด {#if dataOverview && dataOverview.false_count != 0}{((dataOverview.false_count/dataOverview.Total_count)*100).toFixed(2)}{:else}0{/if}%
             </div>
             
         </Card.Footer>

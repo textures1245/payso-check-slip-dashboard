@@ -46,7 +46,7 @@
   </div> -->
   
   
-<Card.Root class="relative w-100 rounded-xl overflow-hidden text-center  shadow-none " style="height:100%">
+<Card.Root class="relative w-100 rounded-xl overflow-hidden text-center  shadow-none" style="height:100%">
 	
 	<Card.Header class={'rounded-t-xl relative overflow-hidden '} style="height:80px;background-color:#D0D4DA">
 		
@@ -57,7 +57,7 @@
 
 	<Card.Content class="px-4 py-2 z-0">
 		<div class="gap-1 text-3xl text-center py-4">
-			<p class="font-medium leading-none text-6xl " >{pkg.Price.toFixed(2)}</p>
+			<p class=" font-bold leading-none text-6xl " >{pkg.Price.toFixed(2)}</p>
 			<p class="text-sm text-neutral-500">THB</p>
 		</div>
 		<div class="gap-1 text-3xl text-center py-4">
