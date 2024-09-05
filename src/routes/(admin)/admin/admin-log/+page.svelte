@@ -160,7 +160,7 @@
 	};
 </script>
 
-<div class="w-full py-4 sm:px-4 overflow-x-auto" style="font-family: Ubuntu, sans-serif">
+<div class="w-full py-4 sm:px-4 overflow-x-auto" >
 	<span
 		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>Log</span

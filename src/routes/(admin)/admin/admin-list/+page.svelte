@@ -194,7 +194,7 @@
 	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4" style="font-family: Ubuntu, sans-serif">
+<div class="w-full py-4 px-2 sm:px-4" >
 	<span
 		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>Merchant</span
