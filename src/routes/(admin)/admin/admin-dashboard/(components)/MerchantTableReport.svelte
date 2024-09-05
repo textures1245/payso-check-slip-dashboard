@@ -8,7 +8,7 @@
 <Table.Root>
 	<Table.Header>
 		<Table.Row class="text-xs md:text-sm">
-			<Table.Head></Table.Head>
+			<Table.Head>#</Table.Head>
 			<Table.Head>หมายเลข</Table.Head>
 			<Table.Head class="w-[30px ]">ชื่อ</Table.Head>
 			<Table.Head>อีเมล์</Table.Head>

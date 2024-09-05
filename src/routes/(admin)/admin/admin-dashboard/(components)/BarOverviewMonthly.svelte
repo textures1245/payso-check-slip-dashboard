@@ -202,7 +202,7 @@
 </script>
 
 <div class="relative h-[18rem]">
-	<div class="form-control items-center">
+	<div class="form-control items-end">
 		<form
 			bind:this={form}
 			method="POST"

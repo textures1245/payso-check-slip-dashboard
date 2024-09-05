@@ -8,7 +8,7 @@
 <Table.Root>
 	<Table.Header>
 		<Table.Row class="text-xs md:text-sm">
-			<Table.Head></Table.Head>
+			<Table.Head>#</Table.Head>
 			<Table.Head>เลขรายการ</Table.Head>
 			<Table.Head>เลข MID</Table.Head>
 			<Table.Head>สถานะ</Table.Head>

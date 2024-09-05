@@ -89,7 +89,7 @@
 </script>
 
 <div class="relative h-64">
-	<div class="form-control items-end">
+	<div class="form-control items-start">
 		<form
 			bind:this={form}
 			method="POST"
@@ -113,7 +113,7 @@
 			}}
 		>
 			<div class="flex gap-4">
-				<label class="form-control w-full max-w-xs">
+				<label class="form-control w-full max-w-xs ">
 					<div class="label">
 						<span class="label-text-alt">วันที่เริ่ม</span>
 					</div>
@@ -138,7 +138,7 @@
 					/>
 				</label>
 				<label class="max-w-xs self-end">
-					<button class="btn bg-primary text-primary-content btn-xs" type="submit">ยืนยัน</button>
+					<button class="btn bg-primary text-primary-content btn-xs" type="submit">ค้นหา</button>
 				</label>
 			</div>
 		</form>

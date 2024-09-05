@@ -338,17 +338,17 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 w-16">ID</th>
-					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap">
+					<th class="p-1 sm:p-2 w-16 text-sm">ID</th>
+					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap text-sm">
 						<div class="lg:block sm:block hidden">Package Name</div>
 						<div class="lg:hidden sm:hidden block">P.Name</div>
 					</th>
-					<th class="p-1 sm:p-2 text-right">Price</th>
-					<th class="p-1 sm:p-2 text-right text-wrap">
-						<div class="lg:block sm:block hidden">Quota Limit</div>
+					<th class="p-1 sm:p-2 text-right text-sm">Price</th>
+					<th class="p-1 sm:p-2 text-right text-wrap text-sm">
+						<div class="lg:block sm:block hidden ">Quota Limit</div>
 						<div class="lg:hidden sm:hidden block">Q.Limit</div>
 					</th>
-					<th class="p-1 sm:p-2">Status</th>
+					<th class="p-1 sm:p-2 text-sm">Status</th>
 					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
 			</thead>

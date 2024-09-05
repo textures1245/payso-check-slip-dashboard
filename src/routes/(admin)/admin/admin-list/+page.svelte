@@ -241,25 +241,25 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center  text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 w-8">No</th>
-					<th class="p-1 sm:p-2 text-wrap text-left">
+					<th class="p-1  sm:p-2 w-8 text-sm">No</th>
+					<th class="p-1 sm:p-2 text-wrap text-left text-sm">
 						<div class="lg:block sm:block hidden">Merchant Id</div>
 						<div class="lg:hidden sm:hidden block">M.ID</div></th
 					>
-					<th class="p-1 sm:p-2 text-left">Email</th>
-					<th class="p-1 sm:p-2 text-left">Type</th>
-					<th class="p-1 sm:p-2 text-wrap text-left"
+					<th class="p-1 sm:p-2 text-left text-sm">Email</th>
+					<th class="p-1 sm:p-2 text-left text-sm">Type</th>
+					<th class="p-1 sm:p-2 text-wrap text-left text-sm"
 						><div class="lg:block sm:block hidden">Merchant Name</div>
 						<div class="lg:hidden sm:hidden block">M.Name</div></th
 					>
-					<th class="p-1 sm:p-2 text-left">Package</th>
-					<th class="p-1 sm:p-2 text-wrap text-right">
-						<div class="lg:block sm:block hidden">QuotaLeft</div>
+					<th class="p-1 sm:p-2 text-left text-sm">Package</th>
+					<th class="p-1 sm:p-2 text-wrap text-right text-sm">
+						<div class="lg:block sm:block hidden ">QuotaLeft</div>
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
-					<th class="p-1 sm:p-2 text-left">QuotaSpending</th>
-					<th class="p-1 sm:p-2">Expire date</th>
-					<th class="p-1 sm:p-2">Status</th>
+					<th class="p-1 sm:p-2 text-left text-sm">QuotaSpending</th>
+					<th class="p-1 sm:p-2 text-sm">Expire date</th>
+					<th class="p-1 sm:p-2 text-sm" >Status</th>
 					<th class="p-1 w-20 sm:p-2"></th>
 				</tr>
 			</thead>
@@ -268,9 +268,9 @@
 					<tr class="border-b border-gray-300">
 						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.Email}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.Email}">{item.Email}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantName}</td>
+						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.MerchantName}">{item.MerchantName}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.PackageName}</td>
 						<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
 							>{item.QuotaUsage + item.BalanceQuotaLeft}</td

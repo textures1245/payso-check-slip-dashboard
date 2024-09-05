@@ -254,8 +254,8 @@
 								>{item.MethodName}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.ActorName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm text-center">
-								<label for={`logDataModel-${i}`} class="btn bg-white"
+							<td class="p-1 sm:p-2 lg:text-sm text-center justify-center flex">
+								<label for={`logDataModel-${i}`} class=" bg-white cursor-pointer"
 									><svg
 										class="w-6 h-6 text-gray-800 dark:text-gray-800"
 										aria-hidden="true"

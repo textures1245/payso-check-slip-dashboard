@@ -181,7 +181,7 @@
 						/>
 					</label>
 					<label class="max-w-xs self-end">
-						<button class="btn bg-primary text-primary-content btn-xs" type="submit">ยืนยัน</button>
+						<button class="btn bg-primary text-primary-content btn-xs" type="submit">ค้นหา</button>
 					</label>
 				</div>
 			</form>
