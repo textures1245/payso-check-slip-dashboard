@@ -20,14 +20,15 @@
 		[key: string]: Route[];
 	} = {
 		admin: [
-			{
-				title: 'รายชื่อผู้ใช้',
-				link: '/admin/admin-list',
-				icon: 'material-symbols-light:admin-panel-settings-rounded',
-			},
+			
 			{
 				title: 'แดชบอร์ด',
 				link: '/admin/admin-dashboard',
+				icon: 'material-symbols-light:admin-panel-settings-rounded',
+			},
+			{
+				title: 'รายชื่อผู้ใช้',
+				link: '/admin/admin-list',
 				icon: 'material-symbols-light:admin-panel-settings-rounded',
 			},
 			{
