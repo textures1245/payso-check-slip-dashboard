@@ -23,7 +23,7 @@
 		><span class="drop-shadow-md">Dashboard</span></span
 	>
 
-	<div class="grid auto-rows-fr justify-center sm:grid-cols-2 xl:grid-cols-3 gap-4">
+	<div class="grid auto-rows-fr  justify-center sm:grid-cols-2 xl:grid-cols-3 gap-4">
 		{#if data.receiptIncomeOverview}
 			{@const currentMonth = Math.max(...data.receiptIncomeOverview.map((item) => +item.Month))}
 			{@const currentIncome =
@@ -36,7 +36,7 @@
 					.reduce((acc, curr) => acc + curr.TotalAmountFromPackage, 0) ?? 0}
 
 			<div class="stats stats-vertical justify-center flex flex-col p-6 gap-2 shadow">
-				<div class="flex justify-between w-full place-self-center px-4">
+				<div class="flex justify-between items-center w-full place-self-center px-4">
 					<div class="text-xs md:text-base text-secondary-foreground font-semibold">
 						รายได้เดือนนี้
 					</div>
@@ -47,7 +47,7 @@
 			</div>
 
 			<div class="stats stats-vertical justify-center flex flex-col p-2 gap-2 shadow">
-				<div class="flex justify-between w-full place-self-center px-4">
+				<div class="flex justify-between items-center w-full place-self-center px-4">
 					<div class="text-xs md:text-base text-secondary-foreground font-semibold">
 						รายได้เดือนก่อนหน้านั้น
 					</div>
@@ -58,7 +58,7 @@
 			</div>
 
 			<div class="stats stats-vertical justify-center flex flex-col p-2 gap-2 shadow">
-				<div class="flex justify-between w-full place-self-center px-4">
+				<div class="flex justify-between items-center w-full place-self-center px-4">
 					<div class="text-xs md:text-base text-secondary-foreground font-semibold">รายได้</div>
 					<div class="flex items-center gap-2">
 						<div
