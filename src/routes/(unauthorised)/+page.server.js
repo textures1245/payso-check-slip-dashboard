@@ -1,5 +1,6 @@
 import { cookiesConfig } from '$lib/cookies';
 import { API_ENDPOINT,API_KEY } from '$env/static/private';
+import { Avatar } from 'bits-ui';
 /** @type {import('./$types').Actions} */
 export const actions = {
 
@@ -74,9 +75,9 @@ export const actions = {
 		}
 	},
     signInWithLine: async ({ request ,cookies}) => {
-		const { uid, name } = Object.fromEntries(await request.formData());
+		const { uid, name,avatar} = Object.fromEntries(await request.formData());
 
-		console.log("email : ",uid," name :",name)
+		console.log("email : ",uid," name :",name,avatar)
 		console.log('checking register');
 		// Append key-value pairs to the FormData object
 		
@@ -100,7 +101,8 @@ export const actions = {
                 MerchantRole: 'ACTIVE', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
                 Status: 'NOT_PAYSO', // สมมติว่าสถานะเป็น 'true'
                 Email: uid,
-                Type:"Line"
+                Type:"Line",
+                
             })
 		};
 		var result = await fetch(`${API_ENDPOINT}/merchant/login`, config);
@@ -119,7 +121,8 @@ export const actions = {
                     MerchantRole: 'NOT_PAYSO', // เปลี่ยน 'your_merchant_role_here' เป็นค่าจริง
                     Status: 'ACTIVE', // สมมติว่าสถานะเป็น 'true'
                     Email: uid,
-                    Type:"Line"
+                    Type:"Line",
+                    AvatarUrl:avatar
                 })
             };
             var resultcreate = await fetch(`${API_ENDPOINT}/merchant/createwithLine`, config);

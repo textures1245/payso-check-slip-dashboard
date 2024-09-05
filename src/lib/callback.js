@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 				document.getElementById('emailInputline').value = profileData.userId;
 				// @ts-ignore
 				document.getElementById('nameInputline').value = profileData.displayName;
+				document.getElementById('inputavatar').value = profileData.pictureUrl;
 				console.log(profileData);
 				// @ts-ignore
 				document.getElementById('mylineForm').submit();
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
 				document.getElementById('inputuid').value = profileData.userId;
                 document.getElementById('inputid').value = returnedState;
+				document.getElementById('inputavatar').value = profileData.pictureUrl;
 				// @ts-ignore
 				document.getElementById('updateline').submit();
             }

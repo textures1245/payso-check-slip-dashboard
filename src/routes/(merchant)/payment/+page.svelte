@@ -35,9 +35,10 @@
 		};
 		let url;
 		if(myCookie.Type != "Line"){
-			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=${myCookie.Email}&customerName=-&total=${price}&referenceNo=${refNo}`
+			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=${myCookie.Email}&customerName=customer&total=${price}&referenceNo=${refNo}`
 		}else{
-			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=napatone123@gmail.com&customerName=-&total=${price}&referenceNo=${refNo}`
+			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=napatone123@gmail.com&customerName=customer&total=${price}&referenceNo=${refNo}`
+			
 		}
 		console.log(" URL ",url)
 		const result = await fetch(url, config);

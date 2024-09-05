@@ -5,6 +5,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import logo_customer  from '$lib/image/customer_logo.png';
 	let cookieValues = null;
 	let profiles: any[] = [];
 	let id: any[] = [];
@@ -13,7 +14,7 @@
 	let showConfirmButton = false;
 	export let form;
 	let profileData: { userId: string; pictureUrl: string; displayName: string }[] = [];
-	let lastProfileData: any[] = [];
+	let linkline: any[] = [];
 	let QuotaLimit=0;
 	let QuotaUse=0;
 	onMount(async () => {
@@ -21,12 +22,14 @@
 		try {
 			console.log(profileData);
 			const data = await GetProfile();
+			const link = await GetLineLink();
 			// Use profileData here
+			linkline=link
 			profiles = data;
 			QuotaLimit = data.QuotaLimit
 			QuotaUse = data.QuotaUsage
 			id.push(data.Id);
-			console.log('profile : ', profiles, id, data);
+			console.log('profile : ', profiles, id, linkline);
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		} finally {
@@ -113,6 +116,37 @@
 		window.location.replace(loginUrl);
 	};
 
+	const GetLineLink = async () => {
+		// const email = sessionStorage.getItem('email');
+		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		
+		console.log('++++++++++', myCookie.Id, myCookie.Email);
+		// console.log('email: ', email, 'id: ', id , );
+		console.log('checking register');
+
+		// Create URL parameters from form data
+		let config = {
+			method: 'GET', // Use GET instead of POST
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		};
+
+		let url;
+		if (myCookie.Id) {
+			console.log('Get by Merchant Id');
+			url = `${PUBLIC_API_ENDPOINT}/linedata/${myCookie.Id}`;
+		} else {
+			throw new Error('Neither email nor id is provided.');
+		}
+
+		const result = await fetch(url, config);
+		const data = await result.json();
+		console.log("Link Line",data);
+		return data.result;
+	};
 
 
 	
@@ -423,16 +457,16 @@
 
 						
 						
-								{#each profileData as profile , index}
+								{#each linkline as profile , index}
 									
-									<div class=" grid gap-4 grid-cols-4 md:grid-cols-4 lg:grid-cols-4 border border-gray-300 rounded-lg">
+									<div class=" grid gap-4 grid-cols-4 md:grid-cols-4 lg:grid-cols-4 border my-2 border-gray-300 rounded-lg">
 									<div class="avatar">
 										<div class="w-10 rounded-full mx-2 my-2">
-											<img src={profile.pictureUrl} />
+												<img src={profile.AvatarUrl} />
 										</div>
 									</div>
 									<div class=" col-span-2 content-center">
-										{profile.displayName}
+										{profile.Name}
 									</div>
 									<div class="dropdown dropdown-bottom flex justify-end bg-none my-2 " >
 										<div tabindex="0" role="button" class="btn btn-sm m-1"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" {...$$props}>

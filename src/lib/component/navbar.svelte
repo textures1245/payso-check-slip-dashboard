@@ -113,10 +113,10 @@ onMount(() => {
 				<div class="flex flex-shrink-0 items-center">
 					<img class="h-8 w-auto lg:ml-0 md:ml-0 sm:ml-10 ml-10" src={logo} alt="Your Company" />
 				</div>
-				<div class="hidden gap-6 items-center sm:ml-6 sm:flex text-card-foreground text-white ">
+				<div class="hidden gap-6 items-end  sm:ml-6 sm:flex text-card-foreground text-white ">
 					{#each navItems as item}
 						<a
-							class="text-xs md:text-sm font-medium transition-colors hover:text-neutral-300 "
+							class="text-xs md:text-sm font-semibold transition-colors hover:text-neutral-300 content-end "
 							href={item.link}>{item.title}</a
 						>
 					{/each}

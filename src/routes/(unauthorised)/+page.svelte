@@ -361,6 +361,7 @@
 </form>
 <form id="mylineForm" method="post" action="?/signInWithLine">
 	<input type="text" hidden name="uid" id="emailInputline" />
+	<input type="text" hidden name="avatar" id="inputavatar" />
 	<input type="text" hidden name="name" id="nameInputline" />
 </form>
 
