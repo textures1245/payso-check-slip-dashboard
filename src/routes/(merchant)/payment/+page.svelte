@@ -262,8 +262,8 @@
     {/if}
 	<p>เวลาที่เหลือ: {formatTime(seconds)} วินาที</p>
 {/if} -->
-<div class="flex justify-center items-centerflex-col bg-white">
-<Card.Root class=" lg:w-2/5 md:w-4/5 my-5">
+<div class="flex justify-center items-center flex-col h-screen overflow-hidden">
+<Card.Root class=" lg:w-2/5 md:w-4/5">
     <Card.Header
         class="p-0 items-center justify-center "
     >
@@ -277,7 +277,7 @@
         {#if messageVisible}
 		
         {#if dataImg}
-        <img src={dataImg} />
+        <img src={dataImg} class="mx-5"/>
         {/if}
         <div class="text-xl flex justify-center items-center">
 			<span>Package Name:</span>
@@ -294,3 +294,5 @@
 </Card.Root>
 
 </div>
+
+
