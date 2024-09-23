@@ -20,10 +20,10 @@
 <div class="container space-y-5 px-8 mx-auto">
 	<span
 		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
-		><span class="drop-shadow-md">Dashboard</span></span
+		><span >Dashbord</span></span
 	>
 
-	<div class="grid auto-rows-fr  justify-center sm:grid-cols-2 xl:grid-cols-3 gap-4">
+	<div class="grid auto-rows-fr  justify-center sm:grid-cols-1 xl:grid-cols-3 gap-4">
 		{#if data.receiptIncomeOverview}
 			{@const currentMonth = Math.max(...data.receiptIncomeOverview.map((item) => +item.Month))}
 			{@const currentIncome =
@@ -37,11 +37,11 @@
 
 			<div class="stats stats-vertical justify-center flex flex-col p-6 gap-2 shadow">
 				<div class="flex justify-between items-center w-full place-self-center px-4">
-					<div class="text-xs md:text-base text-secondary-foreground font-semibold">
+					<div class="text-xs  md:text-base text-secondary-foreground font-semibold">
 						รายได้เดือนนี้
 					</div>
-					<div class="stat-value text-2xl text-right">
-						{currentIncome?.toFixed(2)} ฿
+					<div class="stat-value text-base/6 lg:text-2xl md:text-base sm:text-xs text-right">
+						{currentIncome?.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} ฿
 					</div>
 				</div>
 			</div>
@@ -52,7 +52,7 @@
 						รายได้เดือนก่อนหน้านั้น
 					</div>
 					<div class="stat-value text-2xl text-right">
-						{previousIncome?.toFixed(2)} ฿
+						{previousIncome?.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')} ฿
 					</div>
 				</div>
 			</div>
@@ -278,7 +278,7 @@
 			</div>
 		</div> -->
 	</div>
-	<div class="grid auto-rows-fr justify-center sm:grid-cols-2 xl:grid-cols-2 gap-4">
+	<div class="grid auto-rows-fr justify-center sm:grid-cols-1 xl:grid-cols-2 gap-4">
 		{#if data.receiptIncomeOverview}
 			{@const currentMonth = Math.max(...data.receiptIncomeOverview.map((item) => +item.Month))}
 			{@const currentIncome =
@@ -291,7 +291,7 @@
 					.reduce((acc, curr) => acc + curr.TotalAmountFromPackage, 0) ?? 0}
 		{/if}
 
-		<div class="stats flex gap-4 shadow items-center justify-center w-auto">
+		<div class="stats flex gap-4 shadow items-center justify-center w-auto long-card">
 			<div class="stat text-center flex items-center w-full px-4">
 				
 				<div class="w-12 h-12 rounded-full bg-warning flex items-center justify-center">
@@ -332,7 +332,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="stats flex gap-4 shadow items-center justify-center w-auto">
+		<div class="stats flex gap-4 shadow items-center justify-center w-auto long-card">
 			<div class="stat text-center flex items-center w-full px-4">
 				
 				<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
@@ -341,7 +341,7 @@
 					</svg>
 				</div>
 				
-				<div class="flex items-center">
+				<div class="flex items-center justify-center">
 					<div class="text-xs md:text-base text-secondary-foreground font-semibold mr-4">
 						จำนวนลูกค้า
 					</div>
@@ -374,7 +374,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="grid auto-rows-fr justify-center sm:grid-cols-2 xl:grid-cols-1 gap-4">
+	<div class="grid auto-rows-fr justify-center sm:grid-cols-1 xl:grid-cols-1 gap-4">
 		{#if data.receiptIncomeOverview}
 			{@const currentMonth = Math.max(...data.receiptIncomeOverview.map((item) => +item.Month))}
 			{@const currentIncome =
@@ -387,23 +387,30 @@
 					.reduce((acc, curr) => acc + curr.TotalAmountFromPackage, 0) ?? 0}
 		{/if}
 
-		<div class="stats flex gap-4 shadow items-center justify-center w-auto">
-			<div class="stat text-center flex items-center w-full px-4">
-				<div class="w-12 h-12 rounded-full bg-success flex items-center justify-center">
-					<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" {...$$props}>
-						<path fill="white" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m-2 19.59l-5-5L10.59 15L14 18.41L21.41 11l1.596 1.586Z" />
-						<path fill="none" d="m14 21.591l-5-5L10.591 15L14 18.409L21.41 11l1.595 1.585z" />
-					</svg>
+		<div class="stats  lg:grid-cols-4 md:grid-cols-4 sm:grid-cols-1 lg:grid-rows-1 sm:grid-rows-1 grid-rows-2 gap-4 shadow items-center justify-center w-auto">
+			<div class="stat text-center  items-center w-full px-4 grid grid-cols-3">
+				<div class="lg:block md:hidden sm:hidden hidden">
+					<div class="w-12 h-12 rounded-full bg-success flex items-center justify-center ">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" {...$$props} >
+							<path fill="white" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m-2 19.59l-5-5L10.59 15L14 18.41L21.41 11l1.596 1.586Z" />
+							<path fill="none" d="m14 21.591l-5-5L10.591 15L14 18.409L21.41 11l1.595 1.585z" />
+						</svg>
+					</div>
 				</div>
 				
-				<div class="flex items-center">
-					<div class="text-xs md:text-base text-secondary-foreground font-semibold mr-4">
-						รายการตรวจสอบ
+				
+				<div class="items-center col-span-2 ">
+					<div class="flex items-center">
+						<div class="text-xs md:text-base text-secondary-foreground font-semibold mr-4">
+							รายการตรวจสอบ
+						</div>
+						<div class="text-2xl font-bold">
+							{data.statData?.TransactionStat.Total}
+						</div>
 					</div>
-					<div class="stat-value  text-2xl">
-						{data.statData?.TransactionStat.Total}
-					</div>
+					
 				</div>
+				
 			</div>
 
 			<div class="stat text-center flex items-center w-full px-4">
@@ -544,4 +551,33 @@
 		width: 100%;
 		height: 100%;
 	}
+	@media (max-width: 390px) {
+    .stats {
+      flex-direction: column; /* Stack items vertically */
+      gap: 2rem; /* Reduce the gap */
+    }
+
+    .stat {
+      flex-direction: column; /* Stack each stat item */
+      text-align: center; /* Center align text */
+      padding: 1rem; /* Adjust padding for smaller screens */
+    }
+
+    .stat-value {
+      font-size: 1.5rem; /* Scale down the font size */
+    }
+
+    .text-xs {
+      font-size: 0.75rem; /* Smaller text for the labels */
+    }
+
+    .w-12.h-12 {
+      width: 2.5rem; 
+      height: 2.5rem; /* Adjust icon container size */
+    }
+	.long-card {
+      width: 90vw; /* 90% of the viewport width */
+    }
+  }
+	
 </style>

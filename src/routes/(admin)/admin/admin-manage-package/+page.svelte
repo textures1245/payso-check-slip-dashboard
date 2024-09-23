@@ -15,18 +15,28 @@
 		Price: 0,
 		QuotaLimit: 0,
 		Status: 'INACTIVE',
-		TotalCount: 0
+		TotalCount: 0,
+		Visibility: false,
+		AmountLimit: 100,
+		Index : 0
 	};
 	let packagename = '';
 	let searchInpage = '';
 	let filteredData: PackageData[] = [];
 	let alertMessage: string | null = null; // ตัวแปรสำหรับเก็บข้อความ alert
-	let alertType: 'success' | 'error' | null = null; // ตัวแปรสำหรับประเภท alert
+	let alertType: 'success' | 'error' = 'success'; // ตัวแปรสำหรับประเภท alert
+	let showAlertModalSuccess = false;
+	let showAlertModalError = false;
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
+	let showAlertModalCreateSuccess = false;
+	let showAlertModalCreateError = false;
 	let totalItems = 0;
+	let loadingtable = false;
+
 
 	$: totalPages = Math.ceil(totalItems / limit);
 	console.log('total item', totalItems);
+
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
@@ -63,53 +73,102 @@
 		searchfetchData(packagename, offset, limit);
 	});
 
-	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
-	
-
-		try {
-			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json'
-					}
-				}
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to fetch data');
-			}
-
-			const data = await response.json();
-
-			if (!Array.isArray(data.result)) {
-				throw new Error('Result is not an array');
-			}
-
-			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
-
-			packageData = data.result.map((item: PackageData) => ({
-				Id: item.Id,
-				Name: item.Name,
-				Price: item.Price,
-				QuotaLimit: item.QuotaLimit,
-				Status: item.Status,
-				TotalCount: item.TotalCount
-			}));
-
-			totalPages = Math.ceil(totalCount / currentLimit);
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
+	async function updateVisibility(packageId: number | undefined, newVisibility: boolean) {
+	if (packageId === undefined) {
+		console.error('Package ID is undefined');
+		return;
 	}
 
-	
+	const cookies = getCookies();
+	const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+
+	try {
+		const response = await fetch(`${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Actor-Id': myCookie.Id,
+				'Actor-Name': myCookie.Email,
+				'Actor-Role': 'ADMIN'
+			}
+		});
+
+		if (!response.ok) {
+			throw new Error('Failed to update package visibility');
+		}
+
+		// Update the package data locally
+		const index = packageData.findIndex((pkg) => pkg.Id === packageId);
+		if (index !== -1) {
+			packageData[index].Visibility = newVisibility;
+			packageData = [...packageData]; // trigger reactivity in Svelte
+		}
+
+		// Log success message to the console
+		console.log('Visibility updated successfully!');
+	} catch (error) {
+		console.error('Error updating visibility:', error);
+	}
+}
+
+
+async function searchfetchData(packagename : string, currentOffset : number, currentLimit : number) {
+	loadingtable = true;
+    try {
+        const response = await fetch(
+            `${PUBLIC_API_ENDPOINT}/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data');
+        }
+
+        const data = await response.json();
+
+        // Log the response to check its structure
+        console.log("API Response:", data);
+
+        // Check if 'result' exists and is an array
+        if (!data || typeof data !== 'object') {
+            throw new Error('Invalid response structure: Data is not an object');
+        }
+
+        if (!data.result || !Array.isArray(data.result)) {
+            throw new Error('Invalid response structure: Missing or non-array result');
+        }
+
+        const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
+
+        packageData = data.result.map((item:PackageData, Index : number) => ({
+            Id: item.Id,
+            Name: item.Name,
+            Price: item.Price,
+            QuotaLimit: item.QuotaLimit,
+            Status: item.Status,
+            TotalCount: item.TotalCount,
+            Visibility: item.Visibility,
+            AmountLimit: item.AmountLimit,
+			Index : Index + (offset - 1) * limit + 1
+        }));
+
+        totalPages = Math.ceil(totalCount / currentLimit);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    } finally {
+        loadingtable = false;
+    }
+}
 
 	function clearSearch() {
 		searchInpage = '';
 		filteredData = [...packageData];
-		location.reload();
+		searchfetchData('',offset , limit)
 	}
 
 	function showModalEdit(pkg: PackageData) {
@@ -119,7 +178,17 @@
 		modal.showModal();
 	}
 	function showModalCreate() {
-		newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE', TotalCount: 0 };
+		newPackage = {
+			Id: 0,
+			Name: '',
+			Price: 0,
+			QuotaLimit: 0,
+			Status: 'INACTIVE',
+			TotalCount: 0,
+			Visibility: false,
+			AmountLimit: 100,
+			Index:0
+		};
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
 		modal.showModal();
@@ -148,7 +217,10 @@
 					'Actor-Name': myCookie.Email,
 					'Actor-Role': 'ADMIN'
 				},
-				body: JSON.stringify(newPackage)
+				body: JSON.stringify({
+					...newPackage,
+					Visibility: newPackage.Visibility === true // ให้แน่ใจว่าค่าเป็น boolean ไม่ใช่ string
+				})
 			});
 
 			if (!response.ok) {
@@ -162,6 +234,7 @@
 			alertMessage = 'Package created successfully!';
 			alertType = 'success';
 			showAlertModal = true; // แสดง modal
+			showAlertModalCreateSuccess = true;
 
 			// Close the modal
 			const createModal = document.getElementById('create_modal');
@@ -169,83 +242,104 @@
 				// @ts-ignore
 				createModal.close();
 			}
-			newPackage = { Id: 0, Name: '', Price: 0, QuotaLimit: 0, Status: 'INACTIVE', TotalCount: 0 };
+			newPackage = {
+				Id: 0,
+				Name: '',
+				Price: 0,
+				QuotaLimit: 0,
+				Status: 'INACTIVE',
+				TotalCount: 0,
+				Visibility: false,
+				AmountLimit: 100,
+				Index : 0
+			};
 		} catch (error) {
 			console.error('Error creating package:', error);
 			alertMessage =
 				'Failed to create package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
 			showAlertModal = true; // แสดง modal
+			showAlertModalCreateError = true
 		}
 		location.reload();
 	}
 
 	async function updatePackage() {
 		if (!editingPackage) return;
+
 		const cookies = getCookies();
 		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
 		const trimmedName = editingPackage.Name.trim();
 
-		// Check if the name is empty after trimming
+		// ตรวจสอบว่าชื่อแพ็กเกจไม่เป็นค่าว่าง
 		if (trimmedName === '') {
 			alertMessage = 'Package name cannot be empty or just spaces.';
 			alertType = 'error';
-			showAlertModal = true;
+			showAlertModalError = true;
 			return;
 		}
 
 		try {
-			editingPackage.Name = editingPackage.Name.trim();
-			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/update/package/${editingPackage.Id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Actor-Id': myCookie.Id,
-						'Actor-Name': myCookie.Email,
-						'Actor-Role': 'ADMIN'
-					},
-					body: JSON.stringify(editingPackage)
-				}
-			);
+			// ตัดช่องว่างของชื่อแพ็กเกจ
+			editingPackage.Name = trimmedName;
+
+			const response = await fetch(`${PUBLIC_API_ENDPOINT}/update/package/${editingPackage.Id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'Actor-Id': myCookie.Id,
+					'Actor-Name': myCookie.Email,
+					'Actor-Role': 'ADMIN'
+				},
+				body: JSON.stringify(editingPackage)
+			});
 
 			if (!response.ok) {
 				throw new Error('Failed to update package');
 			}
 
+			// อัปเดต packageData เพื่อสะท้อนการเปลี่ยนแปลง
 			const index = packageData.findIndex((pkg) => pkg.Id === editingPackage?.Id);
 			if (index !== -1) {
 				packageData[index] = { ...editingPackage };
-				packageData = [...packageData]; // Trigger Svelte reactivity
+				packageData = [...packageData]; // กระตุ้นการตอบสนองของ Svelte
 			}
 
-			// ตั้งค่าข้อความและประเภท alert
+			// แสดงข้อความการอัปเดตสำเร็จ
 			alertMessage = 'Package updated successfully!';
 			alertType = 'success';
-			showAlertModal = true; // แสดง modal
+			showAlertModalSuccess = true;
 
-			// Close the modal
+			// ปิด modal แก้ไข
 			const editModal = document.getElementById('my_modal_1');
 			if (editModal) {
 				// @ts-ignore
 				editModal.close();
-				location.reload();
 			}
 		} catch (error) {
 			console.error('Error updating package:', error);
 			alertMessage =
 				'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
-			showAlertModal = true; // แสดง modal
-			location.reload();
+			showAlertModalError = true;
+		} finally {
+			location.reload()
 		}
 	}
 
 	function toggleStatus() {
 		if (editingPackage) {
 			editingPackage.Status = editingPackage.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+		}
+	}
+	
+
+	function toggleHide(event: any) {
+		if (newPackage) {
+			// อ่านค่าจาก checkbox ที่ถูกส่งมาจาก event
+			newPackage.Visibility = event.target.checked;
+			console.log('Visibility after toggle:', newPackage.Visibility);
 		}
 	}
 
@@ -278,51 +372,65 @@
 			input.value = value; // อัปเดตค่าที่แก้ไขแล้ว (ถ้าไม่มีปัญหา)
 		}
 	}
+	function validateInputAmountlimit(event: Event) {
+		const input = event.target as HTMLInputElement;
+		let value = input.value;
+
+		// ลบจุดทศนิยมออกจากค่า
+		value = value.replace(/\./g, '');
+
+		// ใช้ Regular Expression เพื่อตรวจสอบว่าเป็นเลขจำนวนเต็มที่ไม่เกิน 4 หลัก
+		const regex = /^[1-9]\d{0,9}$/;
+
+		if (!regex.test(value)) {
+			input.value = '';
+		} else {
+			input.value = value; // อัปเดตค่าที่แก้ไขแล้ว (ถ้าไม่มีปัญหา)
+		}
+	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4" >
+<div class="w-full py-4 px-2 sm:px-4">
 	<span
 		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
-		>Package</span
+		>แพ็คเก็จ</span
 	>
 
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
 	>
-	<div class="relative w-full max-w-xs">
-		<input
-			type="text"
-			placeholder="Package ID or Package Name"
-			class="input input-bordered w-full pl-10 bg-white"
-			style="background-color: white;"
-			maxlength="100"
-			bind:value={searchInpage}
-		/>
-		<!-- Search Icon -->
-		<div class="absolute inset-y-0 left-0 flex items-center pl-3">
-			<svg
-				class="w-5 h-5 text-gray-500"
-				fill="none"
-				stroke="currentColor"
-				viewBox="0 0 24 24"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M21 21l-4.35-4.35m2.35-7.65a7 7 0 11-14 0 7 7 0 0114 0z"
-				/>
-			</svg>
+		<div class="relative w-full max-w-xs">
+			<input
+				type="text"
+				placeholder="รหัสแพ็คก็จ ชื่อแพ็คเก็จ"
+				class="input input-bordered w-full pl-10 bg-white"
+				style="background-color: white;"
+				maxlength="100"
+				bind:value={searchInpage}
+			/>
+			<!-- Search Icon -->
+			<div class="absolute inset-y-0 left-0 flex items-center pl-3">
+				<svg
+					class="w-5 h-5 text-gray-500"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M21 21l-4.35-4.35m2.35-7.65a7 7 0 11-14 0 7 7 0 0114 0z"
+					/>
+				</svg>
+			</div>
 		</div>
-	</div>
 		<div class="flex justify-end space-x-2">
 			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={firstPage}
-				>Search</button
+				>ค้นหา</button
 			>
-			<button class="btn btn-outline  text-xs sm:text-sm" on:click={clearSearch}
-				>Clear</button
-			>
+			<button class="btn btn-outline text-xs sm:text-sm" on:click={clearSearch}>ล้าง</button>
 		</div>
 		<div
 			class="flex lg:justify-end md:justify-end sm:justify-center justify-center"
@@ -330,7 +438,7 @@
 		>
 			<button
 				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
-				on:click={showModalCreate}>Create</button
+				on:click={showModalCreate}>สร้างแพ็คเก็จ</button
 			>
 		</div>
 	</div>
@@ -338,27 +446,53 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 w-16 text-sm">ID</th>
-					<th class="p-1 lg:w-[50%] sm:p-2 text-left text-wrap text-sm">
-						<div class="lg:block sm:block hidden">Package Name</div>
-						<div class="lg:hidden sm:hidden block">P.Name</div>
+					<th class="p-1 sm:p-2  text-sm w-10">#</th>
+					<th class="p-1 sm:p-2 text-left text-wrap text-sm">
+						<div class="lg:block sm:block hidden">รหัสแพ็คเก็จ</div>
+						<div class="lg:hidden sm:hidden block">รหัส</div>
 					</th>
-					<th class="p-1 sm:p-2 text-right text-sm">Price</th>
+					<th class="p-1 sm:p-2 text-left text-wrap text-sm">
+						<div class="lg:block sm:block hidden">ชื่อแพ็คเก็จ</div>
+						<div class="lg:hidden sm:hidden block">ชื่อ</div>
+					</th>
+					<th class="p-1 sm:p-2 text-right text-sm">ราคา</th>
 					<th class="p-1 sm:p-2 text-right text-wrap text-sm">
-						<div class="lg:block sm:block hidden ">Quota Limit</div>
-						<div class="lg:hidden sm:hidden block">Q.Limit</div>
+						<div class="lg:block sm:block hidden">จำนวนการใช้สูงสุด</div>
+						<div class="lg:hidden sm:hidden block">จำนวน</div>
 					</th>
-					<th class="p-1 sm:p-2 text-sm">Status</th>
+					<th class="p-1 sm:p-2 text-right text-wrap text-sm">
+						<div class="lg:block sm:block hidden">คงเหลือ (ที่ขายได้)</div>
+						<div class="lg:hidden sm:hidden block">คงเหลือ</div>
+					</th>
+
+					<th class="p-1 sm:p-2 text-sm">สถานะ</th>
+					<th class="p-1 sm:p-2 text-sm">การมองเห็น</th>
 					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
+				{#if loadingtable}
+				<tr><td colspan="7"><span class="loading loading-spinner loading-xs"></span>
+				</td></tr>
+				{:else if packageData.length === 0}
+					<tr><td colspan="7">No data available</td></tr>
+				{:else}
+
 				{#each packageData as item}
 					<tr class="border-b border-gray-300">
-						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.Id || '-'}</th>
+						<td class="p-1 sm:p-2 lg:text-sm truncate font-bold ">{item.Index}</td>
+						<th class="p-1 sm:p-2 lg:text-sm truncate font-normal">{item.Id || '-'}</th>
 						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
 						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.QuotaLimit || '-'}</td>
+						<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
+							>{(item.QuotaLimit || '-').toLocaleString()}</td
+						>
+						<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
+							>{item.AmountLimit.toLocaleString()}</td
+						>
+
+						<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
+
 						<td class="p-1 sm:p-2 lg:text-sm truncate">
 							<div class="flex justify-center">
 								<div
@@ -371,28 +505,36 @@
 								</div>
 							</div>
 						</td>
-						<td class="p-1 sm:p-2">
-							
-							<svg
-							on:click={() => showModalEdit(item)}
-							class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
-							aria-hidden="true"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke="currentColor"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+						<td>
+							<input
+								type="checkbox"
+								class="toggle [--tglbg:white] toggle-success lg:toggle-md md:toggle-sm sm:toggle-xs toggle-xs"
+								bind:checked={item.Visibility}
+								on:change={() => updateVisibility(item.Id, item.Visibility)}
+
 							/>
-						</svg>
-							
+						</td>
+						<td class="p-1 sm:p-2">
+							<svg
+								on:click={() => showModalEdit(item)}
+								class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+								aria-hidden="true"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+								/>
+							</svg>
 						</td>
 					</tr>
 				{/each}
+				{/if}
 			</tbody>
 		</table>
 		<!-- <div class="grid col-2 w-full justify-end sm:w-auto">
@@ -424,7 +566,7 @@
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+				<div class="text-sm font-bold">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select
@@ -445,14 +587,14 @@
 						on:click={prevPage}
 						disabled={currentPage === 1}
 					>
-						Previous
+						ย้อนกลับ
 					</button>
 					<button
 						class="btn btn-xs sm:btn-sm btn-outline"
 						on:click={nextPage}
 						disabled={currentPage === totalPages}
 					>
-						Next
+						ต่อไป
 					</button>
 				</div>
 			</div>
@@ -460,35 +602,81 @@
 	</div>
 </div>
 
-<dialog id="alert_modal" class="modal" open={showAlertModal}>
-	<div class="modal-box bg-white w-11/12 max-w-md">
-		<div class="form-control">
-			<h2 class="text-2xl font-bold mb-4">{alertType === 'success' ? 'Success' : 'Error'}</h2>
-			<p>{alertMessage}</p>
-			<div class="modal-action">
-				<button
-					class="btn"
-					on:click={() => {
-						showAlertModal = false;
-						alertMessage = null;
-						alertType = null;
-					}}
-				>
-					Close
-				</button>
-			</div>
+<dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<linearGradient
+					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
+					x1="9.858"
+					x2="38.142"
+					y1="9.858"
+					y2="38.142"
+					gradientUnits="userSpaceOnUse"
+					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
+					></stop></linearGradient
+				><path
+					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
+					opacity=".05"
+				></path><path
+					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
+					opacity=".07"
+				></path><path
+					fill="#fff"
+					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
+				></path>
+			</svg>
 		</div>
+		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+		<p class=" text-center">Update สำเร็จ</p>
+	</div>
+</dialog>
+<dialog id="alert_modal_false" class="modal" open={showAlertModalError}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
 	</div>
 </dialog>
 
 <dialog id="edit_modal" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">
 		<div class="form-control">
-			<h2 class="text-2xl font-bold mb-4">Edit</h2>
+			<h2 class="text-2xl font-bold mb-4 text-primary">แก้ไข</h2>
 			{#if editingPackage}
-				<div></div>
+				<!-- Package Name -->
 				<label class="label">
-					<span class="label-text text-black w-2/5">Package Name:</span>
+					<span class="label-text text-black w-2/5">ชื่อแพ็คเก็จ:</span>
 					<input
 						type="text"
 						class="input input-bordered bg-white w-80"
@@ -497,8 +685,9 @@
 					/>
 				</label>
 
+				<!-- Package Price -->
 				<label class="label">
-					<span class="label-text text-black w-2/5">Price:</span>
+					<span class="label-text text-black w-2/5">ราคา:</span>
 					<input
 						type="number"
 						maxlength="8"
@@ -509,8 +698,10 @@
 						on:input={validateDecimalInput}
 					/>
 				</label>
+
+				<!-- Quota Limit -->
 				<label class="label">
-					<span class="label-text text-black w-2/5">QuotaLimit:</span>
+					<span class="label-text text-black w-2/5">โค้วต้าสูงสุด:</span>
 					<input
 						type="number"
 						maxlength="4"
@@ -521,8 +712,23 @@
 						on:input={validateInput}
 					/>
 				</label>
+				<!-- Amount Limit -->
+				<label class="label">
+					<span class="label-text text-black w-2/5">คงเหลือ:</span>
+					<input
+						type="number"
+						maxlength="9"
+						min="1"
+						max="9999"
+						class="input input-bordered bg-white w-80"
+						bind:value={editingPackage.AmountLimit}
+						on:input={validateInputAmountlimit}
+					/>
+				</label>
+
+				<!-- Package Status (Active/Inactive) -->
 				<label class="label cursor-pointer bg-white flex">
-					<span class="label-text text-black w-2/5">Status</span>
+					<span class="label-text text-black w-2/5">สถานะ</span>
 					<div class="w-80">
 						<input
 							type="checkbox"
@@ -533,12 +739,20 @@
 					</div>
 				</label>
 
+				
+
+				
+
+				<!-- Modal Actions -->
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
-						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn bg-primary text-white btn-primary" on:click={updatePackage}
-							>Save</button
-						>
+						<!-- Close Button -->
+						<button class="btn btn-outline btn-error">ปิด</button>
+
+						<!-- Save/Update Button -->
+						<button class="btn bg-primary text-white btn-primary" on:click={updatePackage}>
+							บันทึก
+						</button>
 					</form>
 				</div>
 			{/if}
@@ -549,11 +763,11 @@
 <dialog id="create_modal" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">
 		<div class="form-control">
-			<h2 class="text-2xl font-bold mb-4">Create</h2>
+			<h2 class="text-2xl font-bold mb-4 text-primary">สร้างแพ็คเก็จ</h2>
 
 			<div></div>
 			<label class="label">
-				<span class="label-text text-black w-2/5">Package Name:</span>
+				<span class="label-text text-black w-2/5">ชื่อแพ็คเก็จ:</span>
 				<input
 					type="text"
 					class="input input-bordered bg-white w-80"
@@ -563,7 +777,7 @@
 			</label>
 
 			<label class="label">
-				<span class="label-text text-black w-2/5">Price:</span>
+				<span class="label-text text-black w-2/5">ราคา:</span>
 				<input
 					type="number"
 					class="input input-bordered bg-white w-80"
@@ -573,7 +787,7 @@
 				/>
 			</label>
 			<label class="label">
-				<span class="label-text text-black w-2/5">QuotaLimit:</span>
+				<span class="label-text text-black w-2/5">โค้วต้าสูงสุด:</span>
 				<input
 					type="number"
 					class="input input-bordered bg-white w-80"
@@ -583,7 +797,7 @@
 				/>
 			</label>
 			<label class="label cursor-pointer bg-white flex">
-				<span class="label-text text-black w-2/5">Status</span>
+				<span class="label-text text-black w-2/5">สถานะ</span>
 				<div class="w-80">
 					<input
 						type="checkbox"
@@ -593,16 +807,104 @@
 					/>
 				</div>
 			</label>
+			<label class="label cursor-pointer bg-white flex">
+				<span class="label-text text-black w-2/5">การมองเห็น</span>
+				<div class="w-80">
+					<input
+						type="checkbox"
+						class="toggle [--tglbg:white] toggle-success"
+						bind:checked={newPackage.Visibility}
+						on:change={toggleHide}
+					/>
+				</div>
+			</label>
+			<label class="label">
+				<span class="label-text text-black w-2/5">จำนวนการขาย:</span>
+				<input
+					type="number"
+					class="input input-bordered bg-white w-80"
+					bind:value={newPackage.AmountLimit}
+					min="1"
+					on:input={validateInputAmountlimit}
+				/>
+			</label>
 
 			<div class="modal-action">
 				<form method="dialog" class="flex space-x-2">
-					<button class="btn btn-outline btn-error">Close</button>
+					<button class="btn btn-outline btn-error">ปิด</button>
 					<button class="btn bg-primary text-white btn-primary" on:click={createPackage}
-						>Save</button
+						>บันทึก</button
 					>
 				</form>
 			</div>
 		</div>
+	</div>
+</dialog>
+
+<dialog id="create_alert_modal_success" class="modal" open={showAlertModalCreateSuccess}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<linearGradient
+					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
+					x1="9.858"
+					x2="38.142"
+					y1="9.858"
+					y2="38.142"
+					gradientUnits="userSpaceOnUse"
+					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
+					></stop></linearGradient
+				><path
+					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
+					opacity=".05"
+				></path><path
+					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
+					opacity=".07"
+				></path><path
+					fill="#fff"
+					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+		<p class=" text-center">สร้างแพ็คเก็จสำเร็จ</p>
+	</div>
+</dialog>
+<dialog id="create_alert_modal_error" class="modal" open={showAlertModalCreateError}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">การสร้างแพ็จแก็จไม่สำเร็จ</p>
 	</div>
 </dialog>
 

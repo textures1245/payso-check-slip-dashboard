@@ -183,7 +183,7 @@
 		/>
 		<input
 			type="text"
-			placeholder="Action"
+			placeholder="การกระทำ"
 			bind:value={action}
 			on:input={handleInputAction}
 			class="input input-bordered bg-white my-1 mx-2"
@@ -191,7 +191,7 @@
 		/>
 		<input
 			type="text"
-			placeholder="Actor"
+			placeholder="ชื่อผู้ใช้"
 			bind:value={actorName}
 			on:input={handleInputActor}
 			class="input input-bordered bg-white my-1 mx-2"
@@ -200,11 +200,11 @@
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
 			<button
 				on:click={firstPage}
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2">Search</button
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2">ค้นหา</button
 			>
 			<button
 				on:click={handleClear}
-				class="btn btn-outline  text-xs sm:text-sm my-1 mx-2">Clear</button
+				class="btn btn-outline  text-xs sm:text-sm my-1 mx-2">ล้าง</button
 			>
 		</div>
 		<select
@@ -212,36 +212,37 @@
 			bind:value={role}
 			on:change={handleSearch}
 		>
-			<option value="ADMIN">Admin</option>
-			<option value="MERCHANT">Merchant</option>
-			<option value="">All</option>
+			<option value="ADMIN">แอดมิน</option>
+			<option value="MERCHANT">ผู้ใช้งาน</option>
+			<option value="">ทั้งหมด</option>
 		</select>
 	</div>
 	<div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base caption-bottom">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 w-10">No</th>
+					<th class="p-1 sm:p-2 w-10">#</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">Time Stamp</div>
+						<div class="lg:block sm:block hidden">วันเดือนปี</div>
 						<div class="lg:hidden sm:hidden block">Time</div>
 					</th>
-					<th class="p-1 sm:p-2">Action</th>
+					<th class="p-1 sm:p-2">การกระทำ</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden text-left">Method Name</div>
+						<div class="lg:block sm:block hidden text-left">ชื่อคำสั่ง</div>
 						<div class="lg:hidden sm:hidden block text-left">Method</div>
 					</th>
 
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden text-left">Actor Name</div>
+						<div class="lg:block sm:block hidden text-left">ชื่อผู้ใช้</div>
 						<div class="lg:hidden sm:hidden block text-left">Name</div>
 					</th>
-					<th class="p-1 sm:p-2 text-center">Data</th>
+					<th class="p-1 sm:p-2 text-center">ข้อมูล json</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
 				{#if loading}
-					<tr><td colspan="6">Loading...</td></tr>
+					<tr><td colspan="6"><span class="loading loading-spinner loading-xs"></span>
+					</td></tr>
 				{:else if LogAdmin.length === 0}
 					<tr><td colspan="6">No data available</td></tr>
 				{:else}
@@ -316,7 +317,7 @@
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+				<div class="text-sm font-bold">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select
@@ -337,14 +338,14 @@
 						on:click={prevPage}
 						disabled={currentPage === 1}
 					>
-						Previous
+						ย้อนกลับ
 					</button>
 					<button
 						class="btn btn-xs sm:btn-sm btn-outline"
 						on:click={nextPage}
 						disabled={currentPage === totalPages}
 					>
-						Next
+						ต่อไป
 					</button>
 				</div>
 			</div>
