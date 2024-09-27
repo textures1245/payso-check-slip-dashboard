@@ -1,0 +1,25 @@
+# nginx config doesn't work yet
+# only the sveltekit-app service works
+
+version: '3.0'
+
+services:
+  sveltekit-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.nginx
+  #   ports:
+  #     - "80:80"
+  #   depends_on:
+  #     - sveltekit-app
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./build:/usr/share/nginx/html:ro # Mount the local build directory

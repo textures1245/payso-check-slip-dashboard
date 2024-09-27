@@ -1,0 +1,9 @@
+# Dockerfile.nginx
+
+FROM nginx:alpine
+
+# Copy the Nginx configuration file
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Use a mounted volume to get the SvelteKit build
+# This will be handled by docker-compose.yml
