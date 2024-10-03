@@ -536,7 +536,7 @@
 				</Card.Content>
 			</Card.Root>
 			<Card.Root class="p-4 w-full">
-				<Card.Title>ลูกค้าที่สมัครล่าสุด</Card.Title>
+				<Card.Title>ลูกค้าที่เปลี่ยนแพ็คเก็จล่าสุด</Card.Title>
 				<Card.Content>
 					<MerchantTableReport props={data.merchantListReport} />
 				</Card.Content>

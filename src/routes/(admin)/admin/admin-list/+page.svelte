@@ -61,7 +61,7 @@
 	}
 
 	async function fetchData(currentOffset: number, currentLimit: number, searchMerchant: string) {
-		loadingtable = true
+		loadingtable = true;
 		try {
 			const response = await fetch(
 				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`
@@ -69,18 +69,36 @@
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
+
 			const data = await response.json();
-			if (!Array.isArray(data.result)) {
-				throw new Error('Result is not an array');
+
+			// Log the entire response to check its structure
+			console.log('API Response:', data);
+
+			// Check if 'data' exists and is an object
+			if (!data || typeof data !== 'object') {
+				console.error('Data is not an object:', data);
+				throw new Error('Invalid response structure: Data is not an object');
 			}
-			console.log(data);
+
+			// Check if 'result' exists and is an array, handle cases where 'result' is null or undefined
+			if (!data.result) {
+				console.warn('Result is null or undefined. Handling as empty array.');
+				data.result = []; // Default to an empty array
+			}
+
+			if (!Array.isArray(data.result)) {
+				console.error('Result is not an array:', data.result);
+				throw new Error('Invalid response structure: Missing or non-array result');
+			}
+
 			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 			userData = data.result.map((item: UserData, index: number) => ({
 				Id: item.Id,
 				MerchantId: item.MerchantId,
 				MerchantName: item.MerchantName,
 				QuotaUsage: item.QuotaUsage,
-				QuotaLimit:item.QuotaLimit,
+				QuotaLimit: item.QuotaLimit,
 				PackageId: item.PackageId,
 				PackageName: item.PackageName,
 				BalanceQuotaLeft: item.BalanceQuotaLeft,
@@ -94,9 +112,8 @@
 			totalPages = Math.ceil(totalCount / currentLimit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
-		}
-		finally{
-			loadingtable = false
+		} finally {
+			loadingtable = false;
 		}
 	}
 
@@ -129,7 +146,7 @@
 		searchInpage = '';
 		keyWord = '';
 		filteredData = [...userData];
-		fetchData(offset , limit, '')
+		fetchData(offset, limit, '');
 	}
 
 	function showModal(user: UserData) {
@@ -200,9 +217,8 @@
 				'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
 			showAlertModalError = true;
-		}
-		finally{
-			location.reload()
+		} finally {
+			location.reload();
 		}
 	}
 
@@ -216,7 +232,7 @@
 	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4" >
+<div class="w-full py-4 px-2 sm:px-4">
 	<span
 		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>รายชื่อผู้ใช้</span
@@ -261,83 +277,90 @@
 	</div>
 	<div class="overflow-x-auto">
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
-			<thead class="text-center  text-gray-700 lg:text-base">
+			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1  sm:p-2 w-10 text-sm">#</th>
+					<th class="p-1 sm:p-2 w-10 text-sm">#</th>
 					<th class="p-1 sm:p-2 text-wrap text-left text-sm">
 						<div class="lg:block sm:block hidden">รหัสลูกค้า</div>
 						<div class="lg:hidden sm:hidden block">MID</div></th
 					>
 					<th class="p-1 sm:p-2 text-left text-sm">อีเมล์</th>
 					<th class="p-1 sm:p-2 text-wrap text-left text-sm"
-					><div class="lg:block sm:block hidden">ชื่อ-นามสกุล</div>
-					<div class="lg:hidden sm:hidden block">MName</div></th
-				>
+						><div class="lg:block sm:block hidden">ชื่อ-นามสกุล</div>
+						<div class="lg:hidden sm:hidden block">MName</div></th
+					>
 					<th class="p-1 sm:p-2 text-left text-sm">ประเภทลูกค้า</th>
-				
+
 					<th class="p-1 sm:p-2 text-left text-sm">แพ็คเก็จที่สมัคร</th>
 					<th class="p-1 sm:p-2 text-wrap text-right text-sm">
-						<div class="lg:block sm:block hidden ">จำนวนเหลือใช้</div>
+						<div class="lg:block sm:block hidden">จำนวนเหลือใช้</div>
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
 					<th class="p-1 sm:p-2 text-right text-sm">จำนวนที่ใช้ไป</th>
 					<th class="p-1 sm:p-2 text-sm">วันหมดอายุแพ็คเก็จ</th>
-					<th class="p-1 sm:p-2 text-sm" >สถานะ</th>
+					<th class="p-1 sm:p-2 text-sm">สถานะ</th>
 					<th class="p-1 w-20 sm:p-2"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
 				{#if loadingtable}
-				<tr><td colspan="11"><span class="loading loading-spinner loading-xs"></span>
-				</td></tr>
+					<tr><td colspan="11"><span class="loading loading-spinner loading-xs"></span> </td></tr>
 				{:else if userData.length === 0}
 					<tr><td colspan="11">No data available</td></tr>
 				{:else}
-				{#each userData as item}
-					<tr class="border-b border-gray-300">
-						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.Email}">{item.Email}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.MerchantName}">{item.MerchantName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.PackageName}">{item.PackageName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
-							>{ (item.QuotaUsage + item.BalanceQuotaLeft).toLocaleString()}</td
-						>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.QuotaSpending.toLocaleString()}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.BillDate.split(' ')[0]}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">
-							<div class="flex justify-center">
-								<div
-									class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
-									'ACTIVE'
-										? 'badge-success'
-										: 'badge-danger'}"
-								>
-									{item.Status}
-								</div>
-							</div>
-						</td>
-						<td class="p-1 sm:p-2">
-							<svg
-								on:click={() => showModal(item)}
-								class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
-								aria-hidden="true"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
+					{#each userData as item}
+						<tr class="border-b border-gray-300">
+							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.Email}
+								>{item.Email}</td
 							>
-								<path
-									stroke="currentColor"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-								/>
-							</svg>
-						</td>
-					</tr>
-				{/each}
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MerchantName}
+								>{item.MerchantName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.PackageName}
+								>{item.PackageName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
+								>{(item.QuotaUsage + item.BalanceQuotaLeft).toLocaleString()}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
+								>{item.QuotaSpending.toLocaleString()}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.BillDate.split(' ')[0]}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">
+								<div class="flex justify-center">
+									<div
+										class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
+										'ACTIVE'
+											? 'badge-success'
+											: 'badge-danger'}"
+									>
+										{item.Status}
+									</div>
+								</div>
+							</td>
+							<td class="p-1 sm:p-2">
+								<svg
+									on:click={() => showModal(item)}
+									class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+									aria-hidden="true"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+									/>
+								</svg>
+							</td>
+						</tr>
+					{/each}
 				{/if}
 			</tbody>
 		</table>
@@ -453,7 +476,8 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<button class="btn btn-outline btn-error">ปิด</button>
-						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>บันทึก</button
+						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}
+							>บันทึก</button
 						>
 					</form>
 				</div>

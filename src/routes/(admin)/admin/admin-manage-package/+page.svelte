@@ -18,7 +18,7 @@
 		TotalCount: 0,
 		Visibility: false,
 		AmountLimit: 100,
-		Index : 0
+		Index: 0
 	};
 	let packagename = '';
 	let searchInpage = '';
@@ -33,10 +33,8 @@
 	let totalItems = 0;
 	let loadingtable = false;
 
-
 	$: totalPages = Math.ceil(totalItems / limit);
 	console.log('total item', totalItems);
-
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
@@ -74,46 +72,48 @@
 	});
 
 	async function updateVisibility(packageId: number | undefined, newVisibility: boolean) {
-	if (packageId === undefined) {
-		console.error('Package ID is undefined');
-		return;
-	}
+		if (packageId === undefined) {
+			console.error('Package ID is undefined');
+			return;
+		}
 
-	const cookies = getCookies();
-	const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+		const cookies = getCookies();
+		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
-	try {
-		const response = await fetch(`${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				'Actor-Id': myCookie.Id,
-				'Actor-Name': myCookie.Email,
-				'Actor-Role': 'ADMIN'
+		try {
+			const response = await fetch(
+				`${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`,
+				{
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json',
+						'Actor-Id': myCookie.Id,
+						'Actor-Name': myCookie.Email,
+						'Actor-Role': 'ADMIN'
+					}
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to update package visibility');
 			}
-		});
 
-		if (!response.ok) {
-			throw new Error('Failed to update package visibility');
+			// Update the package data locally
+			const index = packageData.findIndex((pkg) => pkg.Id === packageId);
+			if (index !== -1) {
+				packageData[index].Visibility = newVisibility;
+				packageData = [...packageData]; // trigger reactivity in Svelte
+			}
+
+			// Log success message to the console
+			console.log('Visibility updated successfully!');
+		} catch (error) {
+			console.error('Error updating visibility:', error);
 		}
-
-		// Update the package data locally
-		const index = packageData.findIndex((pkg) => pkg.Id === packageId);
-		if (index !== -1) {
-			packageData[index].Visibility = newVisibility;
-			packageData = [...packageData]; // trigger reactivity in Svelte
-		}
-
-		// Log success message to the console
-		console.log('Visibility updated successfully!');
-	} catch (error) {
-		console.error('Error updating visibility:', error);
 	}
-}
 
-
-async function searchfetchData(packagename : string, currentOffset : number, currentLimit : number) {
-	loadingtable = true;
+	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
+    loadingtable = true;
     try {
         const response = await fetch(
             `${PUBLIC_API_ENDPOINT}/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
@@ -131,21 +131,31 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 
         const data = await response.json();
 
-        // Log the response to check its structure
+        // Log the entire response to check its structure
         console.log("API Response:", data);
 
-        // Check if 'result' exists and is an array
+        // Check if 'data' exists and is an object
         if (!data || typeof data !== 'object') {
+            console.error('Data is not an object:', data);
             throw new Error('Invalid response structure: Data is not an object');
         }
 
-        if (!data.result || !Array.isArray(data.result)) {
+        // Check if 'result' exists and is an array, handle cases where 'result' is null or undefined
+        if (!data.result) {
+            console.warn('Result is null or undefined. Handling as empty array.');
+            data.result = [];  // Default to an empty array
+        }
+
+        if (!Array.isArray(data.result)) {
+            console.error('Result is not an array:', data.result);
             throw new Error('Invalid response structure: Missing or non-array result');
         }
 
+        // Calculate totalCount and handle case where result is an empty array
         const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 
-        packageData = data.result.map((item:PackageData, Index : number) => ({
+        // Map the result to packageData
+        packageData = data.result.map((item: PackageData, Index: number) => ({
             Id: item.Id,
             Name: item.Name,
             Price: item.Price,
@@ -154,9 +164,10 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
             TotalCount: item.TotalCount,
             Visibility: item.Visibility,
             AmountLimit: item.AmountLimit,
-			Index : Index + (offset - 1) * limit + 1
+            Index: Index + (currentOffset - 1) * currentLimit + 1
         }));
 
+        // Calculate total pages
         totalPages = Math.ceil(totalCount / currentLimit);
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -165,10 +176,11 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
     }
 }
 
+
 	function clearSearch() {
 		searchInpage = '';
 		filteredData = [...packageData];
-		searchfetchData('',offset , limit)
+		searchfetchData('', offset, limit);
 	}
 
 	function showModalEdit(pkg: PackageData) {
@@ -187,7 +199,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			TotalCount: 0,
 			Visibility: false,
 			AmountLimit: 100,
-			Index:0
+			Index: 0
 		};
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
@@ -251,7 +263,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				TotalCount: 0,
 				Visibility: false,
 				AmountLimit: 100,
-				Index : 0
+				Index: 0
 			};
 		} catch (error) {
 			console.error('Error creating package:', error);
@@ -259,7 +271,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				'Failed to create package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
 			showAlertModal = true; // แสดง modal
-			showAlertModalCreateError = true
+			showAlertModalCreateError = true;
 		}
 		location.reload();
 	}
@@ -324,7 +336,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			alertType = 'error';
 			showAlertModalError = true;
 		} finally {
-			location.reload()
+			location.reload();
 		}
 	}
 
@@ -333,7 +345,6 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			editingPackage.Status = editingPackage.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 		}
 	}
-	
 
 	function toggleHide(event: any) {
 		if (newPackage) {
@@ -446,7 +457,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2  text-sm w-10">#</th>
+					<th class="p-1 sm:p-2 text-sm w-10">#</th>
 					<th class="p-1 sm:p-2 text-left text-wrap text-sm">
 						<div class="lg:block sm:block hidden">รหัสแพ็คเก็จ</div>
 						<div class="lg:hidden sm:hidden block">รหัส</div>
@@ -472,68 +483,66 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			</thead>
 			<tbody class="text-center">
 				{#if loadingtable}
-				<tr><td colspan="7"><span class="loading loading-spinner loading-xs"></span>
-				</td></tr>
+					<tr><td colspan="7"><span class="loading loading-spinner loading-xs"></span> </td></tr>
 				{:else if packageData.length === 0}
 					<tr><td colspan="7">No data available</td></tr>
 				{:else}
-
-				{#each packageData as item}
-					<tr class="border-b border-gray-300">
-						<td class="p-1 sm:p-2 lg:text-sm truncate font-bold ">{item.Index}</td>
-						<th class="p-1 sm:p-2 lg:text-sm truncate font-normal">{item.Id || '-'}</th>
-						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
-							>{(item.QuotaLimit || '-').toLocaleString()}</td
-						>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
-							>{item.AmountLimit.toLocaleString()}</td
-						>
-
-						<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
-
-						<td class="p-1 sm:p-2 lg:text-sm truncate">
-							<div class="flex justify-center">
-								<div
-									class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status ===
-									'ACTIVE'
-										? 'badge-success'
-										: 'badge-danger'}"
-								>
-									{item.Status}
-								</div>
-							</div>
-						</td>
-						<td>
-							<input
-								type="checkbox"
-								class="toggle [--tglbg:white] toggle-success lg:toggle-md md:toggle-sm sm:toggle-xs toggle-xs"
-								bind:checked={item.Visibility}
-								on:change={() => updateVisibility(item.Id, item.Visibility)}
-
-							/>
-						</td>
-						<td class="p-1 sm:p-2">
-							<svg
-								on:click={() => showModalEdit(item)}
-								class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
-								aria-hidden="true"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
+					{#each packageData as item}
+						<tr class="border-b border-gray-300">
+							<td class="p-1 sm:p-2 lg:text-sm truncate font-bold">{item.Index}</td>
+							<th class="p-1 sm:p-2 lg:text-sm truncate font-normal text-left">{item.Id || '-'}</th>
+							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title={item.Name}>{item.Name}</td
 							>
-								<path
-									stroke="currentColor"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
+								>{(item.QuotaLimit || '-').toLocaleString()}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
+								>{item.AmountLimit.toLocaleString()}</td
+							>
+
+							<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
+
+							<td class="p-1 sm:p-2 lg:text-sm truncate">
+								<div class="flex justify-center">
+									<div
+										class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status ===
+										'ACTIVE'
+											? 'badge-success'
+											: 'badge-danger'}"
+									>
+										{item.Status}
+									</div>
+								</div>
+							</td>
+							<td>
+								<input
+									type="checkbox"
+									class="toggle [--tglbg:white] toggle-success lg:toggle-md md:toggle-sm sm:toggle-xs toggle-xs"
+									bind:checked={item.Visibility}
+									on:change={() => updateVisibility(item.Id, item.Visibility)}
 								/>
-							</svg>
-						</td>
-					</tr>
-				{/each}
+							</td>
+							<td class="p-1 sm:p-2">
+								<svg
+									on:click={() => showModalEdit(item)}
+									class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+									aria-hidden="true"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+									/>
+								</svg>
+							</td>
+						</tr>
+					{/each}
 				{/if}
 			</tbody>
 		</table>
@@ -738,10 +747,6 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 						/>
 					</div>
 				</label>
-
-				
-
-				
 
 				<!-- Modal Actions -->
 				<div class="modal-action">

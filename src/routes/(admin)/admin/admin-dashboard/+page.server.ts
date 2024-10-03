@@ -83,7 +83,7 @@ export const load: PageServerLoad = async () => {
 		merchantListReport = await ep.merchant.GetMerchantsDetail({
 			ft: {
 				order_by: 'DESC',
-				order_field: 'RegisterDate'
+				order_field: 'UpdatedAt'
 			},
 			p: {
 				offset: 1,
@@ -435,7 +435,7 @@ export const actions: Actions = {
 				{
 					ft: {
 						order_by: sortOrder,
-						order_field: 'QuotaUsage'
+						order_field: 'UpdatedAt'
 					},
 					p: {
 						offset: 1, 

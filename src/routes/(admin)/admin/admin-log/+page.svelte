@@ -167,7 +167,7 @@
 	>
 
 	<div
-		class="grid lg:grid-cols-6 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4 "
+		class="grid lg:grid-cols-7 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4 "
 	>
 		<input
 			type="date"
@@ -183,7 +183,7 @@
 		/>
 		<input
 			type="text"
-			placeholder="การกระทำ"
+			placeholder="Action"
 			bind:value={action}
 			on:input={handleInputAction}
 			class="input input-bordered bg-white my-1 mx-2"
@@ -197,6 +197,16 @@
 			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="250"
 		/>
+		<select
+			class="select w-100 rounded-md bg-white my-1 mx-2 outline outline-1 outline-gray-300"
+			bind:value={role}
+			on:change={handleSearch}
+		>
+			<option value="ADMIN">แอดมิน</option>
+			<option value="MERCHANT">ผู้ใช้งาน</option>
+			<option value="">ทั้งหมด</option>
+		</select>
+
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
 			<button
 				on:click={firstPage}
@@ -207,15 +217,7 @@
 				class="btn btn-outline  text-xs sm:text-sm my-1 mx-2">ล้าง</button
 			>
 		</div>
-		<select
-			class="select w-100 rounded-md bg-white my-1 mx-2 outline outline-1 outline-gray-300"
-			bind:value={role}
-			on:change={handleSearch}
-		>
-			<option value="ADMIN">แอดมิน</option>
-			<option value="MERCHANT">ผู้ใช้งาน</option>
-			<option value="">ทั้งหมด</option>
-		</select>
+		
 	</div>
 	<div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
@@ -226,9 +228,9 @@
 						<div class="lg:block sm:block hidden">วันเดือนปี</div>
 						<div class="lg:hidden sm:hidden block">Time</div>
 					</th>
-					<th class="p-1 sm:p-2">การกระทำ</th>
-					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden text-left">ชื่อคำสั่ง</div>
+					<th class="p-1 sm:p-2">Action</th>
+					<th class="p-1 sm:p-2 text-wrap w-[30%]" >
+						<div class="lg:block sm:block hidden text-left">Method Name</div>
 						<div class="lg:hidden sm:hidden block text-left">Method</div>
 					</th>
 
@@ -236,7 +238,7 @@
 						<div class="lg:block sm:block hidden text-left">ชื่อผู้ใช้</div>
 						<div class="lg:hidden sm:hidden block text-left">Name</div>
 					</th>
-					<th class="p-1 sm:p-2 text-center">ข้อมูล json</th>
+					<th class="p-1 sm:p-2 text-center">รายละเอียด</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
@@ -249,12 +251,12 @@
 					{#each LogAdmin as item, i (i)}
 						<tr class="border-b border-gray-300">
 							<td class="p-1 sm:p-2 lg:text-sm">{item.index}</td>
-							<td class="p-1 sm:p-2 lg:text-sm">{item.Timestamp}</td>
+							<td class="p-1 sm:p-2 lg:text-sm" title="{item.Timestamp}">{item.Timestamp}</td>
 							<td class="p-1 sm:p-2 lg:text-sm">{item.Action}</td>
-							<td class="p-1 sm:p-2 lg:text-sm break-words text-pretty text-left"
-								>{item.MethodName}</td
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left "
+								title="{item.MethodName}">{item.MethodName}</td
 							>
-							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.ActorName}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title="{item.ActorName}">{item.ActorName}</td>
 							<td class="p-1 sm:p-2 lg:text-sm text-center justify-center flex">
 								<label for={`logDataModel-${i}`} class=" bg-white cursor-pointer"
 									><svg
@@ -279,8 +281,38 @@
 									</svg></label
 								>
 								<Modal index={i}>
-									<JsonViewer data={item.DataRequest} />
-								</Modal>
+									<div class="p-4 space-y-4">
+										<div class="flex">
+											<span class="text-lg font-bold">รายละเอียด</span>
+										</div>
+									  <div class="flex">
+										<span class="font-bold min-w-[80px]">วันเดือนปี:</span>
+										<span>{item.Timestamp}</span>
+									  </div>
+									  <div class="flex">
+										<span class="font-bold min-w-[80px]">Action:</span>
+										<span>{item.Action}</span>
+									  </div>
+									  <div class="flex">
+										<span class="font-bold min-w-[80px]">Method:</span>
+										<span>{item.MethodName}</span>
+									  </div>
+									  <div class="flex">
+										<span class="font-bold min-w-[80px]">ชื่อผู้ใช้:</span>
+										<span>{item.ActorName}</span>
+									  </div>
+									  
+									  <div class="pt-4">
+										<span class="font-bold ">JSON</span>
+										<JsonViewer data={item.DataRequest} />
+									  </div>
+									</div>
+								  </Modal>
+								  
+								  
+								  
+								  
+								  
 							</td>
 						</tr>
 					{/each}
