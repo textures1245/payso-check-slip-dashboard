@@ -5,17 +5,15 @@
 	import type { Dashboard } from 'svelte-radix';
 
 	let navItems: NavItem[] = [
-
-		{ id: 2, title: 'Dashboard', link: '/dashboard' },
-		{ id: 3, title: 'Package', link: '/package' },
-
+		{ id: 1, title: 'แดชบอร์ด', link: '/dashboard' },
+		{ id: 2, title: 'แพ็คเกจ', link: '/package' },
 	];
 
 
 	
 </script>
 
-<div class="bg-primary-foreground ">
+<div class="bg-primary-foreground  overflow-y-hidden">
 	<Navbar {navItems} />
 	<Separator />
 
@@ -25,3 +23,7 @@
 		</div>
 
 </div>
+
+<style>
+	
+</style>

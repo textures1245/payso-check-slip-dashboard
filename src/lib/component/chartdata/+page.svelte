@@ -1,57 +1,96 @@
 <script lang="ts">
  
-    import { Bar } from 'svelte-chartjs';
+    import { Bar} from 'svelte-chartjs';
     import { Chart, registerables, type ChartOptions } from 'chart.js';
+    import ChartDataLabels from 'chartjs-plugin-datalabels';
     import * as Card from "$lib/components/ui/card";
 	import { afterUpdate,onMount } from 'svelte';
   import { Button } from '$lib/components/ui/button';
   import cookie from 'cookie';
   import { PUBLIC_API_ENDPOINT } from '$env/static/public';
-
+  import flatpickr from 'flatpickr';
+    import { Thai } from 'flatpickr/dist/l10n/th.js';
+    import  monthSelectPlugin  from 'flatpickr/dist/plugins/monthSelect/index';
+    import  'flatpickr/dist/plugins/monthSelect/style.css';
+    import date from"$lib/image/calendar.png";
     // Register Chart.js components
     Chart.register(...registerables);
+    Chart.register(ChartDataLabels);
 let dataChart: any[] = [];
 let labels: string[] = [];
 let successValues: number[] = [];
 let failedValues: number[] = [];
 
 let newlabels: string[] = [];
-let newsuccessValues: number[] = [];
-let newfailedValues: number[] = [];
-let today = new Date();
-let month = today.getMonth() + 1;
-let year = today.getFullYear();
+let startDatePicker: Node;
+let selectedStartDate = new Date();
 let chart: { update: () => void; };
     onMount(async () => {
+      flatpickr(startDatePicker, {
+        plugins: [
+          monthSelectPlugin({
+            shorthand: true, // ใช้ตัวย่อสำหรับชื่อเดือน
+            dateFormat: "Y-m", // รูปแบบวันที่ที่ส่ง
+            // ค่าตั้งต้น
+            defaultDate: selectedStartDate,
+          })
+        ],
+        locale: Thai,
+        onChange: (selectedDates) => {
+          selectedStartDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
+          startDatePicker.value = formatDateSelect(selectedStartDate); // อัปเดตค่าของ input เมื่อเปลี่ยนเดือน
+        },
+      });
+  
+      startDatePicker.value = formatDateSelect(selectedStartDate); // ตั้งค่าเริ่มต้นใน input
 		try {
 			const datachart = await GetdataChart();
 			dataChart=datachart;
 
 			console.log('Chart : ',datachart);
-      labels = Array.from(new Set(dataChart.map(item => formatDate(item.CreatedAt))));
-      successValues = labels.map(label => {
-    return dataChart
-        .filter(item => 
-            formatDate(item.CreatedAt) === label && 
-            (item.Status === 'SUCCESS' || item.Status === 'success')
-        )
-        .length; // Count the number of successful items
+      const newlabels = Array.from(new Set(dataChart.map(item => formatDate(item.CreatedAt))));
+      const counts = {
+    SUCCESS: Array(newlabels.length).fill(0),
+    FAILED: Array(newlabels.length).fill(0),
+    PENDING: Array(newlabels.length).fill(0),
+    RESPOND_REJECTED: Array(newlabels.length).fill(0),
+    REQUEST_REJECTED: Array(newlabels.length).fill(0),
+};
+dataChart.forEach((item: { CreatedAt: any; Status: any; }) => {
+    const labelIndex = newlabels.indexOf(formatDate(item.CreatedAt));
+    if (labelIndex !== -1) {
+        switch (item.Status) {
+            case 'SUCCESS':
+            case 'success':
+                counts.SUCCESS[labelIndex]++;
+                break;
+            case 'FAILED':
+                counts.FAILED[labelIndex]++;
+                break;
+            case 'PENDING':
+                counts.PENDING[labelIndex]++;
+                break;
+            case 'RESPOND_REJECTED':
+                counts.RESPOND_REJECTED[labelIndex]++;
+                break;
+            case 'REQUEST_REJECTED':
+                counts.REQUEST_REJECTED[labelIndex]++;
+                break;
+            default:
+                break;
+        }
+    }
 });
 
-failedValues = labels.map(label => {
-    return dataChart
-        .filter(item => 
-            formatDate(item.CreatedAt) === label && 
-            item.Status === 'FAILED'
-        )
-        .length; // Count the number of failed items
-});
+data.labels = newlabels;
+data.datasets[0].data = counts.SUCCESS;
+data.datasets[1].data = counts.FAILED;
+data.datasets[2].data = counts.PENDING;
+data.datasets[3].data = counts.REQUEST_REJECTED;
+data.datasets[4].data = counts.RESPOND_REJECTED;
 
-
-      data.labels = labels;
-      data.datasets[0].data = successValues;
-      data.datasets[1].data = failedValues;
-    console.log("ข้อมูล",labels,successValues,failedValues)
+// Log the results
+console.log("ข้อมูล res :", newlabels, counts.SUCCESS, counts.FAILED, counts.RESPOND_REJECTED, counts.REQUEST_REJECTED, counts.PENDING);
  
     if (chart) {
                chart.update(); // Ensure chart is updated with new data
@@ -64,18 +103,29 @@ failedValues = labels.map(label => {
 
 
 	});
+ 
 
-  const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
-  return date.toLocaleDateString('en-US', options); // ใช้รูปแบบที่ต้องการ
-};
+  function formatDate(dateString:any) {
+    const date = new Date(dateString);
+    
+    // ตรวจสอบว่ามีวันที่ถูกต้องหรือไม่
+    if (isNaN(date.getTime())) {
+        return "Invalid date"; // คืนค่าข้อความหากวันที่ไม่ถูกต้อง
+    }
+
+    // แปลงวันที่เป็นรูปแบบ "18 ก.ย. 2024"
+    const day = date.getDate();
+    const month = date.toLocaleString('th-TH', { month: 'short' });
+    const year = date.getFullYear(); // ปี ค.ศ.
+
+    return `${day} ${month} ${year}`; // คืนค่าในรูปแบบ "18 ก.ย. 2024"
+}
     const GetdataChart = async () => {
       const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		console.log("++++++++++",myCookie.Id , myCookie.Email);
-    const [year, month] = monthToSend.split("-");
-    console.log("เดือน ",year, month,typeof(monthToSend))
+    const formattedStartDate = selectedStartDate.toISOString().slice(0, 7); // YYYY-MM
+    const [year, month] = formattedStartDate.split("-");
+    console.log("เดือน ",year, month,typeof(formattedStartDate))
 		const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		console.log( 'id: ', id , typeof(id));
     let apiUrl;
@@ -112,22 +162,42 @@ failedValues = labels.map(label => {
       
       datasets: [
         {
-          label: 'สลิปจริง',
+          label: 'สลิปถูกต้อง',
           data: successValues,
           backgroundColor: 'rgba(71, 205, 137, 0.8)',  // Green background
           borderColor: 'rgba(0, 128, 0, 1)',        // Green border
           borderWidth: 1
         },
         {
-          label: 'สลิปปลอม',
+          label: 'สลิปผิด',
           data: failedValues, // ตั้งค่าให้มีค่าเท่ากันสำหรับทุกเดือน
           backgroundColor: 'rgba(240, 68, 56, 0.8)',  // Red background
           borderColor: 'rgba(255, 0, 0, 1)',        // Red border
           borderWidth: 1
-        }
+        }, {
+          label: 'สลิปรอกาตรวจสอบ',
+          data: successValues,
+          backgroundColor: 'rgba(255, 165, 0, 0.8)',      // Orange background
+        borderColor: 'rgba(255, 165, 0, 1)',             // Orange border
+          borderWidth: 1
+        },
+        {
+          label: 'สลิปคำขอถูกปฏิเสธ',
+          data: successValues,
+          backgroundColor: 'rgba(128, 128, 128, 0.8)',    // Gray background
+        borderColor: 'rgba(128, 128, 128, 1)',           // Gray border
+          borderWidth: 1
+        },
+        {
+          label: 'สลิปปฏิเสธการตอบ',
+          data: successValues,
+          backgroundColor: 'rgba(128, 0, 128, 0.8)',   // Purple background
+          borderColor: 'rgba(128, 0, 128, 1)',          // Purple border
+          borderWidth: 1
+        },
+        
       ]
     };
-
 
     
     // Chart options
@@ -149,13 +219,60 @@ failedValues = labels.map(label => {
         mode: 'xy',
       }
     },
+    datalabels: {
+      formatter: (value: number, context: { datasetIndex: any; dataIndex: any; chart: { data: { datasets: any; }; }; }) => {
+        const datasetIndex = context.datasetIndex;
+        const dataIndex = context.dataIndex;
+        const datasets = context.chart.data.datasets;
+
+        // ถ้าเป็น dataset บนสุด ให้แสดงยอดรวม
+        if (datasetIndex === datasets.length - 1) {
+    const total = datasets.reduce((sum: any, dataset: { data: { [x: string]: any; }; }) => {
+      const value = dataset.data[dataIndex];
+      return sum + (value ? value : 0);
+    }, 0);
+    return value === 0 ? '' : `Total:${total}\n${value}`;
+
+    // return value === 0 ? '' : `${total}`;
+  } else {
+    return value === 0 ? '' : `${value}`;
+  }
+      },
+      anchor: (context: { datasetIndex: any; chart: { data: { datasets: any; }; }; }) => {
+        const datasetIndex = context.datasetIndex;
+        const datasets = context.chart.data.datasets;
+        if (datasetIndex === datasets.length ) {
+          return 'end';  // แสดงยอดรวมที่ด้านบนสุด
+        }
+        return 'center';  // แสดงค่าของแต่ละโซนตรงกลาง
+      },
+      align: (context: { datasetIndex: any; chart: { data: { datasets: any; }; }; }) => {
+        const datasetIndex = context.datasetIndex;
+        const datasets = context.chart.data.datasets;
+        if (datasetIndex === datasets.length - 1) {
+          return 'end';  // จัดให้ยอดรวมอยู่ด้านบนสุด
+        }
+        return 'center';  // จัดให้ค่าของแต่ละโซนอยู่ตรงกลาง
+      },
+      offset: 0,
+      color: '#000',
+      font: {
+        size: 12, // ขนาดตัวอักษร
+        weight: 'bold'
+      },
+      padding: {
+        bottom: 5 // ระยะห่างจากขอบล่างของแท่ง
+      }
+    },
   },
     animation: {
     duration: 1000,
     easing: 'easeInOutQuart'
   },
+  
   scales: {
     x: {
+      stacked: true,// ปิดการซ้อนทับของแท่งบนแกน x
       ticks: {
         color: 'black', // ตั้งค่าสีของอักษรบนแกน x
         font: {
@@ -168,6 +285,7 @@ failedValues = labels.map(label => {
       }
     },
     y: {
+      stacked: true, // ปิดการซ้อนทับของแท่งบนแกน y
       ticks: {
         color: 'black', // ตั้งค่าสีของอักษรบนแกน y
         font: {
@@ -187,40 +305,58 @@ failedValues = labels.map(label => {
 
   
 
-  let monthToSend=`${year}-${month.toString().padStart(2, '0')}`;
+
 
   
 let searchPerformed = false;
 let dataSearch: any[] = [];
-async function SearchData(param1: string) {
-
-		const datasearch = await searchGetdata(param1);
+async function SearchData() {
+  const formattedStartDate = selectedStartDate.toISOString().slice(0, 7);
+		const datasearch = await searchGetdata(formattedStartDate);
 		
     dataSearch = datasearch
     console.log("res : ",dataSearch )
 		searchPerformed = true;
     newlabels = Array.from(new Set(dataSearch.map(item => formatDate(item.CreatedAt))));
-    newsuccessValues = newlabels.map(label => {
-            const successCount = dataSearch.filter(item => 
-                formatDate(item.CreatedAt) === label && 
-                (item.Status === 'SUCCESS' || item.Status === 'success')
-            ).length;
-            console.log(`Success count for ${label}: `, successCount);
-            return successCount;
-        });
-
-        newfailedValues = newlabels.map(label => {
-            const failedCount = dataSearch.filter(item => 
-                formatDate(item.CreatedAt) === label && 
-                item.Status === 'FAILED'
-            ).length;
-            console.log(`Failed count for ${label}: `, failedCount);
-            return failedCount;
-        });
+    const counts = {
+    SUCCESS: Array(newlabels.length).fill(0),
+    FAILED: Array(newlabels.length).fill(0),
+    PENDING: Array(newlabels.length).fill(0),
+    RESPOND_REJECTED: Array(newlabels.length).fill(0),
+    REQUEST_REJECTED: Array(newlabels.length).fill(0),
+};
+dataSearch.forEach(item => {
+    const labelIndex = newlabels.indexOf(formatDate(item.CreatedAt));
+    if (labelIndex !== -1) {
+        switch (item.Status) {
+            case 'SUCCESS':
+            case 'success':
+                counts.SUCCESS[labelIndex]++;
+                break;
+            case 'FAILED':
+                counts.FAILED[labelIndex]++;
+                break;
+            case 'PENDING':
+                counts.PENDING[labelIndex]++;
+                break;
+            case 'RESPOND_REJECTED':
+                counts.RESPOND_REJECTED[labelIndex]++;
+                break;
+            case 'REQUEST_REJECTED':
+                counts.REQUEST_REJECTED[labelIndex]++;
+                break;
+            default:
+                break;
+        }
+    }
+});
       data.labels = newlabels;
-      data.datasets[0].data = newsuccessValues;
-      data.datasets[1].data = newfailedValues;
-    console.log("ข้อมูล res :",newlabels,newsuccessValues,newfailedValues)
+      data.datasets[0].data = counts.SUCCESS;
+data.datasets[1].data = counts.FAILED;
+data.datasets[2].data = counts.PENDING;
+data.datasets[3].data = counts.REQUEST_REJECTED;
+data.datasets[4].data = counts.RESPOND_REJECTED;
+console.log("ข้อมูล res :", newlabels, counts.SUCCESS, counts.FAILED, counts.RESPOND_REJECTED, counts.REQUEST_REJECTED, counts.PENDING);
    
     if (chart) {
            chart.update(); // Ensure chart is updated with new data
@@ -234,12 +370,18 @@ async function SearchData(param1: string) {
   const searchGetdata = async (param1: string) => {
         // const id = sessionStorage.getItem('merchant_id');
        
-        const [year, month] = param1.split("-");
-        console.log("param1",param1,year,month)
+       let [year, month] = param1.split("-");
+        
+        month = parseInt(month, 10);
+        month += 1; // Increment month
+    if (month > 12) {
+        month = 1; // Wrap around to January
+        year = (parseInt(year, 10) + 1).toString(); // Increment year
+    }
+    console.log("param1",param1,year,month)
         const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
-        console.log("search ",myCookie.Id , param1 , typeof(param1))
 
         let apiUrl;
     if (myCookie && myCookie.Type === "Line") {
@@ -269,7 +411,16 @@ async function SearchData(param1: string) {
 //         chart.update(); // Ensure chart is updated with new data
 //     }
 // });
-
+const formatDateSelect = (/** @type {Date} */ date: Date) => {
+      const months = [
+        "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.",
+        "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.",
+        "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+      ];
+      const month = months[date.getMonth()]; // ใช้เดือนในภาษาไทย
+      const year = date.getFullYear(); // ใช้ปี ค.ศ.
+      return `${month} ${year}`;
+    };
   
   </script>
 
@@ -278,23 +429,29 @@ async function SearchData(param1: string) {
 
 
 <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1 " style="height: 100%;">
-  <div class="flex justify-between my-2 " style="height: 30px;width:96%">
+  <div class="flex justify-between my-2   font-semibold" style="height: 30px;width:96%">
     <div>
-      กราฟแสดงข้อมูลรายเดือน
+      กราฟแสดงข้อมูลในช่วงเดือน
     </div>
-    <div class="flex justify-end  relative" >
-      <input 
-      type="month" 
-      bind:value={monthToSend} 
-      class="border-2 border-neutral-950 rounded-lg lg:px-3 mx-2 border border-stone-400 text-zinc-500"
-  />
+    <div class="flex justify-end  " >
+      <div class=" relative mx-3">
+        <input type="text" bind:this={startDatePicker} class="max-w-44 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent" readonly />
+        <img
+        src="{date}"
+        width="20px"
+        class="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none"  
+        alt="Calendar Icon"
+    />
+      </div>
+    
+      
         
         <Button
   variant="outline"
   class=" flex text-center py-0 px-0  text-white hover:text-black  bg-primary "
-  on:click={() => SearchData(monthToSend)}
+  on:click={() => SearchData()}
   style="width:40%;height:30px;"
-  ><div class="mx-3 content-center"  style="width:100%;height:100%" >
+  ><div class="mx-3 content-center font-semibold"  style="width:100%;height:100%" >
 
     ค้นหา
   </div>
@@ -306,6 +463,7 @@ async function SearchData(param1: string) {
   {#if searchPerformed == true}
   
       <Bar {data} {options}  />
+
   {:else}
   
       <Bar {data} {options}  />

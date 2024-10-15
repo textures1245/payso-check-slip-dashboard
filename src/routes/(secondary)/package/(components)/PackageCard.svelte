@@ -1,10 +1,13 @@
 <script context="module" lang="ts">
 	export type PackageCardProp = {
-		name: string;
-		price: number;
-		quotalimit: number;
+		Name: string;
+		Price: number;
+		QuotaLimit: number;
 		color: string;
 		index: number;
+		AmountLimit: number;
+		OrderAmount: number;
+		Id:number;
 	};
 </script>
 
@@ -23,8 +26,11 @@
 		sessionStorage.setItem('packageId', packageId);
 		window.location.assign("/payment")
 	}
+	
 
-
+	// let progressClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'progress-dark-red' : 'progress-success';
+	// let bgClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'bg-[#FEF3F2]' : 'bg-green-200';
+	let textClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'text-red-600' : 'text-white';
 </script>
 
 <!-- <div class="relative max-w-sm rounded overflow-hidden shadow-lg">
@@ -46,52 +52,74 @@
   </div> -->
   
   
-<Card.Root class="relative w-100 rounded-xl overflow-hidden text-center  shadow-none" style="height:100%">
+<Card.Root class="relative w-100 rounded-xl overflow-hidden text-center  shadow-none " style="height:100%">
 	
-	<Card.Header class={'rounded-t-xl relative overflow-hidden '} style="height:80px;background-color:#D0D4DA">
+	<Card.Header class={'rounded-t-xl relative overflow-hidden '} style="height:170px;background-color:rgba(234, 236, 240, 0.3);">
 		
 		<div class="flex justify-center">
-			<div class="text-3xl font-bold uppercase w-72 truncate " title="{pkg.Name}">{pkg.Name}</div>
+			<div class="text-xl font-bold uppercase truncate bg-[#F0F4FF] border-[#CCDEFF] border-2 rounded-3xl px-2" style="color:#113BD4;" title="{pkg.Name}">{pkg.Name}</div>
+		</div>
+		<div class="gap-1 text-3xl text-center py-4">
+			<p class="  font-semibold leading-none text-4xl " >{pkg.Price.toFixed(2).toLocaleString()}</p>
+			<p class="text-sm text-black mt-2">บาท / แพ็คเกจ</p>
 		</div>
 	</Card.Header>
 
 	<Card.Content class="px-4 py-2 z-0">
-		<div class="gap-1 text-3xl text-center py-4">
-			<p class=" font-bold leading-none text-6xl " >{pkg.Price.toFixed(2)}</p>
-			<p class="text-sm text-neutral-500">THB</p>
+	
+		<div class="gap-1 flex text-3xl text-left py-4">
+			<div><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
+				<g fill="#146dec" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(10.66667,10.66667)"><path d="M12,2c-5.511,0 -10,4.489 -10,10c0,5.511 4.489,10 10,10c5.511,0 10,-4.489 10,-10c0,-5.511 -4.489,-10 -10,-10zM12,4c4.43012,0 8,3.56988 8,8c0,4.43012 -3.56988,8 -8,8c-4.43012,0 -8,-3.56988 -8,-8c0,-4.43012 3.56988,-8 8,-8zM16.29297,8.29297l-6.29297,6.29297l-2.29297,-2.29297l-1.41406,1.41406l3.70703,3.70703l7.70703,-7.70703z"></path></g></g>
+				</svg></div>
+			<div class="text-sm leading-none content-center ml-1">{(pkg.QuotaLimit).toLocaleString()}  สลิป</div>
 		</div>
-		<div class="gap-1 text-3xl text-center py-4">
-			<div class="font-medium leading-none">{pkg.QuotaLimit}</div>
-			<p class="text-sm text-neutral-500">Requests</p>
+		
+		<div class="justify-start flex text-sm  text-start   ">
+			<div class="mr-2"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
+				<g fill="#146dec" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(10.66667,10.66667)"><path d="M12,2c-5.511,0 -10,4.489 -10,10c0,5.511 4.489,10 10,10c5.511,0 10,-4.489 10,-10c0,-5.511 -4.489,-10 -10,-10zM12,4c4.43012,0 8,3.56988 8,8c0,4.43012 -3.56988,8 -8,8c-4.43012,0 -8,-3.56988 -8,-8c0,-4.43012 3.56988,-8 8,-8zM16.29297,8.29297l-6.29297,6.29297l-2.29297,-2.29297l-1.41406,1.41406l3.70703,3.70703l7.70703,-7.70703z"></path></g></g>
+				</svg></div>
+			ราคาเฉลี่ย {(pkg.Price/pkg.QuotaLimit).toFixed(2)} บาท / สลิป
 		</div>
-
-		<small class="justify-center text-md items-center py-4 text-neutral-500">
-			Average price {(pkg.Price/pkg.QuotaLimit).toFixed(2)} baht per request
-		</small>
 
 	</Card.Content>
 
-	<Card.Footer>
-		{#if index+1 == maxIndex}
-		<Button size="lg"  class="w-full  bg-primary text-white" on:click={() => sendData(pkg.Price.toFixed(2),pkg.Name,pkg.Id)} >
-			<Check class="me-2 h-4 w-4" /> BUY NOW
+	<Card.Footer class="flex-col mt-3 font-semibold " >
+		<Button size="lg" variant="outline" class="w-full bg-primary text-white" style="height:50px" on:click={() => sendData(pkg.Price.toFixed(2),pkg.Name,pkg.Id)} >
+			ซื้อเลย 
 		</Button>
-		{:else}
-		<Button size="lg" variant="outline " class="w-full bg-primary text-white" on:click={() => sendData(pkg.Price.toFixed(2),pkg.Name,pkg.Id)} >
-			<Check class="me-2 h-4 w-4" /> BUY NOW
-		</Button>
-	{/if}
+
+		{#if pkg.AmountLimit != 0 && ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 < 10}
+		
+		<div class="relative w-full mt-3">
+			<!-- Progress bar container -->
+			<div class="w-full rounded-full overflow-hidden h-4">
+			  <!-- Progress bar fill -->
+			  <progress class="progress w-full  " value="{pkg.AmountLimit-pkg.OrderAmount}" max="{pkg.AmountLimit}" style="height: 18px;"></progress>
+			  <!-- Progress bar text -->
+			  <div class="absolute inset-0 flex items-center justify-center {textClass} font-bold text-xs">
+				เหลือเพียง {pkg.AmountLimit-pkg.OrderAmount} แพ็คเกจ
+			  </div>
+			</div>
+		  </div>
+		  
+
+		{/if}
+		
+	
 		
 	</Card.Footer>
-	{#if index+1 == maxIndex}
+	
+	{#if pkg.OrderAmount == maxIndex }
 		<div
-			class="absolute top-3 right-0 -mr-14 mt-4 transform rotate-45 text-white py-1 px-16 text-sm font-semibold" style="background-color: #FFBE00;color:
-#0031E5"
+			class="absolute top-3 right-0 -mr-14 mt-4 transform rotate-45 text-white py-1 px-16 text-xl font-semibold " style="background-color: #F04438;color:
+#fffff"
 		>
 			Popular
 		</div>
 		
 	{/if}
+	
+	
 </Card.Root>
 
 
@@ -136,3 +164,26 @@
 		</Button>
 	</Card.Footer>
 </Card.Root> -->
+<style scoped>
+    progress[value] {
+        /* ปรับแต่งลักษณะของ progress bar */
+        -webkit-appearance: none; /* สำหรับ Safari */
+        appearance: none;
+        width: 100%;
+        height: 18px; /* ความสูง */
+    }
+
+    progress[value]::-webkit-progress-bar {
+        background-color: #FEF3F2; /* สีพื้นหลัง */
+        border-radius: 10px;
+    }
+
+    progress[value]::-webkit-progress-value {
+        background-color: #FF5733; /* สีของ progress */
+        border-radius: 10px;
+    }
+
+    progress[value]::-moz-progress-bar {
+        background-color: #FF5733; /* สีของ progress สำหรับ Firefox */
+    }
+</style>

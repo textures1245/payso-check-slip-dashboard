@@ -6,6 +6,8 @@
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { onMount } from 'svelte';
     import * as Card from "$lib/components/ui/card";
+	import dowlaod from"$lib/image/downloads.png";
+	import payment from"$lib/image/Payment.png";
 	const date = new Date();
 	const year = date.getFullYear().toString();
 	const month = (date.getMonth() + 1).toString().padStart(2, '0'); // getMonth() is zero-based
@@ -41,8 +43,10 @@
 			
 		}
 		console.log(" URL ",url)
+		console.time('Fetch Only Create');
 		const result = await fetch(url, config);
 		const data = await result.json();
+		console.timeEnd('Fetch Only Create');
 		console.log('Fetched data:', data);
 		if (data) {
 			return data.data.image;
@@ -74,7 +78,6 @@
 			`${PUBLIC_API_ENDPOINT}/payment/create`,
 			config
 		);
-
 		const data = await result.json();
 		console.log('Fetched data:', data);
 		if (data) {
@@ -85,19 +88,25 @@
 	let dataImg="";
 
 	onMount(async () => {
-		packageprice = sessionStorage.getItem('packageprice');
-		packagename = sessionStorage.getItem('packagename');
+		packageprice = sessionStorage.getItem('packageprice') as string;
+		packagename = sessionStorage.getItem('packagename') as string;
 		const storedTime = localStorage.getItem('remainingTime');
 		const Img = localStorage.getItem('Img');
 		
+		
+		
     if (storedTime) {
         seconds = parseInt(storedTime, 10); // นำค่าที่เก็บไว้มาใช้
-		dataImg = Img
+		dataImg = Img as string
 		console.log('data : ', dataImg);
     }else{
 		try {
+			
 			const data = await Create();
+			
+			console.time('Fetch Only Create onMount');
 			CreateRefno();
+			console.timeEnd('Fetch Only Create onMount');
 			dataImg = data;
 			console.log('dataIMG : ', dataImg);
 			localStorage.setItem('Img', dataImg.toString());
@@ -122,26 +131,39 @@
 	function startTimer() {
 		timerStarted = true; // ตั้งค่าสถานะว่าเริ่มต้นแล้ว
 		localStorage.setItem('remainingTime', seconds.toString());
-		const intervalId = setInterval(async () => {
+		(window as any).intervalId = setInterval(async () => {
 			seconds -= 1; // ลดค่าการนับเวลา
 			localStorage.setItem('remainingTime', seconds.toString());
 			const data = await Check();
 			console.log("Check : ",data)
 			// ตรวจสอบว่าหมดเวลา
+			if(data.OrderAmount ==data.AmountLimit){
+				const modal = document.getElementById('my_modal_2');
+				if (modal) {
+					modal.showModal();
+					setTimeout(() => {
+            		window.location.assign("/package");
+        			}, 2000);
+				}
+				
+			}
 			if (seconds <= 0 || data.Status == "SUCCESS") {
-				clearInterval(intervalId); // หยุดการนับเวลา
+				clearInterval((window as any).intervalId); // หยุดการนับเวลา
 				clearRemainingTime()
 				messageVisible = false; // ซ่อนข้อความ
-				if (data.Status =="SUCCESS") {
+				if (data.Status =="SUCCESS" ) {
                     UpdatePackage()
+					if(data.OrderAmount == data.AmountLimit-1){
+						UpdateLimitPackage()
+					}
                     window.location.assign("/dashboard")
 				}
-				if (seconds <= 0) {
+				if (seconds <= 0 ) {
                     window.location.assign("/package")
 				}
 			}
 		}, 1000); // ทำงานทุกๆ 1 วินาที
-
+	
 // เช็คเวลาแบบตรวจทุกๆ 5 วินาที
 	// 	const intervalId = setInterval(async () => {
     //     seconds -= 1; // ลดค่าการนับเวลา
@@ -223,7 +245,7 @@
     
     const UpdatePackage = async () => {
 		// Create URL parameters from form data
-        const Id = sessionStorage.getItem('packageId');
+       		 const Id = sessionStorage.getItem('packageId') as string;
 			const cookies = getCookies();
 			const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 			console.log('package Id :', typeof(Id), typeof(myCookie.Id));
@@ -250,9 +272,41 @@
     localStorage.removeItem('remainingTime'); 
 	localStorage.removeItem('Img');
 	localStorage.removeItem('RefNo');
+	if ((window as any).intervalId) {
+    clearInterval((window as any).intervalId);
+    console.log('Timer stopped.');
+  }
 }
 
 
+const UpdateLimitPackage = async () => {
+		const packagegId = sessionStorage.getItem('packageId')
+		let config = {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+			}
+		};
+		var result = await fetch(
+			`${PUBLIC_API_ENDPOINT}/update/visibility/${packagegId}/false`,
+			config
+		);
+
+		const data = await result.json();
+		return data;
+	};
+
+	const filename = 'QRcode.png';
+	function downloadImage(imageUrl: string, filename: string) {
+    const link = document.createElement('a'); // สร้างลิงค์ใหม่
+    link.href = imageUrl; // ตั้งค่า URL ของรูปภาพ
+    link.download = filename; // ตั้งชื่อไฟล์เมื่อดาวน์โหลด
+
+    // เพิ่มลิงค์ลงในเอกสารและคลิกเพื่อดาวน์โหลด
+    document.body.appendChild(link);
+    link.click(); // เริ่มการดาวน์โหลด
+    document.body.removeChild(link); // ลบลิงค์หลังจากดาวน์โหลดเสร็จ
+}
     
 </script>
 
@@ -262,8 +316,8 @@
     {/if}
 	<p>เวลาที่เหลือ: {formatTime(seconds)} วินาที</p>
 {/if} -->
-<div class="flex justify-center items-center flex-col h-screen overflow-hidden">
-<Card.Root class=" lg:w-2/5 md:w-4/5">
+<div class="flex justify-center items-center flex-col h-[calc(100vh-41px)] ">
+<Card.Root class=" lg:w-2/5 md:w-3/5">
     <Card.Header
         class="p-0 items-center justify-center "
     >
@@ -273,26 +327,77 @@
     <Card.Content class="flex justify-center text-center ">
         
         <div>
-        <p class="text-xl my-2">สแกนเพื่อชำระเงิน</p>
+        <p class="text-2xl mt-5 font-semibold">สแกนเพื่อชำระเงิน</p>
         {#if messageVisible}
 		
         {#if dataImg}
-        <img src={dataImg} class="mx-5"/>
+		<div class="flex justify-center mt-3">
+		<div class="border-2 border-[#113566] rounded-md overflow-hidden w-5/5  ">
+		<div class=" bg-[#113566]  flex justify-center"> <img src={payment}  width="120px" height="100px"/> </div>
+		<div class=""><img src={dataImg}  class="w-[220px] h-[220px] lg:w-[250px] lg:h-[230px]"/></div>
+	</div>
+	</div>
         {/if}
-        <div class="text-xl flex justify-center items-center">
-			<span>Package Name:</span>
-			<p class="ml-2 text-2xl">{packagename}</p>
+        <div class="text-lg flex justify-center items-center mt-3" >
+			<span>แพ็คเกจ :</span>
+			<p class="ml-2 text-lg  font-semibold  truncate">{packagename}</p>
 		  </div>
-		<div class="text-xl flex justify-center items-center">
-			<span>ราคา</span>
-			<p class="ml-2 text-2xl">{packageprice} Bath</p>
+		<div class="text-lg flex justify-center items-center">
+			<span>จำนวนเงิน :</span>
+			<p class="ml-2 text-2xl font-semibold " style="color:#1353EC">{(packageprice).toLocaleString()} Bath</p>
 		  </div>
-        <p class=" lg:text-4xl md:text-4xl text-2xl my-3"> {formatTime(seconds)}</p>
     {/if}
+	
     </div>
     </Card.Content>
+	<div class="m-5">
+	<div class=" text-center p-3  bg-[#FEF6F6] text-[#E02424]">
+        <p class=" lg:text-xl md:text-xl text-xl  font-semibold">หมดอายุใน  {formatTime(seconds)} นาที</p>
+		<p class=" text-sm">*จ่ายสำเร็จแล้ว โปรดรอจนหน้าจอกลับไปยังหน้าหลัก</p>
+		<p class=" text-sm">คิวอาร์โค้ดที่จ่ายสำเร็จแล้ว ไม่สามารถจ่ายซ้ำได้</p>
+		</div>
+	</div>
+	<div class="mx-5 mb-5"><Button variant="outline" class="w-full h-12 text-white hover:text-black  bg-primary font-semibold" on:click={() => downloadImage(dataImg, filename)}  ><img src="{dowlaod}" width="18px" height="18px" class="mr-3">ดาวน์โหลดคิวอาร์โค้ด</Button></div>
 </Card.Root>
 
 </div>
 
+<dialog id="my_modal_2" class="modal">
+	<div class="modal-box ">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-2xl">แพ็คเกจนี้ถูกซื้อครบจำนวนที่กำหนดแล้ว</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>
 
+
+<style scoped>
+.truncate {
+    white-space: nowrap; /* ไม่ให้ข้อความแถวใหม่ */
+    overflow: hidden; /* ซ่อนข้อความที่เกิน */
+    text-overflow: ellipsis; /* แสดง ... เมื่อเกิน */
+    max-width: 20ch; /* จำกัดความกว้างให้ไม่เกิน 15 ตัวอักษร */
+}
+</style>

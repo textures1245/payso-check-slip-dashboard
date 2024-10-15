@@ -10,7 +10,9 @@
 		import paysoLogo from '$lib/image/paysologo.jpg';
 		import * as Select from '$lib/components/ui/select';
 		import * as Avatar from '$lib/components/ui/avatar';
-	
+		import pie from '$lib/image/chart1.png';
+	import chart from '$lib/image/chart2.png';
+	import statuspic from '$lib/image/chart3.png';
 	  
 	
 	  
@@ -34,10 +36,6 @@
 );
 		
 		
-		const Login = async () => {
-			// @ts-ignore
-			
-		};
 
 		let showPassword = false;
 	let password = '';
@@ -54,12 +52,36 @@
 	
 	
 	<div
-		class="bg-gradient-to-tr h-lvh from-destructive via-primary via-70% to-secondary grid lg:grid-cols-3 "
+		class="h-lvh bg-[url({bg})] bg-cover bg-center  lg:p-10 md:p-0   bg-opacity-1 grid lg:grid-cols-3  overflow-y-hidden"
 	>
-		<div class=" hidden lg:block lg:h-lvn md:col-span-1 lg:col-span-2 " style="hight:50px">
-			<img class=" hidden lg:block object-cover w-full h-full " src={bg} alt="background" />
+	<div class=" hidden  content-center  lg:block lg:h-lvn md:col-span-1 lg:col-span-2  bg-zinc-300 "  style="hight:50px">
+		<div class="flex justify-start  w-5/5   ">
+			<div class="  rounded-2xl  p-6 flex flex-col   text-sm  ">
+				<div class="px-10">
+					<div class="pt-2 text-start">
+						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#17B26A]"> จัดการการเข้าถึงและสิทธิ์ของผู้ใช้งานอย่างมีประสิทธิภาพ</h2>
+					</div>
+					<div class="pt-2 text-start">
+						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#475467]">วิเคราะห์ข้อมูลและสร้างรายงานเพื่อการตัดสินใจที่ดีขึ้น</h2>
+					</div>
+					<div class="pt-2 text-start">
+						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#475467]">ติดตามและวิเคราะห์ข้อมูลระบบได้ง่าย ๆ</h2>
+					</div>
+					<div class="py-2 w-5/5">
+						<h2 class="xl:text-lg lg:text-md text-start">ยินดีต้อนรับสู่แดชบอร์ดผู้ดูแล ที่ทำให้การจัดการระบบง่ายและปลอดภัยที่สุด!</h2>
+					</div>
+					
+				</div>
+			</div>
 		</div>
-		<div class="col-span-1 backdrop-blur-md w-full h-full py-20 lg:py-0 px-20 lg:px-0 place-self-center">
+	<div class=" w-full xl:h-full lg:h-3/5 rounded-2xl  flex justify-center items-center relative overflow-hidden ">
+		<img src="{pie}" class="absolute top-28 left-40 w-3/6 h-auto transform translate-y-[-10%]  scale-75 shadow-lg" style="z-index: 3;">
+		<img src="{chart}" class="absolute top-5 left-10 w-3/5 h-auto transform translate-y-[-5%]  scale-75 shadow-md" style="z-index: 2;">
+		<img src="{statuspic}" class="absolute top-0 right-0 w-3/5 h-auto transform scale-75 shadow-lg" style="z-index: 1;">
+	</div>
+		
+	</div>
+		<div class="col-span-1  w-full h-full py-10 lg:py-0 px-10 lg:px-0 place-self-center">
 			<Card.Root
 				class="h-full grid place-items-center shadow-2xl bg-primary-foreground lg:rounded-none rounded-b-none"
 			>
@@ -78,7 +100,7 @@
 			  <div class="flex my-3 grid gap-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 text-black" style="width: 100%;">
 				<form id="loginadmin" method="post" action="?/signInAdmin">
 					<div class="flex justify-center">
-					<input type="text" name="username" placeholder="Username" id="uernameAdmin" style="width: 90%;height:40px" class="border border-spacing-10 px-5 rounded-2xl" />
+					<input type="text" name="username" placeholder="Username" id="uernameAdmin" style="width: 90%;height:40px" class="border border-spacing-10 px-5 rounded-md" />
 					</div>
 					<div class="flex justify-center">
 						<div style="position: relative; width: 90%;">
@@ -91,7 +113,7 @@
 									placeholder="Password"
 									id="password"
 									style="width: 100%; height: 40px;"
-									class="my-3 border border-spacing-10 ps-5 pe-10 rounded-2xl"
+									class="my-3 border border-spacing-10 ps-5 pe-10 rounded-md"
 								/>
 								<!-- <input type="checkbox" on:change={togglePasswordVisibility} style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);" /> -->
 								<svg
@@ -118,7 +140,7 @@
 						</div>
 					</div>
 					<div class="flex justify-center">
-						<Button type="submit" variant="outline" class="my-2 flex text-center py-0 px-0  bg-sky-400 rounded-2xl text-white bg-primary" style="width:90%;height:40px;"  >Sign In</Button>
+						<Button type="submit" variant="outline" class="my-2 flex text-center py-0 px-0  rounded-md text-white bg-primary" style="width:90%;height:40px;"  >Sign In</Button>
 					</div>
 				</form>
 			  </div>

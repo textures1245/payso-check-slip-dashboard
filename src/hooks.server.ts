@@ -13,8 +13,6 @@ export const handle = async ({ resolve, event }) => {
 	];
 	const isAdminPath = adminPaths.some((path) => event.url.pathname.startsWith(path));
 
-	console.log('isAdminPath', isAdminPath);
-
 	try {
 		console.log(event.url.pathname);
 		if (event.url.pathname == '/') {
@@ -38,11 +36,17 @@ export const handle = async ({ resolve, event }) => {
 		}
 		if (isAdminPath) {
 			const token = event.cookies.get('admin_account') || '';
+			const tokenmercahnt = event.cookies.get('merchant_account') || '';
 			// const paths = event.url.pathname
 			// const path = `/${paths}`;
 			// If no token is found, redirect to the login page
 			if (!token) {
-				return redirect(302, '/login-admin');
+				if(tokenmercahnt){
+					return redirect(302, '/dashboard');
+				}else{
+					return redirect(302, '/login-admin');
+				}
+				
 			}
 		}
 		if(event.url.pathname == '/login-admin'){

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import cookie from 'cookie';
 	import * as Card from '$lib/components/ui/card';
-	import logo from '$lib/image/merchant.png';
+	import logo from '$lib/image/logoshop.png';
 	import { onDestroy, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
@@ -18,7 +18,7 @@
 	let QuotaLimit=0;
 	let QuotaUse=0;
 	onMount(async () => {
-
+		clearRemainingTime()
 		try {
 			console.log(profileData);
 			const data = await GetProfile();
@@ -77,7 +77,9 @@
 		};
 
 		let url;
-		if (myCookie.Id) {
+		if (myCookie && myCookie.Type === "Line") {
+        	url = `${PUBLIC_API_ENDPOINT}/merchant/profileline/${myCookie.Email}`;
+		}else if (myCookie.Id) {
 			console.log('Get by Merchant Id');
 			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
 		} else {
@@ -91,8 +93,13 @@
 	};
 
 	// $: list = merchantList.data;
+	// let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
+	// let clientId = '2006015671';
+	// let redirectUri = 'http://localhost:5173/profile';
+	// let state = id;
+	// let scope = 'profile%20openid%20email';
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientId = '2006015671';
+	let clientId = '2005856083';
 	let redirectUri = 'http://localhost:5173/profile';
 	let state = id;
 	let scope = 'profile%20openid%20email';
@@ -270,7 +277,31 @@
 //         removeAccount(index);
 //     }
 	
+function clearRemainingTime() {
+    localStorage.removeItem('remainingTime'); // การใช้งานที่ถูกต้อง
+	localStorage.removeItem('Img');
+	localStorage.removeItem('RefNo');
+    if ((window as any).intervalId) {
+    clearInterval((window as any).intervalId);
+    console.log('Timer stopped.');
+  }
+}
 
+function formatDate(dateString:any) {
+    const date = new Date(dateString);
+    
+    // ตรวจสอบว่ามีวันที่ถูกต้องหรือไม่
+    if (isNaN(date.getTime())) {
+        return "Invalid date"; // คืนค่าข้อความหากวันที่ไม่ถูกต้อง
+    }
+
+    // แปลงวันที่เป็นรูปแบบ "18 ก.ย. 2024"
+    const day = date.getDate();
+    const month = date.toLocaleString('th-TH', { month: 'short' });
+    const year = date.getFullYear(); // ปี ค.ศ.
+
+    return `${day} ${month} ${year}`; // คืนค่าในรูปแบบ "18 ก.ย. 2024"
+}
 
 </script>
 
@@ -369,52 +400,55 @@
 </div> -->
 
 <div
-	class=" grid gap-4 md:grid-cols-1 lg:grid-cols-1 overflow-x-hidden lg:h-screen md:screen sm:h-screen h-screen w-100 bg-primary-foreground"
+	class=" grid gap-4 md:grid-cols-1 lg:grid-cols-1 overflow-x-hidden min-h-[calc(100vh-41px)] w-100 bg-primary-foreground"
 >
-	<div class="flex justify-center bg-slate-100">
-		<div class="lg:my-0 md:my-0 sm:my-0 my-5">
-			<div class="flex my-3 justify-center">
-				<img src={logo} alt="" class="w-24 h-30 my-5" />
-				<div class="my-5 content-center mx-2">
-					<div class=" text-4xl font-bold truncate lg:w-96 md:w-96 sm:w-96 w-56" title="{profiles.MerchantName}">{profiles.MerchantName}</div>
-					<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-2 my-2"><div class="text-lg">Merchant ID : {#if profiles.MerchantId != 0}{profiles.MerchantId}{:else}-{/if}</div><div class="flex justify-center mx-5">
-						{#if profiles.Status == 'ACTIVE'}
-							<div
-								class="  bg-green-500 text-center px-3  rounded-lg text-sm text-white"
-								style="height: 18px;"
-							>
-								ACTIVE
-							</div>
-						{:else}
-							<div
-								class="   bg-red-600 text-center px-3 rounded-lg text-sm text-white"
-								style="height: 18px;"
-							>
-								INACTIVE
-							</div>
-						{/if}
-					</div></div>
-				</div>
-			</div>
+	<div class="flex justify-center bg-primary-foreground">
+		<div class="lg:my-8 md:my-8 sm:my-8 my-5">
+			
 			<Card.Root class="my-2 w-80 sm:w-full md:w-full lg:w-full">
 				<Card.Header>
 				  <Card.Title>
-					<div class="flex justify-between textl-xl mx-5">
-						<div> Package</div>
-						<div>{profiles.PackageName}</div>
+					<div class="flex justify-center  lg:w-full md:w-full sm:w-full w-80 ">
+						<div class="content-center">
+						<div class="bg-[#DBE8FF] rounded-full content-center lg:p-6 md:p-6 sm:p-6 p-6  min-w-20 min-h-20 ">
+						<img src={logo}  /></div></div>
+						<div class=" content-center mx-2">
+							<div class=" text-2xl font-bold truncate lg:w-96 md:w-96 sm:w-96 w-56" title="{profiles.MerchantName}">{#if loading}-{:else}{profiles.MerchantName}{/if}</div>
+							<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-2 my-2   font-normal "><div class="text-md content-center">รหัสร้านค้า : {#if profiles.MerchantId == 0 || loading}-{:else}{profiles.MerchantId}{/if}</div>
+							<div class="flex justify-start content-center">
+								{#if profiles.Status == 'ACTIVE'}
+									<div
+										class="  bg-[#ECFDF3] text-[#067647] border border-[#ABEFC6]   font-semibold  text-center px-2 py-1 rounded-xl text-sm   content-center"
+										
+									>
+										<li>ACTIVE</li>
+									</div>
+								{:else}
+									<div
+										class="   bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA] font-semibold text-center px-2 py-1 rounded-lg text-sm  content-center"
+									
+									>
+									<li>INACTIVE</li>
+									</div>
+								{/if}
+							</div></div>
+						</div>
 					</div>
+					
 					
 				  </Card.Title>
 				</Card.Header>
 				<Card.Content>
-				  <div class="flex justify-center"><progress class="progress progress-success w-96 mx-2" value={QuotaLimit-QuotaUse} max={QuotaLimit}></progress></div>
-				  <div class="flex justify-end w-100 lg:px-10 md:px-10 sm:px-10 px-2">
-					<div class="text-xs	my-2">used {parseInt(profiles.QuotaLimit-profiles.QuotaUsage)} of {parseInt(profiles.QuotaLimit)} requests</div>
+					<div class="flex justify-between textl-lg mx-5   font-semibold">
+						<div class="px-1"> แพ็คเกจ</div>
+						<div>{#if loading}-{:else}{profiles.PackageName}{/if}</div>
+					</div>
+				  <div class="flex justify-center mt-3"><progress class="progress progress-success w-full mx-5" value={QuotaLimit-QuotaUse} max={QuotaLimit}></progress></div>
+				  <div class="flex  w-100 lg:px-5 md:px-5 sm:px-5 px-5" >
+					<div class="text-xs	my-4 flex justify-start" style="width: 100%;">{#if loading}วันที่หมดอายุ -{:else}วันที่หมดอายุ {formatDate(profiles.BillDate.split("T")[0])} {/if}</div>
+					<div class="text-xs	my-4 flex justify-end" style="width: 100%;">{#if loading}ใช้ไป 0 จาก 0 รายการ{:else}ใช้ไป {parseInt(profiles.QuotaLimit-profiles.QuotaUsage).toLocaleString()} จาก {parseInt(profiles.QuotaLimit).toLocaleString()} รายการ{/if}</div>
 				  </div>
 				</Card.Content>
-				<Card.Footer>
-					
-				</Card.Footer>
 			  </Card.Root>
 			<div
 				class="  bg-white w-80 lg:my-3 md:my-5 sm:my-0 my-8 sm:w-96 md:w-full lg:w-full rounded-2xl border border-slate-300"
@@ -428,63 +462,66 @@
 				</div>
 				<div class="my-5">
 					{#if loading}
-					<div class="flex justify-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="spin"
-                            x="0px"
-                            y="0px"
-                            width="100"
-                            height="100"
-                            viewBox="0 0 128 128"
-                        >
-                            <path
-                                d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
-                            ></path>
-                        </svg>
-                    </div>
+					<div class="border border-blue-300 shadow rounded-md p-4 max-w-md w-full mx-auto h-56">
+						<div class="animate-pulse flex space-x-4">
+						  <div class="rounded-full bg-slate-200 h-10 w-10"></div>
+						  <div class="flex-1 space-y-6 py-1">
+							<div class="h-2 bg-slate-200 rounded"></div>
+							<div class="space-y-3">
+							  <div class="grid grid-cols-3 gap-4">
+								<div class="h-2 bg-slate-200 rounded col-span-2"></div>
+								<div class="h-2 bg-slate-200 rounded col-span-1"></div>
+								<div class="h-2 bg-slate-200 rounded col-span-2"></div>
+								<div class="h-2 bg-slate-200 rounded col-span-1"></div>
+								<div class="h-2 bg-slate-200 rounded col-span-2"></div>
+								<div class="h-2 bg-slate-200 rounded"></div>
+								<div class="h-2 bg-slate-200 rounded col-span-1"></div>
+								<div class="h-2 bg-slate-200 rounded col-span-2"></div>
+								<div class="h-2 bg-slate-200 rounded"></div>
+							  </div>
+							  <div class="h-2 bg-slate-200 rounded"></div>
+							</div>
+						  </div>
+						</div>
+					  </div>
 					{:else}
 						<Card.Root class=" text-black border-none shadow-none">
 							<Card.Content class="mx-3 my-3 flex px-3  ">
 								<div style="width: 100%;">
-									<div class="text-4xl font-bold">About</div>
+									<div class="text-2xl font-semibold">เกี่ยวกับ</div>
 									<div class="text-sm text-wrap my-2 grid gap-4 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
-										<div class="text-sm">Email </div>
-										<div class=" col-span-2">{profiles.Email}</div>
-										<div class="text-sm">Phone </div>
+										<div class="text-sm">อีเมล </div>
+										<div class=" col-span-2 break-words">{profiles.Email}</div>
+										<div class="text-sm">โทรศัพท์ </div>
 										<div class=" col-span-2">{profiles.MerchantTel}</div>
 									</div>
 								</div></Card.Content
 							>
 						</Card.Root>
 						<hr class=" bg-gray-300 my-3 mx-5" style="height: 2px;" />
-						<div class="mx-5">
-							<div class=" text-4xl my-3 font-bold">Address</div>
+						<div class="mx-3 px-3">
+							<div class=" text-2xl my-3 font-semibold">ที่อยู่</div>
 
 							<div class=" grid gap-4 grid-cols-3 md:grid-cols-3 lg:grid-cols-3">
-								
-									<div class="text-sm">URL</div>
-									<div class="text-sm break-words col-span-2">{profiles.MerchantURL}</div>
-								
-								
-									<div class="text-sm">Company</div>
+
+									<div class="text-sm">บริษัท</div>
 									<div class="text-sm col-span-2 break-words">{profiles.MerchantCompany}</div>
-								
-								
-									<div class="text-sm">Address</div>
+			
+									<div class="text-sm">ที่อยู่</div>
 									<div class="text-sm col-span-2 break-words">{profiles.AddressTH}</div>
-							
+									<div class="text-sm">ลิงก์</div>
+									<div class="text-sm break-words col-span-2">{profiles.MerchantURL}</div>
 								
 							</div>
 						</div>
 					<hr class=" bg-gray-300 my-3 mx-5" style="height: 2px;" />
 					{/if}
-					<div class="mx-5">
-						<div class=" text-2xl my-3">Links</div>
+					<div class="mx-3 px-3">
+						<div class=" text-2xl my-3 font-semibold">ลิงก์</div>
 
 						
 						
-								{#each linkline as profile , index}
+								{#each linkline as profile }
 									
 									<div class=" grid gap-4 grid-cols-4 md:grid-cols-4 lg:grid-cols-4 border my-2 border-gray-300 rounded-lg">
 									<div class="avatar">
@@ -496,7 +533,7 @@
 										{profile.Name}
 									</div>
 									<div class="dropdown dropdown-bottom flex justify-end bg-none my-2 " >
-										<div tabindex="0" role="button" class="btn btn-sm m-1"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" {...$$props}>
+										<div tabindex="0" role="button" class=" btn-sm m-1  content-center"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" {...$$props}>
 											<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
 												<circle cx="8" cy="2.5" r=".75" />
 												<circle cx="8" cy="8" r=".75" />
@@ -516,14 +553,14 @@
 							
 						
 					</div>
-					<div class="flex justify-start">
+					<div class="flex justify-start hover:text-black">
 						<Button
 							variant="outline"
-							class="my-2 mx-5 flex text-center py-0 px-0 bg-green-500 rounded-md lg:w-30 md:w-50"
+							class="my-2 mx-5 flex text-center py-0 px-0 bg-green-500 rounded-md lg:w-30 md:w-50 group"
 							on:click={line}
 							style="height:40px"
 							><div
-							class="lg:bg-green-800 md:bg-green-800 sm:bg-green-800 rounded-sm w-24 "
+							class=" rounded-sm w-24 "
 							style="height:100%"
 						>
 							<svg
@@ -543,8 +580,8 @@
 								></path>
 							</svg>
 						</div>
-						<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden hover:text-black text-white">
-							Login With Line
+						<div style="width: 100%;height:100%" class="content-center lg:block md:block sm:block hidden group-hover:text-black text-white">
+							เข้าสู่ระบบด้วย Line
 						</div>
 						</Button>
 						
@@ -629,17 +666,7 @@
 		<button>close</button>
 	</form>
 </dialog>
-<div class="tooltip-container">
-    <div class="tooltip">
-        <button class="btn rounded-full  bg-black text-white">i</button>
-        <div class="tooltip-text">
-            <strong>คำแนะนำเบื้องต้น:</strong> <br>
-            แสดงข้อมูลเบื้องต้นของคนที่เข้ามาใช้งาน
-            <br><br>  กดปุ่ม Line --> Login Line --> แสดงรูป Line ( สามารถทำแบบเดิมเพื่อเพิ่มอีก Line ได้ )-->กดยืนยัน  
-            <br><br>  สามารถใช้งาน Check Slip ผ่านไลน์ได้แล้ว ( ถ้าไม่ได้ ต้องซื้อ โควต้า ที่หน้า Package )
-        </div>
-    </div>
-</div>
+
 
 <form id="updateline" method="post" action="?/UpdateLine">
 		<input type="text" hidden name="uid" id="inputuid" />
@@ -671,40 +698,5 @@
 		}
 	}
 
-	.tooltip-container {
-        position: fixed; /* ใช้ fixed เพื่อให้อยู่ตำแหน่งเดิมเมื่อเลื่อนหน้า */
-        right: 10px; /* ปรับให้ปุ่มและ tooltip อยู่ด้านขวาของหน้าจอ */
-        top: 95%; /* ปรับตำแหน่งให้อยู่ตรงกลางตามแนวตั้ง */
-        transform: translateY(-50%); /* เลื่อนขึ้นครึ่งหนึ่งของความสูงเพื่อให้อยู่ตรงกลาง */
-        z-index: 1000;
-    }
-
-    .tooltip {
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .tooltip .tooltip-text {
-        visibility: hidden;
-        width: 250px;
-        max-height: 300px; /* กำหนดความสูงสูงสุดเพื่อให้มี scrollbar */
-        background-color: #555;
-        color: #fff;
-        text-align: left;
-        border-radius: 5px;
-        padding: 10px;
-        position: absolute;
-        right: 0; /* ให้ tooltip อยู่ชิดขวาของปุ่ม */
-        bottom: 100%; /* ให้ tooltip อยู่ด้านล่างของปุ่ม */
-        margin-top: 10px; /* ระยะห่างระหว่างปุ่มและ tooltip */
-        overflow-y: auto; /* เพิ่ม scrollbar ในแนวตั้ง */
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .tooltip:hover .tooltip-text {
-        visibility: visible;
-        opacity: 1;
-    }
+	
 </style>

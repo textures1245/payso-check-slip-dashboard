@@ -1,35 +1,23 @@
 <script lang="ts">
-	type Transaction = {
-		BankResponded: string;
-		CreatedAt: string;
-		Id: number;
-		Status: string;
-		TransferRefId: string;
-	};
-    import { Bar } from 'svelte-chartjs';
-    import logo from"$lib/image/pack.png";
     import { Button } from '$lib/components/ui/button';
 	import * as Table from "$lib/components/ui/table";
-    import * as Card from "$lib/components/ui/card";
-	import * as Carousel from '$lib/components/ui/carousel/index.js';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog';
     // Register Chart.js components
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import cookie from 'cookie';
-	export let firstItem: Transaction;
-    console.log(firstItem)
-  const tags = Array.from({ length: 50 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`
-  ); 
+	import failed  from '$lib/image/failed.png';
+	import success  from '$lib/image/success.png';
 
   let statusToSend="all";
-
+  let previousStartDate: string | null = null;
+  let previousEndDate: string | null = null;
   
 
 	let dataChart: any[] = [];
 	onMount(async () => {
+		previousStartDate = localStorage.getItem('startDate');
+    	previousEndDate = localStorage.getItem('endDate');
 		try {
 			const datachart = await Getdata();
 			dataChart=datachart;
@@ -39,7 +27,15 @@
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		}
+		checkLocalStorageChanges();
+    
+    // ตั้งเวลาให้ตรวจสอบการเปลี่ยนแปลงในบางช่วงเวลา (เช่นทุก 1 วินาที)
+    const intervalId = setInterval(checkLocalStorageChanges, 100);
 
+    // ลบ interval เมื่อ component ถูกทำลาย
+    onDestroy(() => {
+        clearInterval(intervalId);
+    });
 		
 
 
@@ -47,23 +43,26 @@
 	function getCookies() {
   return cookie.parse(document.cookie);
 }
-	const Getdata = async () => {
+	 const Getdata = async () => {
 		// const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		// console.log( 'id: ', id , typeof(id));
 		const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		console.log("++++++++++",myCookie.Id , myCookie.Email);
-		
-		console.log('checking transaction month');
+		const startDate = localStorage.getItem('startDate');
+		const endDate = localStorage.getItem('endDate');
+
 		let apiUrl;
     if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusallline/${myCookie.Email}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/${myCookie.Id}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}`;
+		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/pending/${startDate}/${endDate}`;
+		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/5/2024-08-01/2024-09-10`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
     }
+	
 		// Create URL parameters from form data
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
@@ -71,15 +70,30 @@
                 'Content-Type': 'application/json'
             }
 		};
-		var result = await fetch(apiUrl, config);
-		const datas = await result.json();
-		return datas.result
+		console.time('Fetch Only Getdata');
+		console.log('Fetching from:', apiUrl);
+console.time('API Call');
+const result = await fetch(apiUrl, config);
+console.timeEnd('API Call');
+console.log('Response Status:', result.status);
+console.time('Process Data');
+const datas = await result.json();
+console.timeEnd('Process Data');
+		console.timeEnd('Fetch Only Getdata');
+		console.log('Data size:', JSON.stringify(datas).length);
+		
+		if (datas.result) {
+            return datas.result;
+        }
 
 	};
 
 	const searchGetdata = async (param1: string) => {
 		// const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		// console.log( 'id: ', id , typeof(id));
+		const startDate = localStorage.getItem('startDate');
+		const endDate = localStorage.getItem('endDate');
+		console.log("Date" , startDate,endDate)
 		const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
@@ -87,9 +101,9 @@
 		console.log('checking transaction month');
 		let apiUrl;
     if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}/${startDate}/${endDate}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}/${startDate}/${endDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -101,8 +115,10 @@
                 'Content-Type': 'application/json'
             }
 		};
+		console.time('Fetch Only Getdata');
 		var result = await fetch(apiUrl, config);
 		const datas = await result.json();
+		console.timeEnd('Fetch Only Getdata');
 		return datas.result
 
 	};
@@ -125,19 +141,64 @@
 
   }
 
+  async function checkLocalStorageChanges() {
+    const currentStartDate = localStorage.getItem('startDate');
+    const currentEndDate = localStorage.getItem('endDate');
+
+    if (currentStartDate !== previousStartDate || currentEndDate !== previousEndDate) {
+        previousStartDate = currentStartDate;
+        previousEndDate = currentEndDate;
+        // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลใหม่
+		const datachart = await Getdata();
+		dataChart=datachart
+		dataSearch = datachart
+		statusToSend="all"
+    }
+}
   const statuses = [
-	{ value: 'all', label: 'All' },
-  { value: 'success', label: 'Success' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'pending', label: 'Pending' }
+	{ value: 'all', label: 'ทั้งหมด' },
+  { value: 'success', label: 'ถูกต้อง' },
+  { value: 'failed', label: 'ผิด' },
+  { value: 'pending', label: 'กำลังดำเนินการ' }
 ];
+
+function formatDate(dateString:any) {
+    const date = new Date(dateString);
+    
+    // ตรวจสอบว่ามีวันที่ถูกต้องหรือไม่
+    if (isNaN(date.getTime())) {
+        return "Invalid date"; // คืนค่าข้อความหากวันที่ไม่ถูกต้อง
+    }
+
+    // แปลงวันที่เป็นรูปแบบ "18 ก.ย. 2024"
+    const day = date.getDate();
+    const month = date.toLocaleString('th-TH', { month: 'short' });
+    const year = date.getFullYear(); // ปี ค.ศ.
+
+    return `${day} ${month} ${year}`; // คืนค่าในรูปแบบ "18 ก.ย. 2024"
+}
+
+function formatTime(dateString: string) {
+        // ลบช่องว่างระหว่างวันที่และเวลา (สำหรับกรณี "2024-08-24 12:23:36")
+        const normalizedDateString = dateString.replace(' ', 'T');
+
+        // แปลงเป็น Date object
+        const date = new Date(normalizedDateString);
+        
+        // ดึงชั่วโมงและนาที
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        
+        // คืนค่ารูปแบบ HH:MM
+        return `${hours}:${minutes}`;
+    }
   </script>
-<div class="flex justify-between mx-5 my-2">
-	<div class="content-center">
+<div class="flex justify-between mx-2 my-2">
+	<div class="content-center font-semibold">
 		รายการย้อนหลัง
 	</div>
 	<div class="flex " style="height: 30px;">
-		<select bind:value={statusToSend} class="border-2  mx-2 rounded-lg border  border-stone-400 text-zinc-500 text-center">
+		<select bind:value={statusToSend} class="border-2  mx-2 rounded-lg border  border-stone-400 text-black text-start pl-2">
 			<option value="" disabled selected >Select a status</option>
 			{#each statuses as month}
 			  <option value="{month.value}">{month.label}</option>
@@ -148,7 +209,7 @@ variant="outline"
 class=" flex text-center py-0 px-0  text-white hover:text-black border border-gray-400  bg-primary"
 on:click={() => SearchData(statusToSend)}
 style="width:40%;height:30px;"
-><div class="mx-3 content-center" style="width:100%;height:100%">
+><div class="mx-3 content-center font-semibold" style="width:100%;height:100%">
 	ค้นหา
 </div>
 </Button
@@ -156,17 +217,17 @@ style="width:40%;height:30px;"
 	</div>
 </div>
 
-<ScrollArea class="h-96 mx-2 rounded-md border border-gray-400" style="width:100%;">
+<ScrollArea class="h-96 mx-2 rounded-md" style="width:100%;">
     <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1  ">
     <div class="rounded-lg snap-y " style="width:100%">
 		{#if searchPerformed }
 		<Table.Root>
 		<Table.Header>
-			<Table.Row>
+			<Table.Row  style=" background-color:#F9FAFB">
 			  <Table.Head class="w-[100px] text-black font-bold">วันที่ทำการ</Table.Head>
 			  <Table.Head class="text-center text-black font-bold">เวลาทำการ</Table.Head>
 			  <Table.Head class="text-center text-black font-bold">Transfer ID</Table.Head>
-			  <Table.Head class="text-center text-black font-bold">Status</Table.Head>
+			  <Table.Head class="text-center text-black font-bold">สถานะ</Table.Head>
 			</Table.Row>
 		  </Table.Header>
 		  <Table.Body>
@@ -190,27 +251,37 @@ style="width:40%;height:30px;"
 			
 		</div> -->
 		<Table.Row>
-			<Table.Cell class="font-medium">{item.CreatedAt.split('T')[0]}</Table.Cell>
-			<Table.Cell class="text-center">{item.CreatedAt.split('T')[1].split('.')[0].split('Z')[0]}</Table.Cell>
-			<Table.Cell class="sm:text-pretty text-center"> <div class="sm:hidden">
+			<Table.Cell class="font-medium">{formatDate(item.CreatedAt.split('T')[0])}</Table.Cell>
+			<Table.Cell class="text-center">{formatTime(item.CreatedAt)}</Table.Cell>
+			<Table.Cell class="sm:text-pretty text-center"> <div class="sm:hidden lg:block xl:hidden">
 				{item.TransferRefId.substring(0, item.TransferRefId.length / 2)}<br>
 				{item.TransferRefId.substring(item.TransferRefId.length / 2)}
 			  </div>
-			  <div class="hidden sm:block">
+			  <div class="hidden sm:block lg:hidden xl:block">
 				{item.TransferRefId}
 			  </div></Table.Cell>
-			<Table.Cell class=" flex justify-center">{#if item.Status === 'SUCCESS'}
+			<Table.Cell class=" flex justify-center font-semibold">{#if item.Status === 'SUCCESS'}
 				<span class=" flex  items-center" style="color:#17B26A;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 120 120">
 					<circle cx="60" cy="64" r="48" opacity=".35"></circle><circle cx="60" cy="60" r="48" fill="#44bf00"></circle><polygon points="53.303,89 26.139,61.838 33.582,54.395 53.303,74.116 86.418,41 93.861,48.443" opacity=".35"></polygon><polygon fill="#fff" points="53.303,84 26.139,56.838 33.582,49.395 53.303,69.116 86.418,36 93.861,43.443"></polygon>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm pb-5 ">SUCCESS</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #ECFDF3;color:#067647; border-color:#ABEFC6"><img src="{success}" width="12px" height="12px" class="mr-2">SUCCESS</div></span>
 			  {:else if item.Status === 'PENDING'}
-				<span class="text-black flex  items-center"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 50 50">
-					<path d="M25,2C12.318,2,2,12.317,2,25s10.318,23,23,23s23-10.317,23-23S37.682,2,25,2z M37.735,12.679L27.644,23.61 C27.864,24.027,28,24.496,28,25c0,0.76-0.292,1.447-0.758,1.976l3.632,6.539c0.269,0.482,0.094,1.091-0.388,1.359 C30.332,34.96,30.165,35,30.001,35c-0.352,0-0.692-0.186-0.875-0.515l-3.631-6.535C25.333,27.977,25.17,28,25,28 c-1.657,0-3-1.343-3-3s1.343-3,3-3c0.42,0,0.82,0.088,1.183,0.244l10.082-10.923c0.375-0.404,1.007-0.431,1.413-0.056 C38.084,11.64,38.109,12.272,37.735,12.679z"></path>
-				</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm pb-5 ">PENDING</div></span>
+			  <span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+				<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
+				</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #fff9e6;color:#f57c00;border-color:#f57c00"><svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="12px" height="12px" viewBox="0 0 24 24" {...$$props}>
+					<path fill="#f57c00" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m4.2 14.2L11 13V7h1.5v5.2l4.5 2.7z" />
+				</svg>PENDING</div></span>
+					{:else if item.Status === 'RESPOND_REJECTED'}
+					<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+						<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Response Rejected</div></span>
+						{:else if item.Status === 'REQUEST_REJECTED'}
+					<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+						<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Request Rejected</div></span>	
 			  {:else if item.Status === 'FAILED'}
 				<span class="flex items-center" style="color:#F04438;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
 					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm pb-5 " >FAILED</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #FEF3F2;color:#B42318;border-color:#FECDCA"><img src="{failed}" width="12px" height="12px" class="mr-2">FAILED</div></span>
 			  {:else}
 				<span class="text-gray-500">Unknown Status</span>
 			  {/if}</Table.Cell>
@@ -225,11 +296,11 @@ style="width:40%;height:30px;"
 		{:else if (statusToSend="all")}
 		<Table.Root>
 			<Table.Header>
-				<Table.Row>
+				<Table.Row style=" background-color:#F9FAFB">
 				  <Table.Head class="w-[100px] text-black font-bold">วันที่ทำการ</Table.Head>
 				  <Table.Head class="text-center text-black font-bold">เวลาทำการ</Table.Head>
 				  <Table.Head class="text-center text-black font-bold">Transfer ID</Table.Head>
-				  <Table.Head class="text-center text-black font-bold">Status</Table.Head>
+				  <Table.Head class="text-center text-black font-bold">สถานะ</Table.Head>
 				</Table.Row>
 			  </Table.Header>
 			  <Table.Body>
@@ -247,27 +318,38 @@ style="width:40%;height:30px;"
 			</div>
 		</div> -->
 		<Table.Row>
-			<Table.Cell class="font-medium">{item.CreatedAt.split('T')[0]}</Table.Cell>
-			<Table.Cell class="text-center">{item.CreatedAt.split('T')[1].split('.')[0].split('Z')[0]}</Table.Cell>
-			<Table.Cell class="sm:text-pretty text-center"> <div class="sm:hidden">
+			<Table.Cell class="font-medium">{formatDate(item.CreatedAt.split('T')[0])}</Table.Cell>
+			<Table.Cell class="font-medium  text-center">{formatTime(item.CreatedAt)}</Table.Cell>
+			<!-- <Table.Cell class="text-center">{item.CreatedAt.split('T')[1].split('.')[0].split('Z')[0].split(':').slice(0, 2).join(':')}</Table.Cell> -->
+			<Table.Cell class="sm:text-pretty text-center"> <div class="sm:hidden lg:block xl:hidden">
 				{item.TransferRefId.substring(0, item.TransferRefId.length / 2)}<br>
 				{item.TransferRefId.substring(item.TransferRefId.length / 2)}
 			  </div>
-			  <div class="hidden sm:block">
+			  <div class="hidden sm:block lg:hidden xl:block">
 				{item.TransferRefId}
 			  </div></Table.Cell>
-			  <Table.Cell class=" flex justify-center">{#if item.Status === 'SUCCESS'}
+			  <Table.Cell class=" flex justify-center font-semibold">{#if item.Status === 'SUCCESS'}
 				<span class=" flex  items-center" style="color:#17B26A;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 120 120">
 					<circle cx="60" cy="64" r="48" opacity=".35"></circle><circle cx="60" cy="60" r="48" fill="#44bf00"></circle><polygon points="53.303,89 26.139,61.838 33.582,54.395 53.303,74.116 86.418,41 93.861,48.443" opacity=".35"></polygon><polygon fill="#fff" points="53.303,84 26.139,56.838 33.582,49.395 53.303,69.116 86.418,36 93.861,43.443"></polygon>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm pb-5">SUCCESS</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #ECFDF3;color:#067647; border-color:#ABEFC6"><img src="{success}" width="12px" height="12px" class="mr-2">SUCCESS</div></span>
 			  {:else if item.Status === 'PENDING'}
-				<span class="text-black flex  items-center "><svg xmlns="http://www.w3.org/2000/svg" class="lg:hidden  md:hidden sm:block block" x="0px" y="0px" width="30" height="30" viewBox="0 0 50 50">
-					<path d="M25,2C12.318,2,2,12.317,2,25s10.318,23,23,23s23-10.317,23-23S37.682,2,25,2z M37.735,12.679L27.644,23.61 C27.864,24.027,28,24.496,28,25c0,0.76-0.292,1.447-0.758,1.976l3.632,6.539c0.269,0.482,0.094,1.091-0.388,1.359 C30.332,34.96,30.165,35,30.001,35c-0.352,0-0.692-0.186-0.875-0.515l-3.631-6.535C25.333,27.977,25.17,28,25,28 c-1.657,0-3-1.343-3-3s1.343-3,3-3c0.42,0,0.82,0.088,1.183,0.244l10.082-10.923c0.375-0.404,1.007-0.431,1.413-0.056 C38.084,11.64,38.109,12.272,37.735,12.679z"></path>
-				</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm pb-5">PENDING</div></span>
+				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #fff9e6;color:#f57c00;border-color:#f57c00"><svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="12px" height="12px" viewBox="0 0 24 24" {...$$props}>
+						<path fill="#f57c00" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m4.2 14.2L11 13V7h1.5v5.2l4.5 2.7z" />
+					</svg>PENDING</div></span>
+				{:else if item.Status === 'RESPOND_REJECTED'}
+				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Response Rejected</div></span>
+					{:else if item.Status === 'REQUEST_REJECTED'}
+				<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Request Rejected</div></span>
 			  {:else if item.Status === 'FAILED'}
 				<span class=" flex items-center " style="color:#F04438;"><svg xmlns="http://www.w3.org/2000/svg" class="lg:hidden  md:hidden sm:block block" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
 					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm pb-5 ">FAILED</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3 " style="background-color: #FEF3F2;color:#B42318;border-color:#FECDCA"><img src="{failed}" width="12px" height="12px" class="mr-2">FAILED</div></span>
 			  {:else}
 				<span class="text-gray-500">Unknown Status</span>
 			  {/if}</Table.Cell>
