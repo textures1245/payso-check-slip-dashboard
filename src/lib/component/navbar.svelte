@@ -54,7 +54,12 @@ onMount(() => {
   function handleLogout() {
     deleteCookie('merchant_account');
     deleteCookie('admin_account');
-	window.location.assign("/")
+	if(isAdminPath){
+		window.location.assign("/login-admin")
+	}else{
+		window.location.assign("/")
+	}
+	
     // ทำการรีเฟรชหรือรีไดเร็กไปที่หน้าอื่นหลังจากลบคุกกี้
   }
 
