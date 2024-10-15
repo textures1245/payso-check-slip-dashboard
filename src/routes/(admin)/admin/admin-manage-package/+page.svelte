@@ -30,6 +30,8 @@
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
 	let showAlertModalCreateSuccess = false;
 	let showAlertModalCreateError = false;
+	let showAlertModalUpdateSuccess = false;
+	let showAlertModalUpdateError = false;
 	let totalItems = 0;
 	let loadingtable = false;
 
@@ -71,46 +73,49 @@
 		searchfetchData(packagename, offset, limit);
 	});
 
-	async function updateVisibility(packageId: number | undefined, newVisibility: boolean) {
-		if (packageId === undefined) {
-			console.error('Package ID is undefined');
-			return;
-		}
+	async function updateVisibility(packageId: number | undefined, newVisibility: boolean): Promise<boolean> {
+    if (packageId === undefined) {
+        console.error('Package ID is undefined');
+        return false; // Return false if packageId is undefined
+    }
 
-		const cookies = getCookies();
-		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+    const cookies = getCookies();
+    const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
-		try {
-			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json',
-						'Actor-Id': myCookie.Id,
-						'Actor-Name': myCookie.Email,
-						'Actor-Role': 'ADMIN'
-					}
-				}
-			);
+    try {
+        const response = await fetch(
+            `${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Actor-Id': myCookie.Id,
+                    'Actor-Name': myCookie.Email,
+                    'Actor-Role': 'ADMIN'
+                }
+            }
+        );
 
-			if (!response.ok) {
-				throw new Error('Failed to update package visibility');
-			}
+        if (!response.ok) {
+            throw new Error('Failed to update package visibility');
+        }
 
-			// Update the package data locally
-			const index = packageData.findIndex((pkg) => pkg.Id === packageId);
-			if (index !== -1) {
-				packageData[index].Visibility = newVisibility;
-				packageData = [...packageData]; // trigger reactivity in Svelte
-			}
+        // Update the package data locally
+        const index = packageData.findIndex((pkg) => pkg.Id === packageId);
+        if (index !== -1) {
+            packageData[index].Visibility = newVisibility;
+            packageData = [...packageData]; // trigger reactivity in Svelte
+        }
 
-			// Log success message to the console
-			console.log('Visibility updated successfully!');
-		} catch (error) {
-			console.error('Error updating visibility:', error);
-		}
-	}
+        // Log success message to the console
+        console.log('Visibility updated successfully!');
+        return true; // Return true on success
+    } catch (error) {
+        console.error('Error updating visibility:', error);
+        return false; // Return false on error
+    }
+}
+
 
 	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
     loadingtable = true;
@@ -273,7 +278,7 @@
 			showAlertModal = true; // แสดง modal
 			showAlertModalCreateError = true;
 		}
-		location.reload();
+		// location.reload();
 	}
 
 	async function updatePackage() {
@@ -288,7 +293,7 @@
 		if (trimmedName === '') {
 			alertMessage = 'Package name cannot be empty or just spaces.';
 			alertType = 'error';
-			showAlertModalError = true;
+			showAlertModalUpdateSuccess = true;
 			return;
 		}
 
@@ -334,9 +339,9 @@
 			alertMessage =
 				'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
-			showAlertModalError = true;
+			showAlertModalUpdateError = true;
 		} finally {
-			location.reload();
+			// location.reload();
 		}
 	}
 
@@ -403,7 +408,7 @@
 
 <div class="w-full py-4 px-2 sm:px-4">
 	<span
-		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>แพ็คเก็จ</span
 	>
 
@@ -457,7 +462,7 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 text-sm w-10">#</th>
+					<th class="p-1 sm:p-2 text-sm w-12">ลำดับ</th>
 					<th class="p-1 sm:p-2 text-left text-wrap text-sm">
 						<div class="lg:block sm:block hidden">รหัสแพ็คเก็จ</div>
 						<div class="lg:hidden sm:hidden block">รหัส</div>
@@ -476,7 +481,7 @@
 						<div class="lg:hidden sm:hidden block">คงเหลือ</div>
 					</th>
 
-					<th class="p-1 sm:p-2 text-sm">สถานะ</th>
+					<th class="p-1 sm:p-2 text-sm  w-28">สถานะ</th>
 					<th class="p-1 sm:p-2 text-sm">การมองเห็น</th>
 					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
@@ -506,12 +511,12 @@
 							<td class="p-1 sm:p-2 lg:text-sm truncate">
 								<div class="flex justify-center">
 									<div
-										class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status ===
+										class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
 										'ACTIVE'
 											? 'badge-success'
 											: 'badge-danger'}"
 									>
-										{item.Status}
+									{item.Status === 'INACTIVE' ? 'DEACTIVE' : item.Status}
 									</div>
 								</div>
 							</td>
@@ -520,7 +525,14 @@
 									type="checkbox"
 									class="toggle [--tglbg:white] toggle-success lg:toggle-md md:toggle-sm sm:toggle-xs toggle-xs"
 									bind:checked={item.Visibility}
-									on:change={() => updateVisibility(item.Id, item.Visibility)}
+									on:change={async () => {
+										const success = await updateVisibility(item.Id, item.Visibility);
+										if (success) {
+											showAlertModalSuccess = true; // Show success modal
+										} else {
+											showAlertModalError = true; // Show error modal
+										}
+									}}
 								/>
 							</td>
 							<td class="p-1 sm:p-2">
@@ -612,44 +624,57 @@
 </div>
 
 <dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
-	<div class="modal-box">
-		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<linearGradient
-					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
-					x1="9.858"
-					x2="38.142"
-					y1="9.858"
-					y2="38.142"
-					gradientUnits="userSpaceOnUse"
-					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
-					></stop></linearGradient
-				><path
-					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
-					opacity=".05"
-				></path><path
-					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
-					opacity=".07"
-				></path><path
-					fill="#fff"
-					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
-				></path>
-			</svg>
-		</div>
-		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
-		<p class=" text-center">Update สำเร็จ</p>
-	</div>
+    <div class="modal-box">
+        <div class="text-lg font-bold flex justify-center">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="100"
+                height="100"
+                viewBox="0 0 48 48"
+            >
+                <linearGradient
+                    id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
+                    x1="9.858"
+                    x2="38.142"
+                    y1="9.858"
+                    y2="38.142"
+                    gradientUnits="userSpaceOnUse"
+                >
+                    <stop offset="0" stop-color="#21ad64"></stop>
+                    <stop offset="1" stop-color="#088242"></stop>
+                </linearGradient>
+                <path
+                    fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
+                    d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+                ></path>
+                <path
+                    d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
+                    opacity=".05"
+                ></path>
+                <path
+                    d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
+                    opacity=".07"
+                ></path>
+                <path
+                    fill="#fff"
+                    d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
+                ></path>
+            </svg>
+        </div>
+        <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+        <p class="text-center">Update สำเร็จ</p>
+        <div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalSuccess = false;
+			}}>
+				ปิด
+			</button>
+        </div>
+    </div>
 </dialog>
+
 <dialog id="alert_modal_false" class="modal" open={showAlertModalError}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
@@ -675,6 +700,11 @@
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
 		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => showAlertModalError = false}>
+                ปิด
+            </button>
+        </div>
 	</div>
 </dialog>
 
@@ -688,7 +718,7 @@
 					<span class="label-text text-black w-2/5">ชื่อแพ็คเก็จ:</span>
 					<input
 						type="text"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						maxlength="250"
 						bind:value={editingPackage.Name}
 					/>
@@ -702,7 +732,7 @@
 						maxlength="8"
 						max="9999999"
 						min="1"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						bind:value={editingPackage.Price}
 						on:input={validateDecimalInput}
 					/>
@@ -716,7 +746,7 @@
 						maxlength="4"
 						min="1"
 						max="9999"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						bind:value={editingPackage.QuotaLimit}
 						on:input={validateInput}
 					/>
@@ -729,7 +759,7 @@
 						maxlength="9"
 						min="1"
 						max="9999"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						bind:value={editingPackage.AmountLimit}
 						on:input={validateInputAmountlimit}
 					/>
@@ -752,7 +782,7 @@
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<!-- Close Button -->
-						<button class="btn btn-outline btn-error">ปิด</button>
+						<button class="btn border border-gray-500 text-black">ปิด</button>
 
 						<!-- Save/Update Button -->
 						<button class="btn bg-primary text-white btn-primary" on:click={updatePackage}>
@@ -775,7 +805,7 @@
 				<span class="label-text text-black w-2/5">ชื่อแพ็คเก็จ:</span>
 				<input
 					type="text"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.Name}
 					maxlength="250"
 				/>
@@ -785,7 +815,7 @@
 				<span class="label-text text-black w-2/5">ราคา:</span>
 				<input
 					type="number"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.Price}
 					min="1"
 					on:input={validateDecimalInput}
@@ -795,7 +825,7 @@
 				<span class="label-text text-black w-2/5">โค้วต้าสูงสุด:</span>
 				<input
 					type="number"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.QuotaLimit}
 					min="1"
 					on:input={validateInput}
@@ -827,7 +857,7 @@
 				<span class="label-text text-black w-2/5">จำนวนการขาย:</span>
 				<input
 					type="number"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.AmountLimit}
 					min="1"
 					on:input={validateInputAmountlimit}
@@ -836,7 +866,7 @@
 
 			<div class="modal-action">
 				<form method="dialog" class="flex space-x-2">
-					<button class="btn btn-outline btn-error">ปิด</button>
+					<button class="btn border border-gray-500 text-black">ปิด</button>
 					<button class="btn bg-primary text-white btn-primary" on:click={createPackage}
 						>บันทึก</button
 					>
@@ -883,6 +913,16 @@
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
 		<p class=" text-center">สร้างแพ็คเก็จสำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalCreateSuccess = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
+		
+		
 	</div>
 </dialog>
 <dialog id="create_alert_modal_error" class="modal" open={showAlertModalCreateError}>
@@ -910,19 +950,152 @@
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
 		<p class=" text-center">การสร้างแพ็จแก็จไม่สำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalCreateError = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
+	</div>
+</dialog>
+
+<dialog id="update_alert_modal_success" class="modal" open={showAlertModalUpdateSuccess}>
+    <div class="modal-box">
+        <div class="text-lg font-bold flex justify-center">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="100"
+                height="100"
+                viewBox="0 0 48 48"
+            >
+                <linearGradient
+                    id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
+                    x1="9.858"
+                    x2="38.142"
+                    y1="9.858"
+                    y2="38.142"
+                    gradientUnits="userSpaceOnUse"
+                >
+                    <stop offset="0" stop-color="#21ad64"></stop>
+                    <stop offset="1" stop-color="#088242"></stop>
+                </linearGradient>
+                <path
+                    fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
+                    d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+                ></path>
+                <path
+                    d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
+                    opacity=".05"
+                ></path>
+                <path
+                    d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
+                    opacity=".07"
+                ></path>
+                <path
+                    fill="#fff"
+                    d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
+                ></path>
+            </svg>
+        </div>
+        <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+        <p class="text-center">Update สำเร็จ</p>
+        <div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalUpdateSuccess = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
+    </div>
+</dialog>
+
+<dialog id="update_alert_modal_error" class="modal" open={showAlertModalUpdateError}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalUpdateError = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
 	</div>
 </dialog>
 
 <style>
 	.badge-status {
-		@apply py-1 px-2 rounded-full text-white lg:w-24 md:w-32 sm:w-28 w-20;
-	}
-	.badge-success {
-		@apply border border-success text-success bg-transparent;
-	}
-	.badge-danger {
-		@apply border  border-destructive text-destructive bg-transparent;
-	}
+	@apply py-1 px-2 rounded-full;
+	width: 100%;
+	position: relative; /* Enable positioning for the dot */
+	padding-left: 1rem; /* Add space for the text */
+	color: #333; /* Default text color (will be overridden in specific classes) */
+}
+
+.badge-success {
+	@apply border border-success;
+	background-color: rgba(76, 175, 80, 0.2); /* Light green background */
+	color: #4CAF50; /* Green text color */
+}
+
+.badge-danger {
+	@apply border border-gray-500; /* Change border to dark gray */
+	background-color: #ffffff; /* White background */
+	color: gray; /* Dark gray text color */
+}
+
+.badge-success::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: #4CAF50; /* Dark green to match text color */
+	position: absolute;
+	left: 1rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.badge-danger::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: gray; /* Dark gray to match the border */
+	position: absolute;
+	left: 0.5rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
 	@media (max-width: 640px) {
 		.badge-status {
 			width: 100%;

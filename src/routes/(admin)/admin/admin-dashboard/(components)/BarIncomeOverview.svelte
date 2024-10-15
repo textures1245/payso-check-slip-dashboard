@@ -115,7 +115,7 @@
 
 <div class="relative h-64">
 	<div class="flex flex-col lg:flex-row items-center lg:items-end justify-between">
-		<label class="form-control w-full max-w-xs">
+		<!-- <label class="form-control w-full max-w-xs">
 			<div class="label">
 				<span class="label-text-alt">ตัวเลือก</span>
 			</div>
@@ -131,7 +131,7 @@
 					<option value={optKey} selected={optKey === optSelected}>{opt[optKey]}</option>
 				{/each}
 			</select>
-		</label>
+		</label> -->
 		<div class="form-control items-end">
 			<form
 				bind:this={form}
@@ -158,25 +158,25 @@
 				<div class="flex gap-4">
 					<label class="form-control w-full max-w-xs">
 						<div class="label">
-							<span class="label-text-alt">วันที่เริ่ม</span>
+							<span class="label-text-alt">เดือนเริ่มต้น</span>
 						</div>
 						<input
 							value={defaultOpt.startDate}
 							required
 							name="startDate"
-							type="date"
+							type="month"
 							class="input input-xs input-bordered w-full max-w-xs"
 						/>
 					</label>
 					<label class="form-control w-full max-w-xs">
 						<div class="label">
-							<span class="label-text-alt">วันที่จบ</span>
+							<span class="label-text-alt">เดือนสิ้นสุด</span>
 						</div>
 						<input
 							value={defaultOpt.endDate}
 							required
 							name="endDate"
-							type="date"
+							type="month"
 							class="input input-xs input-bordered w-full max-w-xs"
 						/>
 					</label>

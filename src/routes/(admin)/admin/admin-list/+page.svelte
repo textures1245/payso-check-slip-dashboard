@@ -158,69 +158,71 @@
 	}
 
 	async function updateUser() {
-		if (!editingUser) return;
-		const cookies = getCookies();
-		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+	if (!editingUser) return;
+	const cookies = getCookies();
+	const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
-		try {
-			const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
+	try {
+		const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Actor-Id': myCookie.Id,
+				'Actor-Name': myCookie.Email,
+				'Actor-Role': 'ADMIN'
+			},
+			body: JSON.stringify({
+				PackageId: editingUser.PackageId,
+				MerchantId: editingUser.Id
+			})
+		});
+
+		if (!updatePackageResponse.ok) {
+			throw new Error('Failed to update package');
+		}
+
+		const updateStatusResponse = await fetch(
+			`${PUBLIC_API_ENDPOINT}/merchant/updatestatus/${editingUser.Id}`,
+			{
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json',
-					'Actor-Id': myCookie.Id,
-					'Actor-Name': myCookie.Email,
-					'Actor-Role': 'ADMIN'
+					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({
-					PackageId: editingUser.PackageId,
-					MerchantId: editingUser.Id
-				})
-			});
-
-			if (!updatePackageResponse.ok) {
-				throw new Error('Failed to update package');
+				body: JSON.stringify({ Status: editingUser.Status })
 			}
+		);
 
-			const updateStatusResponse = await fetch(
-				`${PUBLIC_API_ENDPOINT}/merchant/updatestatus/${editingUser.Id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ Status: editingUser.Status })
-				}
-			);
-
-			if (!updateStatusResponse.ok) {
-				throw new Error('Failed to update status');
-			}
-
-			const index = userData.findIndex((user) => user.Id === editingUser?.Id);
-			if (index !== -1) {
-				userData[index] = { ...editingUser };
-				userData = [...userData];
-			}
-
-			// แจ้งเตือนว่าอัปเดตสำเร็จ
-			alertMessage = 'Update user successfully!';
-			alertType = 'success';
-			showAlertModalSuccess = true;
-
-			const modal = document.getElementById('my_modal_1');
-			// @ts-ignore
-			modal.close();
-			editingUser = null;
-		} catch (error) {
-			console.error('Error updating user:', error);
-			alertMessage =
-				'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
-			alertType = 'error';
-			showAlertModalError = true;
-		} finally {
-			location.reload();
+		if (!updateStatusResponse.ok) {
+			throw new Error('Failed to update status');
 		}
+
+		const index = userData.findIndex((user) => user.Id === editingUser?.Id);
+		if (index !== -1) {
+			userData[index] = { ...editingUser };
+			userData = [...userData];
+		}
+
+		// แสดงโมดอลแจ้งเตือนอัปเดตสำเร็จ
+		showAlertModalSuccess = true;
+	} catch (error) {
+		console.error('Error updating user:', error);
+		alertMessage = 'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
+		alertType = 'error';
+		showAlertModalError = true;
 	}
+}
+
+// เพิ่มฟังก์ชันรีโหลดหลังจากปิดโมดอล
+function closeSuccessModal() {
+	showAlertModalSuccess = false;
+	location.reload();
+}
+
+function closeErrorModal() {
+	showAlertModalError = false;
+	location.reload();
+}
+
 
 	$: isActive = editingUser?.Status === 'ACTIVE';
 
@@ -234,7 +236,7 @@
 
 <div class="w-full py-4 px-2 sm:px-4">
 	<span
-		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>รายชื่อผู้ใช้</span
 	>
 	<div
@@ -279,7 +281,7 @@
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 w-10 text-sm">#</th>
+					<th class="p-1 sm:p-2 w-12 text-sm">ลำดับ</th>
 					<th class="p-1 sm:p-2 text-wrap text-left text-sm">
 						<div class="lg:block sm:block hidden">รหัสลูกค้า</div>
 						<div class="lg:hidden sm:hidden block">MID</div></th
@@ -306,12 +308,14 @@
 				{#if loadingtable}
 					<tr><td colspan="11"><span class="loading loading-spinner loading-xs"></span> </td></tr>
 				{:else if userData.length === 0}
-					<tr><td colspan="11">No data available</td></tr>
+					<tr><td colspan="11">ไม่พบข้อมูล</td></tr>
 				{:else}
 					{#each userData as item}
 						<tr class="border-b border-gray-300">
 							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">
+								{Number(item.MerchantId) === 0 ? '' : item.MerchantId}
+							</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.Email}
 								>{item.Email}</td
 							>
@@ -328,7 +332,15 @@
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
 								>{item.QuotaSpending.toLocaleString()}</td
 							>
-							<td class="p-1 sm:p-2 lg:text-sm truncate">{item.BillDate.split(' ')[0]}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">
+								{item.BillDate && !isNaN(Date.parse(item.BillDate))
+									? new Date(item.BillDate).toLocaleDateString('en-EN', {
+											day: '2-digit',
+											month: '2-digit',
+											year: 'numeric'
+										})
+									: '-'}
+							</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate">
 								<div class="flex justify-center">
 									<div
@@ -337,7 +349,7 @@
 											? 'badge-success'
 											: 'badge-danger'}"
 									>
-										{item.Status}
+									{item.Status === 'INACTIVE' ? 'DEACTIVE' : item.Status}
 									</div>
 								</div>
 							</td>
@@ -443,16 +455,17 @@
 					<span class="label-text text-black w-2/5">ชื่อ-นามสกุล:</span>
 					<input
 						type="text"
-						class="input input-bordered bg-white disabled:bg-white disabled:text-black w-80"
+						class="input input-bordered !border-black bg-white disabled:bg-white disabled:text-black w-80"
 						disabled
 						bind:value={editingUser.MerchantName}
+						
 					/>
 				</label>
 				<label class="label">
 					<span class="label-text text-black w-2/5">แพ็คเก็จ:</span>
 
 					<select
-						class="select max-w-xs w-80 bg-white overflow-y-auto"
+						class="select max-w-xs w-80 bg-white overflow-y-auto border border-gray-900"
 						bind:value={editingUser.PackageId}
 					>
 						{#each packageData as pkgdata}
@@ -475,7 +488,7 @@
 
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
-						<button class="btn btn-outline btn-error">ปิด</button>
+						<button class="btn border border-gray-500 text-black ">ปิด</button>
 						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}
 							>บันทึก</button
 						>
@@ -522,6 +535,8 @@
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
 		<p class=" text-center">Update สำเร็จ</p>
+		<div class=" modal-action flex justify-center">
+			<button class="btn btn-outline" on:click={closeSuccessModal}>ปิด</button>		</div>
 	</div>
 </dialog>
 <dialog id="alert_modal_false" class="modal" open={showAlertModalError}>
@@ -549,20 +564,62 @@
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
 		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
+		<div class=" modal-action flex justify-center">
+			<button class="btn btn-outline" on:click={closeErrorModal}>ปิด</button>
+		</div>
 	</div>
 </dialog>
 
 <style>
-	.badge-status {
-		@apply py-1 px-2 rounded-full text-white;
-		width: 10 0%;
-	}
-	.badge-success {
-		@apply border border-success text-success bg-transparent;
-	}
-	.badge-danger {
-		@apply border  border-destructive text-destructive bg-transparent;
-	}
+.badge-status {
+	@apply py-1 px-2 rounded-full;
+	width: 100%;
+	position: relative; /* Enable positioning for the dot */
+	padding-left: 1rem; /* Add space for the text */
+	color: #333; /* Default text color (will be overridden in specific classes) */
+}
+
+.badge-success {
+	@apply border border-success;
+	background-color: rgba(76, 175, 80, 0.2); /* Light green background */
+	color: #4CAF50; /* Green text color */
+}
+
+.badge-danger {
+	@apply border border-gray-500; /* Change border to dark gray */
+	background-color: #ffffff; /* White background */
+	color: gray; /* Dark gray text color */
+}
+
+.badge-success::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: #4CAF50; /* Dark green to match text color */
+	position: absolute;
+	left: 1rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.badge-danger::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: gray; /* Dark gray to match the border */
+	position: absolute;
+	left: 0.5rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+
+
+
 	@media (max-width: 640px) {
 		.badge-status {
 			width: 100%;

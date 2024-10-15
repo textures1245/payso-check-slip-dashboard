@@ -23,17 +23,16 @@
 							'error'
 						);
 					}
-
 					if (result.type === 'success') {
 						props = result.data.transactionList;
 					}
 				};
 			}}
 		>
-			<div class="flex gap-4">
-				<label class="form-control w-full max-w-xs">
+			<div class="flex gap-3">
+				<label class="form-control  w-[160px]">
 					<select
-						class="select select-xs select-bordered w-full max-w-xs"
+						class="select select-sm select-bordered  w-[160px]"
 						name="status"
 						id="status"
 					>
@@ -43,25 +42,26 @@
 						<option value="FAILED">FAILED</option>
 					</select>
 				</label>
-
-				<label class="form-control w-full max-w-xs">
+				<label class="form-control w-[180px]">
 					<select
-						class="select select-xs select-bordered w-full max-w-xs"
+						class="select select-sm select-bordered w-full"
 						name="sortOrder"
 						id="sortOrder"
 					>
-						<option disabled selected>เรียงตาม</option>
+						<option disabled selected>เรียงตามวันที่</option>
 						<option value="DESC">มากไปน้อย</option>
 						<option value="ASC">น้อยไปมาก</option>
 					</select>
 				</label>
-				<label class="max-w-xs self-end">
-					<button class="btn bg-primary text-primary-content btn-xs" type="submit">ค้นหา</button>
+				<label class="max-w-sm self-end">
+					<button class="btn bg-primary text-primary-content btn-sm" type="submit">ค้นหา</button>
 				</label>
 			</div>
 		</form>
 	</div>
 </div>
+
+
 
 <Table.Root>
 	<Table.Header>
@@ -117,15 +117,42 @@
 				</Table.Cell>
 				<Table.Cell>
 					<span
-						class:text-success={t.Status.toLocaleUpperCase() === 'SUCCESS'}
-						class:text-warning={t.Status.toLocaleUpperCase() === 'PENDING'}
-						class:text-destructive={t.Status.toLocaleUpperCase() === 'REJECTED' ||
-							t.Status.toLocaleUpperCase() === 'FAILED'}
-						class="badge badge-outline badge-sm uppercase text-xs"
+					   class:text-success-bg={t.Status.toLocaleUpperCase() === 'SUCCESS'}
+					   class:text-pending-bg={t.Status.toLocaleUpperCase() === 'PENDING'}
+					   class:text-respond-rejected-bg={t.Status.toLocaleUpperCase() === 'RESPOND_REJECTED'}
+					   class:text-rejected-bg={t.Status.toLocaleUpperCase() === 'REJECTED' || t.Status.toLocaleUpperCase() === 'FAILED'}
+					   class="badge badge-outline badge-sm uppercase text-xs flex items-center"
 					>
-						{t.Status}
+					   {#if t.Status.toLocaleUpperCase() === 'SUCCESS'}
+					   <svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
+						<path fill="#136911" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z" />
+					</svg>
+					   {:else if t.Status.toLocaleUpperCase() === 'PENDING'}
+					   <svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
+						<path fill="#f57c00" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m4.2 14.2L11 13V7h1.5v5.2l4.5 2.7z" />
+					</svg>
+					{:else if t.Status.toLocaleLowerCase() === "RESPOND_REJECTED"}
+					<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48" {...$$props}>
+						<g fill="none" stroke="#182230" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+							<path d="M19.01 42H9a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h30a3 3 0 0 1 3 3v10.03m0 10.005V41a1 1 0 0 1-1 1H29.037M42 29.035H18" />
+							<path d="m23 23l-6 6l6 6" />
+						</g>
+					</svg>
+					{:else if t.Status.toLocaleUpperCase() === 'REJECTED' || t.Status.toLocaleUpperCase() === 'FAILED'}
+					<svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
+						<path fill="#d32f2f" d="M18.36 19.78L12 13.41l-6.36 6.37l-1.42-1.42L10.59 12L4.22 5.64l1.42-1.42L12 10.59l6.36-6.36l1.41 1.41L13.41 12l6.36 6.36z" />
+					</svg>
+					
+					   {/if}
+
+					   
+					   
+
+					   {t.Status}
 					</span>
-				</Table.Cell>
+				 </Table.Cell>
+				 
+				
 				
 			
 				<Table.Cell>{t.TransferRefId}</Table.Cell>
@@ -133,3 +160,25 @@
 		{/each}
 	</Table.Body>
 </Table.Root>
+
+<style>
+	.text-success-bg {
+	background-color: #e6f4ea; /* พื้นหลังสีเขียวอ่อน */
+	color: #2e7d32; /* สีตัวอักษรสีเขียวเข้ม */
+}
+
+.text-pending-bg {
+	background-color: #fff9e6; /* พื้นหลังสีเหลืองอ่อน */
+	color: #f57c00; /* สีตัวอักษรสีเหลืองเข้ม */
+}
+
+.text-rejected-bg {
+	background-color: #fce8e8; /* พื้นหลังสีแดงอ่อน */
+	color: #d32f2f; /* สีตัวอักษรสีแดงเข้ม */
+}
+.text-respond-rejected-bg {
+		background-color: #D0D5DD; 
+		color: #182230; 
+	}
+
+</style>

@@ -24,7 +24,9 @@ type OrderField =
 	| 'QuotaSpending'
 	| 'RegisterDate'
 	| 'QuotaUsage'
-	| 'BillDate';
+	| 'BillDate'
+	| 'PackageChangedAt';
+	
 
 export type Filter = {
 	order_by: 'DESC' | 'ASC';

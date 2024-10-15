@@ -93,7 +93,7 @@ export const load: PageServerLoad = async () => {
 		topMerchantQuotaSpendListReport = await ep.merchant.GetMerchantsDetail({
 			ft: {
 				order_by: 'DESC',
-				order_field: 'QuotaSpending'
+				order_field: 'PackageChangedAt'
 			},
 			p: {
 				offset: 1,

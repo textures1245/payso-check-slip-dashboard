@@ -160,104 +160,135 @@
 	};
 </script>
 
-<div class="w-full py-4 sm:px-4 overflow-x-auto" >
+<div class="w-full py-4 sm:px-4 overflow-x-auto">
 	<span
-		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
-		>Log</span
+		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		>บันทึก</span
 	>
 
-	<div
-		class="grid lg:grid-cols-7 md:grid-cols-2 sm:grid-cols-1 items-start lg:items-start mb-4 pt-8 sm:pt-6 md:pt-4 "
-	>
-		<input
+	<div class="flex items-center flex-wrap mb-4 pt-8 sm:pt-6 md:pt-4">
+		<div class="flex items-center gap-2">
+		  <input
 			type="date"
 			bind:value={startDate}
 			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
-		/>
-		<input
+		  />
+		  <span class="text-center self-center w-4">ถึง</span>
+		  <input
 			type="date"
 			bind:value={endDate}
 			class="input input-bordered bg-white my-1 mx-2"
 			maxlength="100"
-		/>
-		<input
-			type="text"
-			placeholder="Action"
-			bind:value={action}
-			on:input={handleInputAction}
-			class="input input-bordered bg-white my-1 mx-2"
-			maxlength="100"
-		/>
-		<input
-			type="text"
-			placeholder="ชื่อผู้ใช้"
-			bind:value={actorName}
-			on:input={handleInputActor}
-			class="input input-bordered bg-white my-1 mx-2"
-			maxlength="250"
-		/>
-		<select
-			class="select w-100 rounded-md bg-white my-1 mx-2 outline outline-1 outline-gray-300"
-			bind:value={role}
-			on:change={handleSearch}
-		>
-			<option value="ADMIN">แอดมิน</option>
-			<option value="MERCHANT">ผู้ใช้งาน</option>
-			<option value="">ทั้งหมด</option>
-		</select>
-
-		<div class="flex flex-col sm:flex-row lg:col-span-2">
-			<button
-				on:click={firstPage}
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2">ค้นหา</button
-			>
-			<button
-				on:click={handleClear}
-				class="btn btn-outline  text-xs sm:text-sm my-1 mx-2">ล้าง</button
-			>
+		  />
 		</div>
 		
-	</div>
+		<input
+		  type="text"
+		  placeholder="กิจกรรม"
+		  bind:value={action}
+		  on:input={handleInputAction}
+		  class="input input-bordered bg-white my-1 mx-2"
+		  maxlength="100"
+		/>
+		
+		<input
+		  type="text"
+		  placeholder="ชื่อผู้ใช้"
+		  bind:value={actorName}
+		  on:input={handleInputActor}
+		  class="input input-bordered bg-white my-1 mx-2"
+		  maxlength="250"
+		/>
+		
+		<div class="flex flex-col sm:flex-row lg:col-span-2">
+		  <button
+			on:click={firstPage}
+			class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2"
+		  >ค้นหา</button>
+		  <button
+			on:click={handleClear}
+			class="btn btn-outline text-xs sm:text-sm my-1 mx-2"
+		  >ล้าง</button>
+		</div>
+	  </div>
+	  
 	<div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
+			<thead>
+				<tr>
+				  <th colspan="6" class="p-2">
+					<div class="flex justify-start p-2  rounded-md text-gray-700 ">
+					  <select
+						class="select rounded-md  bg-white outline outline-1 outline-gray-300 px-2 py-0.5 w-[200px]" 
+						bind:value={role}
+						on:change={handleSearch}
+					  >
+						<option value="ADMIN">แอดมิน</option>
+						<option value="MERCHANT">ผู้ใช้งาน</option>
+						<option value="">ทั้งหมด</option>
+					  </select>
+					</div>
+				  </th>
+				</tr>
+			  </thead>
 			<thead class="text-center text-gray-700 lg:text-base caption-bottom">
-				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2 w-10">#</th>
+				<tr class="border-b border-gray-300 bg-gray-100">
+					<th class="p-1 sm:p-2 w-10 text-left">ลำดับ</th>
 					<th class="p-1 sm:p-2 text-wrap">
-						<div class="lg:block sm:block hidden">วันเดือนปี</div>
+						<div class="lg:block sm:block hidden text-left">วันที่</div>
 						<div class="lg:hidden sm:hidden block">Time</div>
 					</th>
-					<th class="p-1 sm:p-2">Action</th>
-					<th class="p-1 sm:p-2 text-wrap w-[30%]" >
-						<div class="lg:block sm:block hidden text-left">Method Name</div>
-						<div class="lg:hidden sm:hidden block text-left">Method</div>
+					<th class="p-1 sm:p-2 text-left">กิจกรรม</th>
+					<th class="p-1 sm:p-2 text-wrap w-[30%]">
+						<div class="lg:block sm:block hidden text-left">หัวข้อ</div>
+						<div class="lg:hidden sm:hidden block text-left">หัวข้อ</div>
 					</th>
 
 					<th class="p-1 sm:p-2 text-wrap">
 						<div class="lg:block sm:block hidden text-left">ชื่อผู้ใช้</div>
-						<div class="lg:hidden sm:hidden block text-left">Name</div>
+						<div class="lg:hidden sm:hidden block text-left">ชื่อผู้ใช้</div>
 					</th>
-					<th class="p-1 sm:p-2 text-center">รายละเอียด</th>
+					<th class="p-1 sm:p-2 text-left">รายละเอียด</th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
 				{#if loading}
-					<tr><td colspan="6"><span class="loading loading-spinner loading-xs"></span>
-					</td></tr>
+					<tr><td colspan="6"><span class="loading loading-spinner loading-xs"></span> </td></tr>
 				{:else if LogAdmin.length === 0}
-					<tr><td colspan="6">No data available</td></tr>
+					<tr><td colspan="6">ไม่พบข้อมูล</td></tr>
 				{:else}
 					{#each LogAdmin as item, i (i)}
 						<tr class="border-b border-gray-300">
-							<td class="p-1 sm:p-2 lg:text-sm">{item.index}</td>
-							<td class="p-1 sm:p-2 lg:text-sm" title="{item.Timestamp}">{item.Timestamp}</td>
-							<td class="p-1 sm:p-2 lg:text-sm">{item.Action}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left "
-								title="{item.MethodName}">{item.MethodName}</td
+							<td class="p-1 sm:p-2 lg:text-sm text-left font-semibold">{item.index}</td>
+							<td
+								class="p-1 sm:p-2 lg:text-sm text-left"
+								title={new Date(item.Timestamp).toLocaleString('en-EN', {
+									day: '2-digit',
+									month: '2-digit',
+									year: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit',
+									hour12: false
+								})}
 							>
-							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title="{item.ActorName}">{item.ActorName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm text-center justify-center flex">
+								{new Date(item.Timestamp).toLocaleString('en-EN', {
+									day: '2-digit',
+									month: '2-digit',
+									year: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit',
+									hour12: false
+								})}
+							</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.Action}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MethodName}
+								>{item.MethodName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title={item.ActorName}
+								>{item.ActorName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm text-center justify-start flex">
 								<label for={`logDataModel-${i}`} class=" bg-white cursor-pointer"
 									><svg
 										class="w-6 h-6 text-gray-800 dark:text-gray-800"
@@ -285,34 +316,29 @@
 										<div class="flex">
 											<span class="text-lg font-bold">รายละเอียด</span>
 										</div>
-									  <div class="flex">
-										<span class="font-bold min-w-[80px]">วันเดือนปี:</span>
-										<span>{item.Timestamp}</span>
-									  </div>
-									  <div class="flex">
-										<span class="font-bold min-w-[80px]">Action:</span>
-										<span>{item.Action}</span>
-									  </div>
-									  <div class="flex">
-										<span class="font-bold min-w-[80px]">Method:</span>
-										<span>{item.MethodName}</span>
-									  </div>
-									  <div class="flex">
-										<span class="font-bold min-w-[80px]">ชื่อผู้ใช้:</span>
-										<span>{item.ActorName}</span>
-									  </div>
-									  
-									  <div class="pt-4">
-										<span class="font-bold ">JSON</span>
-										<JsonViewer data={item.DataRequest} />
-									  </div>
+										<div class="flex">
+											<span class="font-bold min-w-[80px]">วันที่:</span>
+											<span>{item.Timestamp}</span>
+										</div>
+										<div class="flex">
+											<span class="font-bold min-w-[80px]">กิจกรรม:</span>
+											<span>{item.Action}</span>
+										</div>
+										<div class="flex">
+											<span class="font-bold min-w-[80px]">หัวข้อ:</span>
+											<span>{item.MethodName}</span>
+										</div>
+										<div class="flex">
+											<span class="font-bold min-w-[80px]">ชื่อผู้ใช้:</span>
+											<span>{item.ActorName}</span>
+										</div>
+
+										<div class="pt-4">
+											<span class="font-bold">JSON</span>
+											<JsonViewer data={item.DataRequest} />
+										</div>
 									</div>
-								  </Modal>
-								  
-								  
-								  
-								  
-								  
+								</Modal>
 							</td>
 						</tr>
 					{/each}

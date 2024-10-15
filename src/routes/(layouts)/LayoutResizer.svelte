@@ -59,7 +59,7 @@
 		{onExpand}
 	>
 		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px] hidden' : 'px-2 ')}>
-			<span>Menu</span>
+			
 		</div>
 		<Separator />
 		<Sidebar {isCollapsed} routes={subLinks[getRootPath(currentSubPath)]} />
