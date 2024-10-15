@@ -10,7 +10,8 @@
 	import * as Tabs from '$lib/components/ui/tabs';
 	import cookie from 'cookie';
 	import logo from '$lib/image/paysologo.png';
-	import logoCustomer from '$lib/image/customer_logo.png';
+	import logoAdmin from '$lib/image/user.png';
+	import logoCustomer from '$lib/image/logoshop.png';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	let Username ="";
@@ -24,7 +25,7 @@
 	let merchantName="";
 	let adminName="";
 	let displayName = '';
-
+	let isAdminPath: boolean;
 // ฟังก์ชันสำหรับดึงข้อมูลจากคุกกี้
 function getCookies() {
   return cookie.parse(document.cookie);
@@ -41,6 +42,7 @@ onMount(() => {
       ? displayName = adminName 
       : displayName = merchantName;
     console.log('Merchant Name:', merchantName);
+		isAdminPath = window.location.pathname.includes('/admin');
   });
 
 
@@ -55,13 +57,15 @@ onMount(() => {
 	window.location.assign("/")
     // ทำการรีเฟรชหรือรีไดเร็กไปที่หน้าอื่นหลังจากลบคุกกี้
   }
+
+  
 </script>
 
 
 <nav class="bg-card"  style="background-color:#1353ec;">
 
 	<div class=" px-2">
-		<div class="relative flex h-10 items-center justify-between">
+		<div class="relative flex h-11 items-center justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
 				<!-- Mobile menu button-->
 				<button
@@ -110,35 +114,37 @@ onMount(() => {
 				</button>
 			</div>
 			<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-				<div class="flex flex-shrink-0 items-center">
-					<img class="h-8 w-auto lg:ml-0 md:ml-0 sm:ml-10 ml-10" src={logo} alt="Your Company" />
+				<div class="flex flex-shrink-0  items-center">
+					<img class="h-10 w-auto py-2" src={logo} alt="Your Company" />
 				</div>
-				<div class="hidden gap-6 items-end  sm:ml-6 sm:flex text-card-foreground text-white ">
+				<div class="hidden gap-6 items-end py-2 px-5 sm:ml-6 sm:flex text-card-foreground text-white ">
 					{#each navItems as item}
 						<a
-							class="text-xs md:text-sm font-semibold transition-colors hover:text-neutral-300 content-end "
+							class="text-xs md:text-sm  transition-colors hover:text-neutral-300 content-end "
 							href={item.link}>{item.title}</a
 						>
 					{/each}
 				</div>
 			</div>
 			<div class="flex  justify-end"><div class="avatar lg:block md:block sm:hidden hidden">
-				<div class="w-10 rounded-full">
-				  <img src={logoCustomer} />
+				<div class="w-12 content-center p-2">
+					<div class="bg-[#DBE8FF] rounded-full content-center p-2 ">
+						{#if !isAdminPath}<img src={logoCustomer}  />{:else}<img src={logoAdmin}  />{/if}</div>
 				</div>
 			  </div>
 			  <div class="mx-3 text-white content-center">{displayName}</div>
-			  <div class="relative">
-				<details class="dropdown dropdown-bottom dropdown-end lg:block md:block sm:hidden hidden mx-2">
-				  <summary class="text-sm  py-2 rounded-2xl  ">
-				
+			  <div class="relative ">
+				<div class="dropdown dropdown-bottom dropdown-end lg:block md:block sm:hidden hidden mx-2 my-2">
+				  <summary tabindex="0" class="text-sm  py-2 rounded-2xl  ">
+					
 				  </summary>
-				  <ul class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
-					<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button  >Profile</button></a></li>
+				  <ul tabindex="0"  class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
+					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button  >Profile</button></a></li>{/if}
 					<li><a class="py-2 px-4 hover:bg-gray-100 rounded"><button on:click={handleLogout} style="color:#F04438;">Sign Out</button></a></li>
 				  </ul>
-				</details>
+				</div>
 			  </div>
+			  
 			</div>
 			<!-- <div
 				class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0"
@@ -198,7 +204,7 @@ onMount(() => {
 							<a  href={item.link}>{item.title}</a>
 						</li>
 					{/each}
-					<li><a class=" hover:bg-gray-100 rounded" href="/profile"><button>Profile</button></a></li>
+					{#if !isAdminPath}<li><a class=" hover:bg-gray-100 rounded" href="/profile"><button>Profile</button></a></li>{/if}
 					<button on:click={handleLogout} style="color:#F04438;">Sign Out</button>
 				</ul>
 			</div>
