@@ -6,4 +6,7 @@ export type PackageData = {
 	QuotaLimit? : number;  
 	Status : string; 
 	TotalCount : number;   
+	Visibility : boolean;
+	AmountLimit : number;
+	Index : number;
 }

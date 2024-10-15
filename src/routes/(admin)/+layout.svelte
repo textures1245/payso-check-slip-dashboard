@@ -24,22 +24,22 @@
 			{
 				title: 'แดชบอร์ด',
 				link: '/admin/admin-dashboard',
-				icon: 'il:dashboard',
+				icon: 'hugeicons:home-04',
 			},
 			{
 				title: 'รายชื่อผู้ใช้',
 				link: '/admin/admin-list',
-				icon: 'dashicons:admin-users',
+				icon: 'carbon:user-multiple',
 			},
 			{
 				title: 'จัดการแพ็คเก็จ',
 				link: '/admin/admin-manage-package',
-				icon: 'dashicons:flag',
+				icon: 'fluent:box-24-regular',
 			},
 			{
 				title: 'Log',
 				link: '/admin/admin-log',
-				icon: 'dashicons:clock',
+				icon: 'mage:file-3',
 			},
 		]
 	};

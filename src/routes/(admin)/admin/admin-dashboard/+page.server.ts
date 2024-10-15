@@ -32,7 +32,7 @@ export const load: PageServerLoad = async () => {
 	const date15DaysAgo = new Date();
 	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
 
-    const dateSixMonthsAgo = new Date();
+	const dateSixMonthsAgo = new Date();
 	dateSixMonthsAgo.setMonth(dateSixMonthsAgo.getMonth() - 6)
 
 	const defaultOpt = {
@@ -45,7 +45,7 @@ export const load: PageServerLoad = async () => {
 		},
 
 		receiptIncome: {
-			startDate: 	dateSixMonthsAgo.toISOString().split('T')[0],
+			startDate: dateSixMonthsAgo.toISOString().split('T')[0],
 			endDate: new Date().toISOString().split('T')[0]
 		},
 
@@ -83,7 +83,7 @@ export const load: PageServerLoad = async () => {
 		merchantListReport = await ep.merchant.GetMerchantsDetail({
 			ft: {
 				order_by: 'DESC',
-				order_field: 'RegisterDate'
+				order_field: 'UpdatedAt'
 			},
 			p: {
 				offset: 1,
@@ -93,7 +93,7 @@ export const load: PageServerLoad = async () => {
 		topMerchantQuotaSpendListReport = await ep.merchant.GetMerchantsDetail({
 			ft: {
 				order_by: 'DESC',
-				order_field: 'QuotaSpending'
+				order_field: 'PackageChangedAt'
 			},
 			p: {
 				offset: 1,
@@ -107,9 +107,11 @@ export const load: PageServerLoad = async () => {
 			},
 			p: {
 				offset: 1,
-				limit: 12
+				limit: 10
 			}
 		});
+		
+		
 		pkgUsageRatio = await ep.adminDb.GetPackageUsageRatio();
 		transactionDailyCount = await ep.adminDb.GetTransactionDailyCount(
 			defaultOpt.dailyTrans.startDate,
@@ -276,7 +278,7 @@ export const actions: Actions = {
 			success: true
 		};
 	},
-	
+
 	updateReceiptIncomeOverview: async ({ request }) => {
 		const { startDate, endDate } = Object.fromEntries(await request.formData()) as {
 			startDate: string;
@@ -361,5 +363,110 @@ export const actions: Actions = {
 			updateMonthlyOverview: updateMonthlyOverview.result ?? [],
 			success: true
 		};
-	}
+	},
+	updateTransactionList: async ({ request }) => {
+		// ดึงข้อมูลจากฟอร์ม
+		const { status, sortOrder } = Object.fromEntries(await request.formData()) as {
+			status: string;
+			sortOrder: string;
+		};
+
+		console.log('Request parameters:', { status, sortOrder });
+
+		let transactionList: DataResponse<Transaction[]>;
+
+		const transactionAPI = new TransactionExternalAPI(); // Initialize your API class
+
+		try {
+			// เรียกใช้ GetTransactions พร้อมกับสถานะและการเรียงลำดับ
+			transactionList = await transactionAPI.GetTransactions(
+				{
+					ft: {
+						order_by: sortOrder,
+						order_field: 'VerifiedDate'
+					},
+					p: {
+						offset: 1, 
+						limit: 10 
+					}
+				},
+				status // ตัวกรองสถานะ
+			);
+		} catch (err) {
+			const axiosErr = err as AxiosError;
+			console.error(`-= Error while trying to send request to endpoint =-`);
+			console.error('ErrorStack:', axiosErr);
+			return fail(axiosErr.status || 500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		// ตรวจสอบว่าคำขอสำเร็จหรือไม่
+		if (transactionList.status_code !== 200) {
+			console.error(`-= ErrorResult given from endpoint =-`);
+			return fail(500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		// ส่งข้อมูลรายการธุรกรรมไปยัง frontend
+		return {
+			transactionList: transactionList.result ?? [],
+			success: true
+		};
+	},
+	updatetopMerchantQuotaSpendListReport: async ({ request }) => {
+		// ดึงข้อมูลจากฟอร์ม
+		const { merChantIdorName, merChantRole,sortOrder } = Object.fromEntries(await request.formData()) as {
+			merChantIdorName: string;
+			merChantRole : string;
+			sortOrder: string;
+		};
+
+		console.log('Request parameters:', { merChantIdorName,merChantRole, sortOrder });
+
+		let merchantListReport: DataResponse<MerchantPKG[]>;
+
+		const merchantAPI = new MerchantExternalAPI() // Initialize your API class
+
+		try {
+			// เรียกใช้ GetTransactions พร้อมกับสถานะและการเรียงลำดับ
+			merchantListReport = await merchantAPI.GetMerchantsDetail(
+				{
+					ft: {
+						order_by: sortOrder,
+						order_field: 'UpdatedAt'
+					},
+					p: {
+						offset: 1, 
+						limit: 10 
+					}
+				},
+				merChantIdorName, merChantRole// ตัวกรองสถานะ
+			);
+		} catch (err) {
+			const axiosErr = err as AxiosError;
+			console.error(`-= Error while trying to send request to endpoint =-`);
+			console.error('ErrorStack:', axiosErr);
+			return fail(axiosErr.status || 500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		// ตรวจสอบว่าคำขอสำเร็จหรือไม่
+		if (merchantListReport.status_code !== 200) {
+			console.error(`-= ErrorResult given from endpoint =-`);
+			return fail(500, {
+				message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
+			});
+		}
+
+		// ส่งข้อมูลรายการธุรกรรมไปยัง frontend
+		return {
+			MerchantQuotaSpendListReport: merchantListReport.result ?? [],
+			success: true
+		};
+	},
+
+
 };

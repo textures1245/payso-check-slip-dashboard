@@ -20,10 +20,11 @@ export class TransactionExternalAPI implements TransactionController {
 			this.endpoint = this.endpoint.slice(0, -1);
 		}
 	}
-	GetTransactions = async (qOpt?: QueryOpt): Promise<DataResponse<Transaction[]>> => {
+	GetTransactions = async (qOpt?: QueryOpt,status?: string): Promise<DataResponse<Transaction[]>> => {
+
 		const config: AxiosRequestConfig = {
 			method: 'GET',
-			url: `${this.endpoint}/transaction/get-all${getQueryFilterParams(qOpt)}`,
+			url: `${this.endpoint}/transaction/get-all?${status ? `status=${status}` : ''}${getQueryFilterParams(qOpt,false)}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint
 			}

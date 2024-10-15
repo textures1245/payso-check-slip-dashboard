@@ -113,7 +113,7 @@
 			}}
 		>
 			<div class="flex gap-4">
-				<label class="form-control w-full max-w-xs ">
+				<label class="form-control w-full max-w-xs  ">
 					<div class="label">
 						<span class="label-text-alt">วันที่เริ่ม</span>
 					</div>

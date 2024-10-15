@@ -15,4 +15,5 @@ export type MerchantPKG = {
 	PackageName: string;
 	QuotaLimit?: number;
 	TotalCount: number;
+	PackageChangedAt : string;
 };

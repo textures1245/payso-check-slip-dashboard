@@ -18,10 +18,10 @@ export class MerchantExternalAPI implements MerchantController {
 			this.endpoint = this.endpoint.slice(0, -1);
 		}
 	}
-	GetMerchantsDetail = async (qOpt?: QueryOpt): Promise<DataResponse<MerchantPKG[]>> => {
+	GetMerchantsDetail = async (qOpt?: QueryOpt,merChantIdorName? : string,merChantRole? : string): Promise<DataResponse<MerchantPKG[]>> => {
 		const config: AxiosRequestConfig = {
 			method: 'GET',
-			url: `${this.endpoint}/merchant/get-merchants-with-pkg${getQueryFilterParams(qOpt)}`,
+			url: `${this.endpoint}/merchant/get-merchants-with-pkg?${merChantIdorName ? `searchMerchant=${merChantIdorName}&` : ''}${merChantRole ? `merchantRole=${merChantRole}&` : ''}${getQueryFilterParams(qOpt,false)}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint
 			}

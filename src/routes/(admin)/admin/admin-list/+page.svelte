@@ -16,6 +16,12 @@
 	let keyWord = '';
 	let packageData: PackageData[] = [];
 	let totalItems = 0;
+	let loadingtable = false;
+	let alertMessage: string | null = null; // ตัวแปรสำหรับเก็บข้อความ alert
+	let alertType: 'success' | 'error' = 'success'; // ตัวแปรสำหรับประเภท alert
+	let showAlertModalSuccess = false;
+	let showAlertModalError = false;
+	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
@@ -55,6 +61,7 @@
 	}
 
 	async function fetchData(currentOffset: number, currentLimit: number, searchMerchant: string) {
+		loadingtable = true;
 		try {
 			const response = await fetch(
 				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`
@@ -62,31 +69,51 @@
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
+
 			const data = await response.json();
-			if (!Array.isArray(data.result)) {
-				throw new Error('Result is not an array');
+
+			// Log the entire response to check its structure
+			console.log('API Response:', data);
+
+			// Check if 'data' exists and is an object
+			if (!data || typeof data !== 'object') {
+				console.error('Data is not an object:', data);
+				throw new Error('Invalid response structure: Data is not an object');
 			}
-			console.log(data);
+
+			// Check if 'result' exists and is an array, handle cases where 'result' is null or undefined
+			if (!data.result) {
+				console.warn('Result is null or undefined. Handling as empty array.');
+				data.result = []; // Default to an empty array
+			}
+
+			if (!Array.isArray(data.result)) {
+				console.error('Result is not an array:', data.result);
+				throw new Error('Invalid response structure: Missing or non-array result');
+			}
+
 			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 			userData = data.result.map((item: UserData, index: number) => ({
-				Id: parseInt(item.Id, 10),
-				MerchantId: parseInt(item.MerchantId, 10),
+				Id: item.Id,
+				MerchantId: item.MerchantId,
 				MerchantName: item.MerchantName,
-				QuotaUsage: parseInt(item.QuotaUsage, 10),
-				QuotaLimit: parseInt(item.QuotaLimit, 10),
-				PackageId: parseInt(item.PackageId, 10),
+				QuotaUsage: item.QuotaUsage,
+				QuotaLimit: item.QuotaLimit,
+				PackageId: item.PackageId,
 				PackageName: item.PackageName,
-				BalanceQuotaLeft: parseInt(item.BalanceQuotaLeft, 10),
+				BalanceQuotaLeft: item.BalanceQuotaLeft,
 				Status: item.Status,
 				MerchantRole: item.MerchantRole,
 				Email: item.Email,
 				BillDate: item.BillDate,
-				QuotaSpending: parseInt(item.QuotaSpending, 10),
+				QuotaSpending: item.QuotaSpending,
 				index: index + (offset - 1) * limit + 1
 			}));
 			totalPages = Math.ceil(totalCount / currentLimit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
+		} finally {
+			loadingtable = false;
 		}
 	}
 
@@ -117,8 +144,9 @@
 
 	function clearSearch() {
 		searchInpage = '';
+		keyWord = '';
 		filteredData = [...userData];
-		location.reload();
+		fetchData(offset, limit, '');
 	}
 
 	function showModal(user: UserData) {
@@ -130,59 +158,71 @@
 	}
 
 	async function updateUser() {
-		if (!editingUser) return;
-		const cookies = getCookies();
-		const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+	if (!editingUser) return;
+	const cookies = getCookies();
+	const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
-		try {
-			const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
+	try {
+		const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Actor-Id': myCookie.Id,
+				'Actor-Name': myCookie.Email,
+				'Actor-Role': 'ADMIN'
+			},
+			body: JSON.stringify({
+				PackageId: editingUser.PackageId,
+				MerchantId: editingUser.Id
+			})
+		});
+
+		if (!updatePackageResponse.ok) {
+			throw new Error('Failed to update package');
+		}
+
+		const updateStatusResponse = await fetch(
+			`${PUBLIC_API_ENDPOINT}/merchant/updatestatus/${editingUser.Id}`,
+			{
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json',
-					'Actor-Id': myCookie.Id,
-					'Actor-Name': myCookie.Email,
-					'Actor-Role': 'ADMIN'
+					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({
-					PackageId: editingUser.PackageId,
-					MerchantId: editingUser.Id
-				})
-			});
-
-			if (!updatePackageResponse.ok) {
-				throw new Error('Failed to update package');
+				body: JSON.stringify({ Status: editingUser.Status })
 			}
+		);
 
-			const updateStatusResponse = await fetch(
-				`${PUBLIC_API_ENDPOINT}/merchant/updatestatus/${editingUser.Id}`,
-				{
-					method: 'PUT',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ Status: editingUser.Status })
-				}
-			);
-
-			if (!updateStatusResponse.ok) {
-				throw new Error('Failed to update status');
-			}
-
-			const index = userData.findIndex((user) => user.Id === editingUser?.Id);
-			if (index !== -1) {
-				userData[index] = { ...editingUser };
-				userData = [...userData];
-			}
-
-			const modal = document.getElementById('my_modal_1');
-			// @ts-ignore
-			modal.close();
-			editingUser = null;
-		} catch (error) {
-			console.error('Error updating user:', error);
+		if (!updateStatusResponse.ok) {
+			throw new Error('Failed to update status');
 		}
-		location.reload();
+
+		const index = userData.findIndex((user) => user.Id === editingUser?.Id);
+		if (index !== -1) {
+			userData[index] = { ...editingUser };
+			userData = [...userData];
+		}
+
+		// แสดงโมดอลแจ้งเตือนอัปเดตสำเร็จ
+		showAlertModalSuccess = true;
+	} catch (error) {
+		console.error('Error updating user:', error);
+		alertMessage = 'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
+		alertType = 'error';
+		showAlertModalError = true;
 	}
+}
+
+// เพิ่มฟังก์ชันรีโหลดหลังจากปิดโมดอล
+function closeSuccessModal() {
+	showAlertModalSuccess = false;
+	location.reload();
+}
+
+function closeErrorModal() {
+	showAlertModalError = false;
+	location.reload();
+}
+
 
 	$: isActive = editingUser?.Status === 'ACTIVE';
 
@@ -194,10 +234,10 @@
 	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4" >
+<div class="w-full py-4 px-2 sm:px-4">
 	<span
-		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
-		>Merchant</span
+		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		>รายชื่อผู้ใช้</span
 	>
 	<div
 		class="mb-6 pt-8 sm:pt-6 md:pt-4 flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-4 sm:space-y-0 sm:space-x-4"
@@ -205,7 +245,7 @@
 		<div class="relative w-full max-w-xs">
 			<input
 				type="text"
-				placeholder="Merchant Id or Merchant Name"
+				placeholder="รหัสลูกค้า ชื่อ-นามสกุล"
 				class="input input-bordered w-full pl-10 bg-white"
 				style="background-color: white;"
 				maxlength="100"
@@ -232,83 +272,108 @@
 
 		<div class="flex space-x-2">
 			<button class="btn bg-primary text-white text-xs sm:text-sm" on:click={firstPage}
-				>Search</button
+				>ค้นหา</button
 			>
-			<button class="btn btn-outline text-xs sm:text-sm" on:click={clearSearch}>Clear</button>
+			<button class="btn btn-outline text-xs sm:text-sm" on:click={clearSearch}>ล้าง</button>
 		</div>
 	</div>
 	<div class="overflow-x-auto">
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
-			<thead class="text-center  text-gray-700 lg:text-base">
+			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1  sm:p-2 w-8 text-sm">No</th>
+					<th class="p-1 sm:p-2 w-12 text-sm">ลำดับ</th>
 					<th class="p-1 sm:p-2 text-wrap text-left text-sm">
-						<div class="lg:block sm:block hidden">Merchant Id</div>
-						<div class="lg:hidden sm:hidden block">M.ID</div></th
+						<div class="lg:block sm:block hidden">รหัสลูกค้า</div>
+						<div class="lg:hidden sm:hidden block">MID</div></th
 					>
-					<th class="p-1 sm:p-2 text-left text-sm">Email</th>
-					<th class="p-1 sm:p-2 text-left text-sm">Type</th>
+					<th class="p-1 sm:p-2 text-left text-sm">อีเมล์</th>
 					<th class="p-1 sm:p-2 text-wrap text-left text-sm"
-						><div class="lg:block sm:block hidden">Merchant Name</div>
-						<div class="lg:hidden sm:hidden block">M.Name</div></th
+						><div class="lg:block sm:block hidden">ชื่อ-นามสกุล</div>
+						<div class="lg:hidden sm:hidden block">MName</div></th
 					>
-					<th class="p-1 sm:p-2 text-left text-sm">Package</th>
+					<th class="p-1 sm:p-2 text-left text-sm">ประเภทลูกค้า</th>
+
+					<th class="p-1 sm:p-2 text-left text-sm">แพ็คเก็จที่สมัคร</th>
 					<th class="p-1 sm:p-2 text-wrap text-right text-sm">
-						<div class="lg:block sm:block hidden ">QuotaLeft</div>
+						<div class="lg:block sm:block hidden">จำนวนเหลือใช้</div>
 						<div class="lg:hidden sm:hidden block">Quota</div></th
 					>
-					<th class="p-1 sm:p-2 text-left text-sm">QuotaSpending</th>
-					<th class="p-1 sm:p-2 text-sm">Expire date</th>
-					<th class="p-1 sm:p-2 text-sm" >Status</th>
+					<th class="p-1 sm:p-2 text-right text-sm">จำนวนที่ใช้ไป</th>
+					<th class="p-1 sm:p-2 text-sm">วันหมดอายุแพ็คเก็จ</th>
+					<th class="p-1 sm:p-2 text-sm">สถานะ</th>
 					<th class="p-1 w-20 sm:p-2"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
-				{#each userData as item}
-					<tr class="border-b border-gray-300">
-						<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.Email}">{item.Email}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.MerchantName}">{item.MerchantName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.PackageName}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
-							>{item.QuotaUsage + item.BalanceQuotaLeft}</td
-						>
-						<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.QuotaSpending}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">{item.BillDate.split(' ')[0]}</td>
-						<td class="p-1 sm:p-2 lg:text-sm truncate">
-							<div class="flex justify-center">
-								<div
-									class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
-									'ACTIVE'
-										? 'badge-success'
-										: 'badge-danger'}"
-								>
-									{item.Status}
-								</div>
-							</div>
-						</td>
-						<td class="p-1 sm:p-2">
-							<svg
-								on:click={() => showModal(item)}
-								class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
-								aria-hidden="true"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
+				{#if loadingtable}
+					<tr><td colspan="11"><span class="loading loading-spinner loading-xs"></span> </td></tr>
+				{:else if userData.length === 0}
+					<tr><td colspan="11">ไม่พบข้อมูล</td></tr>
+				{:else}
+					{#each userData as item}
+						<tr class="border-b border-gray-300">
+							<th class="p-1 sm:p-2 lg:text-sm truncate">{item.index}</th>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">
+								{Number(item.MerchantId) === 0 ? '' : item.MerchantId}
+							</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.Email}
+								>{item.Email}</td
 							>
-								<path
-									stroke="currentColor"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-								/>
-							</svg>
-						</td>
-					</tr>
-				{/each}
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MerchantName}
+								>{item.MerchantName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.PackageName}
+								>{item.PackageName}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
+								>{(item.QuotaUsage + item.BalanceQuotaLeft).toLocaleString()}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
+								>{item.QuotaSpending.toLocaleString()}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">
+								{item.BillDate && !isNaN(Date.parse(item.BillDate))
+									? new Date(item.BillDate).toLocaleDateString('en-EN', {
+											day: '2-digit',
+											month: '2-digit',
+											year: 'numeric'
+										})
+									: '-'}
+							</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate">
+								<div class="flex justify-center">
+									<div
+										class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
+										'ACTIVE'
+											? 'badge-success'
+											: 'badge-danger'}"
+									>
+									{item.Status === 'INACTIVE' ? 'DEACTIVE' : item.Status}
+									</div>
+								</div>
+							</td>
+							<td class="p-1 sm:p-2">
+								<svg
+									on:click={() => showModal(item)}
+									class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+									aria-hidden="true"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+									/>
+								</svg>
+							</td>
+						</tr>
+					{/each}
+				{/if}
 			</tbody>
 		</table>
 		<!-- <div class="grid w-full sm:w-auto bg-gray-100">
@@ -344,7 +409,7 @@
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm font-bold">Page {currentPage} of {totalPages}</div>
+				<div class="text-sm font-bold">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select
@@ -365,14 +430,14 @@
 						on:click={prevPage}
 						disabled={currentPage === 1}
 					>
-						Previous
+						ย้อนกลับ
 					</button>
 					<button
 						class="btn btn-xs sm:btn-sm btn-outline"
 						on:click={nextPage}
 						disabled={currentPage === totalPages}
 					>
-						Next
+						ต่อไป
 					</button>
 				</div>
 			</div>
@@ -383,23 +448,24 @@
 <dialog id="my_modal_1" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">
 		<div class="form-control">
-			<h2 class="text-2xl font-bold mb-4">Edit</h2>
+			<h2 class="text-2xl font-bold mb-4 text-primary">แก้ไข</h2>
 			{#if editingUser}
 				<div></div>
 				<label class="label">
-					<span class="label-text text-black w-2/5">Merchant Name:</span>
+					<span class="label-text text-black w-2/5">ชื่อ-นามสกุล:</span>
 					<input
 						type="text"
-						class="input input-bordered bg-white disabled:bg-white disabled:text-black w-80"
+						class="input input-bordered !border-black bg-white disabled:bg-white disabled:text-black w-80"
 						disabled
 						bind:value={editingUser.MerchantName}
+						
 					/>
 				</label>
 				<label class="label">
-					<span class="label-text text-black w-2/5">Package:</span>
+					<span class="label-text text-black w-2/5">แพ็คเก็จ:</span>
 
 					<select
-						class="select max-w-xs w-80 bg-white overflow-y-auto"
+						class="select max-w-xs w-80 bg-white overflow-y-auto border border-gray-900"
 						bind:value={editingUser.PackageId}
 					>
 						{#each packageData as pkgdata}
@@ -409,7 +475,7 @@
 				</label>
 
 				<label class="label cursor-pointer bg-white flex">
-					<span class="label-text text-black w-2/5">Status</span>
+					<span class="label-text text-black w-2/5">สถานะ</span>
 					<div class="w-80">
 						<input
 							type="checkbox"
@@ -422,8 +488,9 @@
 
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
-						<button class="btn btn-outline btn-error">Close</button>
-						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}>Save</button
+						<button class="btn border border-gray-500 text-black ">ปิด</button>
+						<button class="btn bg-primary text-white btn-primary" on:click={updateUser}
+							>บันทึก</button
 						>
 					</form>
 				</div>
@@ -431,18 +498,128 @@
 		</div>
 	</div>
 </dialog>
+<dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<linearGradient
+					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
+					x1="9.858"
+					x2="38.142"
+					y1="9.858"
+					y2="38.142"
+					gradientUnits="userSpaceOnUse"
+					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
+					></stop></linearGradient
+				><path
+					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
+					opacity=".05"
+				></path><path
+					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
+					opacity=".07"
+				></path><path
+					fill="#fff"
+					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+		<p class=" text-center">Update สำเร็จ</p>
+		<div class=" modal-action flex justify-center">
+			<button class="btn btn-outline" on:click={closeSuccessModal}>ปิด</button>		</div>
+	</div>
+</dialog>
+<dialog id="alert_modal_false" class="modal" open={showAlertModalError}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
+		<div class=" modal-action flex justify-center">
+			<button class="btn btn-outline" on:click={closeErrorModal}>ปิด</button>
+		</div>
+	</div>
+</dialog>
 
 <style>
-	.badge-status {
-		@apply py-1 px-2 rounded-full text-white;
-		width: 10 0%;
-	}
-	.badge-success {
-		@apply border border-success text-success bg-transparent;
-	}
-	.badge-danger {
-		@apply border  border-destructive text-destructive bg-transparent;
-	}
+.badge-status {
+	@apply py-1 px-2 rounded-full;
+	width: 100%;
+	position: relative; /* Enable positioning for the dot */
+	padding-left: 1rem; /* Add space for the text */
+	color: #333; /* Default text color (will be overridden in specific classes) */
+}
+
+.badge-success {
+	@apply border border-success;
+	background-color: rgba(76, 175, 80, 0.2); /* Light green background */
+	color: #4CAF50; /* Green text color */
+}
+
+.badge-danger {
+	@apply border border-gray-500; /* Change border to dark gray */
+	background-color: #ffffff; /* White background */
+	color: gray; /* Dark gray text color */
+}
+
+.badge-success::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: #4CAF50; /* Dark green to match text color */
+	position: absolute;
+	left: 1rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.badge-danger::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: gray; /* Dark gray to match the border */
+	position: absolute;
+	left: 0.5rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+
+
+
 	@media (max-width: 640px) {
 		.badge-status {
 			width: 100%;

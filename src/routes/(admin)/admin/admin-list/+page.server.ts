@@ -4,15 +4,15 @@ export type UserData = {
     MerchantId: string;
     MerchantName: string;
     PackageName: string;
-    QuotaUsage: string;
-    QuotaLimit: string;
+    QuotaUsage: number;
+    QuotaLimit: number;
     PackageId: string;
-    BalanceQuotaLeft : string ;
+    BalanceQuotaLeft : number ;
     Status: string;
     MerchantRole :string;
     Email : string;
     BillDate : string;
-    QuotaSpending : string;
+    QuotaSpending : number;
     index : number;
 
    

@@ -232,7 +232,7 @@
 					chart.update();
 				}}
 				name="pkgIdSelected"
-				class="select select-xs select-bordered w-full max-w-xs"
+				class="select select-sm select-bordered w-full max-w-md"
 			>
 				{#each Object.keys(opt) as optKey}
 					<option value={optKey} selected={optKey === optSelected}>{opt[optKey]}</option>
