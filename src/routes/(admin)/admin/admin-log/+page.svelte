@@ -204,7 +204,7 @@
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
 		  <button
 			on:click={firstPage}
-			class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2"
+			class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2 hover:bg-[#050680]"
 		  >ค้นหา</button>
 		  <button
 			on:click={handleClear}
@@ -260,7 +260,7 @@
 				{:else}
 					{#each LogAdmin as item, i (i)}
 						<tr class="border-b border-gray-300">
-							<td class="p-1 sm:p-2 lg:text-sm text-left font-semibold">{item.index}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-left ">{item.index}</td>
 							<td
 								class="p-1 sm:p-2 lg:text-sm text-left"
 								title={new Date(item.Timestamp).toLocaleString('en-EN', {
@@ -375,7 +375,7 @@
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm font-bold">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
+				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select

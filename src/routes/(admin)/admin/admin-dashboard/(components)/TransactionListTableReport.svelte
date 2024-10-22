@@ -40,6 +40,9 @@
 						<option value="SUCCESS">SUCCESS</option>
 						<option value="PENDING">PENDING</option>
 						<option value="FAILED">FAILED</option>
+						<option value="RESPOND_REJECTED">RESPOND REJECTED</option>
+						<option value="REQUEST_REJECTED">REQUEST REJECTED</option>
+						<option value="BANK_ACC_NOT_MATCH">BANK ACC NOT MATCH</option>
 					</select>
 				</label>
 				<label class="form-control w-[180px]">
@@ -48,13 +51,13 @@
 						name="sortOrder"
 						id="sortOrder"
 					>
-						<option disabled selected>เรียงตามวันที่</option>
+						<option value="DESC">เรียงตามวันที่</option>
 						<option value="DESC">มากไปน้อย</option>
 						<option value="ASC">น้อยไปมาก</option>
 					</select>
 				</label>
 				<label class="max-w-sm self-end">
-					<button class="btn bg-primary text-primary-content btn-sm" type="submit">ค้นหา</button>
+					<button class="btn bg-primary text-primary-content btn-sm hover:bg-[#050680]" type="submit">ค้นหา</button>
 				</label>
 			</div>
 		</form>
@@ -65,8 +68,8 @@
 
 <Table.Root>
 	<Table.Header>
-		<Table.Row class="text-xs md:text-sm">
-			<Table.Head>#</Table.Head>
+		<Table.Row class="text-xs md:text-sm bg-gray-100 text-gray-700">
+			<Table.Head>ลำดับ</Table.Head>
 			<Table.Head>วันเวลาที่ตรวจสอบ</Table.Head>
 			<Table.Head>เลขที่รายการ</Table.Head>
 			<Table.Head>รหัสลูกค้า</Table.Head>
@@ -120,31 +123,12 @@
 					   class:text-success-bg={t.Status.toLocaleUpperCase() === 'SUCCESS'}
 					   class:text-pending-bg={t.Status.toLocaleUpperCase() === 'PENDING'}
 					   class:text-respond-rejected-bg={t.Status.toLocaleUpperCase() === 'RESPOND_REJECTED'}
+					   class:text-request-rejected-bg={t.Status.toLocaleUpperCase() === 'REQUEST_REJECTED'}
+					   class:text-bank-acc-not-match-bg={t.Status.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'}
 					   class:text-rejected-bg={t.Status.toLocaleUpperCase() === 'REJECTED' || t.Status.toLocaleUpperCase() === 'FAILED'}
 					   class="badge badge-outline badge-sm uppercase text-xs flex items-center"
 					>
-					   {#if t.Status.toLocaleUpperCase() === 'SUCCESS'}
-					   <svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
-						<path fill="#136911" d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z" />
-					</svg>
-					   {:else if t.Status.toLocaleUpperCase() === 'PENDING'}
-					   <svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
-						<path fill="#f57c00" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m4.2 14.2L11 13V7h1.5v5.2l4.5 2.7z" />
-					</svg>
-					{:else if t.Status.toLocaleLowerCase() === "RESPOND_REJECTED"}
-					<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48" {...$$props}>
-						<g fill="none" stroke="#182230" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-							<path d="M19.01 42H9a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h30a3 3 0 0 1 3 3v10.03m0 10.005V41a1 1 0 0 1-1 1H29.037M42 29.035H18" />
-							<path d="m23 23l-6 6l6 6" />
-						</g>
-					</svg>
-					{:else if t.Status.toLocaleUpperCase() === 'REJECTED' || t.Status.toLocaleUpperCase() === 'FAILED'}
-					<svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
-						<path fill="#d32f2f" d="M18.36 19.78L12 13.41l-6.36 6.37l-1.42-1.42L10.59 12L4.22 5.64l1.42-1.42L12 10.59l6.36-6.36l1.41 1.41L13.41 12l6.36 6.36z" />
-					</svg>
 					
-					   {/if}
-
 					   
 					   
 
@@ -163,22 +147,31 @@
 
 <style>
 	.text-success-bg {
-	background-color: #e6f4ea; /* พื้นหลังสีเขียวอ่อน */
-	color: #2e7d32; /* สีตัวอักษรสีเขียวเข้ม */
+	background-color: #DCFAE6; /* พื้นหลังสีเขียวอ่อน */
+	color: #17B26A; /* สีตัวอักษรสีเขียวเข้ม */
 }
 
 .text-pending-bg {
-	background-color: #fff9e6; /* พื้นหลังสีเหลืองอ่อน */
-	color: #f57c00; /* สีตัวอักษรสีเหลืองเข้ม */
+	background-color: #FEF0C7; /* พื้นหลังสีเหลืองอ่อน */
+	color: #F79009; /* สีตัวอักษรสีเหลืองเข้ม */
 }
 
 .text-rejected-bg {
-	background-color: #fce8e8; /* พื้นหลังสีแดงอ่อน */
-	color: #d32f2f; /* สีตัวอักษรสีแดงเข้ม */
+	background-color: #FEE4E2; /* พื้นหลังสีแดงอ่อน */
+	color: #F04438; /* สีตัวอักษรสีแดงเข้ม */
 }
 .text-respond-rejected-bg {
-		background-color: #D0D5DD; 
-		color: #182230; 
+		background-color: #F9FAFB; 
+		color: #61646C; 
+	}
+	.text-request-rejected-bg {
+		background-color: #F9FAFB; 
+		color: #61646C; 
+	}
+
+	.text-bank-acc-not-match-bg {
+		background-color: #F9FAFB; 
+		color: #61646C; 
 	}
 
 </style>

@@ -53,7 +53,7 @@
 						class="select select-sm select-bordered w-full max-w-sm"
 						name="merChantRole"
 					>
-						<option disabled selected>ประเภทลูกค้า</option>
+						<option value = "">ประเภทลูกค้า</option>
 						<option value="PAYSO">Payso</option>
 						<option value="NOT_PAYSO">Not_Payso</option>
 					</select>
@@ -61,13 +61,13 @@
 
 				<label class="form-control w-full max-w-sm">
 					<select class="select select-sm select-bordered w-full max-w-sm" name="sortOrder">
-						<option disabled selected>เรียงตามวันที่</option>
+						<option value="DESC">เรียงตามวันที่</option>
 						<option value="DESC">มากไปน้อย</option>
 						<option value="ASC">น้อยไปมาก</option>
 					</select>
 				</label>
 				<label class="max-w-sm self-end">
-					<button class="btn bg-primary text-primary-content btn-sm" type="submit">ค้นหา</button>
+					<button class="btn bg-primary text-primary-content btn-sm hover:bg-[#050680]" type="submit">ค้นหา</button>
 				</label>
 			</div>
 		</form>
@@ -77,11 +77,11 @@
 
 <Table.Root>
 	<Table.Header>
-		<Table.Row class="text-xs md:text-sm">
+		<Table.Row class="text-xs md:text-sm bg-gray-100 text-gray-700">
 			<Table.Head>ลำดับ</Table.Head>
 			<Table.Head>รหัสลูกค้า</Table.Head>
 			<Table.Head class="w-[30px ]">ชื่อ-นามสกุล</Table.Head>
-			<Table.Head>อีเมล์</Table.Head>
+			<Table.Head>อีเมล</Table.Head>
 			<Table.Head>ประเภทลูกค้า</Table.Head>
 			<Table.Head>แพ็คเก็จที่สมัคร</Table.Head>
 			<Table.Head>โควตาที่ใช้</Table.Head>

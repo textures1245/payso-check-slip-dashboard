@@ -443,7 +443,7 @@
 			</div>
 		</div>
 		<div class="flex justify-end space-x-2">
-			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={firstPage}
+			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm hover:bg-[#050680]" on:click={firstPage}
 				>ค้นหา</button
 			>
 			<button class="btn btn-outline text-xs sm:text-sm" on:click={clearSearch}>ล้าง</button>
@@ -453,7 +453,7 @@
 			style="width: 100%;"
 		>
 			<button
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm hover:bg-[#050680]"
 				on:click={showModalCreate}>สร้างแพ็คเก็จ</button
 			>
 		</div>
@@ -481,7 +481,7 @@
 						<div class="lg:hidden sm:hidden block">คงเหลือ</div>
 					</th>
 
-					<th class="p-1 sm:p-2 text-sm  w-28">สถานะ</th>
+					<th class="p-1 sm:p-2 text-sm  ">สถานะ</th>
 					<th class="p-1 sm:p-2 text-sm">การมองเห็น</th>
 					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
@@ -490,11 +490,11 @@
 				{#if loadingtable}
 					<tr><td colspan="7"><span class="loading loading-spinner loading-xs"></span> </td></tr>
 				{:else if packageData.length === 0}
-					<tr><td colspan="7">No data available</td></tr>
+					<tr><td colspan="7">ไม่พบข้อมูล</td></tr>
 				{:else}
 					{#each packageData as item}
 						<tr class="border-b border-gray-300">
-							<td class="p-1 sm:p-2 lg:text-sm truncate font-bold">{item.Index}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate ">{item.Index}</td>
 							<th class="p-1 sm:p-2 lg:text-sm truncate font-normal text-left">{item.Id || '-'}</th>
 							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title={item.Name}>{item.Name}</td
 							>
@@ -503,7 +503,8 @@
 								>{(item.QuotaLimit || '-').toLocaleString()}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
-								>{item.AmountLimit.toLocaleString()}</td
+								>  {item.AmountLimit === 0 ? 'Unlimited' : item.AmountLimit.toLocaleString()}
+								</td
 							>
 
 							<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
@@ -587,7 +588,7 @@
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm font-bold">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
+				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select
@@ -626,42 +627,10 @@
 <dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
     <div class="modal-box">
         <div class="text-lg font-bold flex justify-center">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                x="0px"
-                y="0px"
-                width="100"
-                height="100"
-                viewBox="0 0 48 48"
-            >
-                <linearGradient
-                    id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
-                    x1="9.858"
-                    x2="38.142"
-                    y1="9.858"
-                    y2="38.142"
-                    gradientUnits="userSpaceOnUse"
-                >
-                    <stop offset="0" stop-color="#21ad64"></stop>
-                    <stop offset="1" stop-color="#088242"></stop>
-                </linearGradient>
-                <path
-                    fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
-                    d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-                ></path>
-                <path
-                    d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
-                    opacity=".05"
-                ></path>
-                <path
-                    d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
-                    opacity=".07"
-                ></path>
-                <path
-                    fill="#fff"
-                    d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
-                ></path>
-            </svg>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+			</svg>
         </div>
         <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
         <p class="text-center">Update สำเร็จ</p>
@@ -678,24 +647,8 @@
 <dialog id="alert_modal_false" class="modal" open={showAlertModalError}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<path
-					fill="#f44336"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					fill="#fff"
-					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
-				></path><path
-					fill="#fff"
-					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
@@ -785,7 +738,7 @@
 						<button class="btn border border-gray-500 text-black">ปิด</button>
 
 						<!-- Save/Update Button -->
-						<button class="btn bg-primary text-white btn-primary" on:click={updatePackage}>
+						<button class="btn bg-primary text-white btn-primary hover:bg-[#050680]" on:click={updatePackage}>
 							บันทึก
 						</button>
 					</form>
@@ -867,7 +820,7 @@
 			<div class="modal-action">
 				<form method="dialog" class="flex space-x-2">
 					<button class="btn border border-gray-500 text-black">ปิด</button>
-					<button class="btn bg-primary text-white btn-primary" on:click={createPackage}
+					<button class="btn bg-primary text-white btn-primary hover:bg-[#050680]" on:click={createPackage}
 						>บันทึก</button
 					>
 				</form>
@@ -879,36 +832,9 @@
 <dialog id="create_alert_modal_success" class="modal" open={showAlertModalCreateSuccess}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<linearGradient
-					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
-					x1="9.858"
-					x2="38.142"
-					y1="9.858"
-					y2="38.142"
-					gradientUnits="userSpaceOnUse"
-					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
-					></stop></linearGradient
-				><path
-					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
-					opacity=".05"
-				></path><path
-					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
-					opacity=".07"
-				></path><path
-					fill="#fff"
-					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
@@ -928,24 +854,8 @@
 <dialog id="create_alert_modal_error" class="modal" open={showAlertModalCreateError}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<path
-					fill="#f44336"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					fill="#fff"
-					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
-				></path><path
-					fill="#fff"
-					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
@@ -964,42 +874,10 @@
 <dialog id="update_alert_modal_success" class="modal" open={showAlertModalUpdateSuccess}>
     <div class="modal-box">
         <div class="text-lg font-bold flex justify-center">
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                x="0px"
-                y="0px"
-                width="100"
-                height="100"
-                viewBox="0 0 48 48"
-            >
-                <linearGradient
-                    id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
-                    x1="9.858"
-                    x2="38.142"
-                    y1="9.858"
-                    y2="38.142"
-                    gradientUnits="userSpaceOnUse"
-                >
-                    <stop offset="0" stop-color="#21ad64"></stop>
-                    <stop offset="1" stop-color="#088242"></stop>
-                </linearGradient>
-                <path
-                    fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
-                    d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-                ></path>
-                <path
-                    d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
-                    opacity=".05"
-                ></path>
-                <path
-                    d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
-                    opacity=".07"
-                ></path>
-                <path
-                    fill="#fff"
-                    d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
-                ></path>
-            </svg>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+			</svg>
         </div>
         <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
         <p class="text-center">Update สำเร็จ</p>
@@ -1017,24 +895,8 @@
 <dialog id="update_alert_modal_error" class="modal" open={showAlertModalUpdateError}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<path
-					fill="#f44336"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					fill="#fff"
-					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
-				></path><path
-					fill="#fff"
-					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
@@ -1061,14 +923,14 @@
 
 .badge-success {
 	@apply border border-success;
-	background-color: rgba(76, 175, 80, 0.2); /* Light green background */
-	color: #4CAF50; /* Green text color */
+	background-color: #DCFAE6; /* Light green background */
+	color: #17B26A; /* Green text color */
 }
 
 .badge-danger {
 	@apply border border-gray-500; /* Change border to dark gray */
-	background-color: #ffffff; /* White background */
-	color: gray; /* Dark gray text color */
+	background-color: #F9FAFB; /* White background */
+	color: #61646C; /* Dark gray text color */
 }
 
 .badge-success::before {
@@ -1077,7 +939,7 @@
 	width: 0.5rem;
 	height: 0.5rem;
 	border-radius: 50%;
-	background-color: #4CAF50; /* Dark green to match text color */
+	background-color: #17B26A; /* Dark green to match text color */
 	position: absolute;
 	left: 1rem; /* Adjusted position closer to the text */
 	top: 50%;
@@ -1090,7 +952,7 @@
 	width: 0.5rem;
 	height: 0.5rem;
 	border-radius: 50%;
-	background-color: gray; /* Dark gray to match the border */
+	background-color: #61646C; /* Dark gray to match the border */
 	position: absolute;
 	left: 0.5rem; /* Adjusted position closer to the text */
 	top: 50%;
