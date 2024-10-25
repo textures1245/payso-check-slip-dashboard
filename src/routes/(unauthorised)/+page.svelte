@@ -157,7 +157,9 @@
 </script>
 
 <svelte:head>
+	 {@html `
 	<script src="../src/lib/callback.js"></script>
+	`}
 </svelte:head>
 
 <div
