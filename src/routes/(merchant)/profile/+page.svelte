@@ -110,7 +110,7 @@
 	// let scope = 'profile%20openid%20email';
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientId = '2006478813';
-	let redirectUri = 'http://localhost:5173/profile';
+	let redirectUri = 'https://payso-check-slip-dashboard-staging.vercel.app/profile';
 	let state = id;
 	let scope = 'profile%20openid%20email';
 
