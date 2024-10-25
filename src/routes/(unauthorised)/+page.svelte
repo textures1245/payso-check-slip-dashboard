@@ -89,24 +89,24 @@
 	}
 
 	onMount(async () => {
-		const cookies = getCookies();
-		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
-		const statusCookie = sessionStorage.getItem('StatusCoockie');
-		if (!myCookie) {
-			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
-			sessionStorage.removeItem('StatusCoockie');
-			showModal = true;
+		// const cookies = getCookies();
+		// const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
+		// const statusCookie = sessionStorage.getItem('StatusCoockie');
+		// if (!myCookie) {
+		// 	// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
+		// 	sessionStorage.removeItem('StatusCoockie');
+		// 	showModal = true;
 
-			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
-			setTimeout(() => {
-				showModal = false; // ปิด modal
-				location.reload(); // รีโหลดหน้า
-			}, 3000);
-		}
-		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
-			linetest();
-			sessionStorage.setItem('StatusCoockie', 'rr');
-		}
+		// 	// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
+		// 	setTimeout(() => {
+		// 		showModal = false; // ปิด modal
+		// 		location.reload(); // รีโหลดหน้า
+		// 	}, 3000);
+		// }
+		// if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
+		// 	linetest();
+		// 	sessionStorage.setItem('StatusCoockie', 'rr');
+		// }
 
 		if (form) {
 			if (form.data) {
@@ -134,7 +134,7 @@
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientIdtest = '2006478813';
-	let redirectUritest = `${PUBLIC_DOMAIN}`;
+	let redirectUritest = 'https://payso-check-slip-dashboard-xi.vercel.app/';
 	let statetest = '1234';
 	let scopetest = 'profile%20openid%20email';
 
@@ -171,6 +171,7 @@
 			<div class="  rounded-2xl p-6 flex flex-col text-sm">
 				<div class="px-10">
 					<div class="pt-2 text-start">
+						<button on:click={linetest}>12315646</button>
 						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#17B26A]">
 							ดูข้อมูลสลิปและการใช้งานผ่านกราฟและสถิติตามช่วงเวลา
 						</h2>
