@@ -50,7 +50,7 @@ const loadPastandBank = async () => {
 
 
 <div class="  bg-primary-foreground min-h-screen flex flex-col xl:px-20 lg:px-10 md:px-10 px-0">
-<div class="mx-5" >
+<div class="mx-5 " >
 <Overview/>
 </div>
 <div class="grid gap-2 md:grid-cols-1 lg:grid-cols-2 mx-5 my-6 ">

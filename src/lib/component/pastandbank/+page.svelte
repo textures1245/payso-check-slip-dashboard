@@ -70,18 +70,8 @@
                 'Content-Type': 'application/json'
             }
 		};
-		console.time('Fetch Only Getdata');
-		console.log('Fetching from:', apiUrl);
-console.time('API Call');
 const result = await fetch(apiUrl, config);
-console.timeEnd('API Call');
-console.log('Response Status:', result.status);
-console.time('Process Data');
 const datas = await result.json();
-console.timeEnd('Process Data');
-		console.timeEnd('Fetch Only Getdata');
-		console.log('Data size:', JSON.stringify(datas).length);
-		
 		if (datas.result) {
             return datas.result;
         }
@@ -159,7 +149,10 @@ console.timeEnd('Process Data');
 	{ value: 'all', label: 'ทั้งหมด' },
   { value: 'success', label: 'ถูกต้อง' },
   { value: 'failed', label: 'ผิด' },
-  { value: 'pending', label: 'กำลังดำเนินการ' }
+  { value: 'pending', label: 'กำลังดำเนินการ' },
+  { value: 'REQUEST_REJECTED', label: 'คำขอถูกปฏิเสธ' },
+  { value: 'RESPOND_REJECTED', label: 'ปฏิเสธการตอบ' },
+  { value: 'BANK_ACC_NOT_MATCH', label: 'ชื่อบัญชีไม่ตรง' }
 ];
 
 function formatDate(dateString:any) {
@@ -205,8 +198,7 @@ function formatTime(dateString: string) {
 			{/each}
 		  </select>
 		  <Button
-variant="outline"
-class=" flex text-center py-0 px-0  text-white hover:text-black border border-gray-400  bg-primary"
+class=" flex text-center py-0 px-0  text-white  border border-gray-400  bg-primary hover:bg-[#050680]"
 on:click={() => SearchData(statusToSend)}
 style="width:40%;height:30px;"
 ><div class="mx-3 content-center font-semibold" style="width:100%;height:100%">
@@ -263,25 +255,27 @@ style="width:40%;height:30px;"
 			<Table.Cell class=" flex justify-center font-semibold">{#if item.Status === 'SUCCESS'}
 				<span class=" flex  items-center" style="color:#17B26A;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 120 120">
 					<circle cx="60" cy="64" r="48" opacity=".35"></circle><circle cx="60" cy="60" r="48" fill="#44bf00"></circle><polygon points="53.303,89 26.139,61.838 33.582,54.395 53.303,74.116 86.418,41 93.861,48.443" opacity=".35"></polygon><polygon fill="#fff" points="53.303,84 26.139,56.838 33.582,49.395 53.303,69.116 86.418,36 93.861,43.443"></polygon>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #ECFDF3;color:#067647; border-color:#ABEFC6"><img src="{success}" width="12px" height="12px" class="mr-2">SUCCESS</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #DCFAE6 ;color:#17B26A; border-color:#17B26A">SUCCESS</div></span>
 			  {:else if item.Status === 'PENDING'}
-			  <span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
-				<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
-				</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #fff9e6;color:#f57c00;border-color:#f57c00"><svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="12px" height="12px" viewBox="0 0 24 24" {...$$props}>
-					<path fill="#f57c00" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m4.2 14.2L11 13V7h1.5v5.2l4.5 2.7z" />
-				</svg>PENDING</div></span>
-					{:else if item.Status === 'RESPOND_REJECTED'}
-					<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
-						<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
-						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Response Rejected</div></span>
-						{:else if item.Status === 'REQUEST_REJECTED'}
+				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #FEF0C7;color:#F79009;border-color:#F79009">PENDING</div></span>
+				{:else if item.Status === 'RESPOND_REJECTED'}
+				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Response Rejected</div></span>
+					{:else if item.Status === 'REQUEST_REJECTED'}
+				<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Request Rejected</div></span>
+			  {:else if item.Status === 'FAILED'}
+				<span class=" flex items-center " style="color:#F04438;"><svg xmlns="http://www.w3.org/2000/svg" class="lg:hidden  md:hidden sm:block block" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
+					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3 " style="background-color: #FEE4E2;color:#F04438;border-color:#F04438">FAILED</div></span>
+					{:else if item.Status === 'BANK_ACC_NOT_MATCH'}
 					<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 						<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
-						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Request Rejected</div></span>	
-			  {:else if item.Status === 'FAILED'}
-				<span class="flex items-center" style="color:#F04438;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
-					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #FEF3F2;color:#B42318;border-color:#FECDCA"><img src="{failed}" width="12px" height="12px" class="mr-2">FAILED</div></span>
+						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Bank Name NOT MATCH</div></span>
 			  {:else}
 				<span class="text-gray-500">Unknown Status</span>
 			  {/if}</Table.Cell>
@@ -300,7 +294,7 @@ style="width:40%;height:30px;"
 				  <Table.Head class="w-[100px] text-black font-bold">วันที่ทำการ</Table.Head>
 				  <Table.Head class="text-center text-black font-bold">เวลาทำการ</Table.Head>
 				  <Table.Head class="text-center text-black font-bold">Transfer ID</Table.Head>
-				  <Table.Head class="text-center text-black font-bold">สถานะ</Table.Head>
+				  <Table.Head class="text-start text-black font-bold">สถานะ</Table.Head>
 				</Table.Row>
 			  </Table.Header>
 			  <Table.Body>
@@ -328,28 +322,30 @@ style="width:40%;height:30px;"
 			  <div class="hidden sm:block lg:hidden xl:block">
 				{item.TransferRefId}
 			  </div></Table.Cell>
-			  <Table.Cell class=" flex justify-center font-semibold">{#if item.Status === 'SUCCESS'}
+			  <Table.Cell class=" flex justify-start font-semibold">{#if item.Status === 'SUCCESS'}
 				<span class=" flex  items-center" style="color:#17B26A;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 120 120">
 					<circle cx="60" cy="64" r="48" opacity=".35"></circle><circle cx="60" cy="60" r="48" fill="#44bf00"></circle><polygon points="53.303,89 26.139,61.838 33.582,54.395 53.303,74.116 86.418,41 93.861,48.443" opacity=".35"></polygon><polygon fill="#fff" points="53.303,84 26.139,56.838 33.582,49.395 53.303,69.116 86.418,36 93.861,43.443"></polygon>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #ECFDF3;color:#067647; border-color:#ABEFC6"><img src="{success}" width="12px" height="12px" class="mr-2">SUCCESS</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #DCFAE6 ;color:#17B26A; border-color:#17B26A">SUCCESS</div></span>
 			  {:else if item.Status === 'PENDING'}
 				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #fff9e6;color:#f57c00;border-color:#f57c00"><svg class="mr-1" xmlns="http://www.w3.org/2000/svg" width="12px" height="12px" viewBox="0 0 24 24" {...$$props}>
-						<path fill="#f57c00" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m4.2 14.2L11 13V7h1.5v5.2l4.5 2.7z" />
-					</svg>PENDING</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #FEF0C7;color:#F79009;border-color:#F79009">PENDING</div></span>
 				{:else if item.Status === 'RESPOND_REJECTED'}
 				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Response Rejected</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Response Rejected</div></span>
 					{:else if item.Status === 'REQUEST_REJECTED'}
 				<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #d3d3d3; color: #4f4f4f; border-color: #4f4f4f;">Request Rejected</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Request Rejected</div></span>
 			  {:else if item.Status === 'FAILED'}
 				<span class=" flex items-center " style="color:#F04438;"><svg xmlns="http://www.w3.org/2000/svg" class="lg:hidden  md:hidden sm:block block" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
 					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
-					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3 " style="background-color: #FEF3F2;color:#B42318;border-color:#FECDCA"><img src="{failed}" width="12px" height="12px" class="mr-2">FAILED</div></span>
+					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3 " style="background-color: #FEE4E2;color:#F04438;border-color:#F04438">FAILED</div></span>
+					{:else if item.Status === 'BANK_ACC_NOT_MATCH'}
+					<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+						<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
+						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Bank Name NOT MATCH</div></span>
 			  {:else}
 				<span class="text-gray-500">Unknown Status</span>
 			  {/if}</Table.Cell>
