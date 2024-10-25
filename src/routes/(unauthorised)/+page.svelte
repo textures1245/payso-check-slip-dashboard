@@ -108,6 +108,57 @@
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
+		const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const returnedState = urlParams.get('state');
+    
+    // ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
+    if (code) {
+        try {
+            const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: `${PUBLIC_DOMAIN}`,
+                    client_id: '2006478813',
+                    client_secret: '28d4c9a577a54f93c61e88c33c304794'
+                })
+            });
+
+            const tokenData = await tokenResponse.json();
+            console.log('Token data:', tokenData);
+
+            const profileResponse = await fetch('https://api.line.me/v2/profile', {
+                headers: {
+                    Authorization: `Bearer ${tokenData.access_token}`
+                }
+            });
+
+            const profileData = await profileResponse.json();
+            console.log('Profile data:', profileData);
+
+            // Store user profile data
+            localStorage.setItem('profile Data', JSON.stringify(profileData));
+            sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+            setCookie('UserLineId', JSON.stringify(profileData), 7);
+            console.log("data ", profileData);
+
+            if (returnedState === '1010-1010') {
+                document.getElementById('emailInputline').value = profileData.userId;
+                document.getElementById('nameInputline').value = profileData.displayName;
+                document.getElementById('inputavatar').value = profileData.pictureUrl;
+                console.log(profileData);
+                document.getElementById('mylineForm').submit();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 		if (form) {
 			if (form.data) {
 				sessionStorage.setItem('email', form.data.Email);
@@ -156,9 +207,9 @@
 	}
 </script>
 
-<svelte:head>
+<!-- <svelte:head>
 	<script src="../src/lib/callback.js"></script>
-</svelte:head>
+</svelte:head> -->
 
 <div
 	class=" h-lvh  bg-cover bg-center  md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden"
