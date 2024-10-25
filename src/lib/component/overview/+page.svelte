@@ -187,7 +187,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     if (myCookie && myCookie.Type === "Line") {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/13/${formattedStartDate}/${formattedEndDate}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${formattedStartDate}/${formattedEndDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;

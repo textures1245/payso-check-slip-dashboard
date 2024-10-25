@@ -55,7 +55,7 @@
     if (myCookie && myCookie.Type === "Line") {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/-/${startDate}/${endDate}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/pending/${startDate}/${endDate}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/5/2024-08-01/2024-09-10`;
     } else {
