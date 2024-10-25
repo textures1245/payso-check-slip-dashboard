@@ -27,6 +27,62 @@
 	let QuotaLimit = 0;
 	let QuotaUse = 0;
 	onMount(async () => {
+		const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    let returnedState = urlParams.get('state');
+    
+    console.log(returnedState);
+    if (code) {
+        try {
+            const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: `${PUBLIC_DOMAIN}profile`,
+                    client_id: '2006478813',
+                    client_secret: '28d4c9a577a54f93c61e88c33c304794'
+                })
+            });
+
+            const tokenData = await tokenResponse.json();
+            console.log('Token data:', tokenData);
+            if (tokenData.error) {
+                console.log('Token error:', tokenData.error);
+                return;
+            }
+
+            const profileResponse = await fetch('https://api.line.me/v2/profile', {
+                headers: {
+                    Authorization: `Bearer ${tokenData.access_token}`
+                }
+            });
+
+            const profileData = await profileResponse.json();
+            if (profileData.error) {
+                console.log('Profile error:', profileData.error);
+                return;
+            }
+            console.log('Profile data:', profileData);
+
+            localStorage.setItem('DataUsers', JSON.stringify(profileData));
+            sessionStorage.setItem('profileData', JSON.stringify(profileData));
+
+            document.getElementById('inputuid').value = profileData.userId;
+            document.getElementById('inputid').value = returnedState;
+            document.getElementById('inputname').value = profileData.displayName;
+            document.getElementById('inputavatar').value = profileData.pictureUrl;
+            
+            document.getElementById('updateline').submit();
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+	///////////////////////////////////
 		clearRemainingTime();
 		try {
 			console.log(profileData);
@@ -549,9 +605,9 @@ const result = `${myCookie.Id}:${date}:${selectedText}`;
   }
 </script>
 
-<svelte:head>
+<!-- <svelte:head>
 	<script src="../src/lib/callbackup.js"></script>
-</svelte:head>
+</svelte:head> -->
 
 <div
 	class=" grid gap-4 md:grid-cols-1 lg:grid-cols-1 overflow-x-hidden min-h-[calc(100vh-41px)] w-100 bg-primary-foreground"
