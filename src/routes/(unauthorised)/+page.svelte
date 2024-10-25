@@ -103,7 +103,7 @@
 				location.reload(); // รีโหลดหน้า
 			}, 3000);
 		}
-		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' || !statusCookie)) {
+		if ((!myCookie && !statusCookie)) {
 			linetest();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
