@@ -37,7 +37,7 @@
 				icon: 'fluent:box-24-regular',
 			},
 			{
-				title: 'Log',
+				title: 'บันทึก',
 				link: '/admin/admin-log',
 				icon: 'mage:file-3',
 			},

@@ -138,7 +138,7 @@
 					/>
 				</label>
 				<label class="max-w-xs self-end">
-					<button class="btn bg-primary text-primary-content btn-xs" type="submit">ค้นหา</button>
+					<button class="btn bg-primary text-primary-content btn-xs hover:bg-[#050680]" type="submit">ค้นหา</button>
 				</label>
 			</div>
 		</form>

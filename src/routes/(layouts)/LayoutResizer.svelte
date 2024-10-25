@@ -58,9 +58,9 @@
 		class="hidden md:block"
 		{onExpand}
 	>
-		<div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px] hidden' : 'px-2 ')}>
+		<!-- <div class={cn('flex h-[52px] items-center justify-center', isCollapsed ? 'h-[52px] hidden' : 'px-2 ')}>
 			
-		</div>
+		</div> -->
 		<Separator />
 		<Sidebar {isCollapsed} routes={subLinks[getRootPath(currentSubPath)]} />
 	</Resizable.Pane>
