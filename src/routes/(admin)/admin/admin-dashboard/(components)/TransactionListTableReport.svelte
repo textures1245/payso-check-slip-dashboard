@@ -23,50 +23,53 @@
 							'error'
 						);
 					}
-
 					if (result.type === 'success') {
 						props = result.data.transactionList;
 					}
 				};
 			}}
 		>
-			<div class="flex gap-4">
-				<label class="form-control w-full max-w-xs">
+			<div class="flex gap-3">
+				<label class="form-control  w-[160px]">
 					<select
-						class="select select-xs select-bordered w-full max-w-xs"
+						class="select select-sm select-bordered  w-[160px]"
 						name="status"
 						id="status"
 					>
-						<option disabled selected>สถานะ</option>
+						<option value="">สถานะ</option>
 						<option value="SUCCESS">SUCCESS</option>
 						<option value="PENDING">PENDING</option>
 						<option value="FAILED">FAILED</option>
+						<option value="RESPOND_REJECTED">RESPOND REJECTED</option>
+						<option value="REQUEST_REJECTED">REQUEST REJECTED</option>
+						<option value="BANK_ACC_NOT_MATCH">BANK ACC NOT MATCH</option>
 					</select>
 				</label>
-
-				<label class="form-control w-full max-w-xs">
+				<label class="form-control w-[180px]">
 					<select
-						class="select select-xs select-bordered w-full max-w-xs"
+						class="select select-sm select-bordered w-full"
 						name="sortOrder"
 						id="sortOrder"
 					>
-						<option disabled selected>เรียงตาม</option>
+						<option value="DESC">เรียงตามวันที่</option>
 						<option value="DESC">มากไปน้อย</option>
 						<option value="ASC">น้อยไปมาก</option>
 					</select>
 				</label>
-				<label class="max-w-xs self-end">
-					<button class="btn bg-primary text-primary-content btn-xs" type="submit">ค้นหา</button>
+				<label class="max-w-sm self-end">
+					<button class="btn bg-primary text-primary-content btn-sm hover:bg-[#050680]" type="submit">ค้นหา</button>
 				</label>
 			</div>
 		</form>
 	</div>
 </div>
 
+
+
 <Table.Root>
 	<Table.Header>
-		<Table.Row class="text-xs md:text-sm">
-			<Table.Head>#</Table.Head>
+		<Table.Row class="text-xs md:text-sm bg-gray-100 text-gray-700">
+			<Table.Head>ลำดับ</Table.Head>
 			<Table.Head>วันเวลาที่ตรวจสอบ</Table.Head>
 			<Table.Head>เลขที่รายการ</Table.Head>
 			<Table.Head>รหัสลูกค้า</Table.Head>
@@ -117,15 +120,23 @@
 				</Table.Cell>
 				<Table.Cell>
 					<span
-						class:text-success={t.Status.toLocaleUpperCase() === 'SUCCESS'}
-						class:text-warning={t.Status.toLocaleUpperCase() === 'PENDING'}
-						class:text-destructive={t.Status.toLocaleUpperCase() === 'REJECTED' ||
-							t.Status.toLocaleUpperCase() === 'FAILED'}
-						class="badge badge-outline badge-sm uppercase text-xs"
+					   class:text-success-bg={t.Status.toLocaleUpperCase() === 'SUCCESS'}
+					   class:text-pending-bg={t.Status.toLocaleUpperCase() === 'PENDING'}
+					   class:text-respond-rejected-bg={t.Status.toLocaleUpperCase() === 'RESPOND_REJECTED'}
+					   class:text-request-rejected-bg={t.Status.toLocaleUpperCase() === 'REQUEST_REJECTED'}
+					   class:text-bank-acc-not-match-bg={t.Status.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'}
+					   class:text-rejected-bg={t.Status.toLocaleUpperCase() === 'REJECTED' || t.Status.toLocaleUpperCase() === 'FAILED'}
+					   class="badge badge-outline badge-sm uppercase text-xs flex items-center"
 					>
-						{t.Status}
+					
+					   
+					   
+
+					   {t.Status}
 					</span>
-				</Table.Cell>
+				 </Table.Cell>
+				 
+				
 				
 			
 				<Table.Cell>{t.TransferRefId}</Table.Cell>
@@ -133,3 +144,34 @@
 		{/each}
 	</Table.Body>
 </Table.Root>
+
+<style>
+	.text-success-bg {
+	background-color: #DCFAE6; /* พื้นหลังสีเขียวอ่อน */
+	color: #17B26A; /* สีตัวอักษรสีเขียวเข้ม */
+}
+
+.text-pending-bg {
+	background-color: #FEF0C7; /* พื้นหลังสีเหลืองอ่อน */
+	color: #F79009; /* สีตัวอักษรสีเหลืองเข้ม */
+}
+
+.text-rejected-bg {
+	background-color: #FEE4E2; /* พื้นหลังสีแดงอ่อน */
+	color: #F04438; /* สีตัวอักษรสีแดงเข้ม */
+}
+.text-respond-rejected-bg {
+		background-color: #F9FAFB; 
+		color: #61646C; 
+	}
+	.text-request-rejected-bg {
+		background-color: #F9FAFB; 
+		color: #61646C; 
+	}
+
+	.text-bank-acc-not-match-bg {
+		background-color: #F9FAFB; 
+		color: #61646C; 
+	}
+
+</style>

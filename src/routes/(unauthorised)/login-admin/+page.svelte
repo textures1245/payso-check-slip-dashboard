@@ -10,7 +10,8 @@
 		import paysoLogo from '$lib/image/paysologo.jpg';
 		import * as Select from '$lib/components/ui/select';
 		import * as Avatar from '$lib/components/ui/avatar';
-	
+		import bglogin from '$lib/image/bg-login-admin.jpg';
+
 	  
 	
 	  
@@ -34,10 +35,6 @@
 );
 		
 		
-		const Login = async () => {
-			// @ts-ignore
-			
-		};
 
 		let showPassword = false;
 	let password = '';
@@ -54,12 +51,30 @@
 	
 	
 	<div
-		class="bg-gradient-to-tr h-lvh from-destructive via-primary via-70% to-secondary grid lg:grid-cols-3 "
+		class="h-lvh bg-[url({bg})] bg-cover bg-center  lg:p-0 md:p-0   bg-opacity-1 grid lg:grid-cols-3  overflow-y-hidden"
 	>
-		<div class=" hidden lg:block lg:h-lvn md:col-span-1 lg:col-span-2 " style="hight:50px">
-			<img class=" hidden lg:block object-cover w-full h-full " src={bg} alt="background" />
+	<div class=" hidden bg-[url({bglogin})] bg-cover  content-center  lg:block lg:h-lvn md:col-span-1 lg:col-span-2  bg-zinc-300 relative text-white"  style="hight:50px">
+			<div class="absolute inset-0 bg-black bg-opacity-70 p-6 z-10"></div>
+		<div class="flex justify-start  w-5/5   ">
+			<div class="  rounded-2xl  p-6 flex flex-col   text-sm  z-20">
+				<div class="px-10">
+					<div class="pt-2 text-start">
+						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#ffffff]">ยินดีต้อนรับ</h2>
+					</div>
+					<div class="pt-2 text-start">
+						<h1 class="font-semibold xl:text-5xl lg:text-5xl text-[#ffffff]">แดชบอร์ดตรวจสอบสลิป [การควบคุม]</h1>
+					</div>
+					<div class="pt-2 text-start">
+						<h2 class="  font-medium xl:text-lg lg:text-md text-[#ffffff]">กรอก "ชื่อผู้ใช้" และ "รหัสผ่าน" จากนั้นคลิก "เข้าสู่ระบบ"</h2>
+					</div>
+					
+				</div>
+			</div>
+		
 		</div>
-		<div class="col-span-1 backdrop-blur-md w-full h-full py-20 lg:py-0 px-20 lg:px-0 place-self-center">
+		
+	</div>
+		<div class="col-span-1  w-full h-full py-10 lg:py-0 px-10 lg:px-0 place-self-center">
 			<Card.Root
 				class="h-full grid place-items-center shadow-2xl bg-primary-foreground lg:rounded-none rounded-b-none"
 			>
@@ -78,7 +93,7 @@
 			  <div class="flex my-3 grid gap-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 text-black" style="width: 100%;">
 				<form id="loginadmin" method="post" action="?/signInAdmin">
 					<div class="flex justify-center">
-					<input type="text" name="username" placeholder="Username" id="uernameAdmin" style="width: 90%;height:40px" class="border border-spacing-10 px-5 rounded-2xl" />
+					<input type="text" name="username" placeholder="Username" id="uernameAdmin" style="width: 90%;height:40px" class="border border-spacing-10 px-5 rounded-md" />
 					</div>
 					<div class="flex justify-center">
 						<div style="position: relative; width: 90%;">
@@ -91,9 +106,11 @@
 									placeholder="Password"
 									id="password"
 									style="width: 100%; height: 40px;"
-									class="my-3 border border-spacing-10 ps-5 pe-10 rounded-2xl"
+									class="my-3 border border-spacing-10 ps-5 pe-10 rounded-md"
 								/>
 								<!-- <input type="checkbox" on:change={togglePasswordVisibility} style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);" /> -->
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<!-- svelte-ignore a11y-no-static-element-interactions -->
 								<svg
 									class="eye-icon"
 									xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +135,7 @@
 						</div>
 					</div>
 					<div class="flex justify-center">
-						<Button type="submit" variant="outline" class="my-2 flex text-center py-0 px-0  bg-sky-400 rounded-2xl text-white bg-primary" style="width:90%;height:40px;"  >Sign In</Button>
+						<Button type="submit" class="my-2 flex text-center py-0 px-0  rounded-md text-white bg-primary hover:bg-[#050680]" style="width:90%;height:40px;"  >Sign In</Button>
 					</div>
 				</form>
 			  </div>

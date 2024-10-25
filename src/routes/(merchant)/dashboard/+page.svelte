@@ -1,11 +1,45 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
 	import * as Card from "$lib/components/ui/card";
-	import * as Tabs from "$lib/components/ui/tabs/index.js";
 	import Chartdata from "$lib/component/chartdata/+page.svelte";
 	import Overview from "$lib/component/overview/+page.svelte";
-	import PastandBank from "$lib/component/pastandbank/+page.svelte";
+	import { onMount } from 'svelte';
 	let loading = false;
+	declare const flatpickr: any;
+
+	
+
+    onMount(async () => {
+		clearRemainingTime()
+        loadPastandBank();
+	});
+    function clearRemainingTime() {
+    localStorage.removeItem('remainingTime'); // การใช้งานที่ถูกต้อง
+	localStorage.removeItem('Img');
+	localStorage.removeItem('RefNo');
+    if ((window as any).intervalId) {
+    clearInterval((window as any).intervalId);
+    console.log('Timer stopped.');
+
+	
+	
+  }
+}
+
+let PastandBankComponent:any;
+
+// Load PastandBank lazily only when the user scrolls near it or interacts with it
+const loadPastandBank = async () => {
+    if (!PastandBankComponent) {
+        PastandBankComponent = (await import("$lib/component/pastandbank/+page.svelte")).default;
+
+    }
+};
+
+
+
+// ฟังก์ชันในการจัดการการเปลี่ยนแปลงของ input
+
+	
 </script>
 
 {#if loading}
@@ -13,8 +47,10 @@
 	<path d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"></path>
 	</svg>
 {:else}
-<div class="  bg-primary-foreground min-h-screen flex flex-col">
-<div class="mx-5" >
+
+
+<div class="  bg-primary-foreground min-h-screen flex flex-col xl:px-20 lg:px-10 md:px-10 px-0">
+<div class="mx-5 " >
 <Overview/>
 </div>
 <div class="grid gap-2 md:grid-cols-1 lg:grid-cols-2 mx-5 my-6 ">
@@ -40,7 +76,9 @@
 				
 				<div style="height: 100%;width:100%">
 					
-					<PastandBank/>
+					{#if PastandBankComponent}
+    <svelte:component this={PastandBankComponent} />
+{/if}
 			
 				  <div>
 			</div>
@@ -51,21 +89,9 @@
     
 </div>
 </div>
-<div class="tooltip-container">
-    <div class="tooltip">
-        <button class="btn rounded-full  bg-black text-white">i</button>
-        <div class="tooltip-text">
-            <strong>คำแนะนำเบื้องต้น:</strong> <br>
-            ส่วนแรก : แสดงรายการตั้งแต่ วัน/เดือน/ปี ถึง วัน/เดือน/ปี ที่เลือก มีรายการที่จริง ปลอม และทั้งหมด และ โควต้าการใช้งาน
-            <br><br>  ส่วนสอง : แสดงรายการในแต่ละวัน โดยสามารถค้นหาได้ตามเดือนและปี ที่ต้องการ <br> กราฟเขียว จริง | กราฟแดง ปลอม
-            <br><br> ส่วนสาม : แสดงรายการตาม Status ที่เลือก ในรายการทั้งหมด
-        </div>
-    </div>
-</div>
+
 
 {/if}
-
-
 <style scoped>
 .spin {
             display: inline-block;
@@ -83,33 +109,6 @@
         z-index: 1000;
     }
 
-    .tooltip {
-        position: relative;
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    .tooltip .tooltip-text {
-        visibility: hidden;
-        width: 250px;
-        max-height: 300px; /* กำหนดความสูงสูงสุดเพื่อให้มี scrollbar */
-        background-color: #555;
-        color: #fff;
-        text-align: left;
-        border-radius: 5px;
-        padding: 10px;
-        position: absolute;
-        right: 0; /* ให้ tooltip อยู่ชิดขวาของปุ่ม */
-        bottom: 100%; /* ให้ tooltip อยู่ด้านล่างของปุ่ม */
-        margin-top: 10px; /* ระยะห่างระหว่างปุ่มและ tooltip */
-        overflow-y: auto; /* เพิ่ม scrollbar ในแนวตั้ง */
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .tooltip:hover .tooltip-text {
-        visibility: visible;
-        opacity: 1;
-    }
+    
 </style>
 

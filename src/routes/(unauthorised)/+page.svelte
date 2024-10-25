@@ -1,13 +1,15 @@
 <script lang="ts">
 	import spinner from '$lib/image/spinner.gif';
 	import { onMount } from 'svelte';
-
+	import cookie from 'cookie';
 	import * as Card from '$lib/components/ui/card';
 	import { Label } from '$lib/components/ui/label/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import { Button } from '$lib/components/ui/button';
-	import bg from '$lib/image/bg-register.jpg';
 	import paysoLogo from '$lib/image/paysologo.jpg';
+	import pie from '$lib/image/pie.png';
+	import chart from '$lib/image/chart.png';
+	import statuspic from '$lib/image/status.png';
 	import * as Select from '$lib/components/ui/select';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import {
@@ -22,13 +24,13 @@
 	import { redirect } from '@sveltejs/kit';
 
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientId = '2005856083';
+	let clientId = '2006478813';
 	let redirectUri = 'http://localhost:5173/';
 	let state = '1010-1010';
 	let scope = 'profile%20openid%20email';
 	let user = null;
 	let emailgoogle = [];
-
+	let showModal = false;
 	let username = [];
 
 	const line = async () => {
@@ -81,28 +83,65 @@
 
 	export let form;
 	console.log('form : ', form);
+	function getCookies() {
+		return cookie.parse(document.cookie);
+	}
 
 	onMount(async () => {
-		console.log('form : ', form);
+		const cookies = getCookies();
+		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
+		const statusCookie = sessionStorage.getItem('StatusCoockie');
+		if (!myCookie) {
+			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
+			sessionStorage.removeItem('StatusCoockie');
+			showModal = true;
+
+			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
+			setTimeout(() => {
+				showModal = false; // ปิด modal
+				location.reload(); // รีโหลดหน้า
+			}, 3000);
+		}
+		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
+			linetest();
+			sessionStorage.setItem('StatusCoockie', 'rr');
+		}
+
 		if (form) {
 			if (form.data) {
 				sessionStorage.setItem('email', form.data.Email);
 				sessionStorage.setItem('merchant_id', form.data.Id);
+
 				if (form.data.PackageId == '0') {
-					window.location.href = '/package';
+					if (form.status == 'create') {
+						window.location.href = '/package';  // ถ้าจริงต้องมาหน้า detail ก่อน
+					} else {
+						window.location.href = '/package';
+					}
 				} else {
 					window.location.href = '/dashboard';
 				}
 			}
-			if (form.Status == false) {
+			if (form.status == false) {
 				const modal = document.getElementById('my_modal_2');
 				if (modal) {
 					modal.showModal();
 				}
 			}
-			
 		}
 	});
+
+	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
+	let clientIdtest = '2006478813';
+	let redirectUritest = 'http://localhost:5173/';
+	let statetest = '1234';
+	let scopetest = 'profile%20openid%20email';
+
+	const linetest = async () => {
+		let loginUrl = `${lineLoginUrltest}?response_type=code&client_id=${clientIdtest}&redirect_uri=${redirectUritest}&state=${statetest}&scope=${scopetest}`;
+
+		window.location.replace(loginUrl);
+	};
 
 	let showPassword = false;
 	let password = '';
@@ -121,16 +160,62 @@
 </svelte:head>
 
 <div
-	class="bg-gradient-to-tr h-lvh from-destructive via-primary via-70% to-secondary grid lg:grid-cols-3"
+	class=" h-lvh  bg-cover bg-center  md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden"
 >
-	<div class=" hidden lg:block lg:h-lvn md:col-span-1 lg:col-span-2" style="hight:50px">
-		<img class=" hidden lg:block object-cover w-full h-full" src={bg} alt="background" />
-	</div>
 	<div
-		class="col-span-1 backdrop-blur-md w-full h-full py-20 lg:py-0 lg:px-0 md:px-20 sm:px-20 px-5 place-self-center"
+		class=" hidden content-center lg:block lg:h-lvn md:col-span-1 lg:col-span-2 bg-[#EAECF0]"
+		style="hight:50px"
+	>
+		<div class="flex justify-start w-5/5">
+			<div class="  rounded-2xl p-6 flex flex-col text-sm">
+				<div class="px-10">
+					<div class="pt-2 text-start">
+						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#17B26A]">
+							ดูข้อมูลสลิปและการใช้งานผ่านกราฟและสถิติตามช่วงเวลา
+						</h2>
+					</div>
+					<div class="pt-2 text-start">
+						<h2 class="font-semibold xl:text-2xl lg:text-2xl text-[#475467]">
+							แพ็กเกจการใช้งานที่หลากหลาย พร้อมการชำระเงินสะดวกด้วย QR Code
+						</h2>
+					</div>
+					<div class="py-2 text-start">
+						<h2 class="font-semibold xl:text-2xl lg:text-2xl text-[#475467]">
+							เชื่อมต่อ LINE เพื่อแชร์จำนวนการใช้งานจากแพ็กเกจที่ซื้อ
+						</h2>
+					</div>
+					<div class="p-2 w-5/5 bg-white  rounded-lg shadow-lg">
+						<h2 class=" xl:text-lg lg:text-md text-start">
+							ยินดีต้อนรับสู่แดชบอร์ดที่ให้คุณดูสถิติและวิเคราะห์ข้อมูลได้อย่างง่ายดาย!
+						</h2>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div
+			class=" w-full xl:h-full lg:h-3/5 rounded-2xl flex justify-center items-center relative overflow-hidden"
+		>
+			<!-- svelte-ignore a11y-missing-attribute -->
+			<img
+				src={chart}
+				class="absolute top-5 left-10 w-3/5 h-auto transform translate-y-[-5%] scale-75 shadow-md hover:-rotate-8 hover:scale-105 -rotate-6"
+				style="z-index: 2;"
+			/>
+			<!-- svelte-ignore a11y-missing-attribute -->
+			<img
+				src={statuspic}
+				class="absolute top-14 right-20 w-3/5 h-auto transform scale-75 shadow-lg hover:-rotate-8 hover:scale-105 rotate-3	" 
+				style="z-index: 1;"
+			/>
+		</div>
+	</div>
+
+	<div
+		class="col-span-1 w-full h-full py-20 lg:py-0 lg:px-0 md:px-20 sm:px-20 px-5 place-self-center"
 	>
 		<Card.Root
-			class="h-full grid place-items-center shadow-2xl bg-primary-foreground lg:rounded-none rounded-b-xl"
+			class="h-full border-none grid place-items-center  shadow-xl bg-primary-foreground lg:rounded-none rounded-b-xl"
 		>
 			<div class="container space-y-2">
 				<Card.Header class="space-y-2 w-100 ">
@@ -156,7 +241,7 @@
 									placeholder="Username"
 									id="username"
 									style="width: 80%;height:40px"
-									class="border border-spacing-10 px-5 rounded-2xl"
+									class="border border-spacing-10 px-5 rounded-md"
 								/>
 							</div>
 							<div class="flex justify-center">
@@ -170,9 +255,11 @@
 											placeholder="Password"
 											id="password"
 											style="width: 100%; height: 40px;"
-											class="my-3 border border-spacing-10 ps-5 pe-10 rounded-2xl"
+											class="my-3 border border-spacing-10 ps-5 pe-10 rounded-md"
 										/>
 										<!-- <input type="checkbox" on:change={togglePasswordVisibility} style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);" /> -->
+										<!-- svelte-ignore a11y-click-events-have-key-events -->
+										<!-- svelte-ignore a11y-no-static-element-interactions -->
 										<svg
 											class="eye-icon"
 											xmlns="http://www.w3.org/2000/svg"
@@ -199,8 +286,7 @@
 							<div class="flex justify-center">
 								<Button
 									type="submit"
-									variant="outline"
-									class="my-2 flex text-center py-0 px-0  text-white rounded-2xl hover:text-black bg-primary"
+									class="my-2 flex text-center py-0 px-0  text-white rounded-md  bg-primary hover:bg-[#050680]"
 									style="width:80%;height:40px;">Sign In</Button
 								>
 							</div>
@@ -208,19 +294,16 @@
 					</div>
 					<hr class="my-5" />
 					<div
-						class="flex my-3 grid gap-1 grid-cols-3 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
+						class="flex my-3 grid gap-1 grid-cols-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
 						style="width:100%;"
 					>
-						<div class="flex justify-center">
+						<div class="flex justify-center hover:text-black">
 							<Button
 								variant="outline"
-								class="my-2 flex text-center py-0 px-0  lg:bg-sky-400 md:bg-sky-400 sm:bg-sky-400 bg-sky-200 lg:rounded-md sm:rounded-md rounded-full"
+								class="my-2 flex text-center py-0 px-0  lg:bg-white md:bg-white sm:bg-white bg-white lg:rounded-md sm:rounded-md rounded-full text-black"
 								style="width:80%;height:40px"
 								on:click={loginGoogle}
-								><div
-									class="lg:bg-sky-200 md:bg-sky-200 sm:bg-sky-200 flex rounded-sm w-20"
-									style="height:100%"
-								>
+								><div class=" flex rounded-sm w-20" style="height:100%">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										x="0px"
@@ -244,53 +327,21 @@
 										></path>
 									</svg>
 								</div>
-								<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden hover:text-black">
-									Login With Google
-								</div></Button
-							>
-						</div>
-						<div class="flex justify-center">
-							<Button
-								variant="outline"
-								class="my-2 flex text-center py-0 px-0  lg:bg-blue-500 md:bg-blue-500 sm:bg-blue-500 lg:rounded-md sm:rounded-md bg-blue-700 rounded-full"
-								on:click={facebook}
-								style="width:80%;height:40px"
-								><div
-									class="lg:bg-blue-700 md:bg-blue-700 sm:bg-blue-700 rounded-sm w-20"
-									style="height:100%"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										x="0px"
-										y="0px"
-										width="100%"
-										height="100%"
-										viewBox="0 0 48 48"
-									>
-										<path fill="#039be5" d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z"></path><path
-											fill="#fff"
-											d="M26.572,29.036h4.917l0.772-4.995h-5.69v-2.73c0-2.075,0.678-3.915,2.619-3.915h3.119v-4.359c-0.548-0.074-1.707-0.236-3.897-0.236c-4.573,0-7.254,2.415-7.254,7.917v3.323h-4.701v4.995h4.701v13.729C22.089,42.905,23.032,43,24,43c0.875,0,1.729-0.08,2.572-0.194V29.036z"
-										></path>
-									</svg>
-								</div>
 								<div
-									style="width: 100%;"
-									class="content-center mx-2 lg:block md:block sm:block hidden hover:text-black"
+									style="width: 100%;height:100%"
+									class="content-center lg:block md:block sm:block hidden hover:text-black"
 								>
-									Login With Facebook
+									Sign up with Google
 								</div></Button
 							>
 						</div>
-						<div class="flex justify-center">
+						<div class="flex justify-center hover:text-black">
 							<Button
 								variant="outline"
 								class="my-2 flex text-center py-0 px-0 lg:bg-green-500 md:bg-green-500 sm:bg-green-500 lg:rounded-md sm:rounded-md bg-green-800 rounded-full"
 								on:click={line}
 								style="width:80%;height:40px"
-								><div
-									class="lg:bg-green-800 md:bg-green-800 sm:bg-green-800 rounded-sm w-20"
-									style="height:100%"
-								>
+								><div class="rounded-sm w-20" style="height:100%">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										x="0px"
@@ -308,8 +359,11 @@
 										></path>
 									</svg>
 								</div>
-								<div style="width: 100%;" class="content-center lg:block md:block sm:block hidden hover:text-black">
-									Login With Line
+								<div
+									style="width: 100%;height:100%"
+									class="content-center lg:block md:block sm:block hidden hover:text-black"
+								>
+									Sign up with Line
 								</div></Button
 							>
 						</div>
@@ -344,7 +398,7 @@
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
-		<p class=" text-center">Username / Password ไม่ถูกต้อง </p>
+		<p class=" text-center">Username / Password ไม่ถูกต้อง</p>
 	</div>
 	<form method="dialog" class="modal-backdrop">
 		<button>close</button>
@@ -364,6 +418,37 @@
 	<input type="text" hidden name="avatar" id="inputavatar" />
 	<input type="text" hidden name="name" id="nameInputline" />
 </form>
+
+<dialog id="my_modal_2" class="modal" open={showModal}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">เซกชันหมดอายุ</p>
+		<p class=" text-center">เซกชันของคุณได้หมดอายุเนื่องจาก Cookies หมดอายุ ระบบจะให้ทำการ Login Line ไหม</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>
 
 <style lang="postcss">
 	/* .bg-blur-radial {

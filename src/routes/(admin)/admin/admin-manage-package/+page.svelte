@@ -18,7 +18,7 @@
 		TotalCount: 0,
 		Visibility: false,
 		AmountLimit: 100,
-		Index : 0
+		Index: 0
 	};
 	let packagename = '';
 	let searchInpage = '';
@@ -30,13 +30,13 @@
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
 	let showAlertModalCreateSuccess = false;
 	let showAlertModalCreateError = false;
+	let showAlertModalUpdateSuccess = false;
+	let showAlertModalUpdateError = false;
 	let totalItems = 0;
 	let loadingtable = false;
 
-
 	$: totalPages = Math.ceil(totalItems / limit);
 	console.log('total item', totalItems);
-
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
@@ -73,47 +73,52 @@
 		searchfetchData(packagename, offset, limit);
 	});
 
-	async function updateVisibility(packageId: number | undefined, newVisibility: boolean) {
-	if (packageId === undefined) {
-		console.error('Package ID is undefined');
-		return;
-	}
+	async function updateVisibility(packageId: number | undefined, newVisibility: boolean): Promise<boolean> {
+    if (packageId === undefined) {
+        console.error('Package ID is undefined');
+        return false; // Return false if packageId is undefined
+    }
 
-	const cookies = getCookies();
-	const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
+    const cookies = getCookies();
+    const myCookie = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
 
-	try {
-		const response = await fetch(`${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				'Actor-Id': myCookie.Id,
-				'Actor-Name': myCookie.Email,
-				'Actor-Role': 'ADMIN'
-			}
-		});
+    try {
+        const response = await fetch(
+            `${PUBLIC_API_ENDPOINT}/update/visibility/${packageId}/${newVisibility}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Actor-Id': myCookie.Id,
+                    'Actor-Name': myCookie.Email,
+                    'Actor-Role': 'ADMIN'
+                }
+            }
+        );
 
-		if (!response.ok) {
-			throw new Error('Failed to update package visibility');
-		}
+        if (!response.ok) {
+            throw new Error('Failed to update package visibility');
+        }
 
-		// Update the package data locally
-		const index = packageData.findIndex((pkg) => pkg.Id === packageId);
-		if (index !== -1) {
-			packageData[index].Visibility = newVisibility;
-			packageData = [...packageData]; // trigger reactivity in Svelte
-		}
+        // Update the package data locally
+        const index = packageData.findIndex((pkg) => pkg.Id === packageId);
+        if (index !== -1) {
+            packageData[index].Visibility = newVisibility;
+            packageData = [...packageData]; // trigger reactivity in Svelte
+        }
 
-		// Log success message to the console
-		console.log('Visibility updated successfully!');
-	} catch (error) {
-		console.error('Error updating visibility:', error);
-	}
+        // Log success message to the console
+        console.log('Visibility updated successfully!');
+        return true; // Return true on success
+    } catch (error) {
+        console.error('Error updating visibility:', error);
+        return false; // Return false on error
+    }
 }
 
 
-async function searchfetchData(packagename : string, currentOffset : number, currentLimit : number) {
-	loadingtable = true;
+	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
+    loadingtable = true;
     try {
         const response = await fetch(
             `${PUBLIC_API_ENDPOINT}/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
@@ -131,21 +136,31 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 
         const data = await response.json();
 
-        // Log the response to check its structure
+        // Log the entire response to check its structure
         console.log("API Response:", data);
 
-        // Check if 'result' exists and is an array
+        // Check if 'data' exists and is an object
         if (!data || typeof data !== 'object') {
+            console.error('Data is not an object:', data);
             throw new Error('Invalid response structure: Data is not an object');
         }
 
-        if (!data.result || !Array.isArray(data.result)) {
+        // Check if 'result' exists and is an array, handle cases where 'result' is null or undefined
+        if (!data.result) {
+            console.warn('Result is null or undefined. Handling as empty array.');
+            data.result = [];  // Default to an empty array
+        }
+
+        if (!Array.isArray(data.result)) {
+            console.error('Result is not an array:', data.result);
             throw new Error('Invalid response structure: Missing or non-array result');
         }
 
+        // Calculate totalCount and handle case where result is an empty array
         const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 
-        packageData = data.result.map((item:PackageData, Index : number) => ({
+        // Map the result to packageData
+        packageData = data.result.map((item: PackageData, Index: number) => ({
             Id: item.Id,
             Name: item.Name,
             Price: item.Price,
@@ -154,9 +169,10 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
             TotalCount: item.TotalCount,
             Visibility: item.Visibility,
             AmountLimit: item.AmountLimit,
-			Index : Index + (offset - 1) * limit + 1
+            Index: Index + (currentOffset - 1) * currentLimit + 1
         }));
 
+        // Calculate total pages
         totalPages = Math.ceil(totalCount / currentLimit);
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -165,10 +181,11 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
     }
 }
 
+
 	function clearSearch() {
 		searchInpage = '';
 		filteredData = [...packageData];
-		searchfetchData('',offset , limit)
+		searchfetchData('', offset, limit);
 	}
 
 	function showModalEdit(pkg: PackageData) {
@@ -187,7 +204,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			TotalCount: 0,
 			Visibility: false,
 			AmountLimit: 100,
-			Index:0
+			Index: 0
 		};
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
@@ -251,7 +268,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				TotalCount: 0,
 				Visibility: false,
 				AmountLimit: 100,
-				Index : 0
+				Index: 0
 			};
 		} catch (error) {
 			console.error('Error creating package:', error);
@@ -259,9 +276,9 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				'Failed to create package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
 			showAlertModal = true; // แสดง modal
-			showAlertModalCreateError = true
+			showAlertModalCreateError = true;
 		}
-		location.reload();
+		// location.reload();
 	}
 
 	async function updatePackage() {
@@ -276,7 +293,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 		if (trimmedName === '') {
 			alertMessage = 'Package name cannot be empty or just spaces.';
 			alertType = 'error';
-			showAlertModalError = true;
+			showAlertModalUpdateSuccess = true;
 			return;
 		}
 
@@ -322,9 +339,9 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			alertMessage =
 				'Failed to update package: ' + (error instanceof Error ? error.message : 'Unknown error');
 			alertType = 'error';
-			showAlertModalError = true;
+			showAlertModalUpdateError = true;
 		} finally {
-			location.reload()
+			// location.reload();
 		}
 	}
 
@@ -333,7 +350,6 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			editingPackage.Status = editingPackage.Status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 		}
 	}
-	
 
 	function toggleHide(event: any) {
 		if (newPackage) {
@@ -392,7 +408,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 
 <div class="w-full py-4 px-2 sm:px-4">
 	<span
-		class="text-3xl font-bold text-primary flex lg:justify-start md:justify-start sm:justify-center justify-center"
+		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>แพ็คเก็จ</span
 	>
 
@@ -427,7 +443,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			</div>
 		</div>
 		<div class="flex justify-end space-x-2">
-			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm" on:click={firstPage}
+			<button class="btn bg-primary text-white btn-primary text-xs sm:text-sm hover:bg-[#050680]" on:click={firstPage}
 				>ค้นหา</button
 			>
 			<button class="btn btn-outline text-xs sm:text-sm" on:click={clearSearch}>ล้าง</button>
@@ -437,7 +453,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 			style="width: 100%;"
 		>
 			<button
-				class="btn bg-primary text-white btn-primary text-xs sm:text-sm"
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm hover:bg-[#050680]"
 				on:click={showModalCreate}>สร้างแพ็คเก็จ</button
 			>
 		</div>
@@ -446,7 +462,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead class="text-center text-gray-700 lg:text-base">
 				<tr class="border-b border-gray-300">
-					<th class="p-1 sm:p-2  text-sm w-10">#</th>
+					<th class="p-1 sm:p-2 text-sm w-12">ลำดับ</th>
 					<th class="p-1 sm:p-2 text-left text-wrap text-sm">
 						<div class="lg:block sm:block hidden">รหัสแพ็คเก็จ</div>
 						<div class="lg:hidden sm:hidden block">รหัส</div>
@@ -465,75 +481,81 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 						<div class="lg:hidden sm:hidden block">คงเหลือ</div>
 					</th>
 
-					<th class="p-1 sm:p-2 text-sm">สถานะ</th>
+					<th class="p-1 sm:p-2 text-sm  ">สถานะ</th>
 					<th class="p-1 sm:p-2 text-sm">การมองเห็น</th>
 					<th class="p-1 sm:p-2 w-20"></th>
 				</tr>
 			</thead>
 			<tbody class="text-center">
 				{#if loadingtable}
-				<tr><td colspan="7"><span class="loading loading-spinner loading-xs"></span>
-				</td></tr>
+					<tr><td colspan="7"><span class="loading loading-spinner loading-xs"></span> </td></tr>
 				{:else if packageData.length === 0}
-					<tr><td colspan="7">No data available</td></tr>
+					<tr><td colspan="7">ไม่พบข้อมูล</td></tr>
 				{:else}
-
-				{#each packageData as item}
-					<tr class="border-b border-gray-300">
-						<td class="p-1 sm:p-2 lg:text-sm truncate font-bold ">{item.Index}</td>
-						<th class="p-1 sm:p-2 lg:text-sm truncate font-normal">{item.Id || '-'}</th>
-						<td class="p-1 sm:p-2 lg:text-sm text-left truncate">{item.Name}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
-							>{(item.QuotaLimit || '-').toLocaleString()}</td
-						>
-						<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
-							>{item.AmountLimit.toLocaleString()}</td
-						>
-
-						<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
-
-						<td class="p-1 sm:p-2 lg:text-sm truncate">
-							<div class="flex justify-center">
-								<div
-									class="badge-status lg:text-sm md:text-xs sm:text-xs text-xs {item.Status ===
-									'ACTIVE'
-										? 'badge-success'
-										: 'badge-danger'}"
-								>
-									{item.Status}
-								</div>
-							</div>
-						</td>
-						<td>
-							<input
-								type="checkbox"
-								class="toggle [--tglbg:white] toggle-success lg:toggle-md md:toggle-sm sm:toggle-xs toggle-xs"
-								bind:checked={item.Visibility}
-								on:change={() => updateVisibility(item.Id, item.Visibility)}
-
-							/>
-						</td>
-						<td class="p-1 sm:p-2">
-							<svg
-								on:click={() => showModalEdit(item)}
-								class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
-								aria-hidden="true"
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
+					{#each packageData as item}
+						<tr class="border-b border-gray-300">
+							<td class="p-1 sm:p-2 lg:text-sm truncate ">{item.Index}</td>
+							<th class="p-1 sm:p-2 lg:text-sm truncate font-normal text-left">{item.Id || '-'}</th>
+							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title={item.Name}>{item.Name}</td
 							>
-								<path
-									stroke="currentColor"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.Price.toFixed(2)}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
+								>{(item.QuotaLimit || '-').toLocaleString()}</td
+							>
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate"
+								>  {item.AmountLimit === 0 ? 'Unlimited' : item.AmountLimit.toLocaleString()}
+								</td
+							>
+
+							<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
+
+							<td class="p-1 sm:p-2 lg:text-sm truncate">
+								<div class="flex justify-center">
+									<div
+										class="badge-status lg:text-xxs md:text-xxs sm:text-xxs text-xs {item.Status ===
+										'ACTIVE'
+											? 'badge-success'
+											: 'badge-danger'}"
+									>
+									{item.Status === 'INACTIVE' ? 'DEACTIVE' : item.Status}
+									</div>
+								</div>
+							</td>
+							<td>
+								<input
+									type="checkbox"
+									class="toggle [--tglbg:white] toggle-success lg:toggle-md md:toggle-sm sm:toggle-xs toggle-xs"
+									bind:checked={item.Visibility}
+									on:change={async () => {
+										const success = await updateVisibility(item.Id, item.Visibility);
+										if (success) {
+											showAlertModalSuccess = true; // Show success modal
+										} else {
+											showAlertModalError = true; // Show error modal
+										}
+									}}
 								/>
-							</svg>
-						</td>
-					</tr>
-				{/each}
+							</td>
+							<td class="p-1 sm:p-2">
+								<svg
+									on:click={() => showModalEdit(item)}
+									class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer"
+									aria-hidden="true"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke="currentColor"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+									/>
+								</svg>
+							</td>
+						</tr>
+					{/each}
 				{/if}
 			</tbody>
 		</table>
@@ -566,7 +588,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm font-bold">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
+				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select
@@ -603,69 +625,39 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 </div>
 
 <dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
-	<div class="modal-box">
-		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<linearGradient
-					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
-					x1="9.858"
-					x2="38.142"
-					y1="9.858"
-					y2="38.142"
-					gradientUnits="userSpaceOnUse"
-					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
-					></stop></linearGradient
-				><path
-					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
-					opacity=".05"
-				></path><path
-					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
-					opacity=".07"
-				></path><path
-					fill="#fff"
-					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
-				></path>
+    <div class="modal-box">
+        <div class="text-lg font-bold flex justify-center">
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
 			</svg>
-		</div>
-		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
-		<p class=" text-center">Update สำเร็จ</p>
-	</div>
+        </div>
+        <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+        <p class="text-center">Update สำเร็จ</p>
+        <div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalSuccess = false;
+			}}>
+				ปิด
+			</button>
+        </div>
+    </div>
 </dialog>
+
 <dialog id="alert_modal_false" class="modal" open={showAlertModalError}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<path
-					fill="#f44336"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					fill="#fff"
-					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
-				></path><path
-					fill="#fff"
-					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
 		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => showAlertModalError = false}>
+                ปิด
+            </button>
+        </div>
 	</div>
 </dialog>
 
@@ -679,7 +671,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 					<span class="label-text text-black w-2/5">ชื่อแพ็คเก็จ:</span>
 					<input
 						type="text"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						maxlength="250"
 						bind:value={editingPackage.Name}
 					/>
@@ -693,7 +685,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 						maxlength="8"
 						max="9999999"
 						min="1"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						bind:value={editingPackage.Price}
 						on:input={validateDecimalInput}
 					/>
@@ -707,7 +699,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 						maxlength="4"
 						min="1"
 						max="9999"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						bind:value={editingPackage.QuotaLimit}
 						on:input={validateInput}
 					/>
@@ -720,7 +712,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 						maxlength="9"
 						min="1"
 						max="9999"
-						class="input input-bordered bg-white w-80"
+						class="input input-bordered border-black bg-white w-80"
 						bind:value={editingPackage.AmountLimit}
 						on:input={validateInputAmountlimit}
 					/>
@@ -739,18 +731,14 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 					</div>
 				</label>
 
-				
-
-				
-
 				<!-- Modal Actions -->
 				<div class="modal-action">
 					<form method="dialog" class="flex space-x-2">
 						<!-- Close Button -->
-						<button class="btn btn-outline btn-error">ปิด</button>
+						<button class="btn border border-gray-500 text-black">ปิด</button>
 
 						<!-- Save/Update Button -->
-						<button class="btn bg-primary text-white btn-primary" on:click={updatePackage}>
+						<button class="btn bg-primary text-white btn-primary hover:bg-[#050680]" on:click={updatePackage}>
 							บันทึก
 						</button>
 					</form>
@@ -770,7 +758,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				<span class="label-text text-black w-2/5">ชื่อแพ็คเก็จ:</span>
 				<input
 					type="text"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.Name}
 					maxlength="250"
 				/>
@@ -780,7 +768,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				<span class="label-text text-black w-2/5">ราคา:</span>
 				<input
 					type="number"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.Price}
 					min="1"
 					on:input={validateDecimalInput}
@@ -790,7 +778,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				<span class="label-text text-black w-2/5">โค้วต้าสูงสุด:</span>
 				<input
 					type="number"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.QuotaLimit}
 					min="1"
 					on:input={validateInput}
@@ -822,7 +810,7 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 				<span class="label-text text-black w-2/5">จำนวนการขาย:</span>
 				<input
 					type="number"
-					class="input input-bordered bg-white w-80"
+					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.AmountLimit}
 					min="1"
 					on:input={validateInputAmountlimit}
@@ -831,8 +819,8 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 
 			<div class="modal-action">
 				<form method="dialog" class="flex space-x-2">
-					<button class="btn btn-outline btn-error">ปิด</button>
-					<button class="btn bg-primary text-white btn-primary" on:click={createPackage}
+					<button class="btn border border-gray-500 text-black">ปิด</button>
+					<button class="btn bg-primary text-white btn-primary hover:bg-[#050680]" on:click={createPackage}
 						>บันทึก</button
 					>
 				</form>
@@ -844,80 +832,132 @@ async function searchfetchData(packagename : string, currentOffset : number, cur
 <dialog id="create_alert_modal_success" class="modal" open={showAlertModalCreateSuccess}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<linearGradient
-					id="I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1"
-					x1="9.858"
-					x2="38.142"
-					y1="9.858"
-					y2="38.142"
-					gradientUnits="userSpaceOnUse"
-					><stop offset="0" stop-color="#21ad64"></stop><stop offset="1" stop-color="#088242"
-					></stop></linearGradient
-				><path
-					fill="url(#I9GV0SozQFknxHSR6DCx5a_70yRC8npwT3d_gr1)"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					d="M32.172,16.172L22,26.344l-5.172-5.172c-0.781-0.781-2.047-0.781-2.828,0l-1.414,1.414	c-0.781,0.781-0.781,2.047,0,2.828l8,8c0.781,0.781,2.047,0.781,2.828,0l13-13c0.781-0.781,0.781-2.047,0-2.828L35,16.172	C34.219,15.391,32.953,15.391,32.172,16.172z"
-					opacity=".05"
-				></path><path
-					d="M20.939,33.061l-8-8c-0.586-0.586-0.586-1.536,0-2.121l1.414-1.414c0.586-0.586,1.536-0.586,2.121,0	L22,27.051l10.525-10.525c0.586-0.586,1.536-0.586,2.121,0l1.414,1.414c0.586,0.586,0.586,1.536,0,2.121l-13,13	C22.475,33.646,21.525,33.646,20.939,33.061z"
-					opacity=".07"
-				></path><path
-					fill="#fff"
-					d="M21.293,32.707l-8-8c-0.391-0.391-0.391-1.024,0-1.414l1.414-1.414c0.391-0.391,1.024-0.391,1.414,0	L22,27.758l10.879-10.879c0.391-0.391,1.024-0.391,1.414,0l1.414,1.414c0.391,0.391,0.391,1.024,0,1.414l-13,13	C22.317,33.098,21.683,33.098,21.293,32.707z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
 		<p class=" text-center">สร้างแพ็คเก็จสำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalCreateSuccess = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
+		
+		
 	</div>
 </dialog>
 <dialog id="create_alert_modal_error" class="modal" open={showAlertModalCreateError}>
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<path
-					fill="#f44336"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					fill="#fff"
-					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
-				></path><path
-					fill="#fff"
-					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
 		<p class=" text-center">การสร้างแพ็จแก็จไม่สำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalCreateError = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
+	</div>
+</dialog>
+
+<dialog id="update_alert_modal_success" class="modal" open={showAlertModalUpdateSuccess}>
+    <div class="modal-box">
+        <div class="text-lg font-bold flex justify-center">
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+			</svg>
+        </div>
+        <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+        <p class="text-center">Update สำเร็จ</p>
+        <div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalUpdateSuccess = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
+    </div>
+</dialog>
+
+<dialog id="update_alert_modal_error" class="modal" open={showAlertModalUpdateError}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">การอัปเดตไม่สำเร็จ</p>
+		<div class="modal-action flex justify-center">
+            <button class="btn" on:click={() => {
+				showAlertModalUpdateError = false;
+				location.reload()
+			}}>
+				ปิด
+			</button>
+        </div>
 	</div>
 </dialog>
 
 <style>
 	.badge-status {
-		@apply py-1 px-2 rounded-full text-white lg:w-24 md:w-32 sm:w-28 w-20;
-	}
-	.badge-success {
-		@apply border border-success text-success bg-transparent;
-	}
-	.badge-danger {
-		@apply border  border-destructive text-destructive bg-transparent;
-	}
+	@apply py-1 px-2 rounded-full;
+	width: 100%;
+	position: relative; /* Enable positioning for the dot */
+	padding-left: 1rem; /* Add space for the text */
+	color: #333; /* Default text color (will be overridden in specific classes) */
+}
+
+.badge-success {
+	@apply border border-success;
+	background-color: #DCFAE6; /* Light green background */
+	color: #17B26A; /* Green text color */
+}
+
+.badge-danger {
+	@apply border border-gray-500; /* Change border to dark gray */
+	background-color: #F9FAFB; /* White background */
+	color: #61646C; /* Dark gray text color */
+}
+
+.badge-success::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: #17B26A; /* Dark green to match text color */
+	position: absolute;
+	left: 1rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.badge-danger::before {
+	content: '';
+	display: inline-block;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background-color: #61646C; /* Dark gray to match the border */
+	position: absolute;
+	left: 0.5rem; /* Adjusted position closer to the text */
+	top: 50%;
+	transform: translateY(-50%);
+}
 	@media (max-width: 640px) {
 		.badge-status {
 			width: 100%;
