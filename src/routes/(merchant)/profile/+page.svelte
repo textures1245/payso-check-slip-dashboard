@@ -5,6 +5,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_DOMAIN } from '$env/static/public';
 	import logo_customer from '$lib/image/customer_logo.png';
 	let cookieValues = null;
 	let profiles: any[] = [];
@@ -110,7 +111,7 @@
 	// let scope = 'profile%20openid%20email';
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientId = '2006478813';
-	let redirectUri = 'https://payso-check-slip-dashboard-staging.vercel.app/profile';
+	let redirectUri = `${PUBLIC_DOMAIN}profile`;
 	let state = id;
 	let scope = 'profile%20openid%20email';
 

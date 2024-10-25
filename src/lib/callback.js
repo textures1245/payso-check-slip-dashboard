@@ -1,5 +1,5 @@
 // @ts-nocheck
-
+import { PUBLIC_DOMAIN } from '$env/static/public';
 document.addEventListener('DOMContentLoaded', async () => {
 	console.log("login")
 	const urlParams = new URLSearchParams(window.location.search);
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 				body: new URLSearchParams({
 					grant_type: 'authorization_code',
 					code: code,
-					redirect_uri: 'https://payso-check-slip-dashboard-staging.vercel.app/',
+					redirect_uri: `${PUBLIC_DOMAIN}`,
 					// client_id: '2005856083',
 					// client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
 					client_id: '2006478813',
