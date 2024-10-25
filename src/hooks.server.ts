@@ -22,11 +22,32 @@ export const handle = async ({ resolve, event }) => {
 				redirect(302, '/dashboard');
 			}
 		}
+		if (event.url.pathname == '/dashboard') {
+			const token = event.cookies.get('merchant_account') || '';
+
+			if (token.includes('-/All/-') ||  token.includes('DASHBOARD')) {
+				console.log('มีคำว่า -/All/- DASHBOARD อยู่ใน token');
+			} else {
+				redirect(302, '/package');
+			}
+		}
+
+		if (event.url.pathname == '/package') {
+			const token = event.cookies.get('merchant_account') || '';
+
+			if (token.includes('-/All/-') ||  token.includes('PACKAGE')) {
+				console.log('มีคำว่า -/All/- PACKAGE อยู่ใน token');
+			} else {
+				redirect(302, '/dashboard');
+			}
+		}
+		
 		if (
 			event.url.pathname !== '/' &&
 			!isAdminPath &&
 			event.url.pathname !== '/login-admin' &&
 			!event.url.pathname.includes('profile')
+			&& event.url.pathname !== '/line-login'
 		) {
 			const token = event.cookies.get('merchant_account') || '';
 			// If no token is found, redirect to the login page

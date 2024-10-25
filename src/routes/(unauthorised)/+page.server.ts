@@ -34,8 +34,6 @@ export const actions: import('./$types').Actions = {
         const formData = Object.fromEntries(await request.formData());
         const email = formData.email as string;
         const name = formData.name as string;
-
-        console.log("email : ", email, " name :", name);
         console.log('checking register');
 
         const config: RequestInit = {
@@ -58,6 +56,10 @@ export const actions: import('./$types').Actions = {
 
             if (datalogin.message === 'Non Merchant') {
                 console.log("Creating new Merchant");
+                const lineData = JSON.parse(cookies.get('UserLineId'));
+                 console.log("email : ", email, " name :", name , lineData.userId);
+                 const toBase64 = (str: string): string => btoa(unescape(encodeURIComponent(str)));
+                const namesBase64 = toBase64(lineData.displayName);
                 const createConfig: RequestInit = {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -66,10 +68,14 @@ export const actions: import('./$types').Actions = {
                         MerchantRole: 'NOT_PAYSO',
                         Status: 'ACTIVE',
                         Email: email,
-                        Type: "Google Facebook"
+                        Type: "Google Facebook",
+                        SuperUserLineId:lineData.userId,
+                        AvatarUrl: lineData.pictureUrl,
+                        Name:namesBase64,
+                        Roles:"DASHBOARD,PACKAGE,USER_MANAGEMENT,SLIP_CHECKER",
                     })
                 };
-
+                
                 const resultcreate = await fetch(`${API_ENDPOINT}/merchant/create`, createConfig);
                 if (!resultcreate.ok) throw new Error('Failed to create merchant');
 
@@ -105,6 +111,7 @@ export const actions: import('./$types').Actions = {
                 Status: 'NOT_PAYSO',
                 Email: uid,
                 Type: "Line",
+               
             })
         };
 
@@ -116,6 +123,8 @@ export const actions: import('./$types').Actions = {
 
             if (datalogin.message === 'Non Merchant') {
                 console.log("Creating new Merchant");
+                const toBase64 = (str: string): string => btoa(unescape(encodeURIComponent(str)));
+                const namesBase64 = toBase64(name);
                 const createConfig: RequestInit = {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -125,7 +134,10 @@ export const actions: import('./$types').Actions = {
                         Status: 'ACTIVE',
                         Email: uid,
                         Type: "Line",
-                        AvatarUrl: avatar
+                        AvatarUrl: avatar,
+                        SuperUserLineId:uid,
+                        Name:namesBase64,
+                        Roles:"DASHBOARD,PACKAGE,USER_MANAGEMENT,SLIP_CHECKER",
                     })
                 };
 
@@ -167,8 +179,9 @@ export const actions: import('./$types').Actions = {
             const result = await fetch(`https://apis.paysolutions.asia/auth/admin/login/?pass=${password}&user=${username}`, config);
 
             const data = await result.json();
-
+            console.log(data)
             if (data.message === 'complete') {
+                
                 const loginConfig: RequestInit = {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -181,12 +194,17 @@ export const actions: import('./$types').Actions = {
                     })
                 };
 
-                const resultLogin = await fetch(`${API_ENDPOINT}/merchant/login`, loginConfig);
-                if (!resultLogin.ok) throw new Error('Failed to fetch merchant data');
+                const resultLogin = await fetch(`${API_ENDPOINT}/merchant/loginPayso`, loginConfig);
 
                 const datalogin: LoginResponse = await resultLogin.json();
-
-                if (datalogin.message === 'Non Merchant') {
+                
+                console.log(datalogin)
+                if (datalogin.message.includes('Non Merchant')) {
+                    const number = parseInt(datalogin.message.split(': ')[1]);
+                    const email = `e-${number}@paysoTemp.com`
+                    const lineData = JSON.parse(cookies.get('UserLineId'));
+                    const toBase64 = (str: string): string => btoa(unescape(encodeURIComponent(str)));
+                     const namesBase64 = toBase64(lineData.displayName);
                     const createConfig: RequestInit = {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -194,8 +212,13 @@ export const actions: import('./$types').Actions = {
                             MerchantName: username,
                             MerchantRole: 'PAYSO',
                             Status: 'ACTIVE',
-                            Email: username,
-                            Type: "Payso"
+                            Email: email,
+                            Type: "Payso",
+                            MerchantId: null,
+                            SuperUserLineId:lineData.userId,
+                            AvatarUrl: lineData.pictureUrl,
+                            Name:namesBase64,
+                            Roles:"DASHBOARD,PACKAGE,USER_MANAGEMENT,SLIP_CHECKER",
                         })
                     };
 

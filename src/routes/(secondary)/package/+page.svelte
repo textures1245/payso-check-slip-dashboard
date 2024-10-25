@@ -61,7 +61,7 @@ function clearRemainingTime() {
 	</svg>
 {:else}
 <div class="flex flex-col min-h-[calc(100vh-41px)]">
-	<div class="sm:text-center flex justify-center text-4xl mt-8 mb-4 font-sans font-bold">
+	<div class="sm:text-center flex justify-center text-4xl mt-8 mb-4  font-bold">
 		<h1 class=" text-wrap text-center text-black">ราคาแพ็คเกจ</h1>
 		
 	</div>
@@ -75,7 +75,7 @@ function clearRemainingTime() {
             {/if}
 		{/each}
 	</div>
-	<div class="text-center  content-center text-xl my-5 " style="color: #0031E5;"><a href="/dashboard" >Skip to Dashboard >></a></div>
+	<div class="text-center  content-center text-xl my-5 " style="color: #0031E5;"><a href="/dashboard" >ไปหน้า แดชบอร์ด >></a></div>
 </div>
 
 

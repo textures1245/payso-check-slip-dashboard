@@ -187,7 +187,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     if (myCookie && myCookie.Type === "Line") {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     } else if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${formattedStartDate}/${formattedEndDate}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/13/${formattedStartDate}/${formattedEndDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -375,8 +375,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
     </div>
    
     <Button
-  variant="outline"
-  class=" flex text-center w-full md:w-auto px-4 py-1  text-white hover:text-black  bg-primary "
+
+  class=" flex text-center w-full md:w-auto px-4 py-1  text-white   bg-primary hover:bg-[#050680] "
   on:click={() => SearchData()}
   style="width:100%;height:30px;"
   ><div class="mx-3 content-center font-semibold"  style="width:100%;height:100%" >
@@ -391,12 +391,12 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 
 
 
-<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" style="width: 100%;">
+<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 " style="width: 100%;">
     <Card.Root >
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 "
         >
-            <Card.Title class="text-xl font-semibold text-center" style="height:60px">จำนวนสลิปที่ถูกต้อง</Card.Title>
+            <Card.Title class="text-xl font-semibold text-center" style="height:60px">สลิปที่ถูกต้อง</Card.Title>
             
         </Card.Header>
         <Card.Content class="text-center lg:my-5 ">
@@ -436,7 +436,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
         >
-            <Card.Title class="text-xl font-semibold " style="height:60px">จำนวนสลิปที่ผิด</Card.Title>
+            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปที่ผิด</Card.Title>
            
         </Card.Header>
         <Card.Content class="text-center lg:my-5">
@@ -475,7 +475,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
         >
-            <Card.Title class="text-xl font-semibold " style="height:60px">จำนวนสลิปรอตรวจสอบ</Card.Title>
+            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปรอตรวจสอบ</Card.Title>
            
         </Card.Header>
         <Card.Content class="text-center lg:my-5">
@@ -513,7 +513,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
         >
-            <Card.Title class="text-xl font-semibold " style="height:60px">จำนวนสลิปปฏิเสธคำขอ</Card.Title>
+            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปปฏิเสธคำขอ</Card.Title>
            
         </Card.Header>
         <Card.Content class="text-center lg:my-5">
@@ -551,7 +551,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
         >
-            <Card.Title class="text-xl font-semibold " style="height:60px">จำนวนสลิปปฏิเสธตอบกลับ</Card.Title>
+            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปปฏิเสธตอบกลับ</Card.Title>
            
         </Card.Header>
         <Card.Content class="text-center lg:my-5 my-5">
@@ -620,7 +620,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                {/if}
                 </p>
                 </div>
-                <div class=" w-100 mt-2 mb-3  " ><Button variant="outline" class="w-4/5 h-12 text-white hover:text-black  bg-primary font-semibold" on:click={dowloadExportExcel} >ดาวน์โหลดไฟล์ Excel</Button></div>
+                <div class=" w-100 mt-2 mb-3  " ><Button  class="w-4/5 h-12 text-white  bg-primary font-semibold hover:bg-[#050680]" on:click={dowloadExportExcel} >ดาวน์โหลดไฟล์ Excel</Button></div>
         </Card.Content>
     </Card.Root>
 </div>

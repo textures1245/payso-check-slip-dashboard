@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 					redirect_uri: 'http://localhost:5173/profile',
 					// client_id: '2006015671',
 					// client_secret: '14ad9236387e9250c4ae32c12219ab02'
-					client_id: '2005856083',
-					client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
+					// client_id: '2005856083',
+					// client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
+					client_id: '2006478813',
+					client_secret: '28d4c9a577a54f93c61e88c33c304794'
 				})
 			});
 

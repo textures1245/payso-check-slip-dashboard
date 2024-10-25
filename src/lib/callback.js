@@ -18,8 +18,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 					grant_type: 'authorization_code',
 					code: code,
 					redirect_uri: 'http://localhost:5173/',
-					client_id: '2005856083',
-					client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
+					// client_id: '2005856083',
+					// client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
+					client_id: '2006478813',
+					client_secret: '28d4c9a577a54f93c61e88c33c304794'
 				})
 			});
 
@@ -36,8 +38,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 			console.log('Profile data:', profileData);
 
 			// Store user profile data in localStorage (or other storage)
-			localStorage.setItem('profile Data ', JSON.stringify(profileData));
+			localStorage.setItem('profile Data', JSON.stringify(profileData));
 			sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+			setCookie('UserLineId', JSON.stringify(profileData), 7);
+			
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-expect-error
 			if (returnedState == '1010-1010') {
@@ -53,12 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 			}else{
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-expect-error
-                
-				document.getElementById('inputuid').value = profileData.userId;
-                document.getElementById('inputid').value = returnedState;
-				document.getElementById('inputavatar').value = profileData.pictureUrl;
-				// @ts-ignore
-				document.getElementById('updateline').submit();
+				
+				
             }
 
 			// profileData.userId = document.getElementById('uid').value;
@@ -69,3 +69,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 		}
 	}
 });
+
+function setCookie(name, value, days) {
+    let d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    let expires = 'expires=' + d.toUTCString();
+    document.cookie = `${name}=${value};${expires};path=/;Secure;SameSite=Lax`;
+}

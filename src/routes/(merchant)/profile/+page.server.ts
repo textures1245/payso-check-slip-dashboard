@@ -41,7 +41,8 @@ export const actions: Actions = {
                 LineUserId: uids,
                 UserName: namesBase64,
                 MerchantId: id,
-                AvatarUrl: avatar
+                AvatarUrl: avatar,
+                Roles:"DASHBOARD,PACKAGE,SLIP_CHECKER"
             })
         };
 

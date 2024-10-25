@@ -135,9 +135,10 @@
 			seconds -= 1; // ลดค่าการนับเวลา
 			localStorage.setItem('remainingTime', seconds.toString());
 			const data = await Check();
-			console.log("Check : ",data)
-			// ตรวจสอบว่าหมดเวลา
-			if(data.OrderAmount ==data.AmountLimit){
+			const datatest = await CheckLimit();  // ต้องลบถ้ามี postback 
+			console.log("Check : ",data,datatest)
+			// ตรวจสอบว่าหมดเวลา  ถ้าเป็น Postback ต้องเปิด อันนี้ test ใช้ อินคิวรี ปิดก่อน
+			if(datatest.OrderAmount ==datatest.AmountLimit){  //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 				const modal = document.getElementById('my_modal_2');
 				if (modal) {
 					modal.showModal();
@@ -147,22 +148,22 @@
 				}
 				
 			}
-			if (seconds <= 0 || data.Status == "SUCCESS") {
+			if (seconds <= 0 || data.length > 0) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
 				clearInterval((window as any).intervalId); // หยุดการนับเวลา
 				clearRemainingTime()
 				messageVisible = false; // ซ่อนข้อความ
-				if (data.Status =="SUCCESS" ) {
+				if (data.length > 0) {   //    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
                     UpdatePackage()
-					if(data.OrderAmount == data.AmountLimit-1){
+					if(datatest.OrderAmount == datatest.AmountLimit-1){   //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 						UpdateLimitPackage()
 					}
-                    window.location.assign("/dashboard")
+                    window.location.assign("/banklink")
 				}
 				if (seconds <= 0 ) {
                     window.location.assign("/package")
 				}
 			}
-		}, 1000); // ทำงานทุกๆ 1 วินาที
+		}, 5000); // ทำงานทุกๆ 1 วินาที
 	
 // เช็คเวลาแบบตรวจทุกๆ 5 วินาที
 	// 	const intervalId = setInterval(async () => {
@@ -203,6 +204,48 @@
 
 	const Check = async () => {
 		const refNo = localStorage.getItem('RefNo');
+		// let config = {
+		// 	method: 'POST',
+		// 	headers: {
+		// 		'Content-Type': 'application/json',
+		// 	},
+		// 	body: JSON.stringify({
+		// 		RefNo : refNo
+        //     })
+		// };
+		// var result = await fetch(
+		// 	`${PUBLIC_API_ENDPOINT}/payment/get`,
+		// 	config
+		// );
+		// Create URL parameters from form data    ตัวล่าง Inquire  ตัวบน Postback
+		let config = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Accept: 'application/json',
+				apikey: 'AptnQj3WuOI',
+				merchantSecretKey: 'BPWiTNc5bmMJzeqH',
+				merchantID: '17563'
+			},
+			body: JSON.stringify({
+				merchantId: '17563', 
+				refno: refNo,
+				productDetail: 'QWERTY'
+			})
+		};
+		var result = await fetch(`https://apis.paysolutions.asia/order/orderdetailpost`, config);
+
+		const data = await result.json();
+		console.log("asdaada",data)
+		if (data) {
+			return data;			// Postback ใช้ data.result
+		}
+	};
+	
+//////////////////////////////////////////////////////////////////////////
+	// ต้องลบถ้ามี postback 
+	const CheckLimit = async () => {
+		const refNo = localStorage.getItem('RefNo');
 		let config = {
 			method: 'POST',
 			headers: {
@@ -235,10 +278,16 @@
 		// var result = await fetch(`https://apis.paysolutions.asia/order/orderdetailpost`, config);
 
 		const data = await result.json();
+		console.log("asdaada",data)
 		if (data) {
-			return data.result;
+			return data.result;			//data.result
 		}
 	};
+
+
+	//////////////////////////////////////////////////////////////////////////
+
+
 	function getCookies() {
 		return cookie.parse(document.cookie);
 	}
@@ -316,7 +365,7 @@ const UpdateLimitPackage = async () => {
     {/if}
 	<p>เวลาที่เหลือ: {formatTime(seconds)} วินาที</p>
 {/if} -->
-<div class="flex justify-center items-center flex-col h-[calc(100vh-41px)] ">
+<div class="flex justify-center items-center flex-col h-[calc(100vh-41px)]  bg-primary-foreground ">
 <Card.Root class=" lg:w-2/5 md:w-3/5">
     <Card.Header
         class="p-0 items-center justify-center "
@@ -333,7 +382,9 @@ const UpdateLimitPackage = async () => {
         {#if dataImg}
 		<div class="flex justify-center mt-3">
 		<div class="border-2 border-[#113566] rounded-md overflow-hidden w-5/5  ">
+		<!-- svelte-ignore a11y-missing-attribute -->
 		<div class=" bg-[#113566]  flex justify-center"> <img src={payment}  width="120px" height="100px"/> </div>
+		<!-- svelte-ignore a11y-missing-attribute -->
 		<div class=""><img src={dataImg}  class="w-[220px] h-[220px] lg:w-[250px] lg:h-[230px]"/></div>
 	</div>
 	</div>
@@ -357,6 +408,7 @@ const UpdateLimitPackage = async () => {
 		<p class=" text-sm">คิวอาร์โค้ดที่จ่ายสำเร็จแล้ว ไม่สามารถจ่ายซ้ำได้</p>
 		</div>
 	</div>
+	<!-- svelte-ignore a11y-missing-attribute -->
 	<div class="mx-5 mb-5"><Button variant="outline" class="w-full h-12 text-white hover:text-black  bg-primary font-semibold" on:click={() => downloadImage(dataImg, filename)}  ><img src="{dowlaod}" width="18px" height="18px" class="mr-3">ดาวน์โหลดคิวอาร์โค้ด</Button></div>
 </Card.Root>
 

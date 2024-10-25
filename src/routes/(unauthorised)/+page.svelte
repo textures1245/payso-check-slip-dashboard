@@ -1,12 +1,11 @@
 <script lang="ts">
 	import spinner from '$lib/image/spinner.gif';
 	import { onMount } from 'svelte';
-
+	import cookie from 'cookie';
 	import * as Card from '$lib/components/ui/card';
 	import { Label } from '$lib/components/ui/label/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import { Button } from '$lib/components/ui/button';
-	import bg from '$lib/image/bg-register.jpg';
 	import paysoLogo from '$lib/image/paysologo.jpg';
 	import pie from '$lib/image/pie.png';
 	import chart from '$lib/image/chart.png';
@@ -25,13 +24,13 @@
 	import { redirect } from '@sveltejs/kit';
 
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientId = '2005856083';
+	let clientId = '2006478813';
 	let redirectUri = 'http://localhost:5173/';
 	let state = '1010-1010';
 	let scope = 'profile%20openid%20email';
 	let user = null;
 	let emailgoogle = [];
-
+	let showModal = false;
 	let username = [];
 
 	const line = async () => {
@@ -84,19 +83,39 @@
 
 	export let form;
 	console.log('form : ', form);
+	function getCookies() {
+		return cookie.parse(document.cookie);
+	}
 
 	onMount(async () => {
-		console.log('form : ', form);
+		const cookies = getCookies();
+		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
+		const statusCookie = sessionStorage.getItem('StatusCoockie');
+		if (!myCookie) {
+			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
+			sessionStorage.removeItem('StatusCoockie');
+			showModal = true;
+
+			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
+			setTimeout(() => {
+				showModal = false; // ปิด modal
+				location.reload(); // รีโหลดหน้า
+			}, 3000);
+		}
+		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
+			linetest();
+			sessionStorage.setItem('StatusCoockie', 'rr');
+		}
+
 		if (form) {
-			
 			if (form.data) {
 				sessionStorage.setItem('email', form.data.Email);
 				sessionStorage.setItem('merchant_id', form.data.Id);
-				
+
 				if (form.data.PackageId == '0') {
 					if (form.status == 'create') {
 						window.location.href = '/detail';
-					}else{
+					} else {
 						window.location.href = '/package';
 					}
 				} else {
@@ -109,9 +128,20 @@
 					modal.showModal();
 				}
 			}
-			
 		}
 	});
+
+	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
+	let clientIdtest = '2006478813';
+	let redirectUritest = 'http://localhost:5173/';
+	let statetest = '1234';
+	let scopetest = 'profile%20openid%20email';
+
+	const linetest = async () => {
+		let loginUrl = `${lineLoginUrltest}?response_type=code&client_id=${clientIdtest}&redirect_uri=${redirectUritest}&state=${statetest}&scope=${scopetest}`;
+
+		window.location.replace(loginUrl);
+	};
 
 	let showPassword = false;
 	let password = '';
@@ -130,39 +160,59 @@
 </svelte:head>
 
 <div
-	class=" h-lvh bg-[url({bg})] bg-cover bg-center  lg:p-10 md:p-0  bg-opacity-1  grid lg:grid-cols-3 overflow-y-hidden" 
+	class=" h-lvh  bg-cover bg-center  md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden"
 >
-
-	<div class=" hidden  content-center   lg:block lg:h-lvn md:col-span-1 lg:col-span-2     bg-zinc-300 "  style="hight:50px">
-		<div class="flex justify-start  w-5/5   ">
-			<div class="  rounded-2xl  p-6 flex flex-col   text-sm  ">
+	<div
+		class=" hidden content-center lg:block lg:h-lvn md:col-span-1 lg:col-span-2 bg-[#EAECF0]"
+		style="hight:50px"
+	>
+		<div class="flex justify-start w-5/5">
+			<div class="  rounded-2xl p-6 flex flex-col text-sm">
 				<div class="px-10">
 					<div class="pt-2 text-start">
-						<h2 class="font-semibold xl:text-3xl lg:text-2xl  text-[#17B26A]"> วิเคราะห์ข้อมูลง่าย ๆ ด้วยกราฟตามช่วงเวลา</h2>
+						<h2 class="font-semibold xl:text-3xl lg:text-2xl text-[#17B26A]">
+							ดูข้อมูลสลิปและการใช้งานผ่านกราฟและสถิติตามช่วงเวลา
+						</h2>
 					</div>
 					<div class="pt-2 text-start">
-						<h2 class="font-semibold xl:text-3xl lg:text-2xl  text-[#475467]"> ชำระเงินสะดวกด้วยการสแกน QR Code</h2>
+						<h2 class="font-semibold xl:text-2xl lg:text-2xl text-[#475467]">
+							แพ็กเกจการใช้งานที่หลากหลาย พร้อมการชำระเงินสะดวกด้วย QR Code
+						</h2>
 					</div>
 					<div class="py-2 text-start">
-						<h2 class="font-semibold xl:text-3xl lg:text-2xl  text-[#475467]">เชื่อมต่อ LINE เพื่อแชร์การใช้งาน</h2>
+						<h2 class="font-semibold xl:text-2xl lg:text-2xl text-[#475467]">
+							เชื่อมต่อ LINE เพื่อแชร์จำนวนการใช้งานจากแพ็กเกจที่ซื้อ
+						</h2>
 					</div>
-					<div class="py-2  w-5/5 ">
-						<h2 class=" xl:text-lg lg:text-md text-end">ยินดีต้อนรับสู่แพลตฟอร์มที่ทำให้การดูสลิปการชำระเงินง่ายและปลอดภัยที่สุด!</h2>
+					<div class="p-2 w-5/5 bg-white  rounded-lg shadow-lg">
+						<h2 class=" xl:text-lg lg:text-md text-start">
+							ยินดีต้อนรับสู่แดชบอร์ดที่ให้คุณดูสถิติและวิเคราะห์ข้อมูลได้อย่างง่ายดาย!
+						</h2>
+						
 					</div>
-					
 				</div>
 			</div>
 		</div>
-	<div class=" w-full xl:h-full lg:h-3/5 rounded-2xl  flex justify-center items-center relative overflow-hidden ">
-		<img src="{pie}" class="absolute top-75 left-49 w-3/6 h-auto transform translate-y-[-10%]  scale-50 shadow-lg" style="z-index: 3;">
-		<img src="{chart}" class="absolute top-10 left-0 w-3/5 h-auto transform translate-y-[-5%]  scale-75 shadow-md" style="z-index: 2;">
-		<img src="{statuspic}" class="absolute top-0 right-0 w-3/5 h-auto transform scale-75 shadow-lg" style="z-index: 1;">
+		<div
+			class=" w-full xl:h-full lg:h-3/5 rounded-2xl flex justify-center items-center relative overflow-hidden"
+		>
+			<!-- svelte-ignore a11y-missing-attribute -->
+			<img
+				src={chart}
+				class="absolute top-5 left-10 w-3/5 h-auto transform translate-y-[-5%] scale-75 shadow-md hover:-rotate-8 hover:scale-105 -rotate-6"
+				style="z-index: 2;"
+			/>
+			<!-- svelte-ignore a11y-missing-attribute -->
+			<img
+				src={statuspic}
+				class="absolute top-14 right-20 w-3/5 h-auto transform scale-75 shadow-lg hover:-rotate-8 hover:scale-105 rotate-3	" 
+				style="z-index: 1;"
+			/>
+		</div>
 	</div>
-		
-	</div>
-	
+
 	<div
-		class="col-span-1  w-full h-full py-20 lg:py-0 lg:px-0 md:px-20 sm:px-20 px-5 place-self-center"
+		class="col-span-1 w-full h-full py-20 lg:py-0 lg:px-0 md:px-20 sm:px-20 px-5 place-self-center"
 	>
 		<Card.Root
 			class="h-full border-none grid place-items-center  shadow-xl bg-primary-foreground lg:rounded-none rounded-b-xl"
@@ -208,6 +258,8 @@
 											class="my-3 border border-spacing-10 ps-5 pe-10 rounded-md"
 										/>
 										<!-- <input type="checkbox" on:change={togglePasswordVisibility} style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);" /> -->
+										<!-- svelte-ignore a11y-click-events-have-key-events -->
+										<!-- svelte-ignore a11y-no-static-element-interactions -->
 										<svg
 											class="eye-icon"
 											xmlns="http://www.w3.org/2000/svg"
@@ -234,8 +286,7 @@
 							<div class="flex justify-center">
 								<Button
 									type="submit"
-									variant="outline"
-									class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary"
+									class="my-2 flex text-center py-0 px-0  text-white rounded-md  bg-primary hover:bg-[#050680]"
 									style="width:80%;height:40px;">Sign In</Button
 								>
 							</div>
@@ -252,10 +303,7 @@
 								class="my-2 flex text-center py-0 px-0  lg:bg-white md:bg-white sm:bg-white bg-white lg:rounded-md sm:rounded-md rounded-full text-black"
 								style="width:80%;height:40px"
 								on:click={loginGoogle}
-								><div
-									class=" flex rounded-sm w-20 "
-									style="height:100%"
-								>
+								><div class=" flex rounded-sm w-20" style="height:100%">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										x="0px"
@@ -279,7 +327,10 @@
 										></path>
 									</svg>
 								</div>
-								<div style="width: 100%;height:100%" class="content-center lg:block md:block sm:block hidden hover:text-black">
+								<div
+									style="width: 100%;height:100%"
+									class="content-center lg:block md:block sm:block hidden hover:text-black"
+								>
 									Sign up with Google
 								</div></Button
 							>
@@ -290,10 +341,7 @@
 								class="my-2 flex text-center py-0 px-0 lg:bg-green-500 md:bg-green-500 sm:bg-green-500 lg:rounded-md sm:rounded-md bg-green-800 rounded-full"
 								on:click={line}
 								style="width:80%;height:40px"
-								><div
-									class="rounded-sm w-20"
-									style="height:100%"
-								>
+								><div class="rounded-sm w-20" style="height:100%">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										x="0px"
@@ -311,7 +359,10 @@
 										></path>
 									</svg>
 								</div>
-								<div style="width: 100%;height:100%" class="content-center lg:block md:block sm:block hidden hover:text-black">
+								<div
+									style="width: 100%;height:100%"
+									class="content-center lg:block md:block sm:block hidden hover:text-black"
+								>
 									Sign up with Line
 								</div></Button
 							>
@@ -347,7 +398,7 @@
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
-		<p class=" text-center">Username / Password ไม่ถูกต้อง </p>
+		<p class=" text-center">Username / Password ไม่ถูกต้อง</p>
 	</div>
 	<form method="dialog" class="modal-backdrop">
 		<button>close</button>
@@ -367,6 +418,37 @@
 	<input type="text" hidden name="avatar" id="inputavatar" />
 	<input type="text" hidden name="name" id="nameInputline" />
 </form>
+
+<dialog id="my_modal_2" class="modal" open={showModal}>
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				x="0px"
+				y="0px"
+				width="100"
+				height="100"
+				viewBox="0 0 48 48"
+			>
+				<path
+					fill="#f44336"
+					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
+				></path><path
+					fill="#fff"
+					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
+				></path><path
+					fill="#fff"
+					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
+				></path>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">เซกชันหมดอายุ</p>
+		<p class=" text-center">เซกชันของคุณได้หมดอายุเนื่องจาก Cookies หมดอายุ ระบบจะให้ทำการ Login Line ไหม</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
+</dialog>
 
 <style lang="postcss">
 	/* .bg-blur-radial {
