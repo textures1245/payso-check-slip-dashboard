@@ -25,7 +25,7 @@
 
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientId = '2006478813';
-	let redirectUri = 'http://localhost:5173/';
+	let redirectUri = 'https://payso-check-slip-dashboard-staging.vercel.app/';
 	let state = '1010-1010';
 	let scope = 'profile%20openid%20email';
 	let user = null;
@@ -133,7 +133,7 @@
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientIdtest = '2006478813';
-	let redirectUritest = 'http://localhost:5173/';
+	let redirectUritest = 'https://payso-check-slip-dashboard-staging.vercel.app/';
 	let statetest = '1234';
 	let scopetest = 'profile%20openid%20email';
 
