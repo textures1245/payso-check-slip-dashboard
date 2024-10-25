@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 				body: new URLSearchParams({
 					grant_type: 'authorization_code',
 					code: code,
-					redirect_uri: 'https://payso-check-slip-dashboard-staging.vercel.app/profile',
+					redirect_uri: 'http://localhost:5173/profile',
 					// client_id: '2006015671',
 					// client_secret: '14ad9236387e9250c4ae32c12219ab02'
 					// client_id: '2005856083',

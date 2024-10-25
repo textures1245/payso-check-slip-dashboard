@@ -12,6 +12,7 @@
 	import statuspic from '$lib/image/status.png';
 	import * as Select from '$lib/components/ui/select';
 	import * as Avatar from '$lib/components/ui/avatar';
+	import { PUBLIC_DOMAIN } from '$env/static/public';
 	import {
 		auth,
 		provider,
@@ -25,7 +26,7 @@
 
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientId = '2006478813';
-	let redirectUri = 'https://payso-check-slip-dashboard-staging.vercel.app/';
+	let redirectUri = `${PUBLIC_DOMAIN}`;
 	let state = '1010-1010';
 	let scope = 'profile%20openid%20email';
 	let user = null;
@@ -133,7 +134,7 @@
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientIdtest = '2006478813';
-	let redirectUritest = 'https://payso-check-slip-dashboard-staging.vercel.app/';
+	let redirectUritest = `${PUBLIC_DOMAIN}`;
 	let statetest = '1234';
 	let scopetest = 'profile%20openid%20email';
 
