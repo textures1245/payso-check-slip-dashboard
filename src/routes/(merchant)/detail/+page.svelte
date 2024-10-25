@@ -10,9 +10,7 @@
     import addGroup from '$lib/image/addGroup.png';
     import * as Card from "$lib/components/ui/card/index.js";
     import * as Carousel from "$lib/components/ui/carousel/index.js";
-    function handleNextClick() {
-        window.localStorage.herf('/dashboard'); // เปลี่ยน URL นี้ให้เป็นหน้าที่คุณต้องการ
-    }
+    
 </script>
 
 
