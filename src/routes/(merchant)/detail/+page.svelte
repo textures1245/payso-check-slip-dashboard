@@ -4,7 +4,7 @@
     import packages from '$lib/image/package.png';
     import packagess from '$lib/image/packages.png';
     import LineOA from '$lib/image/LineOA.jpg';
-    import Login from '$lib/image/login.png';
+    import Login from '$lib/image/Login.png';
     import Logins from '$lib/image/logins.png';
     import Slip from '$lib/image/Slip.png';
     import addGroup from '$lib/image/addGroup.png';
