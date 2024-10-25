@@ -224,9 +224,10 @@
 						bind:value={role}
 						on:change={handleSearch}
 					  >
+					  <option value="">ทั้งหมด</option>
 						<option value="ADMIN">แอดมิน</option>
 						<option value="MERCHANT">ผู้ใช้งาน</option>
-						<option value="">ทั้งหมด</option>
+						
 					  </select>
 					</div>
 				  </th>
@@ -281,7 +282,7 @@
 									hour12: false
 								})}
 							</td>
-							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.Action}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-left" title="{item.Action}">{item.Action}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MethodName}
 								>{item.MethodName}</td
 							>

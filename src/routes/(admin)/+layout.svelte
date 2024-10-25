@@ -41,6 +41,11 @@
 				link: '/admin/admin-log',
 				icon: 'mage:file-3',
 			},
+			{
+				title: 'รายงานธุรกรรม',
+				link: '/admin/admin-report-transection',
+				icon: 'icon-park-outline:transaction',
+			},
 		]
 	};
 </script>
