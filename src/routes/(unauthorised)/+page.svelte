@@ -92,7 +92,7 @@
 		const cookies = getCookies();
 		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
 		const statusCookie = sessionStorage.getItem('StatusCoockie');
-		if (!myCookie) {
+		if (!myCookie || myCookie.message === 'invalid token') {
 			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
 			sessionStorage.removeItem('StatusCoockie');
 			showModal = true;
