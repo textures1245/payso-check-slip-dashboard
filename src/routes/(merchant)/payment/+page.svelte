@@ -91,6 +91,7 @@
 		packageprice = sessionStorage.getItem('packageprice') as string;
 		packagename = sessionStorage.getItem('packagename') as string;
 		const storedTime = localStorage.getItem('remainingTime');
+		localStorage.removeItem('timerCleared');
 		const Img = localStorage.getItem('Img');
 		
 		
@@ -131,9 +132,23 @@
 	function startTimer() {
 		timerStarted = true; // ตั้งค่าสถานะว่าเริ่มต้นแล้ว
 		localStorage.setItem('remainingTime', seconds.toString());
+		function countdown() {
+			const isTimerCleared = localStorage.getItem('timerCleared');
+    
+    // ถ้าตัวจับเวลาถูกล้าง ไม่ให้ทำงานต่อ
+    if (isTimerCleared === 'true') {
+        console.log('Timer was cleared on another page.');
+        return; // หยุดการทำงาน
+    }
+        if (seconds > 0) {
+            seconds -= 1; // ลดค่าการนับเวลา
+            localStorage.setItem('remainingTime', seconds.toString());
+            setTimeout(countdown, 1000); // ทำงานซ้ำทุกๆ 1 วินาที
+        }
+    }
 		(window as any).intervalId = setInterval(async () => {
-			seconds -= 1; // ลดค่าการนับเวลา
-			localStorage.setItem('remainingTime', seconds.toString());
+			// seconds -= 1; // ลดค่าการนับเวลา
+			// localStorage.setItem('remainingTime', seconds.toString());
 			const data = await Check();
 			const datatest = await CheckLimit();  // ต้องลบถ้ามี postback 
 			console.log("Check : ",data,datatest)
@@ -164,6 +179,7 @@
 				}
 			}
 		}, 5000); // ทำงานทุกๆ 1 วินาที
+		countdown();
 	
 // เช็คเวลาแบบตรวจทุกๆ 5 วินาที
 	// 	const intervalId = setInterval(async () => {

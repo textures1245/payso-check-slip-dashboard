@@ -24,6 +24,7 @@
 		sessionStorage.setItem('packageprice', packagePrice);
 		sessionStorage.setItem('packagename', packageName);
 		sessionStorage.setItem('packageId', packageId);
+		localStorage.removeItem('timerCleared');
 		window.location.assign("/payment")
 	}
 	
