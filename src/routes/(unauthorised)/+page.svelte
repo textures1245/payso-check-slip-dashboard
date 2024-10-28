@@ -104,7 +104,7 @@
                 body: new URLSearchParams({
                     grant_type: 'authorization_code',
                     code: code,
-                    redirect_uri: 'https://payso-check-slip-dashboard-xi.vercel.app/',
+                    redirect_uri: `${PUBLIC_DOMAIN}`,
                     client_id: '2006478813',
                     client_secret: '28d4c9a577a54f93c61e88c33c304794'
                 })
@@ -192,7 +192,7 @@
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientIdtest = '2006478813';
-	let redirectUritest = 'https://payso-check-slip-dashboard-xi.vercel.app/';
+	let redirectUritest = `${PUBLIC_DOMAIN}`;
 	let statetest = '1234';
 	let scopetest = 'profile%20openid%20email';
 
