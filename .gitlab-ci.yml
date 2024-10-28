@@ -1,7 +1,10 @@
 stages:          
   - build
+  
 build-job:      
   stage: build
+  tags:
+    - development  # เพิ่ม Tag ให้ตรงกับ Runner
   script:
     - echo $ENV | sed 's/ /\n/g' > .env
     - echo $ENV | sed 's/ /\n/g' > app.env
