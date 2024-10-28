@@ -89,6 +89,58 @@
 	}
 
 	onMount(async () => {
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
+		const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const returnedState = urlParams.get('state');
+    
+    // ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
+    if (code) {
+        try {
+            const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    grant_type: 'authorization_code',
+                    code: code,
+                    redirect_uri: `${PUBLIC_DOMAIN}`,
+                    client_id: '2006478813',
+                    client_secret: '28d4c9a577a54f93c61e88c33c304794'
+                })
+            });
+
+            const tokenData = await tokenResponse.json();
+            console.log('Token data:', tokenData);
+
+            const profileResponse = await fetch('https://api.line.me/v2/profile', {
+                headers: {
+                    Authorization: `Bearer ${tokenData.access_token}`
+                }
+            });
+
+            const profileData = await profileResponse.json();
+            console.log('Profile data:', profileData);
+
+            // Store user profile data
+            localStorage.setItem('profile Data', JSON.stringify(profileData));
+            sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+            setCookie('UserLineId', JSON.stringify(profileData), 7);
+            console.log("data ", profileData);
+
+            if (returnedState === '1010-1010') {
+                document.getElementById('emailInputline').value = profileData.userId;
+                document.getElementById('nameInputline').value = profileData.displayName;
+                document.getElementById('inputavatar').value = profileData.pictureUrl;
+                console.log(profileData);
+                document.getElementById('mylineForm').submit();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 		const cookies = getCookies();
 		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
 		const statusCookie = sessionStorage.getItem('StatusCoockie');
@@ -103,10 +155,12 @@
 				location.reload(); // รีโหลดหน้า
 			}, 3000);
 		}
-		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
+		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
 			linetest();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
+
+		
 
 		if (form) {
 			if (form.data) {
@@ -154,11 +208,21 @@
 		password = event.target.value.replace(/\s+/g, '');
 		event.target.value = password;
 	}
+
+	function setCookie(name: string, value: string, days: number) {
+    let d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	const isLocal = window.location.hostname === 'localhost';  // ตรวจสอบ environment
+    const domain = isLocal ? 'localhost' : 'payso-check-slip-dashboard-xi.vercel.app';  // กำหนด domain ตาม environment
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;  
+    console.log("cookie ", document.cookie);  
+}
+
 </script>
 
-<svelte:head>
+<!-- <svelte:head>
 	<script src="../src/lib/callback.js"></script>
-</svelte:head>
+</svelte:head> -->
 
 <div
 	class=" h-lvh  bg-cover bg-center  md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden"
