@@ -108,6 +108,7 @@
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
 		const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const returnedState = urlParams.get('state');
@@ -158,6 +159,7 @@
             console.log(error);
         }
     }
+	////////////////////////////////////////////
 
 		if (form) {
 			if (form.data) {
@@ -205,6 +207,16 @@
 		password = event.target.value.replace(/\s+/g, '');
 		event.target.value = password;
 	}
+
+	function setCookie(name: string, value: string, days: number) {
+    let d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	const isLocal = window.location.hostname === 'localhost';  // ตรวจสอบ environment
+    const domain = isLocal ? 'localhost' : 'payso-check-slip-dashboard-xi.vercel.app';  // กำหนด domain ตาม environment
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;  
+    console.log("cookie ", document.cookie);  
+}
+
 </script>
 
 <!-- <svelte:head>

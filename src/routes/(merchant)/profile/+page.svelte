@@ -27,6 +27,7 @@
 	let QuotaLimit = 0;
 	let QuotaUse = 0;
 	onMount(async () => {
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
 		const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     let returnedState = urlParams.get('state');
