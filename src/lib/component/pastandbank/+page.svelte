@@ -67,7 +67,7 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain'
             }
 		};
 const result = await fetch(apiUrl, config);
@@ -102,7 +102,7 @@ const datas = await result.json();
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'text/plain'
             }
 		};
 		console.time('Fetch Only Getdata');

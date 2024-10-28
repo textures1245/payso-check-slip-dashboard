@@ -48,7 +48,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			url: `${this.endpoint}/admin-db/get-receipt-stats?start_date=${startDate}&end_date=${endDate}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
-				'Content-Type': 'application/json'
+				'Content-Type': 'text/plain'
 			}
 		};
 		return axios(config).then((response) => {
@@ -66,7 +66,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			url: `${this.endpoint}/admin-db/get-monthly-overview?month_count=${monthCountInterval}&year=${year}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
-				'Content-Type': 'application/json'
+				'Content-Type': 'text/plain'
 			}
 		};
 		return axios(config).then((response) => {
@@ -79,7 +79,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			url: `${this.endpoint}/admin-db/get-packages-usage-ratio`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
-				'Content-Type': 'application/json'
+				'Content-Type': 'text/plain'
 			}
 		};
 		return axios(config).then((response) => {
@@ -95,7 +95,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			url: `${this.endpoint}/admin-db/get-transaction-daily-records?start_date=${startDate}&end_date=${endDate}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
-				'Content-Type': 'application/json'
+				'Content-Type': 'text/plain'
 			}
 		};
 		return axios(config).then((response) => {
@@ -111,7 +111,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			url: `${this.endpoint}/admin-db/get-quota-merchants-comparison?pkg_id=${pkgId}${getQueryFilterParams(qOpt, false)}`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
-				'Content-Type': 'application/json'
+				'Content-Type': 'text/plain'
 			}
 		};
 		return axios(config).then((response) => {
@@ -125,7 +125,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			url: `${this.endpoint}/admin-db/get-stats`,
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
-				'Content-Type': 'application/json'
+				'Content-Type': 'text/plain'
 			}
 		};
 		return axios(config).then((response) => {
