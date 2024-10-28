@@ -123,7 +123,7 @@
                 body: new URLSearchParams({
                     grant_type: 'authorization_code',
                     code: code,
-                    redirect_uri: `${PUBLIC_DOMAIN}`,
+                    redirect_uri: 'https://payso-check-slip-dashboard-xi.vercel.app/',
                     client_id: '2006478813',
                     client_secret: '28d4c9a577a54f93c61e88c33c304794'
                 })
