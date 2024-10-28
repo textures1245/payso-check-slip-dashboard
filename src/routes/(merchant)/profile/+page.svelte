@@ -140,7 +140,7 @@
 		let config = {
 			method: 'GET', // Use GET instead of POST
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 
@@ -198,7 +198,7 @@
 		let config = {
 			method: 'GET', // Use GET instead of POST
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 
@@ -231,7 +231,7 @@
 		let config = {
 			method: 'GET', // Use GET instead of POST
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 
@@ -257,7 +257,7 @@
 		let config = {
 			method: 'DELETE', // Use GET method
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 
@@ -288,7 +288,7 @@
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 		console.log(id);
@@ -309,7 +309,7 @@
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 		console.log(id);
@@ -339,7 +339,7 @@
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 		console.log(id);

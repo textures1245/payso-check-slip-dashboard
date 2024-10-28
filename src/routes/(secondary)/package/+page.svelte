@@ -33,7 +33,7 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'application/json'
             }
 		};
 		var result = await fetch(`${PUBLIC_API_ENDPOINT}/package/packageactive`, config);

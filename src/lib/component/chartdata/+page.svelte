@@ -144,7 +144,7 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 		var result = await fetch(apiUrl, config);
@@ -406,7 +406,7 @@
 		const config = {
 			method: 'GET',
 			headers: {
-				'Content-Type': 'text/plain'
+				'Content-Type': 'application/json'
 			}
 		};
 		const result = await fetch(apiUrl, config);
