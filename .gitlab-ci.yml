@@ -8,3 +8,4 @@ build-job:
   script:
     - echo $ENV | sed 's/ /\n/g' > .env
     - cat .env
+    - docker compose up -d --build
