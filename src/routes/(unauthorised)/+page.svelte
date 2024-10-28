@@ -186,7 +186,7 @@
 	function setCookie(name: string, value: string, days: number) {
     let d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=payso-check-slip-dashboard-xi.vercel.app`;
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${PUBLIC_DOMAIN}`;
     console.log("cookie ", document.cookie);
 }
 
