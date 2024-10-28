@@ -152,7 +152,7 @@
 				showModal = false; // ปิด modal
 			}, 3000);
 		}
-		if ((!myCookie && !statusCookie) || (myCookie.message === "invalid token" && statusCookie)) {
+		if ((!myCookie && !statusCookie) || (myCookie.message === "invalid token" && statusCookie) || (myCookie.message === "invalid token" && !statusCookie)) {
 			linetest();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
