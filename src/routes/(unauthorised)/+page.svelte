@@ -111,7 +111,7 @@
 		const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const returnedState = urlParams.get('state');
-    
+    console.log(code,returnedState,urlParams)
     // ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
     if (code) {
         try {
