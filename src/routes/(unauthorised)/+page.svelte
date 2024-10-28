@@ -89,25 +89,6 @@
 	}
 
 	onMount(async () => {
-		const cookies = getCookies();
-		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
-		const statusCookie = sessionStorage.getItem('StatusCoockie');
-		if (!myCookie) {
-			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
-			sessionStorage.removeItem('StatusCoockie');
-			showModal = true;
-
-			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
-			setTimeout(() => {
-				showModal = false; // ปิด modal
-				location.reload(); // รีโหลดหน้า
-			}, 3000);
-		}
-		if ((!myCookie && !statusCookie) ) {
-			linetest();
-			sessionStorage.setItem('StatusCoockie', 'rr');
-		}
-
 		const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const returnedState = urlParams.get('state');
@@ -158,6 +139,25 @@
             console.log(error);
         }
     }
+		const cookies = getCookies();
+		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
+		const statusCookie = sessionStorage.getItem('StatusCoockie');
+		if (!myCookie) {
+			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
+			sessionStorage.removeItem('StatusCoockie');
+			showModal = true;
+
+			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
+			setTimeout(() => {
+				showModal = false; // ปิด modal
+			}, 3000);
+		}
+		if ((!myCookie && !statusCookie) ) {
+			linetest();
+			sessionStorage.setItem('StatusCoockie', 'rr');
+		}
+
+		
 
 		if (form) {
 			if (form.data) {
