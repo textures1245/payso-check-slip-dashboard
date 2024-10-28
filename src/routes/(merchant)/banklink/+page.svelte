@@ -140,7 +140,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
     const response = await fetch(`${PUBLIC_API_ENDPOINT}/create/bank`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain',
       },
       body: JSON.stringify(payload)
     });
