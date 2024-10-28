@@ -4,7 +4,7 @@
 	import JsonViewer from './(component)/JsonViewer.svelte';
 	import Modal from './(component)/Modal.svelte';
 	import * as Table from '$lib/components/ui/table';
-
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
 	let limit = 10;
@@ -37,7 +37,7 @@
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actor=${actor}&action=${action}&actor_role=${role}`
+				`${PUBLIC_API_ENDPOINT}/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actor=${actor}&action=${action}&actor_role=${role}`
 			);
 
 			if (!response.ok) {
