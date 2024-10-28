@@ -92,17 +92,17 @@
 		const cookies = getCookies();
 		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
 		const statusCookie = sessionStorage.getItem('StatusCoockie');
-		// if (!myCookie) {
-		// 	// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
-		// 	sessionStorage.removeItem('StatusCoockie');
-		// 	showModal = true;
+		if (!myCookie) {
+			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
+			sessionStorage.removeItem('StatusCoockie');
+			showModal = true;
 
-		// 	// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
-		// 	setTimeout(() => {
-		// 		showModal = false; // ปิด modal
-		// 		location.reload(); // รีโหลดหน้า
-		// 	}, 3000);
-		// }
+			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
+			setTimeout(() => {
+				showModal = false; // ปิด modal
+				location.reload(); // รีโหลดหน้า
+			}, 3000);
+		}
 		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token'  && !statusCookie)) {
 			linetest();
 			sessionStorage.setItem('StatusCoockie', 'rr');
@@ -186,7 +186,7 @@
 	function setCookie(name: string, value: string, days: number) {
     let d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=https://payso-check-slip-dashboard-xi.vercel.app/`;
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=payso-check-slip-dashboard-xi.vercel.app`;
     console.log("cookie ", document.cookie);
 }
 
