@@ -30,7 +30,7 @@
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 				Accept: 'application/json',
 				Authorization: `Bearer ${PUBLIC_oauth_KEY}`
 			}
@@ -65,7 +65,7 @@
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			},
 			body: JSON.stringify({
 				RefNo : refNo,
@@ -223,7 +223,7 @@
 		// let config = {
 		// 	method: 'POST',
 		// 	headers: {
-		// 		'Content-Type': 'application/json',
+		// 		'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 		// 	},
 		// 	body: JSON.stringify({
 		// 		RefNo : refNo
@@ -237,7 +237,7 @@
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 				Accept: 'application/json',
 				apikey: 'AptnQj3WuOI',
 				merchantSecretKey: 'BPWiTNc5bmMJzeqH',
@@ -265,7 +265,7 @@
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			},
 			body: JSON.stringify({
 				RefNo : refNo
@@ -279,7 +279,7 @@
 		// let config = {
 		// 	method: 'POST',
 		// 	headers: {
-		// 		'Content-Type': 'application/json',
+		// 		'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 		// 		Accept: 'application/json',
 		// 		apikey: 'AptnQj3WuOI',
 		// 		merchantSecretKey: 'BPWiTNc5bmMJzeqH',
@@ -317,7 +317,7 @@
 		    let config = {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			},
 			body: JSON.stringify({
 				PackageId: parseInt(Id, 10),
@@ -349,7 +349,7 @@ const UpdateLimitPackage = async () => {
 		let config = {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 		var result = await fetch(

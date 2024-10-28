@@ -89,12 +89,6 @@
 	}
 
 	onMount(async () => {
-		await fetch(`${PUBLIC_DOMAIN}/healthcheck`, {
-			method: 'GET',
-			headers: {
-				'ngrok-skip-browser-warning': 'true'
-			}
-		}).then((res) => console.log(res.status));
 
 		const urlParams = new URLSearchParams(window.location.search);
 		const code = urlParams.get('code');

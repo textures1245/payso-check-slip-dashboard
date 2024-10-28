@@ -144,7 +144,7 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 		var result = await fetch(apiUrl, config);
@@ -406,7 +406,7 @@
 		const config = {
 			method: 'GET',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 		const result = await fetch(apiUrl, config);

@@ -11,7 +11,7 @@ export const actions: Actions = {
         const config: RequestInit = {
             method: 'POST', // การทำงาน get post update delete
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
             },
             body: JSON.stringify({
                 username: username, // ใช้ชื่อจากข้อมูลฟอร์ม
