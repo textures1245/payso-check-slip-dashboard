@@ -198,7 +198,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
         }
     };
 
@@ -240,7 +240,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
             }
 		};
 		var result = await fetch(apiUrl, config);
@@ -296,7 +296,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
         }
     };
 

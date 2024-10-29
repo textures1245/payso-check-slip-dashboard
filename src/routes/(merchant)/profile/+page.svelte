@@ -27,8 +27,7 @@
 	let QuotaLimit = 0;
 	let QuotaUse = 0;
 	onMount(async () => {
-
-
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
 		const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     let returnedState = urlParams.get('state');
@@ -84,8 +83,7 @@
             console.log(error);
         }
     }
-
-//////////////////////////////////////////
+	///////////////////////////////////
 		clearRemainingTime();
 		try {
 			console.log(profileData);
@@ -142,7 +140,7 @@
 		let config = {
 			method: 'GET', // Use GET instead of POST
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 
@@ -200,7 +198,7 @@
 		let config = {
 			method: 'GET', // Use GET instead of POST
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 
@@ -233,7 +231,7 @@
 		let config = {
 			method: 'GET', // Use GET instead of POST
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 
@@ -259,7 +257,7 @@
 		let config = {
 			method: 'DELETE', // Use GET method
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 
@@ -290,7 +288,7 @@
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 		console.log(id);
@@ -311,7 +309,7 @@
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 		console.log(id);
@@ -341,7 +339,7 @@
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 			}
 		};
 		console.log(id);

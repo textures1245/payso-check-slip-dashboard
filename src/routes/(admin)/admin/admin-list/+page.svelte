@@ -166,7 +166,7 @@
 		const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json',
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 				'Actor-Id': myCookie.Id,
 				'Actor-Name': myCookie.Email,
 				'Actor-Role': 'ADMIN'
@@ -186,7 +186,7 @@
 			{
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 				},
 				body: JSON.stringify({ Status: editingUser.Status })
 			}

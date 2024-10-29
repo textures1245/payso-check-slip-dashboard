@@ -9,7 +9,7 @@
 //     	const response = await fetch('https://your-api-endpoint.com/api/checkslipmerchant', {
 //         method: 'POST',
 //         headers: {
-//             'Content-Type': 'application/json',
+//             'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
 //             'Authorization': 'Bearer YOUR_ACCESS_TOKEN'
 //         },
 //         body: JSON.stringify({ email })

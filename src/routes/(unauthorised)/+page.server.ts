@@ -38,7 +38,7 @@ export const actions: import('./$types').Actions = {
 
         const config: RequestInit = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', },
             body: JSON.stringify({
                 MerchantName: name,
                 MerchantRole: 'ACTIVE',
@@ -62,7 +62,7 @@ export const actions: import('./$types').Actions = {
                 const namesBase64 = toBase64(lineData.displayName);
                 const createConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', },
                     body: JSON.stringify({
                         MerchantName: name,
                         MerchantRole: 'NOT_PAYSO',
@@ -104,7 +104,7 @@ export const actions: import('./$types').Actions = {
 
         const config: RequestInit = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', },
             body: JSON.stringify({
                 MerchantName: name,
                 MerchantRole: 'ACTIVE',
@@ -127,7 +127,7 @@ export const actions: import('./$types').Actions = {
                 const namesBase64 = toBase64(name);
                 const createConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', },
                     body: JSON.stringify({
                         MerchantName: name,
                         MerchantRole: 'NOT_PAYSO',
@@ -170,7 +170,7 @@ export const actions: import('./$types').Actions = {
         const config: RequestInit = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
                 apikey: API_KEY,
             }
         };
@@ -184,7 +184,7 @@ export const actions: import('./$types').Actions = {
                 
                 const loginConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', },
                     body: JSON.stringify({
                         MerchantName: username,
                         MerchantRole: 'ACTIVE',
@@ -207,7 +207,7 @@ export const actions: import('./$types').Actions = {
                      const namesBase64 = toBase64(lineData.displayName);
                     const createConfig: RequestInit = {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true', },
                         body: JSON.stringify({
                             MerchantName: username,
                             MerchantRole: 'PAYSO',

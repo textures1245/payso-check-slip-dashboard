@@ -89,56 +89,57 @@
 	}
 
 	onMount(async () => {
+
 		const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const returnedState = urlParams.get('state');
-    console.log(code,returnedState,urlParams)
-    // ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
-    if (code) {
-        try {
-            const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    grant_type: 'authorization_code',
-                    code: code,
-                    redirect_uri: `${PUBLIC_DOMAIN}`,
-                    client_id: '2006478813',
-                    client_secret: '28d4c9a577a54f93c61e88c33c304794'
-                })
-            });
+		const code = urlParams.get('code');
+		const returnedState = urlParams.get('state');
+		console.log(code, returnedState, urlParams);
+		// ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
+		if (code) {
+			try {
+				const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					body: new URLSearchParams({
+						grant_type: 'authorization_code',
+						code: code,
+						redirect_uri: `${PUBLIC_DOMAIN}`,
+						client_id: '2006478813',
+						client_secret: '28d4c9a577a54f93c61e88c33c304794'
+					})
+				});
 
-            const tokenData = await tokenResponse.json();
-            console.log('Token data:', tokenData);
+				const tokenData = await tokenResponse.json();
+				console.log('Token data:', tokenData);
 
-            const profileResponse = await fetch('https://api.line.me/v2/profile', {
-                headers: {
-                    Authorization: `Bearer ${tokenData.access_token}`
-                }
-            });
+				const profileResponse = await fetch('https://api.line.me/v2/profile', {
+					headers: {
+						Authorization: `Bearer ${tokenData.access_token}`
+					}
+				});
 
-            const profileData = await profileResponse.json();
-            console.log('Profile data:', profileData);
+				const profileData = await profileResponse.json();
+				console.log('Profile data:', profileData);
 
-            // Store user profile data
-            localStorage.setItem('profile Data', JSON.stringify(profileData));
-            sessionStorage.setItem('profile Data', JSON.stringify(profileData));
-            setCookie('UserLineId', JSON.stringify(profileData), 7);
-            console.log("data ", profileData);
+				// Store user profile data
+				localStorage.setItem('profile Data', JSON.stringify(profileData));
+				sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+				setCookie('UserLineId', JSON.stringify(profileData), 7);
+				console.log('data ', profileData);
 
-            if (returnedState === '1010-1010') {
-                document.getElementById('emailInputline').value = profileData.userId;
-                document.getElementById('nameInputline').value = profileData.displayName;
-                document.getElementById('inputavatar').value = profileData.pictureUrl;
-                console.log(profileData);
-                document.getElementById('mylineForm').submit();
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
+				if (returnedState === '1010-1010') {
+					document.getElementById('emailInputline').value = profileData.userId;
+					document.getElementById('nameInputline').value = profileData.displayName;
+					document.getElementById('inputavatar').value = profileData.pictureUrl;
+					console.log(profileData);
+					document.getElementById('mylineForm').submit();
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		}
 		const cookies = getCookies();
 		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
 		const statusCookie = sessionStorage.getItem('StatusCoockie');
@@ -152,12 +153,67 @@
 				showModal = false; // ปิด modal
 			}, 3000);
 		}
-		if ((!myCookie && !statusCookie) || (myCookie.message === "invalid token" && statusCookie) || (myCookie.message === "invalid token" && !statusCookie)) {
+		if (
+			(!myCookie && !statusCookie) ||
+			(myCookie.message === 'invalid token' && statusCookie) ||
+			(myCookie.message === 'invalid token' && !statusCookie)
+		) {
 			linetest();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
-		
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
+		// const urlParams = new URLSearchParams(window.location.search);
+		// const code = urlParams.get('code');
+		// const returnedState = urlParams.get('state');
+
+		// ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
+		// if (code) {
+		// 	try {
+		// 		const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+		// 			method: 'POST',
+		// 			headers: {
+		// 				'Content-Type': 'application/x-www-form-urlencoded'
+		// 			},
+		// 			body: new URLSearchParams({
+		// 				grant_type: 'authorization_code',
+		// 				code: code,
+		// 				redirect_uri: `${PUBLIC_DOMAIN}`,
+		// 				client_id: '2006478813',
+		// 				client_secret: '28d4c9a577a54f93c61e88c33c304794'
+		// 			})
+		// 		});
+
+		// 		const tokenData = await tokenResponse.json();
+		// 		console.log('Token data:', tokenData);
+
+		// 		const profileResponse = await fetch('https://api.line.me/v2/profile', {
+		// 			headers: {
+		// 				Authorization: `Bearer ${tokenData.access_token}`
+		// 			}
+		// 		});
+
+		// 		const profileData = await profileResponse.json();
+		// 		console.log('Profile data:', profileData);
+
+		// 		// Store user profile data
+		// 		localStorage.setItem('profile Data', JSON.stringify(profileData));
+		// 		sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+		// 		setCookie('UserLineId', JSON.stringify(profileData), 7);
+		// 		console.log('data ', profileData);
+
+		// 		if (returnedState === '1010-1010') {
+		// 			document.getElementById('emailInputline').value = profileData.userId;
+		// 			document.getElementById('nameInputline').value = profileData.displayName;
+		// 			document.getElementById('inputavatar').value = profileData.pictureUrl;
+		// 			console.log(profileData);
+		// 			document.getElementById('mylineForm').submit();
+		// 		}
+		// 	} catch (error) {
+		// 		console.log(error);
+		// 	}
+		// }
+		////////////////////////////////////////////
 
 		if (form) {
 			if (form.data) {
@@ -166,7 +222,7 @@
 
 				if (form.data.PackageId == '0') {
 					if (form.status == 'create') {
-						window.location.href = '/package';  // ถ้าจริงต้องมาหน้า detail ก่อน
+						window.location.href = '/package'; // ถ้าจริงต้องมาหน้า detail ก่อน
 					} else {
 						window.location.href = '/package';
 					}
@@ -183,6 +239,7 @@
 		}
 	});
 
+
 	function setCookie(name: string, value: string, days: number) {
     let d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
@@ -191,6 +248,13 @@
 	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
     console.log("cookie ", document.cookie,domain);
 }
+	// function setCookie(name: string, value: string, days: number) {
+	// 	let d = new Date();
+	// 	d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	// 	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=payso-check-slip-dashboard-xi.vercel.app`;
+	// 	console.log('cookie ', document.cookie);
+	// }
+
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientIdtest = '2006478813';
@@ -214,15 +278,22 @@
 		password = event.target.value.replace(/\s+/g, '');
 		event.target.value = password;
 	}
+
+	// function setCookie(name: string, value: string, days: number) {
+	// 	let d = new Date();
+	// 	d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	// 	const isLocal = window.location.hostname === 'localhost'; // ตรวจสอบ environment
+	// 	const domain = isLocal ? 'localhost' : 'payso-check-slip-dashboard-xi.vercel.app'; // กำหนด domain ตาม environment
+	// 	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
+	// 	console.log('cookie ', document.cookie);
+	// }
 </script>
 
 <!-- <svelte:head>
 	<script src="../src/lib/callback.js"></script>
 </svelte:head> -->
 
-<div
-	class=" h-lvh  bg-cover bg-center  md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden"
->
+<div class=" h-lvh bg-cover bg-center md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden">
 	<div
 		class=" hidden content-center lg:block lg:h-lvn md:col-span-1 lg:col-span-2 bg-[#EAECF0]"
 		style="hight:50px"
@@ -245,11 +316,10 @@
 							เชื่อมต่อ LINE เพื่อแชร์จำนวนการใช้งานจากแพ็กเกจที่ซื้อ
 						</h2>
 					</div>
-					<div class="p-2 w-5/5 bg-white  rounded-lg shadow-lg">
+					<div class="p-2 w-5/5 bg-white rounded-lg shadow-lg">
 						<h2 class=" xl:text-lg lg:text-md text-start">
 							ยินดีต้อนรับสู่แดชบอร์ดที่ให้คุณดูสถิติและวิเคราะห์ข้อมูลได้อย่างง่ายดาย!
 						</h2>
-						
 					</div>
 				</div>
 			</div>
@@ -266,7 +336,7 @@
 			<!-- svelte-ignore a11y-missing-attribute -->
 			<img
 				src={statuspic}
-				class="absolute top-14 right-20 w-3/5 h-auto transform scale-75 shadow-lg hover:-rotate-8 hover:scale-105 rotate-3	" 
+				class="absolute top-14 right-20 w-3/5 h-auto transform scale-75 shadow-lg hover:-rotate-8 hover:scale-105 rotate-3"
 				style="z-index: 1;"
 			/>
 		</div>
@@ -504,7 +574,9 @@
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">เซกชันหมดอายุ</p>
-		<p class=" text-center">เซกชันของคุณได้หมดอายุเนื่องจาก Cookies หมดอายุ ระบบจะให้ทำการ Login Line ไหม</p>
+		<p class=" text-center">
+			เซกชันของคุณได้หมดอายุเนื่องจาก Cookies หมดอายุ ระบบจะให้ทำการ Login Line ไหม
+		</p>
 	</div>
 	<form method="dialog" class="modal-backdrop">
 		<button>close</button>
