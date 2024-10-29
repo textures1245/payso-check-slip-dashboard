@@ -15,6 +15,27 @@
 	import DoughnutPackageOrderAmount from './(components)/DoughnutPackageOrderAmount.svelte';
 
 	export let data: PageData;
+
+	const date15DaysAgo = new Date();
+	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+
+	const dateSixMonthsAgo = new Date();
+	dateSixMonthsAgo.setMonth(dateSixMonthsAgo.getMonth() - 6);
+
+	const defaultOpt = {
+		// GetTransactionDailyCount
+		quotaAndMerchantUsagePkgSelect: 1,
+
+		dailyTrans: {
+			startDate: date15DaysAgo.toISOString().split('T')[0],
+			endDate: new Date().toISOString().split('T')[0]
+		},
+
+		receiptIncome: {
+			startDate: dateSixMonthsAgo.toISOString().split('T')[0],
+			endDate: new Date().toISOString().split('T')[0]
+		}
+	};
 </script>
 
 <div class="container space-y-5 px-8 mx-auto">
@@ -38,7 +59,7 @@
 			<div class="p-6 pb-5 shadow bg-white rounded-xl">
 				<div class="flex gap-4 items-center">
 					<div class="flex">
-						<span class="border  p-3 rounded-lg" style="background-color: #477DFF;">
+						<span class="border p-3 rounded-lg" style="background-color: #477DFF;">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="35px"
@@ -129,7 +150,7 @@
 
 			<div class="flex gap-4 items-center">
 				<div class="flex">
-					<span class="border  p-3 rounded-lg" style="background-color: #1353EC;">
+					<span class="border p-3 rounded-lg" style="background-color: #1353EC;">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="35px"
@@ -243,7 +264,7 @@
 		<div class="p-6 pb-5 shadow bg-white rounded-xl">
 			<div class="flex gap-4 items-center">
 				<div class="flex">
-					<span class="border  p-3 rounded-lg" style="background-color: #113BD4;">
+					<span class="border p-3 rounded-lg" style="background-color: #113BD4;">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="35px"
@@ -283,7 +304,7 @@
 		<div class="p-6 pb-5 shadow bg-white rounded-xl">
 			<div class="flex gap-4 items-center">
 				<div class="flex">
-					<span class="border  p-3 rounded-lg" style="background-color: #182BBA;">
+					<span class="border p-3 rounded-lg" style="background-color: #182BBA;">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							width="34px"
@@ -503,7 +524,7 @@
 			<h1 class="text-base xl:text-lg font-semibold text-left">ยอดการใช้งานรายวัน</h1>
 			<div class="chart-container" id="line-chart-container">
 				<LineTransactionDaily
-					defaultOpt={data.defaultOpt?.dailyTrans}
+					defaultOpt={data.defaultOpt?.dailyTrans || defaultOpt.dailyTrans}
 					pData={data.transactionDailyCount ?? []}
 				></LineTransactionDaily>
 			</div>
@@ -512,7 +533,7 @@
 			<h1 class="text-base xl:text-lg font-semibold text-left">สถิติรายได้แบบรายเดือน (บาท)</h1>
 			<div class="chart-container" id="line-chart-container">
 				<BarIncomeOverview
-					defaultOpt={data.defaultOpt?.receiptIncome}
+					defaultOpt={data.defaultOpt?.receiptIncome || defaultOpt.receiptIncome}
 					pData={data.receiptIncomeOverview ?? []}
 				></BarIncomeOverview>
 			</div>
@@ -642,6 +663,4 @@
 		background-color: #fce8e8; /* พื้นหลังสีแดงอ่อน */
 		color: #d32f2f; /* สีตัวอักษรสีแดงเข้ม */
 	}
-
-	
 </style>
