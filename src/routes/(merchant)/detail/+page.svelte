@@ -3,7 +3,7 @@
     import profile from '$lib/image/profile.png';
     import packages from '$lib/image/package.png';
     import packagess from '$lib/image/packages.png';
-    import LineOA from '$lib/image/LineOA.jpg';
+    import LineOA from '$lib/image/LineOA.png';
     import Login from '$lib/image/Login.png';
     import Logins from '$lib/image/logins.png';
     import Slip from '$lib/image/Slip.png';
@@ -28,7 +28,7 @@
                 <Carousel.Item class="flex justify-center"><div class="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-white shadow-md rounded-lg p-6 mb-6">
                     <div class="text-sm">
                         <h2 class="text-2xl font-semibold mb-5">ขั้นตอนที่ 1: เชื่อมต่อ Line OA</h2>
-                        <img src={LineOA} alt="Line OA" height="50%" width="180px" class="mx-auto mb-4">
+                        <img src={LineOA} alt="Line OA" height="50%" width="500px" class="mx-auto mb-4">
                         <p class="text-gray-600 mt-8">กดที่เมนู "Register" เพื่อเริ่มต้นลงทะเบียน ถ้าคุณใช้คอมพิวเตอร์ ให้พิมพ์คำว่า "menu"</p>
                     </div>
                 </div></Carousel.Item>

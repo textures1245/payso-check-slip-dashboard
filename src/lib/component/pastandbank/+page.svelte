@@ -219,7 +219,7 @@ style="width:40%;height:30px;"
 			  <Table.Head class="w-[100px] text-black font-bold">วันที่ทำการ</Table.Head>
 			  <Table.Head class="text-center text-black font-bold">เวลาทำการ</Table.Head>
 			  <Table.Head class="text-center text-black font-bold">Transfer ID</Table.Head>
-			  <Table.Head class="text-center text-black font-bold">สถานะ</Table.Head>
+			  <Table.Head class="text-start text-black font-bold">สถานะ</Table.Head>
 			</Table.Row>
 		  </Table.Header>
 		  <Table.Body>
@@ -252,7 +252,7 @@ style="width:40%;height:30px;"
 			  <div class="hidden sm:block lg:hidden xl:block">
 				{item.TransferRefId}
 			  </div></Table.Cell>
-			<Table.Cell class=" flex justify-center font-semibold">{#if item.Status === 'SUCCESS'}
+			<Table.Cell class=" flex justify-start font-semibold">{#if item.Status === 'SUCCESS'}
 				<span class=" flex  items-center" style="color:#17B26A;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 120 120">
 					<circle cx="60" cy="64" r="48" opacity=".35"></circle><circle cx="60" cy="60" r="48" fill="#44bf00"></circle><polygon points="53.303,89 26.139,61.838 33.582,54.395 53.303,74.116 86.418,41 93.861,48.443" opacity=".35"></polygon><polygon fill="#fff" points="53.303,84 26.139,56.838 33.582,49.395 53.303,69.116 86.418,36 93.861,43.443"></polygon>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #DCFAE6 ;color:#17B26A; border-color:#17B26A">SUCCESS</div></span>
