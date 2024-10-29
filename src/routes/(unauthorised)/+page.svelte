@@ -212,10 +212,10 @@
 	function setCookie(name: string, value: string, days: number) {
     let d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-	const isLocal = window.location.hostname === 'localhost';  // ตรวจสอบ environment
-    const domain = isLocal ? 'localhost' : 'payso-check-slip-dashboard-xi.vercel.app';  // กำหนด domain ตาม environment
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;  
-    console.log("cookie ", document.cookie);  
+	const url = new URL(PUBLIC_DOMAIN); // Convert string to URL object
+    const domain = url.hostname; // Get the hostname (payso-check-slip-dashboard-xi.vercel.app)
+	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
+    console.log("cookie ", document.cookie,domain);
 }
 
 </script>
