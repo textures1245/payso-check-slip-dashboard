@@ -64,7 +64,13 @@
 		loadingtable = true;
 		try {
 			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`
+				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				}
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -119,7 +125,12 @@
 
 	async function fetchDataPkg() {
 		try {
-			const response = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/packages`);
+			const response = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/packages`, 	{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				});
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}

@@ -37,7 +37,13 @@
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actor=${actor}&action=${action}&actor_role=${role}`
+				`${PUBLIC_API_ENDPOINT}/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actor=${actor}&action=${action}&actor_role=${role}`,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				}
 			);
 
 			if (!response.ok) {
@@ -168,71 +174,70 @@
 
 	<div class="flex items-center flex-wrap mb-4 pt-8 sm:pt-6 md:pt-4">
 		<div class="flex items-center gap-2">
-		  <input
-			type="date"
-			bind:value={startDate}
-			class="input input-bordered bg-white my-1 mx-2"
-			maxlength="100"
-		  />
-		  <span class="text-center self-center w-4">ถึง</span>
-		  <input
-			type="date"
-			bind:value={endDate}
-			class="input input-bordered bg-white my-1 mx-2"
-			maxlength="100"
-		  />
+			<input
+				type="date"
+				bind:value={startDate}
+				class="input input-bordered bg-white my-1 mx-2"
+				maxlength="100"
+			/>
+			<span class="text-center self-center w-4">ถึง</span>
+			<input
+				type="date"
+				bind:value={endDate}
+				class="input input-bordered bg-white my-1 mx-2"
+				maxlength="100"
+			/>
 		</div>
-		
+
 		<input
-		  type="text"
-		  placeholder="กิจกรรม"
-		  bind:value={action}
-		  on:input={handleInputAction}
-		  class="input input-bordered bg-white my-1 mx-2"
-		  maxlength="100"
+			type="text"
+			placeholder="กิจกรรม"
+			bind:value={action}
+			on:input={handleInputAction}
+			class="input input-bordered bg-white my-1 mx-2"
+			maxlength="100"
 		/>
-		
+
 		<input
-		  type="text"
-		  placeholder="ชื่อผู้ใช้"
-		  bind:value={actorName}
-		  on:input={handleInputActor}
-		  class="input input-bordered bg-white my-1 mx-2"
-		  maxlength="250"
+			type="text"
+			placeholder="ชื่อผู้ใช้"
+			bind:value={actorName}
+			on:input={handleInputActor}
+			class="input input-bordered bg-white my-1 mx-2"
+			maxlength="250"
 		/>
-		
+
 		<div class="flex flex-col sm:flex-row lg:col-span-2">
-		  <button
-			on:click={firstPage}
-			class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2 hover:bg-[#050680]"
-		  >ค้นหา</button>
-		  <button
-			on:click={handleClear}
-			class="btn btn-outline text-xs sm:text-sm my-1 mx-2"
-		  >ล้าง</button>
+			<button
+				on:click={firstPage}
+				class="btn bg-primary text-white btn-primary text-xs sm:text-sm my-1 mx-2 hover:bg-[#050680]"
+				>ค้นหา</button
+			>
+			<button on:click={handleClear} class="btn btn-outline text-xs sm:text-sm my-1 mx-2"
+				>ล้าง</button
+			>
 		</div>
-	  </div>
-	  
+	</div>
+
 	<div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 			<thead>
 				<tr>
-				  <th colspan="6" class="p-2">
-					<div class="flex justify-start p-2  rounded-md text-gray-700 ">
-					  <select
-						class="select rounded-md  bg-white outline outline-1 outline-gray-300 px-2 py-0.5 w-[200px]" 
-						bind:value={role}
-						on:change={handleSearch}
-					  >
-					  <option value="">ทั้งหมด</option>
-						<option value="ADMIN">แอดมิน</option>
-						<option value="MERCHANT">ผู้ใช้งาน</option>
-						
-					  </select>
-					</div>
-				  </th>
+					<th colspan="6" class="p-2">
+						<div class="flex justify-start p-2 rounded-md text-gray-700">
+							<select
+								class="select rounded-md bg-white outline outline-1 outline-gray-300 px-2 py-0.5 w-[200px]"
+								bind:value={role}
+								on:change={handleSearch}
+							>
+								<option value="">ทั้งหมด</option>
+								<option value="ADMIN">แอดมิน</option>
+								<option value="MERCHANT">ผู้ใช้งาน</option>
+							</select>
+						</div>
+					</th>
 				</tr>
-			  </thead>
+			</thead>
 			<thead class="text-center text-gray-700 lg:text-base caption-bottom">
 				<tr class="border-b border-gray-300 bg-gray-100">
 					<th class="p-1 sm:p-2 w-10 text-left">ลำดับ</th>
@@ -261,7 +266,7 @@
 				{:else}
 					{#each LogAdmin as item, i (i)}
 						<tr class="border-b border-gray-300">
-							<td class="p-1 sm:p-2 lg:text-sm text-left ">{item.index}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.index}</td>
 							<td
 								class="p-1 sm:p-2 lg:text-sm text-left"
 								title={new Date(item.Timestamp).toLocaleString('en-EN', {
@@ -282,7 +287,7 @@
 									hour12: false
 								})}
 							</td>
-							<td class="p-1 sm:p-2 lg:text-sm text-left" title="{item.Action}">{item.Action}</td>
+							<td class="p-1 sm:p-2 lg:text-sm text-left" title={item.Action}>{item.Action}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MethodName}
 								>{item.MethodName}</td
 							>
@@ -376,7 +381,7 @@
 		</div> -->
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
-				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
+				<div class="text-sm">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
 
 				<div class="flex items-center space-x-2">
 					<select

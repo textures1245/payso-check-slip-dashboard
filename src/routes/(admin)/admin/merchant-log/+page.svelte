@@ -34,7 +34,13 @@
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=${role}`
+				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=${role}`,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				}
 			);
 
 			if (!response.ok) {

@@ -88,7 +88,13 @@
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/admin/getbankresandtransection?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&merchantname=${mName}&transectionStatus=${tranStatus}`
+				`${PUBLIC_API_ENDPOINT}/admin/getbankresandtransection?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&merchantname=${mName}&transectionStatus=${tranStatus}`,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				}
 			);
 
 			if (!response.ok) {
