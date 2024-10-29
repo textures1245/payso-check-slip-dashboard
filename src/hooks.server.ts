@@ -26,20 +26,30 @@ export const handle = async ({ resolve, event }) => {
 		if (event.url.pathname == '/dashboard') {
 			const token = event.cookies.get('merchant_account') || '';
 
-			if (token.includes('-/All/-') ||  token.includes('DASHBOARD')) {
-				console.log('มีคำว่า -/All/- DASHBOARD อยู่ใน token');
-			} else {
-				redirect(302, '/package');
+
+			if(token){
+				if (token.includes('-/All/-') ||  token.includes('DASHBOARD')) {
+					console.log('มีคำว่า -/All/- DASHBOARD อยู่ใน token');
+				} else {
+					redirect(302, '/package');
+				}
+			}else{
+				redirect(302, '/');
 			}
 		}
 
 		if (event.url.pathname == '/package') {
 			const token = event.cookies.get('merchant_account') || '';
 
-			if (token.includes('-/All/-') ||  token.includes('PACKAGE')) {
-				console.log('มีคำว่า -/All/- PACKAGE อยู่ใน token');
-			} else {
-				redirect(302, '/dashboard');
+
+			if(token){
+				if (token.includes('-/All/-') ||  token.includes('PACKAGE')) {
+					console.log('มีคำว่า -/All/- PACKAGE อยู่ใน token');
+				} else {
+					redirect(302, '/dashboard');
+				}
+			}else{
+				redirect(302, '/');
 			}
 		}
 		
