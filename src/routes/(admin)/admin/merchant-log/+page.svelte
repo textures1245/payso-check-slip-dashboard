@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { LogAdmin } from './+page.server';
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+
 
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
@@ -34,7 +36,7 @@
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
 			const response = await fetch(
-				`http://127.0.0.1:4567/api/v1/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=${role}`
+				`${PUBLIC_API_ENDPOINT}/admin/logadmin/search?startDate=${formattedStartDate}&endDate=${formattedEndDate}&offset=${offset}&limit=${limit}&actorName=${actor}&methodName=${method}&role=${role}`
 			);
 
 			if (!response.ok) {
