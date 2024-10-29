@@ -559,8 +559,7 @@ if (isChecked4) selectedText += selectedText ? ",SLIP_CHECKER" : "SLIP_CHECKER";
   
   let base64Result=""
   function submitLink() {
-	const today = new Date();
-  const date = today.toISOString().split('T')[0];
+	
   const cookies = getCookies();
 	const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		let selectedText = "";
@@ -569,7 +568,8 @@ if (isCheckedLink2) selectedText += selectedText ? ",PACKAGE" : "PACKAGE";
 if (isCheckedLink3) selectedText += selectedText ? ",USER_MANAGEMENT" : "USER_MANAGEMENT";
 if (isCheckedLink4) selectedText += selectedText ? ",SLIP_CHECKER" : "SLIP_CHECKER";
 if (isCheckedLink1 || isCheckedLink2 || isCheckedLink3 ||isCheckedLink4) {
-const result = `${myCookie.Id}:${date}:${selectedText}`;
+	const myDate = myCookie.MerchantId.split("T")[0];
+const result = `${myCookie.Id}:${myDate}:${selectedText}`;
  base64Result = btoa(result); // แปลงเป็น Base64
  console.log(result);
 }
