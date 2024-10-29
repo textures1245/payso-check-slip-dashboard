@@ -263,7 +263,8 @@
 
 		try {
 			// Make the fetch request
-			const result = await fetch(`${PUBLIC_API_ENDPOINT}/delete/linedata/${id}/${myCookie.Email}/${myCookie.Type}`, config);
+			const type = myCookie.Type || "PaySo";
+			const result = await fetch(`${PUBLIC_API_ENDPOINT}/delete/linedata/${id}/${myCookie.Email}/${type}`, config);
 			const datas = await result.json();
 			console.log(datas.message);
 			if (datas.message != "permission denied") {
@@ -315,7 +316,8 @@
 		console.log(id);
 		try {
 			// Make the fetch request
-			const result = await fetch(`${PUBLIC_API_ENDPOINT}/update/linedata/${id}/${status}/${myCookie.Email}/${myCookie.Type}`, config);
+			const type = myCookie.Type || "PaySo";
+			const result = await fetch(`${PUBLIC_API_ENDPOINT}/update/linedata/${id}/${status}/${myCookie.Email}/${type}`, config);
 			const datas = await result.json();
 			if (datas.message == "permission denied") {
 				const modal = document.getElementById('my_modal_4');
@@ -345,7 +347,8 @@
 		console.log(id);
 		try {
 			// Make the fetch request
-			const result = await fetch(`${PUBLIC_API_ENDPOINT}/updateline/roles/${id}/${roles}/${myCookie.Email}/${myCookie.Type}`, config);
+			const type = myCookie.Type || "PaySo";
+			const result = await fetch(`${PUBLIC_API_ENDPOINT}/updateline/roles/${id}/${roles}/${myCookie.Email}/${type}`, config);
 			const datas = await result.json();
 			if (datas.message == "permission denied") {
 				const modal = document.getElementById('my_modal_4');
