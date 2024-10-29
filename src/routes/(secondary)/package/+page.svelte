@@ -38,8 +38,6 @@
 		};
 		var result = await fetch(`${PUBLIC_API_ENDPOINT}/package/packageactive`, config);
 		const data = await result.json();
-		const text = await result.text();
-		console.log("+--56566++++++++++++++",data,text)
 		return data
 	};
 

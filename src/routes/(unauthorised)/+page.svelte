@@ -186,8 +186,10 @@
 	function setCookie(name: string, value: string, days: number) {
     let d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=payso-check-slip-dashboard-xi.vercel.app`;
-    console.log("cookie ", document.cookie);
+	const url = new URL(PUBLIC_DOMAIN); // Convert string to URL object
+    const domain = url.hostname; // Get the hostname (payso-check-slip-dashboard-xi.vercel.app)
+	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
+    console.log("cookie ", document.cookie,domain);
 }
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
