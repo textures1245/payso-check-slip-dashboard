@@ -239,10 +239,9 @@ function handleInputName(event: { target: { value: any; }; }) {
     <div class="container max-w-screen-lg py-5   mx-auto bg-white rounded-2xl shadow">
       <div class="flex  justify-start gap-5">
         <!-- Card ธนาคาร -->
-        <div class="w-full sm:w-auto">
-          <Card.Root class="w-full min-w-[120px] h-[150px]" on:click={showBankForm}>
-            <Card.Header class="flex flex-row items-center justify-center space-y-0 pb-2"></Card.Header>
-            <Card.Content class="px-5">
+        <div class="w-full sm:w-auto  ">
+          <Card.Root class="w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px]" on:click={showBankForm}>
+            <Card.Content class="px-5 h-full content-center">
               <div class="flex justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="60px" height="60px" viewBox="0 0 24 24">
                   <path fill="#0066ff" d="M11.5 1L2 6v2h19V6m-5 4v7h3v-7M2 22h19v-3H2m8-9v7h3v-7m-9 0v7h3v-7z" />
@@ -255,9 +254,8 @@ function handleInputName(event: { target: { value: any; }; }) {
   
         <!-- Card พร้อมเพย์ -->
         <div class="w-full sm:w-auto">
-          <Card.Root class="w-full min-w-[120px] h-[150px]" on:click={showPromptPayForm}>
-            <Card.Header class="flex flex-row items-center justify-center space-y-0 pb-2"></Card.Header>
-            <Card.Content class="px-5">
+          <Card.Root class="w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px]" on:click={showPromptPayForm}>
+            <Card.Content class="px-5 h-full content-center">
               <div class="flex justify-center">
                 <img src="{payment}" width="60" height="60" alt="พร้อมเพย์" />
               </div>
@@ -325,8 +323,8 @@ function handleInputName(event: { target: { value: any; }; }) {
             <div class="flex justify-center sm:justify-end lg:justify-end my-0 sm:my-2 lg:my-2 mx-2"><Button
               type="submit"
               variant="outline"
-              class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary"
-              style="width:25%;height:40px;" on:click={() => sendData(selectedBank.code,AccNoBank,NameTHBank,NameENBank,null,null,null,null)}>บันทึกข้อมูล</Button
+              class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary w-full sm:w-1/6 lg:w-1/6"
+              style="height:40px;" on:click={() => sendData(selectedBank.code,AccNoBank,NameTHBank,NameENBank,null,null,null,null)}>บันทึกข้อมูล</Button
             ></div>
             </div>
     </div>
@@ -388,11 +386,11 @@ function handleInputName(event: { target: { value: any; }; }) {
         <input class="  border-2 w-full px-2" style="height: 40px;" on:input={handleInputName} placeholder="ชื่อบัญชี ภาษาอังกฤษ" maxlength="100" bind:value={NameENPP} required>
     </div>
     </div>
-            <div class="flex justify-center sm:justify-end lg:justify-end my-2 mx-2  "><Button
+            <div class="flex justify-center sm:justify-end lg:justify-end my-0 sm:my-2 lg:my-2 mx-2  "><Button
               type="submit"
               variant="outline"
-              class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary"
-              style="width:25%;height:40px;" on:click={() => sendData(null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP)}>บันทึกข้อมูล</Button
+              class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary w-full sm:w-1/6 lg:w-1/6"
+              style="height:40px;" on:click={() => sendData(null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP)}>บันทึกข้อมูล</Button
             ></div>
       </div>
     </div>
