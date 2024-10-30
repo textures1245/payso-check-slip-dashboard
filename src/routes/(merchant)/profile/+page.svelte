@@ -360,6 +360,7 @@
 				const modal = document.getElementById('my_modal_1');
 				if (modal) {
 					modal.close();
+					location.reload();
 				}
 			}
 		} catch (error) {
@@ -572,7 +573,8 @@ if (isCheckedLink2) selectedText += selectedText ? ",PACKAGE" : "PACKAGE";
 if (isCheckedLink3) selectedText += selectedText ? ",USER_MANAGEMENT" : "USER_MANAGEMENT";
 if (isCheckedLink4) selectedText += selectedText ? ",SLIP_CHECKER" : "SLIP_CHECKER";
 if (isCheckedLink1 || isCheckedLink2 || isCheckedLink3 ||isCheckedLink4) {
-const result = `${myCookie.Id}:${date}:${selectedText}`;
+	const myDate = myCookie.RegisterDate.split("T")[0];
+const result = `${myCookie.Id}:${myDate}:${selectedText}`;
  base64Result = btoa(result); // แปลงเป็น Base64
  console.log(result);
 }

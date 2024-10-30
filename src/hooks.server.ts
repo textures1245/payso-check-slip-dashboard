@@ -31,7 +31,11 @@ export const handle = async ({ resolve, event }) => {
 				if (token.includes('-/All/-') ||  token.includes('DASHBOARD')) {
 					console.log('มีคำว่า -/All/- DASHBOARD อยู่ใน token');
 				} else {
-					redirect(302, '/package');
+					if(token.includes('PACKAGE')){
+						redirect(302, '/package');
+					}else{
+						redirect(302, '/profile');
+					}
 				}
 			}else{
 				redirect(302, '/');
@@ -46,7 +50,12 @@ export const handle = async ({ resolve, event }) => {
 				if (token.includes('-/All/-') ||  token.includes('PACKAGE')) {
 					console.log('มีคำว่า -/All/- PACKAGE อยู่ใน token');
 				} else {
-					redirect(302, '/dashboard');
+					
+					if(token.includes('DASHBOARD')){
+						redirect(302, '/dashboard');
+					}else{
+						redirect(302, '/profile');
+					}
 				}
 			}else{
 				redirect(302, '/');
