@@ -330,10 +330,11 @@ function closeErrorModal() {
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.Email}
 								>{item.Email}</td
 							>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MerchantName}
-								>{item.MerchantName}</td
-							>
+							>{item.MerchantName}</td
+						>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
+						
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.PackageName}
 								>{item.PackageName}</td
 							>
