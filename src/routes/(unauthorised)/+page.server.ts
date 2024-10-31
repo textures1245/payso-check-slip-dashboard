@@ -81,7 +81,7 @@ export const actions: import('./$types').Actions = {
 
                 const datacreate: LoginResponse = await resultcreate.json();
                 cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
-
+                cookies.set('account_create', "create", cookiesConfig);
                 return { data: datacreate.result[0], status: 'create' };
             } else {
                 cookies.set('merchant_account', JSON.stringify(datalogin.result[1]), cookiesConfig);
@@ -146,7 +146,6 @@ export const actions: import('./$types').Actions = {
 
                 const datacreate: LoginResponse = await resultcreate.json();
                 cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
-
                 return { data: datacreate.result[0], status: 'create' };
             } else {
                 cookies.set('merchant_account', JSON.stringify(datalogin.result[1]), cookiesConfig);
@@ -227,7 +226,7 @@ export const actions: import('./$types').Actions = {
 
                     const datacreate: LoginResponse = await resultcreate.json();
                     cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
-
+                    cookies.set('account_create', "create", cookiesConfig);
                     return { data: datacreate.result[0], status: 'create' };
                 } else {
                     cookies.set('merchant_account', JSON.stringify(datalogin.result[1]), cookiesConfig);

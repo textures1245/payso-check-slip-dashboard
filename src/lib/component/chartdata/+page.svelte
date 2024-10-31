@@ -210,6 +210,19 @@
 	const options = {
 		responsive: true,
 		plugins: {
+			legend: {
+            position: 'top',
+            align: 'start',
+            labels: {
+                padding: 20,  // ระยะห่างระหว่าง labels แต่ละตัวใน legend
+                usePointStyle: true,
+                pointStyle: 'rect',
+                boxWidth: 15,
+                boxHeight: 15
+            },
+            // เพิ่มระยะห่างระหว่าง legend กับกราฟ
+            margin: 20  // ปรับตัวเลขนี้ให้มากขึ้นถ้าต้องการระยะห่างมากขึ้น
+        },
 			datalabels: {
 				formatter: (
 					value: number,
@@ -269,7 +282,7 @@
 				offset: 0,
 				color: '#000',
 				font: {
-					size: 12, // ขนาดตัวอักษร
+					size: 8, // ขนาดตัวอักษร
 					weight: 'bold'
 				},
 				padding: {

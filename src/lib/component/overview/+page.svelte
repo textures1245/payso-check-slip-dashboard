@@ -391,7 +391,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 
 
 
-<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 " style="width: 100%;">
+<div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 " style="width: 100%;">
     <Card.Root >
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 "
@@ -410,8 +410,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 class="spin "
                 x="0px"
                 y="0px"
-                width="100"
-                height="100"
+                width="80"
+                height="80"
                 viewBox="0 0 128 128"
             >
                 <path
@@ -448,8 +448,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                   width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path
@@ -487,8 +487,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                   width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path
@@ -525,8 +525,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                   width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path
@@ -563,8 +563,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                    width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path
@@ -592,7 +592,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             <Card.Title class="text-xl  font-semibold text-center" style="height:60px">จำนวนทั้งหมดที่ใช้งาน </Card.Title>
             
         </Card.Header>
-        <Card.Content class="text-center ">
+        <Card.Content class="text-center my-1">
             <div>
                 <p class=" w-100 h-32 content-center text-8xl">
 
@@ -603,8 +603,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                    width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path
@@ -620,7 +620,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                {/if}
                 </p>
                 </div>
-                <div class=" w-100 mt-2 mb-3  " ><Button  class="w-4/5 h-12 text-white  bg-primary font-semibold hover:bg-[#050680]" on:click={dowloadExportExcel} >ดาวน์โหลดไฟล์ Excel</Button></div>
+                <div class=" w-100 mt-2 mb-3  " ><Button  class="w-4/5 h-12 text-white  bg-primary font-semibold hover:bg-[#050680]   text-wrap" on:click={dowloadExportExcel} >ดาวน์โหลดไฟล์ Excel</Button></div>
         </Card.Content>
     </Card.Root>
 </div>
