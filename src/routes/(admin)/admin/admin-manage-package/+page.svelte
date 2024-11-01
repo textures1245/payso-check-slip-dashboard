@@ -781,7 +781,7 @@
 					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.QuotaLimit}
 					min="1"
-					on:input={validateInput}
+					
 				/>
 			</label>
 			<label class="label cursor-pointer bg-white flex">
