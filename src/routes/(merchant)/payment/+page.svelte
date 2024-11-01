@@ -132,9 +132,11 @@
 	function startTimer() {
 		timerStarted = true; // ตั้งค่าสถานะว่าเริ่มต้นแล้ว
 		localStorage.setItem('remainingTime', seconds.toString());
+		const packagePrice = sessionStorage.getItem('packageprice');
+    	const packageName = sessionStorage.getItem('packagename');
 		function countdown() {
 			const isTimerCleared = localStorage.getItem('timerCleared');
-    
+		
     // ถ้าตัวจับเวลาถูกล้าง ไม่ให้ทำงานต่อ
     if (isTimerCleared === 'true') {
         console.log('Timer was cleared on another page.');
@@ -151,7 +153,7 @@
 			// localStorage.setItem('remainingTime', seconds.toString());
 			const data = await Check();
 			const datatest = await CheckLimit();  // ต้องลบถ้ามี postback 
-			console.log("Check : ",data,datatest)
+			// console.log("Check : ",data,datatest)
 			// ตรวจสอบว่าหมดเวลา  ถ้าเป็น Postback ต้องเปิด อันนี้ test ใช้ อินคิวรี ปิดก่อน
 			if(datatest.OrderAmount ==datatest.AmountLimit){  //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 				const modal = document.getElementById('my_modal_2');
@@ -163,17 +165,22 @@
 				}
 				
 			}
-			if (seconds <= 0 || data.length > 0) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
+			// if(packagePrice == "0.00" && packageName == "Free trial"){
+			// 		console.log("--------",packagePrice,packageName)
+			// 	}
+			
+			if (seconds <= 0 || data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial")) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
 				clearInterval((window as any).intervalId); // หยุดการนับเวลา
 				clearRemainingTime()
 				messageVisible = false; // ซ่อนข้อความ
-				if (data.length > 0) {   //    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
+				if (data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial") ) {   //    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
                     UpdatePackage()
 					if(datatest.OrderAmount == datatest.AmountLimit-1){   //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 						UpdateLimitPackage()
 					}
                     window.location.assign("/banklink")
 				}
+				
 				if (seconds <= 0 ) {
                     window.location.assign("/package")
 				}

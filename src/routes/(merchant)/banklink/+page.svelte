@@ -9,10 +9,15 @@
     let selectedBank: { imageUrl: any; name: any;code:any; } | null = null;
     let AccNoBank = ""
     let NameTHBank =""
+    let LastNameTHBank =""
     let NameENBank = ""
+    let LastNameENBank =""
     let AccNoPP = ""
     let NameTHPP =""
+    let LastNameTHPP =""
     let NameENPP = ""
+    let LastNameENPP =""
+    let selectedMethod='bank' 
     const banks = [
     { code: "002", name: "ธนาคารกรุงเทพ จำกัด (มหาชน)", imageUrl: "/src/lib/image/bank/bankkok.jpg" },
     { code: "004", name: "ธนาคารกสิกรไทย จำกัด (มหาชน)", imageUrl: "/src/lib/image/bank/kbank.jpg" },
@@ -52,20 +57,26 @@
   let isPromptPaySelected = false;
 
   function showBankForm() {
+    selectedMethod = "bank";
     isBankSelected = true;
     isPromptPaySelected = false;
     selectedOption = ""
     AccNoPP = ""
     NameTHPP =""
+    LastNameTHPP =""
     NameENPP = ""
+    LastNameENPP =""
     isOpen = false;
   }
 
   function showPromptPayForm() {
+    selectedMethod = "promptpay";
     isBankSelected = false;
     isPromptPaySelected = true;
     selectedBank =""
     AccNoBank = ""
+    LastNameTHBank =""
+    LastNameENBank =""
     NameTHBank =""
     NameENBank = ""
     isOpen = false;
@@ -115,7 +126,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       MerchantId: myCookie.Id,
       BankCode: info.Bank,
       PPTYPE: null,
-      AccountNo: info.AccountNo,
+      AccountNo: Number(info.AccountNo),
       TypeAccount: 'BANK',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -126,7 +137,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       MerchantId: myCookie.Id,
       BankCode: null,
       PPTYPE: info.PPType,
-      AccountNo: info.AccountNo,
+      AccountNo: Number(info.AccountNo),
       TypeAccount: 'PP',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -174,10 +185,14 @@ function sendData(
     AccNoBank: string | null,
     NameTHBank: string | null,
     NameENBank: string | null,
+    LastNameTHBank: string | null,
+    LastNameENBank: string | null,
     PPType: string | null,
     AccNoPP: string | null,
     NameTHPP: string | null,
-    NameENPP: string | null
+    NameENPP: string | null,
+    LastNameTHPP: string | null,
+    LastNameENPP: string | null
 ) {
     console.log('Bank:', Bank);
     console.log('AccNoBank:', AccNoBank);
@@ -194,16 +209,16 @@ function sendData(
         createBank({
             Bank: Bank,
             AccountNo: AccNoBank || '',
-            NameTH: NameTHBank || '',
-            NameEN: NameENBank || ''
+            NameTH: `${NameTHBank || ''} ${LastNameTHBank || ''}`,
+            NameEN: `${NameENBank || ''} ${LastNameENBank || ''}`
         });
     } else if (PPType) {
         // กรณี PPType
         createBank({
             PPType: PPType,
             AccountNo: AccNoPP || '',
-            NameTH: NameTHPP || '',
-            NameEN: NameENPP || ''
+            NameTH: `${NameTHPP || ''} ${LastNameTHPP || ''}`,
+            NameEN: `${NameENPP || ''} ${LastNameENPP || ''}`
         });
     } else {
         console.error('ไม่มีข้อมูล Bank หรือ PPType ที่ถูกต้อง');
@@ -212,13 +227,19 @@ function sendData(
 
 
 function handleInput(event: { target: { value: any; }; }) {
-  const inputValue = event.target.value;
-
-  // ตรวจสอบความยาวของค่าที่ป้อน ถ้ามากกว่า 15 ตัว ให้ตัดออก
-  if (inputValue.length > 15) {
-    event.target.value = inputValue.slice(0, 15);
+    // รับค่า input และอนุญาตเฉพาะตัวเลข
+    let inputValue = event.target.value.replace(/[^0-9]/g, '');
+    
+    // จำกัดความยาวไม่เกิน 15 ตัว
+    if (inputValue.length > 15) {
+      inputValue = inputValue.slice(0, 15);
+    }
+    
+    // อัพเดทค่าใน Svelte
+    // AccNoBank = inputValue;
+    // อัพเดทค่าใน input
+    event.target.value = inputValue;
   }
-}
 
 function handleInputName(event: { target: { value: any; }; }) {
   let inputValue = event.target.value;
@@ -234,13 +255,17 @@ function handleInputName(event: { target: { value: any; }; }) {
 
 
 </script>
-<div class="flex justify-center bg-primary-foreground  h-screen  custom-min-h px-10 py-0 sm:py-5  xl:px-24 lg:py-10  ">
+<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
     
-    <div class="container max-w-screen-lg py-5   mx-auto bg-white rounded-2xl shadow">
+    <div class="container max-w-screen-lg  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow ">
       <div class="flex  justify-start gap-5">
         <!-- Card ธนาคาร -->
         <div class="w-full sm:w-auto  ">
-          <Card.Root class="w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px]" on:click={showBankForm}>
+          <Card.Root class={`w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px] cursor-pointer 
+            transition-all duration-200
+            ${selectedMethod === 'bank' 
+              ? 'border-4 border-[#477DFF] bg-[#F0F4FF]' 
+              : 'border border-[#EAECF0]'}`} on:click={showBankForm}>
             <Card.Content class="px-5 h-full content-center">
               <div class="flex justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="60px" height="60px" viewBox="0 0 24 24">
@@ -254,7 +279,11 @@ function handleInputName(event: { target: { value: any; }; }) {
   
         <!-- Card พร้อมเพย์ -->
         <div class="w-full sm:w-auto">
-          <Card.Root class="w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px]" on:click={showPromptPayForm}>
+          <Card.Root class={`w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px] cursor-pointer 
+            transition-all duration-200
+            ${selectedMethod === 'promptpay' 
+              ? 'border-4 border-[#477DFF] bg-[#F0F4FF]' 
+              : 'border border-[#EAECF0]'}`} on:click={showPromptPayForm}>
             <Card.Content class="px-5 h-full content-center">
               <div class="flex justify-center">
                 <img src="{payment}" width="60" height="60" alt="พร้อมเพย์" />
@@ -302,30 +331,39 @@ function handleInputName(event: { target: { value: any; }; }) {
                   </div>
                 {/if}
               </div>
-              
+              <form on:submit|preventDefault={() => sendData(selectedBank.code, AccNoBank, NameTHBank, NameENBank, LastNameTHBank, LastNameENBank, null, null, null, null, null, null)}>
             <div class="my-5 px-2">
-                <input class="  border-2 w-full px-2 " style="height: 40px;" on:input={handleInput}  placeholder="เลขบัญชีธนาคาร" type="number" bind:value={AccNoBank} required>
+                <input class="  border-2 w-full px-2 " style="height: 40px;" on:input={handleInput}  placeholder="เลขบัญชีธนาคาร" bind:value={AccNoBank} required>
             </div>
             <hr >
-            <div class=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-1">
+            <div class=" grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1">
               
               <div class="px-2">
                 <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาไทย</div>
-                <input class="  border-2 w-full px-2 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อบัญชี ภาษาไทย" bind:value={NameTHBank}  required>
+                <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
+                  <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาไทย" bind:value={NameTHBank}  required></div>
+                  <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาไทย" bind:value={LastNameTHBank}  required></div>
+              </div>
             </div>
            
            
             <div class="px-2">
               <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาอังกฤษ</div>
-                <input class="  border-2 w-full px-2" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อบัญชี ภาษาอังกฤษ" bind:value={NameENBank} required>
+              <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
+                <div class="flex justify-start "> <input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาอังกฤษ" bind:value={NameENBank} required></div>
+                <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาอังกฤษ" bind:value={LastNameENBank}  required></div>
+            </div>
             </div>
             </div>
             <div class="flex justify-center sm:justify-end lg:justify-end my-0 sm:my-2 lg:my-2 mx-2"><Button
               type="submit"
               variant="outline"
               class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary w-full sm:w-1/6 lg:w-1/6"
-              style="height:40px;" on:click={() => sendData(selectedBank.code,AccNoBank,NameTHBank,NameENBank,null,null,null,null)}>บันทึกข้อมูล</Button
-            ></div>
+              style="height:40px;">บันทึกข้อมูล</Button
+            > <!-- on:click={() => sendData(selectedBank.code,AccNoBank,NameTHBank,NameENBank,null,null,null,null)} -->
+          </div> 
+           
+          </form>
             </div>
     </div>
     {/if}
@@ -369,29 +407,38 @@ function handleInputName(event: { target: { value: any; }; }) {
             {/if}
           </div>
         <!-- Inputs for PromptPay -->
+        <form on:submit|preventDefault={() => sendData(null,null,null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP,LastNameTHPP,LastNameENPP)}>
          <div class="my-5 px-2">
-        <input class="border-2 w-full px-2 " on:input={handleInput} style="height: 40px;" placeholder="ใส่ข้อมูลตามที่เลือก"  type="number" bind:value={AccNoPP} required>
+        <input class="border-2 w-full px-2 " on:input={handleInput} style="height: 40px;" placeholder="ใส่ข้อมูลตามที่เลือก" bind:value={AccNoPP} required>
     </div>
     <hr class="">
-    <div class=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-1 ">
+    <div class=" grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 ">
               
       <div class="px-2">
         <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาไทย</div>
-        <input class="  border-2 w-full px-2 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อบัญชี ภาษาไทย" bind:value={NameTHPP} required>
+        <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
+          <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96  " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาไทย" bind:value={NameTHPP} required></div>
+          <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาไทย" bind:value={LastNameTHPP}  required></div>
+      </div>
     </div>
    
    
     <div class="px-2">
       <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาอังกฤษ</div>
-        <input class="  border-2 w-full px-2" style="height: 40px;" on:input={handleInputName} placeholder="ชื่อบัญชี ภาษาอังกฤษ" maxlength="100" bind:value={NameENPP} required>
+      <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
+        <div class="flex justify-start "><input class=" border-2 w-full px-2 md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} placeholder="ชื่อของบัญชี ภาษาอังกฤษ" maxlength="100" bind:value={NameENPP} required></div>
+        <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาอังกฤษ" bind:value={LastNameENPP}  required></div>
+    </div>
     </div>
     </div>
             <div class="flex justify-center sm:justify-end lg:justify-end my-0 sm:my-2 lg:my-2 mx-2  "><Button
               type="submit"
               variant="outline"
               class="my-2 flex text-center py-0 px-0  text-white rounded-md hover:text-black bg-primary w-full sm:w-1/6 lg:w-1/6"
-              style="height:40px;" on:click={() => sendData(null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP)}>บันทึกข้อมูล</Button
+              style="height:40px;" >บันทึกข้อมูล</Button
             ></div>
+            <!-- on:click={() => sendData(null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP)} -->
+          </form>
       </div>
     </div>
   </div>
@@ -428,15 +475,15 @@ function handleInputName(event: { target: { value: any; }; }) {
 
 
 <style scoped>
-  .custom-min-h {
+  /* .custom-min-h {
     max-height: calc(100vh - 45px);
-}
-input[type="number"]::-webkit-inner-spin-button,
+} */
+/* input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
   input[type="number"] {
     -moz-appearance: textfield;
-  }
+  } */
 </style>
