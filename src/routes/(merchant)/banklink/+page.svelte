@@ -85,8 +85,8 @@
   // สถานะเปิดปิดเมนู dropdown
   let selectedOption = "";  // ตัวเลือกที่เลือกไว้
   const options = [
-    { label: "เบอร์โทร", value: "NATID",imageUrl: "/src/lib/image/phone.png" },
-    { label: "เลขประจำตัว", value: "MSISDN" ,imageUrl: "/src/lib/image/bg-people.png"},
+    { label: "เบอร์โทร", value: "MSISDN",imageUrl: "/src/lib/image/phone.png" },
+    { label: "เลขประจำตัว", value: "NATID" ,imageUrl: "/src/lib/image/bg-people.png"},
     { label: "e-Wallet ID", value: "EWALLETID",imageUrl: "/src/lib/image/phone.png" },
     { label: "บัญชีธนาคาร", value: "BANKAC",imageUrl: "/src/lib/image/bg-people.png" }
   ];
