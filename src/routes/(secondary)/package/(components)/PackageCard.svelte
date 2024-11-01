@@ -31,9 +31,14 @@
 		const hasShownWarning = sessionStorage.getItem('hasShownWarning');
 		const response = await GetProfile();
 		console.log(response)
+		if (response === "Free trial" && packageName === "Free trial") {
+        // Show error message or dispatch modal
+		dispatch('showModal1');
+        return;
+    }
 		if (response != "-" && !hasShownWarning) {
 			// ถ้ามี package และยังไม่เคยแสดง alert
-			dispatch('showModal');
+			dispatch('showModal2');
 			sessionStorage.setItem('hasShownWarning', 'true');
 			return; // ออกจากฟังก์ชันโดยยังไม่ดำเนินการต่อ
 		}
