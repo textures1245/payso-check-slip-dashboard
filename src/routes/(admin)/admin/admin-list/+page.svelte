@@ -339,7 +339,7 @@ function closeErrorModal() {
 								>{item.PackageName}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
-								>{(item.QuotaUsage + item.BalanceQuotaLeft).toLocaleString()}</td
+								>{(item.QuotaUsage).toLocaleString()}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
 								>{item.QuotaSpending.toLocaleString()}</td
