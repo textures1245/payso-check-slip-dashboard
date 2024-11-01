@@ -16,23 +16,60 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import Icon from '@iconify/svelte';
+	import { createEventDispatcher } from 'svelte';
+	import cookie from 'cookie';
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+
+	const dispatch = createEventDispatcher();
 
 	export let pkg: PackageCardProp, maxIndex: number ,index:number;
-	
-	function sendData(packagePrice: any,packageName:string,packageId:any) {
+	function getCookies() {
+		return cookie.parse(document.cookie);
+	}
+	async function sendData(packagePrice: any,packageName:string,packageId:any) {
 		// console.log(param1); // Replace with your actual URL
+		const hasShownWarning = sessionStorage.getItem('hasShownWarning');
+		const response = await GetProfile();
+		console.log(response)
+		if (response != "-" && !hasShownWarning) {
+			// ถ้ามี package และยังไม่เคยแสดง alert
+			dispatch('showModal');
+			sessionStorage.setItem('hasShownWarning', 'true');
+			return; // ออกจากฟังก์ชันโดยยังไม่ดำเนินการต่อ
+		}
 		sessionStorage.setItem('packageprice', packagePrice);
 		sessionStorage.setItem('packagename', packageName);
 		sessionStorage.setItem('packageId', packageId);
 		localStorage.removeItem('timerCleared');
 		window.location.assign("/payment")
 	}
+	const GetProfile = async () => {
+		// const email = sessionStorage.getItem('email');
+		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		// Create URL parameters from form data
+		let config = {
+			method: 'GET', // Use GET instead of POST
+			headers: {
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+			}
+		};
+
+		let url;
+			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
+		const result = await fetch(url, config);
+		const data = await result.json();
+		console.log(data);
+		return data.result.PackageName;
+	};
 	
 
 	// let progressClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'progress-dark-red' : 'progress-success';
 	// let bgClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'bg-[#FEF3F2]' : 'bg-green-200';
 	let textClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'text-red-600' : 'text-white';
 </script>
+
 
 <!-- <div class="relative max-w-sm rounded overflow-hidden shadow-lg">
 	
@@ -125,6 +162,7 @@
 
 
 
+
 <!-- <Card.Root class="space-y-8 w-[380px] px-4">
 	<Card.Header>
 		<div class="flex justify-between">
@@ -165,6 +203,7 @@
 		</Button>
 	</Card.Footer>
 </Card.Root> -->
+
 <style scoped>
     progress[value] {
         /* ปรับแต่งลักษณะของ progress bar */

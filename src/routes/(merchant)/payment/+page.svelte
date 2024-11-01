@@ -93,7 +93,7 @@
 		const storedTime = localStorage.getItem('remainingTime');
 		localStorage.removeItem('timerCleared');
 		const Img = localStorage.getItem('Img');
-		
+		sessionStorage.removeItem('hasShownWarning');
 		
 		
     if (storedTime) {
