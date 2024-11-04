@@ -37,12 +37,6 @@
 		}
 	};
 </script>
-<div class="relative flex flex-col items-center h-screen">
-	{#if !data.receiptIncomeOverview}
-		<div class="absolute inset-0 flex items-center justify-center z-50">
-			<div class="loading loading-spinner loading-lg text-black"></div>
-		</div>
-{:else}
 
 <div class="container space-y-5 px-8 mx-auto">
 	<span
@@ -134,8 +128,8 @@
 									d="M11 4.5v11.586l-4.5-4.5L5.086 13L12 19.914L18.914 13L17.5 11.586l-4.5 4.5V4.5z"
 								/>
 							</svg>
-							{`${Math.abs(((currentIncome - previousIncome) / previousIncome) * 100).toFixed(2)}%`}
-						{/if}
+							{Math.abs(((currentIncome - previousIncome) / previousIncome) * 100).toFixed(2)}%
+							{/if}
 					</span>
 				</div>
 			</div>
@@ -349,7 +343,6 @@
 		</div>
 	</div>
 
-	
 	<div id="charts-container" class="text-center *:h-[26rem] items-center gap-4 grid lg:grid-cols-2">
 		<div class="card bg-base-100 shadow-md p-4">
 			<h1 class="text-base xl:text-lg font-semibold text-left">ยอดการใช้งานรายวัน</h1>
@@ -369,18 +362,18 @@
 				></BarIncomeOverview>
 			</div>
 		</div>
-		
+	
 		<div class="card bg-base-100 col-span-full h-full shadow-md p-4">
 			<h1 class="text-base xl:text-lg font-semibold text-left">สถิติโดยรวมแบบรายเดือน</h1>
 			<div class="chart-container h-full">
 				<BarOverviewMonthly pData={data.monthlyOverview ?? []}></BarOverviewMonthly>
 			</div>
 		</div>
-		
+
 	</div>
-	
+
 	<div class="grid gap-2 w-full grid-flow-row lg:grid-flow-col lg:grid-cols-1">
-		
+	
 		<div class="flex gap-2 overflow-auto col-span-full lg:col-span-2 flex-wrap">
 			<Card.Root class="p-4 w-full">
 				<Card.Title>รายการตรวจสอบล่าสุด</Card.Title>
@@ -397,8 +390,7 @@
 		</div>
 	</div>
 </div>
-{/if}
-</div>
+
 
 <style>
 	.chart-container {
