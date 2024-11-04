@@ -37,9 +37,11 @@
 		}
 	};
 </script>
-{#if !data.receiptIncomeOverview}
-    <!-- เพิ่ม loading spinner เพื่อแสดงระหว่างการโหลดข้อมูล -->
-    <div class="loading loading-spinner loading-lg text-black"></div>
+<div class="relative flex flex-col items-center h-screen">
+	{#if !data.receiptIncomeOverview}
+		<div class="absolute inset-0 flex items-center justify-center z-50">
+			<div class="loading loading-spinner loading-lg text-black"></div>
+		</div>
 {:else}
 
 <div class="container space-y-5 px-8 mx-auto">
@@ -396,6 +398,7 @@
 	</div>
 </div>
 {/if}
+</div>
 
 <style>
 	.chart-container {
