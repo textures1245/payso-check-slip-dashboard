@@ -212,6 +212,19 @@
 		responsive: true,
 		maintainAspectRatio: false,
 		plugins: {
+			legend: {
+            position: 'top',
+            align: 'center',
+            labels: {
+                padding: 20,  // ระยะห่างระหว่าง labels แต่ละตัวใน legend
+                usePointStyle: true,
+                pointStyle: 'rect',
+                boxWidth: 15,
+                boxHeight: 15
+            },
+            // เพิ่มระยะห่างระหว่าง legend กับกราฟ
+            margin: 20  // ปรับตัวเลขนี้ให้มากขึ้นถ้าต้องการระยะห่างมากขึ้น
+        },
 			datalabels: {
 				formatter: (
 					value: number,
