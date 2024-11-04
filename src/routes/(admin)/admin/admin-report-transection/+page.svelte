@@ -16,6 +16,7 @@
 	let endDate = '';
 	let merchantName = '';
 	let transectionStatus = ''; 
+	let loadingPage = false;
 
 	$: totalPages = Math.ceil(totalItems / limit);
 
@@ -84,6 +85,7 @@
 		
 	) {
 		loading = true;
+		loadingPage = true;
 		try {
 			const formattedStartDate = formatDateInput(start);
 			const formattedEndDate = formatDateInput(end);
@@ -130,12 +132,20 @@
 			console.error('Error fetching data:', error);
 		} finally {
 			loading = false;
+			loadingPage = false;
 		}
 	}
 
 
 
 </script>
+
+<div class="relative flex flex-col items-center h-screen">
+	{#if loadingPage}
+		<div class="absolute inset-0 flex items-center justify-center z-50">
+			<div class="loading loading-spinner loading-lg text-black"></div>
+		</div>
+	{:else}
 
 <div class="w-full py-4 px-2 sm:px-4">
     <span class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center">
@@ -326,6 +336,8 @@
     
 
 
+</div>
+{/if}
 </div>
 
 
