@@ -126,7 +126,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       MerchantId: myCookie.Id,
       BankCode: info.Bank,
       PPTYPE: null,
-      AccountNo: Number(info.AccountNo),
+      AccountNo: info.AccountNo.toString(),
       TypeAccount: 'BANK',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -137,7 +137,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       MerchantId: myCookie.Id,
       BankCode: null,
       PPTYPE: info.PPType,
-      AccountNo: Number(info.AccountNo),
+      AccountNo: info.AccountNo.toString(),
       TypeAccount: 'PP',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -146,7 +146,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
     throw new Error('Invalid information provided');
   }
 
-    
+    console.log("AccountNo",payload.AccountNo)
   try {
     const response = await fetch(`${PUBLIC_API_ENDPOINT}/create/bank`, {
       method: 'POST',

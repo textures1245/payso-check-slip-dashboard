@@ -116,7 +116,7 @@ export const actions: import('./$types').Actions = {
         };
 
         try {
-            const result = await fetch(`${API_ENDPOINT}/merchant/login`, config);
+            const result = await fetch(`${API_ENDPOINT}/merchant/loginline`, config);
 
             const datalogin: LoginResponse = await result.json();
             console.log(datalogin);
