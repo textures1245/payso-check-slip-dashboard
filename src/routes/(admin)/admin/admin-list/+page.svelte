@@ -22,6 +22,7 @@
 	let showAlertModalSuccess = false;
 	let showAlertModalError = false;
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
+	let loadingPage = false
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
@@ -62,6 +63,7 @@
 
 	async function fetchData(currentOffset: number, currentLimit: number, searchMerchant: string) {
 		loadingtable = true;
+		loadingPage = true;
 		try {
 			const response = await fetch(
 				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`,
@@ -120,6 +122,7 @@
 			console.error('Error fetching data:', error);
 		} finally {
 			loadingtable = false;
+			loadingPage = false;
 		}
 	}
 
@@ -245,7 +248,14 @@ function closeErrorModal() {
 	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4">
+<div class="relative flex flex-col items-center h-screen">
+	{#if loadingPage}
+		<div class="absolute inset-0 flex items-center justify-center z-50">
+			<div class="loading loading-spinner loading-lg text-black"></div>
+		</div>
+	{:else}
+
+	<div class="relative w-full py-4 px-2 sm:px-4">
 	<span
 		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>รายชื่อผู้ใช้</span
@@ -388,37 +398,7 @@ function closeErrorModal() {
 				{/if}
 			</tbody>
 		</table>
-		<!-- <div class="grid w-full sm:w-auto bg-gray-100">
-			<div class="text-sm flex text-left">Page {currentPage} of {totalPages}</div>
-			<div class="flex justify-end">
-				<select
-					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-					bind:value={limit}
-					on:change={firstPage}
-				>
-					<option value={5}>5</option>
-					<option value={10}>10</option>
-					<option value={15}>15</option>
-					<option value={20}>20</option>
-					<option value={25}>25</option>
-					<option value={30}>30</option>
-				</select>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline mx-1"
-					on:click={prevPage}
-					disabled={currentPage === 1}
-				>
-					Previous
-				</button>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline"
-					on:click={nextPage}
-					disabled={currentPage === totalPages}
-				>
-					Next
-				</button>
-			</div>
-		</div> -->
+		
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
 				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
@@ -456,6 +436,11 @@ function closeErrorModal() {
 		</div>
 	</div>
 </div>
+{/if}
+</div>
+
+
+
 
 <dialog id="my_modal_1" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">
