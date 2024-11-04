@@ -423,7 +423,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             </svg>
         </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Success_count : 0}
                 </div>
             {/if}
@@ -461,7 +461,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.false_count : 0}
                 </div>
             {/if}
@@ -500,7 +500,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Pending_count : 0}
                 </div>
             {/if}
@@ -538,7 +538,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Request_Rejected_Count : 0}
                 </div>
             {/if}
@@ -576,7 +576,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Respond_Rejected_Count : 0}
                 </div>
             {/if}
@@ -616,7 +616,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
                {:else}
-                   <div class="text-8xl font-bold w-100">
+                   <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                        {dataOverview ? dataOverview.Total_count : 0}
                        
                    </div>
