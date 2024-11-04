@@ -132,9 +132,10 @@
 		const id = sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		console.log('id: ', id, typeof id);
 		let apiUrl;
-		if (myCookie && myCookie.Type === 'Line') {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
-		} else if (myCookie) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
+		// } else 
+		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
@@ -209,6 +210,7 @@
 	// Chart options
 	const options = {
 		responsive: true,
+		maintainAspectRatio: false,
 		plugins: {
 			datalabels: {
 				formatter: (
@@ -285,6 +287,15 @@
 		scales: {
 			x: {
 				stacked: true, // ปิดการซ้อนทับของแท่งบนแกน x
+				title: {
+                display: true,
+                text: 'วันที่ใช้งานในเดือน', // Add this line to show "วันที่" below the x-axis
+                color: 'black', // Customize the color of the title if needed
+                font: {
+                    size: 12,
+                    weight: 'bold'
+                }
+            },
 				ticks: {
 					color: 'black', // ตั้งค่าสีของอักษรบนแกน x
 					font: {
@@ -395,9 +406,10 @@
 		console.log('++++++++++', myCookie.Id, myCookie.Email);
 
 		let apiUrl;
-		if (myCookie && myCookie.Type === 'Line') {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
-		} else if (myCookie) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
+		// } else 
+		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
@@ -470,7 +482,7 @@
 	</div>
 	<div style="height:100%;width:96%;" class="content-center">
 		{#if searchPerformed == true}
-			<Bar {data} {options} />
+			<Bar {data} {options}  class="min-h"/>
 		{:else}
 			<Bar {data} {options} />
 		{/if}

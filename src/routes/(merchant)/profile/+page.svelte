@@ -146,9 +146,10 @@
 		};
 
 		let url;
-		if (myCookie && myCookie.Type === 'Line') {
-			url = `${PUBLIC_API_ENDPOINT}/merchant/profileline/${myCookie.Email}`;
-		} else if (myCookie.Id) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	url = `${PUBLIC_API_ENDPOINT}/merchant/profileline/${myCookie.Email}`;
+		// } else 
+		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
 			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
 		} else {
@@ -204,9 +205,10 @@
 		};
 
 		let url;
-		if (myCookie && myCookie.Type === 'Line') {
-			url = `${PUBLIC_API_ENDPOINT}/linedata/${myCookie.Email}/LINE`;
-		} else if (myCookie.Id) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	url = `${PUBLIC_API_ENDPOINT}/linedata/${myCookie.Email}/LINE`;
+		// } else
+		 if (myCookie.Id) {
 			console.log('Get by Merchant Id');
 			url = `${PUBLIC_API_ENDPOINT}/linedata/${myCookie.Id}/-`;
 		} else {
@@ -573,7 +575,7 @@ if (isCheckedLink2) selectedText += selectedText ? ",PACKAGE" : "PACKAGE";
 if (isCheckedLink3) selectedText += selectedText ? ",USER_MANAGEMENT" : "USER_MANAGEMENT";
 if (isCheckedLink4) selectedText += selectedText ? ",SLIP_CHECKER" : "SLIP_CHECKER";
 if (isCheckedLink1 || isCheckedLink2 || isCheckedLink3 ||isCheckedLink4) {
-	const myDate = myCookie.MerchantId.split("T")[0];
+	const myDate = myCookie.RegisterDate.split("T")[0];
 const result = `${myCookie.Id}:${myDate}:${selectedText}`;
  base64Result = btoa(result); // แปลงเป็น Base64
  console.log(result);
