@@ -16,15 +16,11 @@
 	import { onMount } from 'svelte';
 
 	export let data: PageData;
+	
 
 	let loading = true;
 
-	onMount(() => {
-		// ตั้งค่า loading ให้เป็น false เมื่อข้อมูลโหลดเสร็จ
-		if (data) {
-			loading = false;
-		}
-	});
+
 
 	const date15DaysAgo = new Date();
 	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
@@ -48,13 +44,7 @@
 	};
 </script>
 
-{#if loading}
-	<div class="flex justify-center items-center h-screen">
-		<div class="absolute inset-0 flex items-center justify-center ">
-			<div class="loading loading-spinner loading-lg text-black"></div>
-		</div>
-	</div>
-{:else}
+
 <div class="container space-y-5 px-8 mx-auto">
 	<span
 		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
@@ -407,7 +397,7 @@
 		</div>
 	</div>
 </div>
-{/if}
+
 
 
 <style>

@@ -169,12 +169,7 @@
 	};
 </script>
 
-<div class="relative flex flex-col items-center h-screen">
-	{#if loadingPage}
-		<div class="absolute inset-0 flex items-center justify-center z-50">
-			<div class="loading loading-spinner loading-lg text-black"></div>
-		</div>
-	{:else}
+
 		<div class="w-full py-4 sm:px-4 overflow-x-auto">
 			<span
 				class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
@@ -211,14 +206,7 @@
 					<option value="ADMIN_LOGIN">ADMIN_LOGIN</option>
 				</select>
 
-				<!-- <input
-					type="text"
-					placeholder="กิจกรรม"
-					bind:value={action}
-					on:input={handleInputAction}
-					class="input input-bordered bg-white my-1 mx-2"
-					maxlength="100"
-				/> -->
+				
 
 				<input
 					type="text"
@@ -240,7 +228,7 @@
 					>
 				</div>
 			</div>
-
+		
 			<div>
 				<table
 					class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white"
@@ -377,33 +365,7 @@
 					</tbody>
 				</table>
 
-				<!-- <div class="grid col-2 w-full justify-end sm:w-auto">
-			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
-			<div class="flex">
-				<select
-					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-					bind:value={limit}
-					on:change={handleSearch}
-				>
-					<option value={5}>5</option>
-					<option value={10}>10</option>
-					<option value={15}>15</option>
-					<option value={20}>20</option>
-					<option value={25}>25</option>
-					<option value={30}>30</option>
-				</select>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary mx-1"
-					on:click={prevPage}
-					disabled={currentPage === 1}>Previous</button
-				>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline btn-primary"
-					on:click={nextPage}
-					disabled={currentPage === totalPages}>Next</button
-				>
-			</div>
-		</div> -->
+				
 				<div class="grid w-full sm:w-auto mt-3">
 					<div class="flex items-center justify-between w-full">
 						<div class="text-sm">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
@@ -441,8 +403,8 @@
 				</div>
 			</div>
 		</div>
-	{/if}
-</div>
+	
+
 
 <dialog id="edit_modal" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">

@@ -36,7 +36,8 @@
 						name="status"
 						id="status"
 					>
-						<option value="">สถานะ</option>
+						<option disabled selected>สถานะ</option>
+						<option value="">ทั้งหมด</option>
 						<option value="SUCCESS">SUCCESS</option>
 						<option value="PENDING">PENDING</option>
 						<option value="FAILED">FAILED</option>

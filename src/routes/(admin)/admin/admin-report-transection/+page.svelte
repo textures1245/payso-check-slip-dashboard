@@ -140,12 +140,7 @@
 
 </script>
 
-<div class="relative flex flex-col items-center h-screen">
-	{#if loadingPage}
-		<div class="absolute inset-0 flex items-center justify-center z-50">
-			<div class="loading loading-spinner loading-lg text-black"></div>
-		</div>
-	{:else}
+
 
 <div class="w-full py-4 px-2 sm:px-4">
     <span class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center">
@@ -207,6 +202,56 @@
 		</div>
 	  </div>
 
+	  <div class="mb-5">
+		<div class="flex ">
+			<div class="text-success-bg text-white badge badge-outline">
+				SUCCESS
+			</div>
+			<div class="ml-2">
+				: การตรวจธุรกรรมนั้นสำเร็จ
+			</div>
+		</div>
+		<div class="flex mt-1">
+			<div class="text-pending-bg badge badge-outline">
+				PENDING
+			</div>
+			<div class="ml-2">
+				: รอดำเนินการตรวจสอบธุรกรรม
+			</div>
+		</div>
+		<div class="flex mt-1">
+			<div class="text-rejected-bg badge badge-outline">
+				FAILED
+			</div>
+			<div class="ml-5">
+				: การตรวจธุรกรรมนั้นไม่สำเร็จ
+			</div>
+		</div>
+		<div class="flex mt-1">
+			<div class="text-respond-rejected-bg badge badge-outline">
+				RES RJECTED
+			</div>
+			<div class="ml-2">
+				: Response Rejected การตอบกลับถูกปฏิเสธ
+			</div>
+		</div>
+		<div class="flex mt-1">
+			<div class="text-respond-rejected-bg badge badge-outline">
+				REQ RJECTED
+			</div>
+			<div class="ml-2">
+				: Request Rejected การส่งคำขอถูกปฏิเสธ
+			</div>
+		</div>
+		<div class="flex mt-1">
+			<div class="text-respond-rejected-bg badge badge-outline">
+				BA NM
+			</div>
+			<div class="ml-2">
+				: Bank Account Not Match เลขบัญชีธนาคารของผู้รับไม่ตรงกับที่ลงทะเบียน
+			</div>
+		</div>
+	</div>
       <div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
 
@@ -276,7 +321,7 @@
 								class="badge badge-outline badge-sm uppercase text-xs flex items-center"
 							 >
 							 {item.TransectionStatus.toLocaleUpperCase() === 'RESPOND_REJECTED' 
-							 ? 'RSP RJECTED'
+							 ? 'RES RJECTED'
 							 : item.TransectionStatus.toLocaleUpperCase() === 'REQUEST_REJECTED'
 							 ? 'REQ RJECTED'
 							 : item.TransectionStatus.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'
@@ -337,8 +382,7 @@
 
 
 </div>
-{/if}
-</div>
+
 
 
 <style>
