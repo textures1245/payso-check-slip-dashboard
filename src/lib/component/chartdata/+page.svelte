@@ -51,9 +51,7 @@
 			const counts = {
 				SUCCESS: Array(newlabels.length).fill(0),
 				FAILED: Array(newlabels.length).fill(0),
-				PENDING: Array(newlabels.length).fill(0),
-				RESPOND_REJECTED: Array(newlabels.length).fill(0),
-				REQUEST_REJECTED: Array(newlabels.length).fill(0)
+				BANK_ACC_NOT_MATCH: Array(newlabels.length).fill(0)
 			};
 			dataChart.forEach((item: { CreatedAt: any; Status: any }) => {
 				const labelIndex = newlabels.indexOf(formatDate(item.CreatedAt));
@@ -64,16 +62,12 @@
 							counts.SUCCESS[labelIndex]++;
 							break;
 						case 'FAILED':
+						case 'REQUEST_REJECTED':
+						case 'RESPOND_REJECTED':
 							counts.FAILED[labelIndex]++;
 							break;
-						case 'PENDING':
-							counts.PENDING[labelIndex]++;
-							break;
-						case 'RESPOND_REJECTED':
-							counts.RESPOND_REJECTED[labelIndex]++;
-							break;
-						case 'REQUEST_REJECTED':
-							counts.REQUEST_REJECTED[labelIndex]++;
+						case 'BANK_ACC_NOT_MATCH':
+							counts.BANK_ACC_NOT_MATCH[labelIndex]++;
 							break;
 						default:
 							break;
@@ -84,10 +78,8 @@
 			data.labels = newlabels;
 			data.datasets[0].data = counts.SUCCESS;
 			data.datasets[1].data = counts.FAILED;
-			data.datasets[2].data = counts.PENDING;
-			data.datasets[3].data = counts.REQUEST_REJECTED;
-			data.datasets[4].data = counts.RESPOND_REJECTED;
-			data.datasets[5].data = Array.from({ length: newlabels.length }, () => 0);
+			data.datasets[2].data = counts.BANK_ACC_NOT_MATCH;
+			data.datasets[3].data = Array.from({ length: newlabels.length }, () => 0);
 
 			// Log the results
 			console.log(
@@ -95,9 +87,7 @@
 				newlabels,
 				counts.SUCCESS,
 				counts.FAILED,
-				counts.RESPOND_REJECTED,
-				counts.REQUEST_REJECTED,
-				counts.PENDING
+				counts.BANK_ACC_NOT_MATCH
 			);
 
 			if (chart) {
@@ -134,7 +124,7 @@
 		let apiUrl;
 		// if (myCookie && myCookie.Type === 'Line') {
 		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
-		// } else 
+		// } else
 		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
 		} else {
@@ -145,7 +135,8 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			}
 		};
 		var result = await fetch(apiUrl, config);
@@ -177,24 +168,10 @@
 				borderWidth: 1
 			},
 			{
-				label: 'สลิปรอกาตรวจสอบ',
+				label: 'สลิปชื่อบัญชีไม่ตรง',
 				data: successValues,
 				backgroundColor: 'rgba(247, 144, 9, 0.8)', // ส้มพื้นหลัง
 				borderColor: 'rgba(247, 144, 9, 1)', // ส้มขอบ
-				borderWidth: 1
-			},
-			{
-				label: 'สลิปคำขอถูกปฏิเสธ',
-				data: successValues,
-				backgroundColor: 'rgba(133, 136, 142, 0.8)', // เทาพื้นหลัง
-				borderColor: 'rgba(133, 136, 142, 1)', // เทาขอบ
-				borderWidth: 1
-			},
-			{
-				label: 'สลิปปฏิเสธการตอบ',
-				data: successValues,
-				backgroundColor: 'rgba(19, 83, 236, 0.8)', // น้ำเงินพื้นหลัง
-				borderColor: 'rgba(19, 83, 236, 1)', // น้ำเงินขอบ
 				borderWidth: 1
 			},
 			{
@@ -213,18 +190,18 @@
 		maintainAspectRatio: false,
 		plugins: {
 			legend: {
-            position: 'top',
-            align: 'center',
-            labels: {
-                padding: 20,  // ระยะห่างระหว่าง labels แต่ละตัวใน legend
-                usePointStyle: true,
-                pointStyle: 'rect',
-                boxWidth: 15,
-                boxHeight: 15
-            },
-            // เพิ่มระยะห่างระหว่าง legend กับกราฟ
-            margin: 20  // ปรับตัวเลขนี้ให้มากขึ้นถ้าต้องการระยะห่างมากขึ้น
-        },
+				position: 'top',
+				align: 'center',
+				labels: {
+					padding: 20, // ระยะห่างระหว่าง labels แต่ละตัวใน legend
+					usePointStyle: true,
+					pointStyle: 'rect',
+					boxWidth: 15,
+					boxHeight: 15
+				},
+				// เพิ่มระยะห่างระหว่าง legend กับกราฟ
+				margin: 20 // ปรับตัวเลขนี้ให้มากขึ้นถ้าต้องการระยะห่างมากขึ้น
+			},
 			datalabels: {
 				formatter: (
 					value: number,
@@ -237,7 +214,6 @@
 						};
 					}
 				) => {
-					
 					const { datasetIndex, dataIndex, chart } = context;
 					const datasets = chart.data.datasets;
 					console.log('total ', datasetIndex, 'datasets', datasets.length, datasetIndex);
@@ -248,16 +224,15 @@
 							.reduce((sum: number, dataset: { data: { [x: string]: any } }, index: any) => {
 								// ตรวจสอบว่า dataset ถูกซ่อนไว้หรือไม่โดยใช้ getDatasetMeta
 								const meta = chart.getDatasetMeta(index);
-                
+
 								if (!meta.hidden) {
-                  
 									const value = dataset.data[dataIndex];
 									return sum + (typeof value === 'number' ? value : 0);
 								}
 								return sum;
 							}, 0);
-              
-              return total === 0 ? '' : `T : ${total}`;
+
+						return total === 0 ? '' : ` ${total}`;
 
 						// return value === 0 ? '' : `${total}`;
 					} else {
@@ -301,14 +276,14 @@
 			x: {
 				stacked: true, // ปิดการซ้อนทับของแท่งบนแกน x
 				title: {
-                display: true,
-                text: 'วันที่ใช้งานในเดือน', // Add this line to show "วันที่" below the x-axis
-                color: 'black', // Customize the color of the title if needed
-                font: {
-                    size: 12,
-                    weight: 'bold'
-                }
-            },
+					display: true,
+					text: 'วันที่ใช้งานในเดือน', // Add this line to show "วันที่" below the x-axis
+					color: 'black', // Customize the color of the title if needed
+					font: {
+						size: 12,
+						weight: 'bold'
+					}
+				},
 				ticks: {
 					color: 'black', // ตั้งค่าสีของอักษรบนแกน x
 					font: {
@@ -349,9 +324,7 @@
 		const counts = {
 			SUCCESS: Array(newlabels.length).fill(0),
 			FAILED: Array(newlabels.length).fill(0),
-			PENDING: Array(newlabels.length).fill(0),
-			RESPOND_REJECTED: Array(newlabels.length).fill(0),
-			REQUEST_REJECTED: Array(newlabels.length).fill(0)
+			BANK_ACC_NOT_MATCH: Array(newlabels.length).fill(0)
 		};
 		dataSearch.forEach((item) => {
 			const labelIndex = newlabels.indexOf(formatDate(item.CreatedAt));
@@ -362,16 +335,12 @@
 						counts.SUCCESS[labelIndex]++;
 						break;
 					case 'FAILED':
+					case 'REQUEST_REJECTED':
+					case 'RESPOND_REJECTED':
 						counts.FAILED[labelIndex]++;
 						break;
-					case 'PENDING':
-						counts.PENDING[labelIndex]++;
-						break;
-					case 'RESPOND_REJECTED':
-						counts.RESPOND_REJECTED[labelIndex]++;
-						break;
-					case 'REQUEST_REJECTED':
-						counts.REQUEST_REJECTED[labelIndex]++;
+					case 'BANK_ACC_NOT_MATCH':
+						counts.BANK_ACC_NOT_MATCH[labelIndex]++;
 						break;
 					default:
 						break;
@@ -381,18 +350,14 @@
 		data.labels = newlabels;
 		data.datasets[0].data = counts.SUCCESS;
 		data.datasets[1].data = counts.FAILED;
-		data.datasets[2].data = counts.PENDING;
-		data.datasets[3].data = counts.REQUEST_REJECTED;
-		data.datasets[4].data = counts.RESPOND_REJECTED;
-		data.datasets[5].data = Array.from({ length: newlabels.length }, () => 0);
+		data.datasets[2].data = counts.BANK_ACC_NOT_MATCH;
+		data.datasets[3].data = Array.from({ length: newlabels.length }, () => 0);
 		console.log(
 			'ข้อมูล res :',
 			newlabels,
 			counts.SUCCESS,
 			counts.FAILED,
-			counts.RESPOND_REJECTED,
-			counts.REQUEST_REJECTED,
-			counts.PENDING
+			counts.BANK_ACC_NOT_MATCH
 		);
 
 		if (chart) {
@@ -421,7 +386,7 @@
 		let apiUrl;
 		// if (myCookie && myCookie.Type === 'Line') {
 		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
-		// } else 
+		// } else
 		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
 		} else {
@@ -431,7 +396,8 @@
 		const config = {
 			method: 'GET',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			}
 		};
 		const result = await fetch(apiUrl, config);
@@ -466,9 +432,9 @@
 	};
 </script>
 
-<div class="grid gap-4 md:grid-cols-1 lg:grid-cols-1" style="height: 100%;">
-	<div class="flex justify-between my-2 font-semibold" style="height: 30px;width:96%">
-		<div>กราฟแสดงข้อมูลในช่วงเดือน</div>
+<div class="" style="height: 100%;">
+	<div class="flex justify-between my-2 font-semibold" style="height: 30px;width:100%">
+		<div >กราฟแสดงข้อมูลในช่วงเดือน</div>
 		<div class="flex justify-end">
 			<div class=" relative mx-3">
 				<input
@@ -493,11 +459,11 @@
 			</Button>
 		</div>
 	</div>
-	<div style="height:100%;width:96%;" class="content-center">
+	<div style="width:96%;min-height: 21.8rem;" class="content-center h-80 md:h-80 lg:h-full mt-5 sm:mt-0 lg:mt-0  ">
 		{#if searchPerformed == true}
-			<Bar {data} {options}  class="min-h"/>
+			<Bar {data} {options} class="min-h-full min-w-full" />
 		{:else}
-			<Bar {data} {options} />
+			<Bar {data} {options} class="min-h-full min-w-full" />
 		{/if}
 	</div>
 </div>
