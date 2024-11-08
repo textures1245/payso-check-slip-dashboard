@@ -6,7 +6,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { PUBLIC_DOMAIN } from '$env/static/public';
-	import { PUBLIC_DOMAIN } from '$env/static/public';
 	import logo_customer from '$lib/image/customer_logo.png';
 	let cookieValues = null;
 	let profiles: any[] = [];
