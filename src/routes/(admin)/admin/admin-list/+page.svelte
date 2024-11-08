@@ -180,7 +180,7 @@
 		const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 				'Actor-Id': myCookie.Id,
 				'Actor-Name': myCookie.Email,
 				'Actor-Role': 'ADMIN'
