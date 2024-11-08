@@ -1,20 +1,12 @@
-# before_script:
-#   - docker info
-#   - docker-compose version
-
-# stages:
-#   - deploy
-
-# deploy:
-#   stage: deploy
-#   script:
-#     - echo $ENV | sed 's/ /\n/g' > .env
-#     - docker-compose --env-file .env build || exit 1
-#     - docker-compose up -d --build --remove-orphans || exit 1
-#   environment:
-#     name: production
-#     url: http://165.22.106.189
-#   only:
-#     - staging-main
-#   tags:
-#     - deployment
+stages:          
+  - build
+  
+build-job:      
+  stage: build
+  tags:
+    - development  # เพิ่ม Tag ให้ตรงกับ Runner
+  script:
+    - export NODE_OPTIONS="--max-old-space-size=1024" # จำกัดหน่วยความจำในการ build แค่ 1GB เท่านั้น
+    - echo $ENV | sed 's/ /\n/g' > .env
+    - cat .env
+    - docker compose up --build
