@@ -34,6 +34,8 @@
 	let showAlertModalUpdateError = false;
 	let totalItems = 0;
 	let loadingtable = false;
+	let loadingPage = false;
+	
 
 	$: totalPages = Math.ceil(totalItems / limit);
 	console.log('total item', totalItems);
@@ -88,7 +90,7 @@
             {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'text/plain',
+                    'Content-Type': 'application/json'
                     'Actor-Id': myCookie.Id,
                     'Actor-Name': myCookie.Email,
                     'Actor-Role': 'ADMIN'
@@ -119,13 +121,14 @@
 
 	async function searchfetchData(packagename: string, currentOffset: number, currentLimit: number) {
     loadingtable = true;
+	loadingPage = true;
     try {
         const response = await fetch(
             `${PUBLIC_API_ENDPOINT}/package/search/getpackage?searchpackage=${packagename}&offset=${currentOffset}&limit=${currentLimit}`,
             {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'text/plain',
+                    'Content-Type': 'application/json'
                 },
             }
         );
@@ -178,6 +181,7 @@
         console.error('Error fetching data:', error);
     } finally {
         loadingtable = false;
+		loadingPage = false;
     }
 }
 
@@ -229,7 +233,7 @@
 			const response = await fetch(`${PUBLIC_API_ENDPOINT}/package/create/packages`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'text/plain',
+					'Content-Type': 'application/json'
 					'Actor-Id': myCookie.Id,
 					'Actor-Name': myCookie.Email,
 					'Actor-Role': 'ADMIN'
@@ -304,7 +308,7 @@
 			const response = await fetch(`${PUBLIC_API_ENDPOINT}/update/package/${editingPackage.Id}`, {
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'text/plain',
+					'Content-Type': 'application/json'
 					'Actor-Id': myCookie.Id,
 					'Actor-Name': myCookie.Email,
 					'Actor-Role': 'ADMIN'
@@ -405,6 +409,8 @@
 		}
 	}
 </script>
+
+
 
 <div class="w-full py-4 px-2 sm:px-4">
 	<span
@@ -624,6 +630,8 @@
 	</div>
 </div>
 
+
+
 <dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
     <div class="modal-box">
         <div class="text-lg font-bold flex justify-center">
@@ -781,7 +789,7 @@
 					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.QuotaLimit}
 					min="1"
-					on:input={validateInput}
+					
 				/>
 			</label>
 			<label class="label cursor-pointer bg-white flex">

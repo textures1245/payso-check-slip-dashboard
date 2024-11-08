@@ -23,7 +23,8 @@ export class MerchantExternalAPI implements MerchantController {
 			method: 'GET',
 			url: `${this.endpoint}/merchant/get-merchants-with-pkg?${merChantIdorName ? `searchMerchant=${merChantIdorName}&` : ''}${merChantRole ? `merchantRole=${merChantRole}&` : ''}${getQueryFilterParams(qOpt,false)}`,
 			headers: {
-				'Access-Control-Allow-Origin': this.endpoint
+				'Access-Control-Allow-Origin': this.endpoint,
+				'Content-Type': 'application/json',
 			}
 		};
 		return axios(config).then((response) => {

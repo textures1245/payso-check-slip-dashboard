@@ -16,6 +16,7 @@
     localStorage.removeItem('remainingTime'); // การใช้งานที่ถูกต้อง
 	localStorage.removeItem('Img');
 	localStorage.removeItem('RefNo');
+	sessionStorage.removeItem('hasShownWarning');
     if ((window as any).intervalId) {
     clearInterval((window as any).intervalId);
     console.log('Timer stopped.');

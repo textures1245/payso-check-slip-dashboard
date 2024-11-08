@@ -5,12 +5,12 @@
 	import Icon from '@iconify/svelte';
 	import { Colors } from 'chart.js';
     import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	
 	import { onMount } from 'svelte';
 	let packages: any[] = [];
 	let maxIndex ='';
 	let loading = false;
 	let randomNumber =0;
-	
 
 	onMount(async () => {
 		clearRemainingTime()
@@ -33,7 +33,7 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'application/json',
             }
 		};
 		var result = await fetch(`${PUBLIC_API_ENDPOINT}/package/packageactive`, config);
@@ -55,7 +55,19 @@ function clearRemainingTime() {
 }
 
 
-	
+	function showModal1() {
+		const modal1 = document.getElementById('my_modal_1') as HTMLDialogElement;
+		if (modal1) {
+			modal1.showModal();
+		}
+	}
+
+	function showModal2() {
+		const modal2 = document.getElementById('my_modal_2') as HTMLDialogElement;
+		if (modal2) {
+			modal2.showModal();
+		}
+	}
 </script>
 {#if loading}
 <svg xmlns="http://www.w3.org/2000/svg" class="spin" x="0px" y="0px" width="100" height="100" viewBox="0 0 128 128">
@@ -72,7 +84,7 @@ function clearRemainingTime() {
 		{#each packages as pkg,i}
         {#if pkg.OrderAmount != pkg.AmountLimit || pkg.AmountLimit==0  }
 			<div class=" lg:my-3 md:my-3 sm:my-2 my-3 lg:mx-2 md:mx-2 sm:mx-0 mx-0 transition-transform hover:scale-105 drop-shadow-lg" >
-				<PackageCard pkg={pkg} maxIndex={randomNumber} index={i}  />
+				<PackageCard pkg={pkg} maxIndex={randomNumber} index={i} on:showModal1={showModal1} on:showModal2={showModal2} />
 			</div>
             {/if}
 		{/each}
@@ -84,7 +96,33 @@ function clearRemainingTime() {
 
 {/if}
 
+<dialog id="my_modal_2" class="modal">
+	<div class="modal-box">
+	  <div class="text-lg font-bold flex justify-center">
+		<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15">
+		  <path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
+		</svg>
+	  </div>
+	  <p class="py-4 text-center font-bold text-2xl">คุณมีแพ็คเกจอยู่แล้ว คุณต้องการเปลี่ยนแพ็คเกจใช่หรือไม่?</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+	  <button>close</button>
+	</form>
+  </dialog>
 
+  <dialog id="my_modal_1" class="modal">
+	<div class="modal-box">
+	  <div class="text-lg font-bold flex justify-center">
+		<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15">
+		  <path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
+		</svg>
+	  </div>
+	  <p class="py-4 text-center font-bold text-2xl">ไม่สามารถซื้อแพ็คเกจ Free trial ได้เนื่องจากคุณกำลังใช้งาน Free trial อยู่ กรุณาเลือกแพ็คเกจอื่น</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+	  <button>close</button>
+	</form>
+  </dialog>
 
 <style scoped>
 .spin {

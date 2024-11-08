@@ -42,7 +42,8 @@ export class TransactionExternalAPI implements TransactionController {
 			method: 'GET',
 			url: `${this.endpoint}/transaction/get-invalid${getQueryFilterParams(qOpt)}`,
 			headers: {
-				'Access-Control-Allow-Origin': this.endpoint
+				'Access-Control-Allow-Origin': this.endpoint,
+				'Content-Type': 'application/json',
 			}
 		};
 		return axios(config).then((response) => {

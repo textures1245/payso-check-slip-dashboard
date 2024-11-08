@@ -22,6 +22,7 @@
 	let showAlertModalSuccess = false;
 	let showAlertModalError = false;
 	let showAlertModal = false; // ตัวแปรสำหรับแสดง modal
+	let loadingPage = false
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
@@ -62,9 +63,16 @@
 
 	async function fetchData(currentOffset: number, currentLimit: number, searchMerchant: string) {
 		loadingtable = true;
+		loadingPage = true;
 		try {
 			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`
+				`${PUBLIC_API_ENDPOINT}/merchant/get-merchants-with-pkg?offset=${offset}&limit=${limit}&searchMerchant=${keyWord}`,
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				}
 			);
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
@@ -114,12 +122,18 @@
 			console.error('Error fetching data:', error);
 		} finally {
 			loadingtable = false;
+			loadingPage = false;
 		}
 	}
 
 	async function fetchDataPkg() {
 		try {
-			const response = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/packages`);
+			const response = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/packages`, 	{
+					headers: {
+						'Content-Type': 'application/json',
+						'ngrok-skip-browser-warning': 'true'
+					}
+				});
 			if (!response.ok) {
 				throw new Error('Failed to fetch data');
 			}
@@ -166,7 +180,7 @@
 		const updatePackageResponse = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'text/plain',
+				'Content-Type': 'application/json'
 				'Actor-Id': myCookie.Id,
 				'Actor-Name': myCookie.Email,
 				'Actor-Role': 'ADMIN'
@@ -186,7 +200,7 @@
 			{
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'text/plain'
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({ Status: editingUser.Status })
 			}
@@ -234,7 +248,8 @@ function closeErrorModal() {
 	}
 </script>
 
-<div class="w-full py-4 px-2 sm:px-4">
+
+	<div class="relative w-full py-4 px-2 sm:px-4">
 	<span
 		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
 		>รายชื่อผู้ใช้</span
@@ -319,15 +334,16 @@ function closeErrorModal() {
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.Email}
 								>{item.Email}</td
 							>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.MerchantName}
-								>{item.MerchantName}</td
-							>
+							>{item.MerchantName}</td
+						>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantRole}</td>
+						
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.PackageName}
 								>{item.PackageName}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
-								>{(item.QuotaUsage + item.BalanceQuotaLeft).toLocaleString()}</td
+								>{(item.QuotaUsage).toLocaleString()}</td
 							>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-right"
 								>{item.QuotaSpending.toLocaleString()}</td
@@ -376,37 +392,7 @@ function closeErrorModal() {
 				{/if}
 			</tbody>
 		</table>
-		<!-- <div class="grid w-full sm:w-auto bg-gray-100">
-			<div class="text-sm flex text-left">Page {currentPage} of {totalPages}</div>
-			<div class="flex justify-end">
-				<select
-					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-					bind:value={limit}
-					on:change={firstPage}
-				>
-					<option value={5}>5</option>
-					<option value={10}>10</option>
-					<option value={15}>15</option>
-					<option value={20}>20</option>
-					<option value={25}>25</option>
-					<option value={30}>30</option>
-				</select>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline mx-1"
-					on:click={prevPage}
-					disabled={currentPage === 1}
-				>
-					Previous
-				</button>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline"
-					on:click={nextPage}
-					disabled={currentPage === totalPages}
-				>
-					Next
-				</button>
-			</div>
-		</div> -->
+		
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
 				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
@@ -444,6 +430,10 @@ function closeErrorModal() {
 		</div>
 	</div>
 </div>
+
+
+
+
 
 <dialog id="my_modal_1" class="modal">
 	<div class="modal-box bg-white w-11/12 max-w-md">

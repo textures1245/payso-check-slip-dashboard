@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 				body: new URLSearchParams({
 					grant_type: 'authorization_code',
 					code: code,
-					redirect_uri: 'http://localhost:5173/',
+					redirect_uri: 'https://payso-check-slip-dashboard-xi.vercel.app/',
 					// client_id: '2005856083',
 					// client_secret: '48a55f999f0d1895eb0bf9bb22b9a564'
 					client_id: '2006478813',
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 			localStorage.setItem('profile Data', JSON.stringify(profileData));
 			sessionStorage.setItem('profile Data', JSON.stringify(profileData));
 			setCookie('UserLineId', JSON.stringify(profileData), 7);
-			
+			console.log("data ",profileData)
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-expect-error
 			if (returnedState == '1010-1010') {
@@ -73,6 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 function setCookie(name, value, days) {
     let d = new Date();
     d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    let expires = 'expires=' + d.toUTCString();
-    document.cookie = `${name}=${value};${expires};path=/;Secure;SameSite=Lax`;
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=payso-check-slip-dashboard-xi.vercel.app`;
+	console.log("cookie ",document.cookie)
 }

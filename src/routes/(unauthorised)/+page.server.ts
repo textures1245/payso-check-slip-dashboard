@@ -38,7 +38,7 @@ export const actions: import('./$types').Actions = {
 
         const config: RequestInit = {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 MerchantName: name,
                 MerchantRole: 'ACTIVE',
@@ -62,7 +62,7 @@ export const actions: import('./$types').Actions = {
                 const namesBase64 = toBase64(lineData.displayName);
                 const createConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
+                    headers: { 'Content-Type': 'application/json', },
                     body: JSON.stringify({
                         MerchantName: name,
                         MerchantRole: 'NOT_PAYSO',
@@ -104,7 +104,7 @@ export const actions: import('./$types').Actions = {
 
         const config: RequestInit = {
             method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
+            headers: { 'Content-Type': 'application/json',},
             body: JSON.stringify({
                 MerchantName: name,
                 MerchantRole: 'ACTIVE',
@@ -116,7 +116,7 @@ export const actions: import('./$types').Actions = {
         };
 
         try {
-            const result = await fetch(`${API_ENDPOINT}/merchant/login`, config);
+            const result = await fetch(`${API_ENDPOINT}/merchant/loginline`, config);
 
             const datalogin: LoginResponse = await result.json();
             console.log(datalogin);
@@ -127,7 +127,7 @@ export const actions: import('./$types').Actions = {
                 const namesBase64 = toBase64(name);
                 const createConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
+                    headers: { 'Content-Type': 'application/json',},
                     body: JSON.stringify({
                         MerchantName: name,
                         MerchantRole: 'NOT_PAYSO',
@@ -170,7 +170,7 @@ export const actions: import('./$types').Actions = {
         const config: RequestInit = {
             method: 'POST',
             headers: {
-                'Content-Type': 'text/plain',
+                'Content-Type': 'application/json',
                 apikey: API_KEY,
             }
         };
@@ -184,7 +184,7 @@ export const actions: import('./$types').Actions = {
                 
                 const loginConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
+                    headers: { 'Content-Type': 'application/json',},
                     body: JSON.stringify({
                         MerchantName: username,
                         MerchantRole: 'ACTIVE',
@@ -207,7 +207,7 @@ export const actions: import('./$types').Actions = {
                      const namesBase64 = toBase64(lineData.displayName);
                     const createConfig: RequestInit = {
                         method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
+                        headers: { 'Content-Type': 'application/json',},
                         body: JSON.stringify({
                             MerchantName: username,
                             MerchantRole: 'PAYSO',

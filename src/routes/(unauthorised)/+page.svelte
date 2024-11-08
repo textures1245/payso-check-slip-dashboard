@@ -89,6 +89,57 @@
 	}
 
 	onMount(async () => {
+
+		const urlParams = new URLSearchParams(window.location.search);
+		const code = urlParams.get('code');
+		const returnedState = urlParams.get('state');
+		console.log(code, returnedState, urlParams);
+		// ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
+		if (code) {
+			try {
+				const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					body: new URLSearchParams({
+						grant_type: 'authorization_code',
+						code: code,
+						redirect_uri: `${PUBLIC_DOMAIN}`,
+						client_id: '2006478813',
+						client_secret: '28d4c9a577a54f93c61e88c33c304794'
+					})
+				});
+
+				const tokenData = await tokenResponse.json();
+				console.log('Token data:', tokenData);
+
+				const profileResponse = await fetch('https://api.line.me/v2/profile', {
+					headers: {
+						Authorization: `Bearer ${tokenData.access_token}`
+					}
+				});
+
+				const profileData = await profileResponse.json();
+				console.log('Profile data:', profileData);
+
+				// Store user profile data
+				localStorage.setItem('profile Data', JSON.stringify(profileData));
+				sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+				setCookie('UserLineId', JSON.stringify(profileData), 7);
+				console.log('data ', profileData);
+
+				if (returnedState === '1010-1010') {
+					document.getElementById('emailInputline').value = profileData.userId;
+					document.getElementById('nameInputline').value = profileData.displayName;
+					document.getElementById('inputavatar').value = profileData.pictureUrl;
+					console.log(profileData);
+					document.getElementById('mylineForm').submit();
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		}
 		const cookies = getCookies();
 		const myCookie = cookies['UserLineId'] ? JSON.parse(cookies['UserLineId']) : null;
 		const statusCookie = sessionStorage.getItem('StatusCoockie');
@@ -100,66 +151,69 @@
 			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
 			setTimeout(() => {
 				showModal = false; // ปิด modal
-				location.reload(); // รีโหลดหน้า
 			}, 3000);
 		}
-		if ((!myCookie && !statusCookie) || (myCookie.message === 'invalid token' && !statusCookie)) {
+		if (
+			(!myCookie && !statusCookie) ||
+			(myCookie.message === 'invalid token' && statusCookie) ||
+			(myCookie.message === 'invalid token' && !statusCookie)
+		) {
 			linetest();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
 		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
-		const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const returnedState = urlParams.get('state');
-    
-    // ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
-    if (code) {
-        try {
-            const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    grant_type: 'authorization_code',
-                    code: code,
-                    redirect_uri: `${PUBLIC_DOMAIN}`,
-                    client_id: '2006478813',
-                    client_secret: '28d4c9a577a54f93c61e88c33c304794'
-                })
-            });
+		// const urlParams = new URLSearchParams(window.location.search);
+		// const code = urlParams.get('code');
+		// const returnedState = urlParams.get('state');
 
-            const tokenData = await tokenResponse.json();
-            console.log('Token data:', tokenData);
+		// ทำงานเฉพาะเมื่อมีการ redirect กลับมาจาก LINE Login
+		// if (code) {
+		// 	try {
+		// 		const tokenResponse = await fetch('https://api.line.me/oauth2/v2.1/token', {
+		// 			method: 'POST',
+		// 			headers: {
+		// 				'Content-Type': 'application/x-www-form-urlencoded'
+		// 			},
+		// 			body: new URLSearchParams({
+		// 				grant_type: 'authorization_code',
+		// 				code: code,
+		// 				redirect_uri: `${PUBLIC_DOMAIN}`,
+		// 				client_id: '2006478813',
+		// 				client_secret: '28d4c9a577a54f93c61e88c33c304794'
+		// 			})
+		// 		});
 
-            const profileResponse = await fetch('https://api.line.me/v2/profile', {
-                headers: {
-                    Authorization: `Bearer ${tokenData.access_token}`
-                }
-            });
+		// 		const tokenData = await tokenResponse.json();
+		// 		console.log('Token data:', tokenData);
 
-            const profileData = await profileResponse.json();
-            console.log('Profile data:', profileData);
+		// 		const profileResponse = await fetch('https://api.line.me/v2/profile', {
+		// 			headers: {
+		// 				Authorization: `Bearer ${tokenData.access_token}`
+		// 			}
+		// 		});
 
-            // Store user profile data
-            localStorage.setItem('profile Data', JSON.stringify(profileData));
-            sessionStorage.setItem('profile Data', JSON.stringify(profileData));
-            setCookie('UserLineId', JSON.stringify(profileData), 7);
-            console.log("data ", profileData);
+		// 		const profileData = await profileResponse.json();
+		// 		console.log('Profile data:', profileData);
 
-            if (returnedState === '1010-1010') {
-                document.getElementById('emailInputline').value = profileData.userId;
-                document.getElementById('nameInputline').value = profileData.displayName;
-                document.getElementById('inputavatar').value = profileData.pictureUrl;
-                console.log(profileData);
-                document.getElementById('mylineForm').submit();
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-	////////////////////////////////////////////
+		// 		// Store user profile data
+		// 		localStorage.setItem('profile Data', JSON.stringify(profileData));
+		// 		sessionStorage.setItem('profile Data', JSON.stringify(profileData));
+		// 		setCookie('UserLineId', JSON.stringify(profileData), 7);
+		// 		console.log('data ', profileData);
+
+		// 		if (returnedState === '1010-1010') {
+		// 			document.getElementById('emailInputline').value = profileData.userId;
+		// 			document.getElementById('nameInputline').value = profileData.displayName;
+		// 			document.getElementById('inputavatar').value = profileData.pictureUrl;
+		// 			console.log(profileData);
+		// 			document.getElementById('mylineForm').submit();
+		// 		}
+		// 	} catch (error) {
+		// 		console.log(error);
+		// 	}
+		// }
+		////////////////////////////////////////////
 
 		if (form) {
 			if (form.data) {
@@ -168,7 +222,7 @@
 
 				if (form.data.PackageId == '0') {
 					if (form.status == 'create') {
-						window.location.href = '/package';  // ถ้าจริงต้องมาหน้า detail ก่อน
+						window.location.href = '/package'; // ถ้าจริงต้องมาหน้า detail ก่อน
 					} else {
 						window.location.href = '/package';
 					}
@@ -184,6 +238,23 @@
 			}
 		}
 	});
+
+
+	function setCookie(name: string, value: string, days: number) {
+    let d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	const url = new URL(PUBLIC_DOMAIN); // Convert string to URL object
+    const domain = url.hostname; // Get the hostname (payso-check-slip-dashboard-xi.vercel.app)
+	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
+    console.log("cookie ", document.cookie,domain);
+}
+	// function setCookie(name: string, value: string, days: number) {
+	// 	let d = new Date();
+	// 	d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	// 	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=payso-check-slip-dashboard-xi.vercel.app`;
+	// 	console.log('cookie ', document.cookie);
+	// }
+
 
 	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
 	let clientIdtest = '2006478813';
@@ -208,24 +279,21 @@
 		event.target.value = password;
 	}
 
-	function setCookie(name: string, value: string, days: number) {
-    let d = new Date();
-    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-	const isLocal = window.location.hostname === 'localhost';  // ตรวจสอบ environment
-    const domain = isLocal ? 'localhost' : 'payso-check-slip-dashboard-xi.vercel.app';  // กำหนด domain ตาม environment
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;  
-    console.log("cookie ", document.cookie);  
-}
-
+	// function setCookie(name: string, value: string, days: number) {
+	// 	let d = new Date();
+	// 	d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+	// 	const isLocal = window.location.hostname === 'localhost'; // ตรวจสอบ environment
+	// 	const domain = isLocal ? 'localhost' : 'payso-check-slip-dashboard-xi.vercel.app'; // กำหนด domain ตาม environment
+	// 	document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
+	// 	console.log('cookie ', document.cookie);
+	// }
 </script>
 
 <!-- <svelte:head>
 	<script src="../src/lib/callback.js"></script>
 </svelte:head> -->
 
-<div
-	class=" h-lvh  bg-cover bg-center  md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden"
->
+<div class=" h-lvh bg-cover bg-center md:p-0 bg-opacity-1 grid lg:grid-cols-3 overflow-y-hidden">
 	<div
 		class=" hidden content-center lg:block lg:h-lvn md:col-span-1 lg:col-span-2 bg-[#EAECF0]"
 		style="hight:50px"
@@ -248,11 +316,10 @@
 							เชื่อมต่อ LINE เพื่อแชร์จำนวนการใช้งานจากแพ็กเกจที่ซื้อ
 						</h2>
 					</div>
-					<div class="p-2 w-5/5 bg-white  rounded-lg shadow-lg">
+					<div class="p-2 w-5/5 bg-white rounded-lg shadow-lg">
 						<h2 class=" xl:text-lg lg:text-md text-start">
 							ยินดีต้อนรับสู่แดชบอร์ดที่ให้คุณดูสถิติและวิเคราะห์ข้อมูลได้อย่างง่ายดาย!
 						</h2>
-						
 					</div>
 				</div>
 			</div>
@@ -269,7 +336,7 @@
 			<!-- svelte-ignore a11y-missing-attribute -->
 			<img
 				src={statuspic}
-				class="absolute top-14 right-20 w-3/5 h-auto transform scale-75 shadow-lg hover:-rotate-8 hover:scale-105 rotate-3	" 
+				class="absolute top-14 right-20 w-3/5 h-auto transform scale-75 shadow-lg hover:-rotate-8 hover:scale-105 rotate-3"
 				style="z-index: 1;"
 			/>
 		</div>
@@ -441,24 +508,8 @@
 <dialog id="my_modal_2" class="modal">
 	<div class="modal-box lg:ml-20">
 		<div class="text-lg font-bold flex justify-center">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				x="0px"
-				y="0px"
-				width="100"
-				height="100"
-				viewBox="0 0 48 48"
-			>
-				<path
-					fill="#f44336"
-					d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"
-				></path><path
-					fill="#fff"
-					d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"
-				></path><path
-					fill="#fff"
-					d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"
-				></path>
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
+				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
@@ -507,7 +558,9 @@
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">เซกชันหมดอายุ</p>
-		<p class=" text-center">เซกชันของคุณได้หมดอายุเนื่องจาก Cookies หมดอายุ ระบบจะให้ทำการ Login Line ไหม</p>
+		<p class=" text-center">
+			เซกชันของคุณได้หมดอายุเนื่องจาก Cookies หมดอายุ ระบบจะให้ทำการ Login Line ไหม
+		</p>
 	</div>
 	<form method="dialog" class="modal-backdrop">
 		<button>close</button>

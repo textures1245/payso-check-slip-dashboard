@@ -52,9 +52,10 @@
 		const endDate = localStorage.getItem('endDate');
 
 		let apiUrl;
-    if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
-    } else if (myCookie) {
+    // if (myCookie && myCookie.Type === "Line") {
+    //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
+    // } else 
+	if (myCookie) {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/pending/${startDate}/${endDate}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/5/2024-08-01/2024-09-10`;
@@ -67,7 +68,7 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'application/json'
             }
 		};
 const result = await fetch(apiUrl, config);
@@ -90,9 +91,10 @@ const datas = await result.json();
 		
 		console.log('checking transaction month');
 		let apiUrl;
-    if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}/${startDate}/${endDate}`;
-    } else if (myCookie) {
+    // if (myCookie && myCookie.Type === "Line") {
+    //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}/${startDate}/${endDate}`;
+    // } else 
+	if (myCookie) {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}/${startDate}/${endDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
@@ -102,7 +104,7 @@ const datas = await result.json();
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'application/json'
             }
 		};
 		console.time('Fetch Only Getdata');
@@ -219,7 +221,7 @@ style="width:40%;height:30px;"
 			  <Table.Head class="w-[100px] text-black font-bold">วันที่ทำการ</Table.Head>
 			  <Table.Head class="text-center text-black font-bold">เวลาทำการ</Table.Head>
 			  <Table.Head class="text-center text-black font-bold">Transfer ID</Table.Head>
-			  <Table.Head class="text-center text-black font-bold">สถานะ</Table.Head>
+			  <Table.Head class="text-start text-black font-bold">สถานะ</Table.Head>
 			</Table.Row>
 		  </Table.Header>
 		  <Table.Body>
@@ -252,7 +254,7 @@ style="width:40%;height:30px;"
 			  <div class="hidden sm:block lg:hidden xl:block">
 				{item.TransferRefId}
 			  </div></Table.Cell>
-			<Table.Cell class=" flex justify-center font-semibold">{#if item.Status === 'SUCCESS'}
+			<Table.Cell class=" flex justify-start font-semibold">{#if item.Status === 'SUCCESS'}
 				<span class=" flex  items-center" style="color:#17B26A;"><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 120 120">
 					<circle cx="60" cy="64" r="48" opacity=".35"></circle><circle cx="60" cy="60" r="48" fill="#44bf00"></circle><polygon points="53.303,89 26.139,61.838 33.582,54.395 53.303,74.116 86.418,41 93.861,48.443" opacity=".35"></polygon><polygon fill="#fff" points="53.303,84 26.139,56.838 33.582,49.395 53.303,69.116 86.418,36 93.861,43.443"></polygon>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #DCFAE6 ;color:#17B26A; border-color:#17B26A">SUCCESS</div></span>

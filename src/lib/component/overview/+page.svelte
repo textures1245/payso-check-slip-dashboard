@@ -184,9 +184,10 @@ const formatDate = (/** @type {Date} */ date: Date) => {
 
 		// Create URL parameters from form data
 		let apiUrl;
-    if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
-    } else if (myCookie) {
+    // if (myCookie && myCookie.Type === "Line1") {
+    //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
+    // } else 
+    if (myCookie) {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${formattedStartDate}/${formattedEndDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
@@ -198,7 +199,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'text/plain'
+            'Content-Type': 'application/json'
         }
     };
 
@@ -227,9 +228,10 @@ const formatDate = (/** @type {Date} */ date: Date) => {
         const formattedStartDate = getFormattedDate(selectedStartDate);
         const formattedEndDate = getFormattedDate(selectedEndDate);
         let apiUrl;
-    if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/exportexcelline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
-    } else if (myCookie) {
+    // if (myCookie && myCookie.Type === "Line1") {
+    //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/exportexcelline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
+    // } else 
+    if (myCookie) {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/exportexcel/${myCookie.Id}/${formattedStartDate}/${formattedEndDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
@@ -240,7 +242,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'text/plain'
+                'Content-Type': 'application/json'
             }
 		};
 		var result = await fetch(apiUrl, config);
@@ -284,9 +286,10 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 		console.log('checking get transaction');
 		// Create URL parameters from form data
 		let apiUrl;
-    if (myCookie && myCookie.Type === "Line") {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${startDate}/${endDate}`;
-    } else if (myCookie) {
+    // if (myCookie && myCookie.Type === "Line") {
+    //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${startDate}/${endDate}`;
+    // } else 
+    if (myCookie) {
         apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${startDate}/${endDate}`;
     } else {
         console.error('No valid merchant account cookie found.');
@@ -296,7 +299,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'text/plain'
+            'Content-Type': 'application/json'
         }
     };
 
@@ -420,7 +423,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             </svg>
         </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Success_count : 0}
                 </div>
             {/if}
@@ -458,7 +461,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.false_count : 0}
                 </div>
             {/if}
@@ -497,7 +500,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Pending_count : 0}
                 </div>
             {/if}
@@ -535,7 +538,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Request_Rejected_Count : 0}
                 </div>
             {/if}
@@ -573,7 +576,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Respond_Rejected_Count : 0}
                 </div>
             {/if}
@@ -613,7 +616,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
                {:else}
-                   <div class="text-8xl font-bold w-100">
+                   <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                        {dataOverview ? dataOverview.Total_count : 0}
                        
                    </div>
