@@ -13,8 +13,14 @@
 	import BarOverviewMonthly from './(components)/BarOverviewMonthly.svelte';
 	import BarIncomeOverview from './(components)/BarIncomeOverview.svelte';
 	import DoughnutPackageOrderAmount from './(components)/DoughnutPackageOrderAmount.svelte';
+	import { onMount } from 'svelte';
 
 	export let data: PageData;
+	
+
+	let loading = true;
+
+
 
 	const date15DaysAgo = new Date();
 	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
@@ -37,6 +43,7 @@
 		}
 	};
 </script>
+
 
 <div class="container space-y-5 px-8 mx-auto">
 	<span
@@ -390,6 +397,7 @@
 		</div>
 	</div>
 </div>
+
 
 
 <style>

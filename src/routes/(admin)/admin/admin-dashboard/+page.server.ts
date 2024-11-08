@@ -1,3 +1,4 @@
+import { promise } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 import type { DataResponse } from '../../../../lib/utils/types';
 import type { MerchantTransactionDetail } from './(mockdata)/data';
@@ -18,6 +19,7 @@ import type {
 import type { Transaction } from '$lib/utils/external-api-type/transaction';
 import type { Package } from '$lib/utils/external-api-type/package';
 import { PackageExternalAPI } from '$lib/server/external-api/package';
+
 
 const ep = {
 	adminDb: new AdminDBExternalAPI(),
@@ -70,6 +72,10 @@ export const load: PageServerLoad = async () => {
 
 	try {
 		statData = await ep.adminDb.GetStats();
+		const startTime = new Date()
+		
+
+
 		recentlyInvalidTransListReport = await ep.transaction.GetInvalidTransaction({
 			ft: {
 				order_by: 'DESC',
@@ -110,8 +116,8 @@ export const load: PageServerLoad = async () => {
 				limit: 10
 			}
 		});
-		
-		
+
+
 		pkgUsageRatio = await ep.adminDb.GetPackageUsageRatio();
 		transactionDailyCount = await ep.adminDb.GetTransactionDailyCount(
 			defaultOpt.dailyTrans.startDate,
@@ -143,7 +149,10 @@ export const load: PageServerLoad = async () => {
 			defaultOpt.receiptIncome.startDate,
 			defaultOpt.receiptIncome.endDate,
 		)
-	} catch (err) {
+		console.log("startTime=====>",(new Date().getTime()-startTime.getTime())/1000)
+	}
+
+	catch (err) {
 		const axiosErr = err as AxiosError;
 		console.error(`-= Error while trying to send request to endpoint =-`);
 		console.error('ErrorStack:', axiosErr);
@@ -171,7 +180,44 @@ export const load: PageServerLoad = async () => {
 		return fail(500, {
 			message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ ไม่สามารถดึงรายการได้ โปรดลองอีกครั้ง'
 		});
+
 	}
+
+	
+	const getalldashbord = () =>  {
+		const promise = Promise.all([ep.merchant.GetMerchantsDetail({
+			ft: {
+				order_by: 'DESC',
+				order_field: 'UpdatedAt'
+			},
+			p: {
+				offset: 1,
+				limit: 10
+			}
+		}),
+		 ep.transaction.GetTransactions({
+			ft: {
+				order_by: 'DESC',
+				order_field: 'VerifiedDate'
+			},
+			p: {
+				offset: 1,
+				limit: 10
+			}
+		})]);
+
+		
+
+		promise
+			.then(results => {
+				console.log("results getall ===",results); // This will log an array containing the results of both API calls
+			})
+			.catch(error => {
+				console.error('Error fetching data:', error);
+			});
+			return null
+	}
+	console.log(getalldashbord())
 
 	return {
 		statData: statData.result,
@@ -386,8 +432,8 @@ export const actions: Actions = {
 						order_field: 'VerifiedDate'
 					},
 					p: {
-						offset: 1, 
-						limit: 10 
+						offset: 1,
+						limit: 10
 					}
 				},
 				status // ตัวกรองสถานะ
@@ -417,13 +463,13 @@ export const actions: Actions = {
 	},
 	updatetopMerchantQuotaSpendListReport: async ({ request }) => {
 		// ดึงข้อมูลจากฟอร์ม
-		const { merChantIdorName, merChantRole,sortOrder } = Object.fromEntries(await request.formData()) as {
+		const { merChantIdorName, merChantRole, sortOrder } = Object.fromEntries(await request.formData()) as {
 			merChantIdorName: string;
-			merChantRole : string;
+			merChantRole: string;
 			sortOrder: string;
 		};
 
-		console.log('Request parameters:', { merChantIdorName,merChantRole, sortOrder });
+		console.log('Request parameters:', { merChantIdorName, merChantRole, sortOrder });
 
 		let merchantListReport: DataResponse<MerchantPKG[]>;
 
@@ -438,8 +484,8 @@ export const actions: Actions = {
 						order_field: 'UpdatedAt'
 					},
 					p: {
-						offset: 1, 
-						limit: 10 
+						offset: 1,
+						limit: 10
 					}
 				},
 				merChantIdorName, merChantRole// ตัวกรองสถานะ

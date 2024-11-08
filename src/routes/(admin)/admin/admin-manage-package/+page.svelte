@@ -410,12 +410,7 @@
 	}
 </script>
 
-<div class="relative flex flex-col items-center h-screen">
-	{#if loadingPage}
-		<div class="absolute inset-0 flex items-center justify-center z-50">
-			<div class="loading loading-spinner loading-lg text-black"></div>
-		</div>
-	{:else}
+
 
 <div class="w-full py-4 px-2 sm:px-4">
 	<span
@@ -634,8 +629,8 @@
 		</div>
 	</div>
 </div>
-{/if}
-</div>
+
+
 
 <dialog id="alert_modal" class="modal" open={showAlertModalSuccess}>
     <div class="modal-box">

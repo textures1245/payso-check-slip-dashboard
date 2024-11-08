@@ -53,7 +53,8 @@
 						class="select select-sm select-bordered w-full max-w-sm"
 						name="merChantRole"
 					>
-						<option value = "">ประเภทลูกค้า</option>
+						<option disabled selected>ประเภทลูกค้า</option>
+						<option value="">ทั้งหมด</option>
 						<option value="PAYSO">Payso</option>
 						<option value="NOT_PAYSO">Not_Payso</option>
 					</select>
