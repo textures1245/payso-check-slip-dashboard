@@ -369,16 +369,60 @@ const UpdateLimitPackage = async () => {
 	};
 
 	const filename = 'QRcode.png';
-	function downloadImage(imageUrl: string, filename: string) {
-    const link = document.createElement('a'); // สร้างลิงค์ใหม่
-    link.href = imageUrl; // ตั้งค่า URL ของรูปภาพ
-    link.download = filename; // ตั้งชื่อไฟล์เมื่อดาวน์โหลด
+// 	function downloadImage(imageUrl: string, filename: string) {
+//     const link = document.createElement('a'); // สร้างลิงค์ใหม่
+//     link.href = imageUrl; // ตั้งค่า URL ของรูปภาพ
+//     link.download = filename; // ตั้งชื่อไฟล์เมื่อดาวน์โหลด
 
-    // เพิ่มลิงค์ลงในเอกสารและคลิกเพื่อดาวน์โหลด
-    document.body.appendChild(link);
-    link.click(); // เริ่มการดาวน์โหลด
-    document.body.removeChild(link); // ลบลิงค์หลังจากดาวน์โหลดเสร็จ
-}
+//     // เพิ่มลิงค์ลงในเอกสารและคลิกเพื่อดาวน์โหลด
+//     document.body.appendChild(link);
+//     link.click(); // เริ่มการดาวน์โหลด
+//     document.body.removeChild(link); // ลบลิงค์หลังจากดาวน์โหลดเสร็จ
+// }
+const downloadImage = async (imageUrl: string, filename: string) => {
+    try {
+      // สร้าง Blob จาก URL
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // สร้าง Object URL
+      
+      
+      // ย้ายการตรวจสอบ iOS มาไว้ในฟังก์ชัน
+      const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent);
+	  const canUseShare = navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] });
+      
+      if (isMobile && canUseShare) {
+        // สำหรับ iOS: เปิดรูปในแท็บใหม่
+        // window.open(blobUrl, '_blank');
+		await navigator.share({
+        files: [new File([blob], filename, { type: blob.type })],
+        title: 'ดาวน์โหลดรูปภาพ',
+        text: 'บันทึกภาพลงในเครื่องของคุณ',
+      });
+        
+      } else {
+        // สำหรับระบบปฏิบัติการอื่นๆ
+		const blobUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+		setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 100);
+      }
+      
+      // ทำความสะอาด Object URL
+      
+      
+    } catch (error) {
+      console.error('เกิดข้อผิดพลาดในการดาวน์โหลดรูปภาพ:', error);
+      alert('ไม่สามารถดาวน์โหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
+    }
+  };
     
 </script>
 
@@ -429,6 +473,7 @@ const UpdateLimitPackage = async () => {
         <p class=" lg:text-xl md:text-xl text-xl  font-semibold">หมดอายุใน  {formatTime(seconds)} นาที</p>
 		<p class=" text-sm">*จ่ายสำเร็จแล้ว โปรดรอจนหน้าจอกลับไปยังหน้าหลัก</p>
 		<p class=" text-sm">คิวอาร์โค้ดที่จ่ายสำเร็จแล้ว ไม่สามารถจ่ายซ้ำได้</p>
+		<p class="text-sm">**สำหรับผู้ใช้มือถือสามารถแคปหน้าจอได้ทันที</p>
 		</div>
 	</div>
 	<!-- svelte-ignore a11y-missing-attribute -->

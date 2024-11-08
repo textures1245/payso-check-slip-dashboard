@@ -359,7 +359,7 @@
 					<Card.Title class="text-center">เข้าสู่ระบบ</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					<div
+					<!-- <div
 						class="flex my-3 grid gap-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 text-black"
 						style="width: 100%;"
 					>
@@ -388,9 +388,7 @@
 											style="width: 100%; height: 40px;"
 											class="my-3 border border-spacing-10 ps-5 pe-10 rounded-md"
 										/>
-										<!-- <input type="checkbox" on:change={togglePasswordVisibility} style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%);" /> -->
-										<!-- svelte-ignore a11y-click-events-have-key-events -->
-										<!-- svelte-ignore a11y-no-static-element-interactions -->
+									
 										<svg
 											class="eye-icon"
 											xmlns="http://www.w3.org/2000/svg"
@@ -422,13 +420,13 @@
 								>
 							</div>
 						</form>
-					</div>
+					</div> -->
 					<hr class="my-5" />
 					<div
 						class="flex my-3 grid gap-1 grid-cols-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
 						style="width:100%;"
 					>
-						<div class="flex justify-center hover:text-black">
+						<!-- <div class="flex justify-center hover:text-black">
 							<Button
 								variant="outline"
 								class="my-2 flex text-center py-0 px-0  lg:bg-white md:bg-white sm:bg-white bg-white lg:rounded-md sm:rounded-md rounded-full text-black"
@@ -465,7 +463,7 @@
 									Sign up with Google
 								</div></Button
 							>
-						</div>
+						</div> -->
 						<div class="flex justify-center hover:text-black">
 							<Button
 								variant="outline"
