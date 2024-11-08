@@ -20,21 +20,29 @@
 
   // ฟังก์ชันสำหรับกรองรายการตาม Roles
   function filterNavItems(cookies: { [s: string]: unknown; } | ArrayLike<unknown>) {
-    const validItems = [];
-    if (Object.values(cookies).some(cookieValue => cookieValue.includes('DASHBOARD'))) {
-      validItems.push({ id: 1, title: 'แดชบอร์ด', link: '/dashboard' });
-    }
-    // ตรวจสอบว่าคุกกี้มีคำว่า 'PACKAGE'
-    if (Object.values(cookies).some(cookieValue => cookieValue.includes('PACKAGE'))) {
-      validItems.push({ id: 2, title: 'แพ็คเกจ', link: '/package' });
-    }
-	
-	if (Object.values(cookies).some(cookieValue => cookieValue.includes('-/All/-'))) {
-      validItems.push({ id: 1, title: 'แดชบอร์ด', link: '/dashboard' });
-	  validItems.push({ id: 2, title: 'แพ็คเกจ', link: '/package' });
+    const validItems: { id: number; title: string; link: string; }[] = [];
+    const addItem = (item: { id: any; title?: string; link?: string; }) => {
+        if (!validItems.some(existingItem => existingItem.id === item.id)) {
+            validItems.push(item);
+        }
+    };
+    if (Object.values(cookies).some(cookieValue => typeof cookieValue === 'string' && cookieValue.includes('DASHBOARD'))) {
+        addItem({ id: 1, title: 'แดชบอร์ด', link: '/dashboard' });
+        addItem({ id: 3, title: 'จัดการบัญชี', link: '/bank' });
     }
 
-    return validItems; // ส่งเฉพาะรายการที่ตรงเงื่อนไข
+    if (Object.values(cookies).some(cookieValue => typeof cookieValue === 'string' && cookieValue.includes('PACKAGE'))) {
+        addItem({ id: 2, title: 'แพ็คเกจ', link: '/package' });
+        addItem({ id: 3, title: 'จัดการบัญชี', link: '/bank' });
+    }
+
+    if (Object.values(cookies).some(cookieValue => typeof cookieValue === 'string' && cookieValue.includes('-/All/-'))) {
+        addItem({ id: 1, title: 'แดชบอร์ด', link: '/dashboard' });
+        addItem({ id: 2, title: 'แพ็คเกจ', link: '/package' });
+        addItem({ id: 3, title: 'จัดการบัญชี', link: '/bank' });
+    }
+
+    return validItems.sort((a, b) => a.id - b.id); // ส่งเฉพาะรายการที่ตรงเงื่อนไข
   }
   let navItems: { id: number; title: string; link: string; }[] = [];
   onMount(() => {
