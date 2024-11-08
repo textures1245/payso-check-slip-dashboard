@@ -90,7 +90,7 @@
             {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                     'Actor-Id': myCookie.Id,
                     'Actor-Name': myCookie.Email,
                     'Actor-Role': 'ADMIN'
@@ -233,7 +233,7 @@
 			const response = await fetch(`${PUBLIC_API_ENDPOINT}/package/create/packages`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 					'Actor-Id': myCookie.Id,
 					'Actor-Name': myCookie.Email,
 					'Actor-Role': 'ADMIN'
@@ -308,7 +308,7 @@
 			const response = await fetch(`${PUBLIC_API_ENDPOINT}/update/package/${editingPackage.Id}`, {
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
 					'Actor-Id': myCookie.Id,
 					'Actor-Name': myCookie.Email,
 					'Actor-Role': 'ADMIN'
