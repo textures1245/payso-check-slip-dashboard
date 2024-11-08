@@ -16,11 +16,8 @@
 	import { onMount } from 'svelte';
 
 	export let data: PageData;
-	
 
 	let loading = true;
-
-
 
 	const date15DaysAgo = new Date();
 	date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
@@ -43,7 +40,6 @@
 		}
 	};
 </script>
-
 
 <div class="container space-y-5 px-8 mx-auto">
 	<span
@@ -136,7 +132,7 @@
 								/>
 							</svg>
 							{Math.abs(((currentIncome - previousIncome) / previousIncome) * 100).toFixed(2)}%
-							{/if}
+						{/if}
 					</span>
 				</div>
 			</div>
@@ -342,11 +338,20 @@
 			</div>
 
 			<div class="flex justify-between border-none mt-2">
+				<div class="text-sm">เปิดการมองเห็น</div>
+				<div class=" font-semibold text-right text-gray-700">
+					{data.statData?.PackageStat.VisibilityOnTotal}
+				</div>
+			</div>
+
+			<div class="flex justify-between border-none mt-2">
 				<div class="text-sm">ไม่ใช้งาน</div>
 				<div class=" font-semibold text-right text-destructive">
 					{data.statData?.PackageStat.InActiveTotal}
 				</div>
 			</div>
+
+			
 		</div>
 	</div>
 
@@ -369,18 +374,16 @@
 				></BarIncomeOverview>
 			</div>
 		</div>
-	
+
 		<div class="card bg-base-100 col-span-full h-full shadow-md p-4">
 			<h1 class="text-base xl:text-lg font-semibold text-left">สถิติโดยรวมแบบรายเดือน</h1>
 			<div class="chart-container h-full">
 				<BarOverviewMonthly pData={data.monthlyOverview ?? []}></BarOverviewMonthly>
 			</div>
 		</div>
-
 	</div>
 
 	<div class="grid gap-2 w-full grid-flow-row lg:grid-flow-col lg:grid-cols-1">
-	
 		<div class="flex gap-2 overflow-auto col-span-full lg:col-span-2 flex-wrap">
 			<Card.Root class="p-4 w-full">
 				<Card.Title>รายการตรวจสอบล่าสุด</Card.Title>
@@ -397,8 +400,6 @@
 		</div>
 	</div>
 </div>
-
-
 
 <style>
 	.chart-container {

@@ -9,4 +9,5 @@ export type PackageData = {
 	Visibility : boolean;
 	AmountLimit : number;
 	Index : number;
+	DaysDueDuration : number;
 }
