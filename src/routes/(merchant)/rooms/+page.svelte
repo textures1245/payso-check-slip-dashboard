@@ -354,7 +354,10 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 
 		const result = await fetch(url, config);
 		const data = await result.json();
-		
+    const modal = document.getElementById('my_modal_3');
+				if (modal) {
+					modal.showModal();
+				}
 		return data.result;
 	};
   let QrToken: string;
@@ -567,9 +570,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     <!-- แถว 1 -->
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -598,9 +599,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     <!-- แถว 2 -->
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -630,9 +629,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
         
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -659,9 +656,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -688,9 +683,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -717,9 +710,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -746,9 +737,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -775,9 +764,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
                       <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
-                      <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
-                        Line OA
-                      </button>
+                      
                       <div class="flex space-x-2">
                         <button
                           class="px-4 py-2 rounded-lg"
@@ -811,3 +798,29 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
             </Card.Root>
 </div>
 </div>
+
+
+<dialog id="my_modal_3" class="modal">
+	<div class="modal-box ">
+		<div class="text-lg font-bold flex justify-center">
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+		<p class=" text-center">บันทึกข้อมูลสำเร็จ</p>
+    <div class="flex  w-full  justify-around mt-5">
+    <div class="flex content-center">
+      <!-- Button to close the modal -->
+      
+
+      <!-- Button to go to another page -->
+      <a href="/dashboard"><button class="btn bg-primary text-white hover:text-black" >ไปหน้า แดชบอร์ด</button></a>
+  </div>
+</div>
+	</div>
+	<!-- <form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form> -->
+</dialog>

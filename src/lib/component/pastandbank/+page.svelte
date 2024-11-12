@@ -83,7 +83,7 @@ const datas = await result.json();
 } else {
   // กรณีที่ไม่มีข้อมูล
   count = 0;
-  totalPages = 0;
+  totalPages = 1;
   // หรือสามารถตั้งค่า default value หรือข้อความแจ้งเตือนตามที่ต้องการ
   console.log('ไม่มีข้อมูล');
 }
