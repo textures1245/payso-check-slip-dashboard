@@ -522,6 +522,114 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 				}
 		return data.result;
 	};
+
+  async function handleCheckboxChange(event: { target: { checked: boolean } }, id: any) {
+		const isChecked = event.target.checked;
+		try {
+		const permissionGranted = await UpdateBankLink(id, isChecked); // Send value 1 or 0
+		console.log(id, isChecked);
+
+		if (!permissionGranted) {
+			// Revert the checkbox value if permission denied
+			event.target.checked = !isChecked;
+			// You might also want to revert the state in the banks array
+			const bank = banks.find(b => b.Id === id);
+			if (bank) {
+				bank.Active = !isChecked; // Ensure the bank state reflects the checkbox state
+			}
+		} else {
+			// If the operation is successful, update the banks array to reflect the new status
+			const bank = banks.find(b => b.Id === id);
+			if (bank) {
+				bank.Active = isChecked; // Update the active state
+			}
+		}
+	} 
+	catch (error) {
+		console.error("Error updating bank link:", error);
+		// Revert the checkbox state if there was an error
+		event.target.checked = !isChecked;
+		const bank = banks.find(b => b.Id === id);
+		if (bank) {
+			bank.Active = !isChecked; // Ensure the bank state reflects the checkbox state
+		}
+	}
+	}
+
+  const UpdateBankLink = async (id: String, status: boolean) => {
+		// Create configuration for the fetch request
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		console.log(id, status);
+		let config = {
+			method: 'PUT', // Use GET method
+			headers: {
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
+			}
+		};
+		console.log(id);
+		try {
+			// Make the fetch request
+			const type = myCookie.Type || 'PaySo';
+			const result = await fetch(`${PUBLIC_API_ENDPOINT}/update/bankdata/${id}/${status}/${myCookie.Email}/${type}/${myCookie.Id}`, config);
+			const datas = await result.json();
+			if (datas.message == 'permission denied') {
+				const modal = document.getElementById('my_modal_4');
+				if (modal) {
+					modal.showModal();
+				}
+				return false;
+			}else {
+				return true;
+			}
+		} catch (error) {
+			console.error('Error fetching transaction data:', error);
+		}
+	};
+
+  // const DeleteBankLink = async (id: String) => {
+	// 	// Create configuration for the fetch request
+	// 	const cookies = getCookies();
+	// 	const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+	// 	console.log('++++++++++', myCookie.Id, myCookie.Email);
+	// 	let config = {
+	// 		method: 'DELETE', // Use GET method
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 			'ngrok-skip-browser-warning': 'true'
+	// 		}
+	// 	};
+
+	// 	try {
+	// 		// Make the fetch request
+	// 		const type = myCookie.Type || 'PaySo';
+	// 		const result = await fetch(
+	// 			`${PUBLIC_API_ENDPOINT}/delete/bankdata/${id}/${myCookie.Email}/${type}/${myCookie.Id}`,
+	// 			config
+	// 		);
+	// 		const datas = await result.json();
+	// 		console.log(datas.message);
+	// 		if (datas.message != 'permission denied') {
+	// 			banks = banks.filter((item) => String(item.Id) !== String(id));
+	// 			console.log('banks ', banks);
+	// 			const modal = document.getElementById('my_modal_1');
+	// 			modal.close();
+	// 		} else {
+	// 			const modal = document.getElementById('my_modal_4');
+	// 			if (modal) {
+	// 				modal.showModal();
+	// 			}
+	// 		}
+	// 	} catch (error) {
+	// 		console.error('Error fetching transaction data:', error);
+	// 	}
+	// };
+
+  function handleInput(event: { target: { value: string; }; }) {
+        // Only allow alphanumeric characters
+        selectedRoom.NotiOnLineGroupId = event.target.value.replace(/[^A-Za-z0-9]/g, "");
+    }
 </script>
 <div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0  sm:py-5  xl:px-24 lg:py-5 xl:py-10 ">
     
@@ -578,7 +686,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="my-5 grid grid-cols-1 lg:px-5" >
         <div class=" w-full">
-            <div class=" font-semibold my-5">บัญชีธนาคาร</div>
+            <div class=" font-semibold my-3">บัญชีธนาคาร</div>
             </div>
             <Carousel.Root>
               <Carousel.Content>
@@ -587,8 +695,19 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 								<div
 									class="  p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md"
 								>
+                
                 <div class="mt-2">
+                  <div class=" content-end flex justify-end"><input
+                    type="checkbox"
+                    value="synthwave"
+                    class="toggle theme-controller toggle-success"
+                    id="menuToggle"
+                    checked={banks.Active}
+                    on:click={(event) => handleCheckboxChange(event, banks.Id)}
+                  />
+                </div>
                   <div class="flex">
+                    
 									<div class="avatar">
 										<div class="w-10 rounded-full mx-2 my-2">
 											{#if banks.TypeAccount === 'BANK' || banks.TypeAccount === 'Bank'}
@@ -617,6 +736,24 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 									<div class="col-span-5  min-w-full mx-3 text-md my-2">
                     <div class="font-semibold"> {banks.NameTH}</div> 
                     <div class="text-slate-400"> {banks.AccountNo}</div>
+                    <!-- <div class="flex justify-end">
+                      <div class="content-end"><button
+                        class="dropdown dropdown-bottom flex flex-col justify-center mx-3 bg-none items-center"
+                        on:click={(event) => DeleteBankLink(banks.Id)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill="#ff0000"
+                            d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z"
+                          />
+                        </svg>
+                      </button>
+                    </div></div> -->
                   </div>
 
                 <div>
@@ -653,6 +790,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 										</button>
 									</div> -->
 								</div>
+                
               </Carousel.Item>
 							{/each}
                 
@@ -785,6 +923,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 												/>
 											{/if}
 										</div>
+                    
 									</div>
 									<div class=" col-span-2 content-center">
 									<div class=" font-semibold">
@@ -846,12 +985,14 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
             <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
           </div></div>
           <div class="my-3 mx-2">
-            NotiOnLineGroupId:
+            Notion Line Group Id:
             <input 
             type="text" 
             placeholder="กรอกข้อมูลที่นี่" 
             class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
+            pattern="[A-Za-z0-9]*"
             bind:value={selectedRoom.NotiOnLineGroupId}
+            on:input={handleInput}
             />
           </div>
           <div>
@@ -859,6 +1000,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
             <div class="mx-2">
               {#if banks }
               {#each banks as banks}
+              {#if banks.Active != false}
               <div
                 class="flex border my-2 border-gray-300 rounded-lg "
               >
@@ -895,6 +1037,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               />
                 </div>
               </div>
+              {/if}
         {/each}
         {/if}
               
@@ -1217,4 +1360,30 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 	<!-- <form method="dialog" class="modal-backdrop">
 		<button>close</button>
 	</form> -->
+</dialog>
+
+<dialog id="my_modal_4" class="modal">
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="100"
+				height="100"
+				viewBox="0 0 15 15"
+				{...$$props}
+			>
+				<path
+					fill="#F04438"
+					fill-rule="evenodd"
+					d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0"
+					clip-rule="evenodd"
+				/>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">คุณไม่มีสิทธิ์ในการแก้ไขข้อมูล</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
 </dialog>

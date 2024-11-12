@@ -271,6 +271,11 @@
   }
 
   function Update() {
+    if (!Name) {
+      errorMessage = "กรุณากรอกข้อมูลให้ครบถ้วน"; // ตั้งค่า errorMessage
+      document.getElementById('nameInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return; // ไม่ทำการบันทึก
+    }
     const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
     if(Name != ""){
@@ -414,6 +419,12 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
       await generateQR(encrypted);
     }
   };
+  function handleInput(event: { target: { value: string; }; }) {
+        // Only allow alphanumeric characters
+        NotiOnLineGroupId = event.target.value.replace(/[^A-Za-z0-9]/g, "");
+    }
+
+    
 </script>
 
 <div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
@@ -436,12 +447,16 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                       <div class="font-semibold text-xl w-full sm:max-w-full truncate" >
                         
                         <input 
+                        id="nameInput"
               type="text" 
               placeholder="กรอกข้อมูลที่นี่" 
               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
               bind:value={Name}
               required
               />
+              {#if errorMessage && !Name}
+              <p class="text-red-500 text-sm mt-1">{errorMessage}</p> <!-- แสดงข้อความแจ้งเตือน -->
+            {/if}
                       </div>
                     </div>
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -452,11 +467,13 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
                   </div></div>
                   <div class="my-3">
+                    Notion Line Group Id:
                     <input 
               type="text" 
-              placeholder="กรอกข้อมูลที่นี่" 
+              placeholder="เลือกกรอกหรือไม่ก็ได้" 
               class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
               bind:value={NotiOnLineGroupId}
+              on:input={handleInput}
               required
               />
                   </div>
