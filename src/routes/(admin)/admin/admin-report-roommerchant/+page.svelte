@@ -83,32 +83,44 @@
 		} finally {
 			loadingtable = false;
 			loadingPage = false;
+		
 		}
 	}
 
 	function nextPage() {
-		if (currentPage < totalPages) {
-			offset++;
-			currentPage++;
-		}
-		handleSearch();
-	}
+        if (currentPage < totalPages) {
+            offset++;
+            currentPage++;
+            handleSearch();
+        }
+    }
 
-	function prevPage() {
-		if (currentPage > 1) {
-			offset--;
-			currentPage--;
-		}
-		handleSearch();
-	}
+    function prevPage() {
+        if (currentPage > 1) {
+            offset--;
+            currentPage--;
+            handleSearch();
+        }
+    }
 
 	function firstPage() {
 		if (currentPage > 1) {
 			offset = 1;
 			currentPage = 1;
+			handleSearch();
 		}
-		handleSearch();
 	}
+
+	$: {
+		// Reset offset and currentPage when limit changes
+		if (limit) {
+			offset = 1;
+			currentPage = 1;
+			fetchData(offset, limit, searchkeyword);
+		}
+	}
+
+
 </script>
 
 <div class="w-full py-4 px-2 sm:px-4">
@@ -175,13 +187,13 @@
 				{:else if roomMerchantData.length === 0}
 					<tr><td colspan="7">ไม่พบข้อมูล</td></tr>
 				{:else}
-					{#each roomMerchantData as item}
+					{#each roomMerchantData.slice((currentPage - 1) * limit, currentPage * limit) as item}
 						<tr class="border-b border-gray-300">
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.Index}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.RoomName}">{item.RoomName}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.MerchantName}">{item.MerchantName}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{ item.TotalQuotaUsed.toFixed(2)}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.TotalQuotaUsed}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-right">{item.MinAmountReceive.toFixed(2)}</td>
 						</tr>
 					{/each}
@@ -221,6 +233,7 @@
 					>
 						ต่อไป
 					</button>
+					
 				</div>
 			</div>
 		</div>
