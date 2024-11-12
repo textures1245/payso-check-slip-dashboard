@@ -4,15 +4,40 @@
     import * as Card from "$lib/components/ui/card";
     import * as Carousel from "$lib/components/ui/carousel";
     import payment from"$lib/image/thai-qr.png";
-    import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_SECRETKEY } from '$env/static/public';
     import cookie from 'cookie';
-	import { onMount } from 'svelte';
+	import { afterUpdate, onMount } from 'svelte';
 	import { Plus } from 'svelte-radix';
+  import { goto } from '$app/navigation';
+  import QRCode from 'qrcode';
+  import CryptoJS from 'crypto-js';
     let isOpen = false;
     let selectedMethod='bank' 
     let loading=false;
     let banks: any[] = [];
     let rooms: any[] = [];
+    let minPayment = 0;
+    let paymentAmount = minPayment;
+    let NotiOnLineGroupId = ""
+    interface Room {
+  Id: any;
+  RoomName: any;
+  TotalQuotaUsed: any;
+  MinAmountReceive: number;
+  HideSenderDetail: boolean;
+  HideReceiverDetail: boolean;
+  NotiOnValid?: string;
+  NotiOnInvalid?: string;
+  NotiOnInvalidUnverified?: string;
+  NotiOnInvalidReceiverBankAccount?: string;
+  NotiOnInvalidMinAmount?: string;
+  NotiOnQuotaLimitExceed?: string;
+  TransactionSummary?: string;
+  QrToken?:string;
+  NotiOnLineGroupId?:string;
+  NotiOnSlipDuplicated?:string;
+}
+let QrToken: string | null = null;
     const bankchecks = [
       {
 		code: '002',
@@ -161,6 +186,8 @@
 			banks = bank;
       rooms=room;
 
+      
+
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		} finally {
@@ -177,6 +204,7 @@
     selectedMethod = "bank";
     isBankSelected = true;
     isRoomSelected = false;
+    showForm = false;
     selectedOption = ""
     isOpen = false;
   }
@@ -224,7 +252,7 @@
 		const result = await fetch(url, config);
 		const data = await result.json();
 		console.log('Link Line', data);
-		return data.result;
+		return data.result || [];
 	};
   const GetRoomLink = async () => {
 		// const email = sessionStorage.getItem('email');
@@ -255,7 +283,31 @@
 		const result = await fetch(url, config);
 		const data = await result.json();
 		console.log('Link Room', data);
-		return data.result;
+
+      return data.result || [];
+    
+	};
+
+  const GetBankLinkRoom = async (roomId:string) => {
+		let config = {
+			method: 'GET', // Use GET instead of POST
+			headers: {
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
+			}
+		};
+
+		let url;
+		if (roomId) {
+			url = `${PUBLIC_API_ENDPOINT}/room/bank/${roomId}`;
+		} else {
+			throw new Error('Neither email nor id is provided.');
+		}
+
+		const result = await fetch(url, config);
+		const data = await result.json();
+		console.log('Bank Link Room', data);
+		return data.result || [];
 	};
   function getBankImage(bankCode: string) {
 		const bank = bankchecks.find((b) => b.code === bankCode);
@@ -265,8 +317,210 @@
 		const bank = bankchecks.find((b) => b.code === bankCode);
 		return bank ? bank.name : "PrompyPay"; // กรณีไม่พบจะใช้ภาพ default
 	}
+  let selectedRoom: Room | null = null;
+  let bankLinkRoom : any[]=[];
+
+  async function handleRoomClick(roomId: any) {
+    showForm = false;
+    selectedRoom = rooms.find(r => r.Id === roomId);
+    const bank = await GetBankLinkRoom(roomId);
+    QrToken=selectedRoom?.QrToken ?? null
+    bankLinkRoom = bank
+    selectedBankAccounts = bank
+    if (QrToken) {
+        await handleGenerate();
+    }
+    console.log(selectedRoom,roomId,bank,QrToken)
+  }
+  let showForm = false;
+  let CheckedHideReceiverDetail = false
+  let CheckedHideSenderDetail  = false
+  const toggleForm =async (roomId: any) => {
+    showForm = !showForm; // เปลี่ยนสถานะของ showForm
+    selectedRoom  = rooms.find(r => r.Id === roomId);
+    paymentAmount = selectedRoom?.MinAmountReceive ?? 0;
+    CheckedHideSenderDetail = selectedRoom?.HideSenderDetail?? false;
+    CheckedHideReceiverDetail = selectedRoom?.HideReceiverDetail?? false;
+    selectedOptions = [
+    selectedRoom?.NotiOnValid ?? 'option1',         // สลิป ถูกต้อง
+    selectedRoom?.NotiOnInvalid ?? 'option1',           // สลิป ถูกใช้งานแล้ว
+    selectedRoom?.NotiOnInvalidUnverified ?? 'option1',       // สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode
+    selectedRoom?.NotiOnInvalidReceiverBankAccount ?? 'option1',  // สลิป ผู้รับเงินไม่ตรง
+    selectedRoom?.NotiOnInvalidMinAmount ?? 'option1',     // ยอดโอนต่ำกว่ากำหนด
+    selectedRoom?.NotiOnQuotaLimitExceed ?? 'option1',    // การแจ้งเตือนเติมโควตาและต่ออายุ
+    selectedRoom?.NotiOnSlipDuplicated ?? 'option2' ,
+    selectedRoom?.TransactionSummary ?? 'option2'        // สรุปยอดสาขารายวัน
+  ];
+    console.log(qrcanvas1)
+    console.log(selectedRoom,selectedOptions)
+  }
+ 
+  //////////////////////gen Qrcode
+  let qrcanvas1: HTMLCanvasElement;
+  let encryptedData: string = '';
+  let errorMessage: string = '';
+  const encryptData = (data: string): string | null => {
+    try {
+      console.log('Encrypting data:', data);
+      const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY); // ทำให้แน่ใจว่าเป็นคีย์ที่มีขนาด 256 บิต
+      const encrypted = CryptoJS.AES.encrypt(data, key, { mode: CryptoJS.mode.ECB }).toString();
+      console.log('Encrypted result:', encrypted);
+      return encrypted;
+    } catch (error) {
+      console.error('Encryption error:', error);
+      errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
+      return null;
+    }
+  };
+  afterUpdate(async () => {
+  if (QrToken) {
+    await handleGenerate();  // เรียกใช้เพื่อสร้าง QR Code ถ้าข้อมูลเปลี่ยน
+  }
+});
+  
+  // Function to generate QR code
+  const generateQR = async (data: string): Promise<void> => {
+    try {
+      if (qrcanvas1) {
+      await QRCode.toCanvas(qrcanvas1, data, {
+        width: 150,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#ffffff'
+        }
+      });
+      console.log("+++++++++++++",qrcanvas1)
+      
+      // คัดลอก QR Code จาก canvas1 ไปยัง canvas2
+      errorMessage = '';
+    } else {
+      errorMessage = 'Canvas element is not available';
+    }
+    } catch (error) {
+      errorMessage = 'การสร้าง QR Code ผิดพลาด: ' + (error as Error).message;
+    }
+  };
+
+  const handleGenerate =async (): Promise<void> => {
+    console.log('handleGenerate called'); // Debug log
+    const dataString = `${QrToken}`;
+    
+    // Encrypt data
+    const encrypted = encryptData(dataString);
+    if (encrypted) {
+      encryptedData = encrypted;
+      await generateQR(encrypted);
+    }
+  };
+
+  
+  /////////////////////////////////////////
+
+  const increaseAmount = () => {
+    paymentAmount += 1; // เพิ่มจำนวนเงินทีละ 1
+  };
+
+  const decreaseAmount = () => {
+    if (paymentAmount > 0) {
+      paymentAmount -= 1; // ลดจำนวนเงินทีละ 1 ถ้าจำนวนเงินไม่ต่ำกว่าขั้นต่ำ
+    }
+  };
+
+
+  let selectedOptions = Array(8).fill(null);
+
+  // ฟังก์ชันสำหรับเลือกตัวเลือก
+  function selectOption(row: number, option: string) {
+    selectedOptions[row] = option;
+    console.log(selectedOptions)
+  }
+
+  function Update() {
+    const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+    const updateData = {
+    // ชื่อห้อง
+    Id  : selectedRoom?.Id,
+    RoomName: selectedRoom?.RoomName,
+    MerchantId:parseInt(myCookie.Id),
+    // บัญชีที่เชื่อมต่อ - กรองเฉพาะบัญชีที่ถูกเลือก (checked)
+    // linkedAccounts: selectedBankAccounts,
+    NotiOnLineGroupId:selectedRoom?.NotiOnLineGroupId,
+    // ยอดเงินขั้นต่ำ
+    MinAmountReceive: paymentAmount,
+    
+    // การตั้งค่าการซ่อนข้อมูล
+
+    HideSenderDetail: CheckedHideSenderDetail,
+      HideReceiverDetail: CheckedHideReceiverDetail,
+
+    
+    // การตั้งค่าการแจ้งเตือน Line
+
+    NotiOnValid: selectedOptions[0],           // สลิปถูกต้อง
+    NotiOnInvalid: selectedOptions[1],            // สลิปถูกใช้งานแล้ว
+    NotiOnInvalidReceiverBankAccount: selectedOptions[2],         // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
+    NotiOnInvalidUnverified: selectedOptions[3],      // สลิปผู้รับเงินไม่ตรง
+    NotiOnInvalidMinAmount: selectedOptions[4],        // ยอดโอนต่ำกว่ากำหนด
+    NotiOnQuotaLimitExceed: selectedOptions[5],     // การแจ้งเตือนเติมโควตาและต่ออายุ
+    NotiOnSlipDuplicated:selectedOptions[6],
+    TransactionSummary: selectedOptions[7]   // สรุปยอดสาขารายวัน
+
+  };
+  console.log(updateData)
+  UpdateRoom(updateData,selectedBankAccounts)
+
+  }
+  let selectedBankAccounts: any[] = [];
+  const handleBankSelection = (bank: { AccountNo: any; }, isChecked: any) => {
+  if (isChecked) {
+    selectedBankAccounts = [...selectedBankAccounts, bank];
+  } else {
+    selectedBankAccounts = selectedBankAccounts.filter(acc => acc.AccountNo !== bank.AccountNo);
+  }
+};
+
+const handleSenderToggle = () => {
+  CheckedHideSenderDetail = !CheckedHideSenderDetail;
+};
+
+// handler สำหรับ receiver
+const handleReceiverToggle = () => {
+  CheckedHideReceiverDetail = !CheckedHideReceiverDetail;
+};
+
+const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
+  const bankIds = bankData.map(bank => bank.Id);
+  console.log('data', dataupdate,bankIds);
+  const requestBody = {
+            rooms: dataupdate,
+            bank: bankIds
+        };
+		let config = {
+			method: 'PUT', // Use GET instead of POST
+			headers: {
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
+			},
+      body: JSON.stringify(
+  requestBody),
+		};
+
+		let url;
+		if (dataupdate) {
+			url = `${PUBLIC_API_ENDPOINT}/updateroom`;
+		} else {
+			throw new Error('Neither email nor id is provided.');
+		}
+
+		const result = await fetch(url, config);
+		const data = await result.json();
+		
+		return data.result;
+	};
 </script>
-<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
+<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0  sm:py-5  xl:px-24 lg:py-5 xl:py-10 ">
     
     <div class="container max-w-screen-xl  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow ">
       <div class="flex   justify-evenly gap-5">
@@ -405,7 +659,7 @@
             </Carousel.Root>
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div class="relative w-full h-32 "  on:click={() => {
-            window.location.assign("/banklink");
+            goto('/banklink');
         }}>
             <!-- Background and overlay -->
             <div class="absolute inset-0 overflow-hidden flex items-center  justify-center  bg-slate-50">
@@ -422,7 +676,7 @@
             
             <!-- Floating button -->
             <div class="relative h-full flex items-center justify-center  ">
-              <button class="w-full py-4 px-6 flex items-center gap-3 bg-[#f1f6ff] hover:bg-[#ceddf9] transition-colors relative"
+              <button class="w-full py-4 px-6 flex items-center gap-3 bg-[#ceddf9] hover:bg-[#b5c9ef] transition-colors relative"
                  >
                  <div class="w-full flex justify-center ">
                   <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
@@ -439,29 +693,31 @@
     <Carousel.Root  class="mt-5" >
       <Carousel.Content  >
         {#each rooms as rooms}
-        <Carousel.Item  class="md:basis-1/1 lg:basis-1/3"><div
-          class="  p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md"
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <Carousel.Item  class="md:basis-1/1 lg:basis-1/3" >
+          <div
+          class="  p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md" on:click={() => handleRoomClick(rooms.Id)}
         >
         <div class="flex ">
           <div class="avatar ">
-            <div class="w-full  flex justify-center min-w-20   bg-green-100 p-5 rounded-lg">
+            <div class="w-full  flex justify-center min-w-20    bg-green-800 p-5 rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" {...$$props}>
-                <path fill="#156c04" fill-opacity="0.25" fill-rule="evenodd" d="M5.058 12a.06.06 0 0 0-.058.059V19c0 .943 0 1.414.293 1.707S6.057 21 7 21h10c.943 0 1.414 0 1.707-.293S19 19.943 19 19v-6.941a.06.06 0 0 0-.058-.059h-1.278c-.141 0-.318 0-.475-.017a1.5 1.5 0 0 1-.697-.25a.19.19 0 0 0-.207-.003a1.6 1.6 0 0 1-.666.24c-.222.03-.484.03-.709.03h-1.563c-.178 0-.393 0-.581-.024l-.645-.082c-.442-.054.2-.054-.242 0l-.645.082c-.188.024-.403.024-.581.024H9.09c-.225 0-.487 0-.709-.03a1.6 1.6 0 0 1-.666-.24a.19.19 0 0 0-.207.003c-.25.173-.504.228-.697.25a4 4 0 0 1-.475.017zm.876-1c-.497 0-.94-.445-.712-.886c.221-.43.632-.724 1.453-1.31l3-2.143C10.798 5.859 11.36 5.458 12 5.458s1.202.4 2.325 1.203l3 2.143c.821.586 1.232.88 1.453 1.31c.227.441-.215.886-.712.886h-.373c-.335 0-.503 0-.631-.09a.5.5 0 0 1-.161-.203c-.044-.089-.087-.204-.144-.356l-.21-.56l-.434-1.156l-.017-.045c-.22-.585-.329-.878-.415-.857c-.087.021-.048.332.03.952l.005.047l.144 1.144c.048.386.078.63.031.8a.4.4 0 0 1-.083.155c-.149.169-.413.169-.94.169h-1.485c-.42 0-.63 0-.772-.125a.4.4 0 0 1-.087-.112c-.062-.116-.088-.284-.121-.54l-.013-.099l-.18-1.44l-.005-.046l-.007-.05c-.073-.588-.11-.882-.198-.882s-.125.294-.198.882l-.007.05l-.005.045l-.18 1.441l-.013.1c-.032.255-.059.423-.12.54a.4.4 0 0 1-.088.11c-.141.126-.351.126-.772.126H9.133c-.528 0-.792 0-.941-.17a.4.4 0 0 1-.083-.154c-.047-.17-.017-.414.031-.8l.143-1.143v-.001l.006-.047c.078-.62.117-.93.03-.952c-.086-.021-.196.272-.415.857l-.017.044v.001L7.454 9.79l-.21.561c-.058.152-.1.267-.145.356a.5.5 0 0 1-.16.204c-.13.089-.297.089-.632.089z" clip-rule="evenodd" />
-                <path fill="#156c04" d="M4.621 4.515c.182-.728.273-1.091.544-1.303C5.437 3 5.812 3 6.562 3h10.876c.75 0 1.125 0 1.397.212c.27.212.362.575.544 1.303l1.466 5.864c.071.286.107.429.032.525s-.223.096-.517.096h-2.616c-.358 0-.538 0-.67-.099c-.133-.099-.185-.27-.288-.614l-.689-2.295c-.216-.722-.324-1.083-.414-1.066c-.089.018-.051.393.024 1.143L15.89 9.9c.051.514.077.771-.072.935s-.407.165-.923.165h-1.49c-.43 0-.645 0-.788-.13c-.143-.128-.164-.342-.207-.77l-.211-2.11c-.072-.723-.108-1.085-.199-1.085c-.09 0-.127.362-.199 1.085l-.211 2.11c-.043.428-.064.642-.207.77c-.143.13-.358.13-.788.13h-1.49c-.516 0-.774 0-.923-.165c-.15-.164-.123-.42-.072-.935l.183-1.831c.075-.75.113-1.125.023-1.143c-.089-.017-.197.344-.413 1.066l-.69 2.295c-.102.344-.154.515-.287.614s-.312.099-.67.099H3.64c-.294 0-.442 0-.517-.096s-.04-.24.032-.525zM12.5 15h-1a2 2 0 0 0-2 2v3.85c0 .083.067.15.15.15h4.7a.15.15 0 0 0 .15-.15V17a2 2 0 0 0-2-2" />
+                <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
               </svg>
             </div>
           </div>
           <div class="mx-2">
             <div class=" text-slate-400">Line Group</div>
-            <div class="   font-semibold   text-xl ">
+            <div class="   font-semibold   text-xl max-w-28 sm:max-w-full truncate ">
                 {rooms.RoomName}
 
             </div>
             <div>ตรวจสอบไปแล้ว {rooms.TotalQuotaUsed} ครั้ง</div>
           </div>
         </div>
-        </div></Carousel.Item>
-        
+        </div>
+      </Carousel.Item>
   {/each}
 
       </Carousel.Content>
@@ -469,53 +725,480 @@
       <Carousel.Next />
     </Carousel.Root>
     
-  <div class="my-5 grid grid-cols-1 lg:px-5" style="height: 100px;">
-    <div class="w-full">
-      <div class="font-semibold my-5"></div>
-    </div>
-  </div>
+    {#if selectedRoom && !showForm}
+    <Card.Root class="my-5" >
+			<Card.Content>
+				<div class="my-5 grid grid-cols-1 lg:px-5" >
+          <div class="w-full  ">
+            <div class="flex mx-2">
+              <div class="avatar ">
+                <div class="w-full  flex justify-center min-w-15 content-center    bg-green-800 p-3 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
+                    <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="mx-2">
+                <div class=" text-slate-400">สาขา</div>
+                <div class="font-semibold text-xl max-w-28 sm:max-w-full truncate" >
+                    {selectedRoom.RoomName}
+                </div>
+              </div>
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div class="flex justify-end w-full items-center">
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div on:click={() => {
+                 toggleForm(selectedRoom?.Id);
+              }} ><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
+                  <path fill="black" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5" />
+                </svg></div></div>
+              
+            </div>
+            <div class=" mx-2 my-5"><div class="canvas-container">
+              <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
+            </div></div>
+            <div>
+              <p class=" font-semibold mx-2">บัญชีที่เชื่อมต่อ</p>
+              <div class="mx-2">
+                {#if bankLinkRoom}
+                {#each bankLinkRoom as bankLinkRoom}
+                <div
+									class="flex border my-2 border-gray-300 rounded-lg"
+								>
+									<div class="avatar">
+										<div class="w-10 rounded-full mx-2 my-2">
+											{#if  bankLinkRoom.TypeAccount === 'BANK' || bankLinkRoom.TypeAccount === 'Bank'}
+												<img src={getBankImage(bankLinkRoom.BankCode)} alt="Bank Image" loading="lazy" />
+											{:else}
+												<img
+													src="https://spoynt.com/wp-content/uploads/2023/12/promtpay-qr.png"
+													alt={bankLinkRoom.NameTH}
+													loading="lazy"
+												/>
+											{/if}
+										</div>
+									</div>
+									<div class=" col-span-2 content-center">
+									<div class=" font-semibold">
+                    {bankLinkRoom.NameTH}
+                  </div>
+                  <div class=" text-slate-400">
+                    {bankLinkRoom.AccountNo}
+                  </div>
+									</div>
+									<!-- svelte-ignore a11y-click-events-have-key-events -->
+									<!-- svelte-ignore a11y-no-static-element-interactions -->
+									<div
+										class="dropdown dropdown-bottom flex flex-row justify-end bg-none my-2 mx-2 items-center col-span-2"
+									>
+									</div>
+								</div>
+          {/each}
+          {/if}
+                
+              </div>
+            </div>
+            <!-- Add any other detailed information you want to display here -->
+             
+          </div>
+        </div>
+			</Card.Content>
+		  </Card.Root>
+    
+  {/if}
+      
+  {#if  selectedRoom && showForm }
+  <Card.Root class="my-5" >
+    <Card.Content>
+      <div class="my-5 grid grid-cols-1 lg:px-5" >
+        <div class="w-full  ">
+          <div class="flex mx-2">
+            <div class="avatar ">
+              <div class="w-full  flex justify-center min-w-15 content-center    bg-green-800 p-3 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
+                  <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
+                </svg>
+              </div>
+            </div>
+            <div class="mx-2 w-full">
+              <div class="font-semibold text-xl w-full sm:max-w-full truncate" >
+                <input 
+      type="text" 
+      placeholder="กรอกข้อมูลที่นี่" 
+      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
+      bind:value={selectedRoom.RoomName}
+      />
+              </div>
+            </div>
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+           
+            
+          </div>
+          <div class=" mx-2 my-5"><div class="canvas-container">
+            <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
+          </div></div>
+          <div class="my-3 mx-2">
+            NotiOnLineGroupId:
+            <input 
+            type="text" 
+            placeholder="กรอกข้อมูลที่นี่" 
+            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
+            bind:value={selectedRoom.NotiOnLineGroupId}
+            />
+          </div>
+          <div>
+            <p class=" font-semibold mx-2">บัญชีที่เชื่อมต่อ</p>
+            <div class="mx-2">
+              {#if banks }
+              {#each banks as banks}
+              <div
+                class="flex border my-2 border-gray-300 rounded-lg "
+              >
+                <div class="avatar">
+                  <div class="w-10 rounded-full mx-2 my-2">
+                    {#if  banks.TypeAccount === 'BANK' || banks.TypeAccount === 'Bank'}
+                      <img src={getBankImage(banks.BankCode)} alt="Bank Image" loading="lazy" />
+                    {:else}
+                      <img
+                        src="https://spoynt.com/wp-content/uploads/2023/12/promtpay-qr.png"
+                        alt={banks.NameTH}
+                        loading="lazy"
+                      />
+                    {/if}
+                  </div>
+                </div>
+                <div class="  content-center  w-full">
+                <div class=" font-semibold">
+                  {banks.NameTH}
+                </div>
+                <div class=" text-slate-400">
+                  {banks.AccountNo}
+                </div>
+                </div>
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <div class=" content-center flex justify-end items-center lg:mx-2"><input
+                type="checkbox"
+                value="synthwave"
+                class="toggle theme-controller toggle-success"
+                id="menuToggle"
+                checked={bankLinkRoom && Array.isArray(bankLinkRoom) && bankLinkRoom.some(bank => bank.AccountNo === banks.AccountNo)}
+                on:change={(e) => handleBankSelection(banks, e.target.checked)}
+              />
+                </div>
+              </div>
+        {/each}
+        {/if}
+              
+            </div>
+          </div>
+          <!-- Add any other detailed information you want to display here -->
+           <div>ตั้งค่า ระบบการตรวจสอบ</div>
+           <div>เตือน ยอดเงินขั่นต่ำ *</div>
+           <div class="relative inline-flex items-center w-full">
+            <!-- ช่องกรอกจำนวนเงิน -->
+
+            <input
+              id="paymentAmount"
+              type="number"
+              bind:value={paymentAmount}
+              min={minPayment}
+              step="1"
+              class="text-start px-5 py-2   border rounded-lg pr-12 pl-10 w-full" 
+            />
+            <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl text-gray-500">
+              ฿
+            </span>
+            <!-- ปุ่ม + และ - อยู่ข้างในช่อง input ทางขวา -->
+            <button 
+    on:click={decreaseAmount} 
+    class="absolute right-12 top-1/2 transform -translate-y-1/2 text-xl bg-red-500 text-white py-1 px-2 rounded-full"
+  >
+    -
+  </button>
   
+  <!-- ปุ่ม + อยู่ขวาใกล้สุด -->
+  <button 
+    on:click={increaseAmount} 
+    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xl bg-green-500 text-white py-1 px-2 rounded-full"
+  >
+    +
+  </button>
+          </div>
+          <div class="m-2">
+            <div class="flex justify-between">
+              <div>ซ่อนเลขบัญชีผู้โอน</div>
+              <div> <input
+                type="checkbox"
+                value="synthwave"
+                class="toggle theme-controller toggle-success"
+                id="menuToggle"
+                checked={CheckedHideSenderDetail}
+                on:change={handleSenderToggle}
+              /></div>
+            </div>
+           
+            <div class="flex justify-between">
+              <div>ซ่อนเลขบัญชีผู้โอน</div>
+              <div> <input
+                type="checkbox"
+                value="synthwave"
+                class="toggle theme-controller toggle-success"
+                id="menuToggle"
+                checked={CheckedHideReceiverDetail}
+                on:change={handleReceiverToggle}
+              /></div>
+            </div>
+          </div>
+
+          <div>Line Notify 1 ( การแจ้งเตือน)</div>
+          <div class="flex flex-col gap-4 p-4">
+            <!-- แถว 1 -->
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[0] === 'LINE OA'}
+                  on:click={() => selectOption(0, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[0] === 'LINE GROUP'}
+                  on:click={() => selectOption(0, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[0] === 'ALL'}
+                  on:click={() => selectOption(0, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+          
+            <!-- แถว 2 -->
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[1] === 'LINE OA'}
+                  on:click={() => selectOption(1, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[1] === 'LINE GROUP'}
+                  on:click={() => selectOption(1, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[1] === 'ALL'}
+                  on:click={() => selectOption(1, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+          
+            <!-- แถว 3 - 8 -->
+
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[2] === 'LINE OA'}
+                  on:click={() => selectOption(2, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[2] === 'LINE GROUP'}
+                  on:click={() => selectOption(2, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[2] === 'ALL'}
+                  on:click={() => selectOption(2, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[3] === 'LINE OA'}
+                  on:click={() => selectOption(3, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[3] === 'LINE GROUP'}
+                  on:click={() => selectOption(3, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[3] === 'ALL'}
+                  on:click={() => selectOption(3, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[4] === 'LINE OA'}
+                  on:click={() => selectOption(4, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[4] === 'LINE GROUP'}
+                  on:click={() => selectOption(4, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[4] === 'ALL'}
+                  on:click={() => selectOption(4, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[5] === 'LINE OA'}
+                  on:click={() => selectOption(5, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[5] === 'LINE GROUP'}
+                  on:click={() => selectOption(5, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[5] === 'ALL'}
+                  on:click={() => selectOption(5, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-blue-500={selectedOptions[6] === 'LINE OA'}
+                  on:click={() => selectOption(6, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[6] === 'LINE GROUP'}
+                  on:click={() => selectOption(6, 'LINE GROUP')}
+                >
+                  Line กลุ่ม
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[6] === 'ALL'}
+                  on:click={() => selectOption(6, 'ALL')}
+                >
+                ทั้งสอง
+                </button>
+              </div>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
+              <button class="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-lg px-4 py-2 mx-2">
+                Line OA
+              </button>
+              <div class="flex space-x-2">
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-green-500={selectedOptions[7] === 'LINE OA'}
+                  on:click={() => selectOption(7, 'LINE OA')}
+                >
+                  Line OA
+                </button>
+                <button
+                  class="px-4 py-2 rounded-lg"
+                  class:bg-red-500={selectedOptions[7] === 'DISABLE'}
+                  on:click={() => selectOption(7, 'DISABLE')}
+                >
+                  ทั้งสอง
+                </button>
+              </div>
+            </div>
+            <!-- คุณสามารถทำซ้ำรูปแบบด้านบนและแก้ไขตัวแปรใน `selectedOptions` ให้เหมาะสม -->
+             <button 
+                  class="w-full bg-black text-white py-2 rounded-lg mt-4"
+                  on:click={Update}
+                >
+                  บันทึกการเปลี่ยนแปลง
+                </button>
+          </div>
+        </div>
+      </div>
+    </Card.Content>
+    </Card.Root>
+  {/if}
   {/if}
 </div>
 </div>
 
 
-<dialog id="my_modal_3" class="modal">
-	<div class="modal-box ">
-		<div class="text-lg font-bold flex justify-center">
-			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
-				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
-				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
-			</svg>
-		</div>
-		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
-		<p class=" text-center">บันทึกข้อมูลสำเร็จ</p>
-    <div class="flex  w-full  justify-around mt-5">
-    <div class="flex content-center">
-      <!-- Button to close the modal -->
-      
-
-      <!-- Button to go to another page -->
-      <a href="/dashboard"><button class="btn bg-primary text-white hover:text-black" >ไปหน้า แดชบอร์ด</button></a>
-  </div>
-</div>
-	</div>
-	<!-- <form method="dialog" class="modal-backdrop">
-		<button>close</button>
-	</form> -->
-</dialog>
-
-
-<style scoped>
-  /* .custom-min-h {
-    max-height: calc(100vh - 45px);
-} */
-/* input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  input[type="number"] {
-    -moz-appearance: textfield;
-  } */
-</style>

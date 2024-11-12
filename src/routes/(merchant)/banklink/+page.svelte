@@ -5,6 +5,7 @@
     import payment from"$lib/image/thai-qr.png";
     import { PUBLIC_API_ENDPOINT } from '$env/static/public';
     import cookie from 'cookie';
+	import { onMount } from 'svelte';
     let isOpen = false;
     let selectedBank: { imageUrl: any; name: any;code:any; } | null = null;
     let AccNoBank = ""
@@ -48,7 +49,55 @@
     { code: "098", name: "ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย",imageUrl: "https://csrgroup.co.th/img/Client258-6.png" }
   ];
 
+  let rooms:any[]=[]
+  let loading=false;
+  onMount(async () => {
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
+		
+		try {
+      const room = await GetRoomLink();
+			// Use profileData here
+      rooms=room;
+      console.log(rooms)
+		} catch (error) {
+			console.error('Error fetching profile:', error);
+		} finally {
+			// การอัปเดตสถานะการโหลด
+			loading = false;
+		}
 
+	});
+  const GetRoomLink = async () => {
+		// const email = sessionStorage.getItem('email');
+		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+
+		console.log('++++++++++', myCookie.Id, myCookie.Email);
+		// console.log('email: ', email, 'id: ', id , );
+
+		// Create URL parameters from form data
+		let config = {
+			method: 'GET', // Use GET instead of POST
+			headers: {
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
+			}
+		};
+
+		let url;
+		if (myCookie.Id) {
+			console.log('Get by Merchant Id');
+			url = `${PUBLIC_API_ENDPOINT}/roomdata/${myCookie.Id}`;
+		} else {
+			throw new Error('Neither email nor id is provided.');
+		}
+
+		const result = await fetch(url, config);
+		const data = await result.json();
+		console.log('Link Room', data);
+		return data.result || [];
+	};
   function selectBank(bank: any) {
     selectedBank = bank;
     isOpen = false;
@@ -147,20 +196,25 @@ const createBank = async (info: BankInfo | PPInfo) => {
     throw new Error('Invalid information provided');
   }
 
-    console.log("AccountNo",payload.AccountNo)
+    
   try {
+    const requestBody = {
+            rooms: selectedRoomIds,
+            bank: payload
+        };
+        console.log("AccountNo",requestBody)
     const response = await fetch(`${PUBLIC_API_ENDPOINT}/create/bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
+   
     console.log('Bank information created successfully!');
     const modal = document.getElementById('my_modal_3');
 				if (modal) {
@@ -254,6 +308,15 @@ function handleInputName(event: { target: { value: any; }; }) {
   event.target.value = inputValue;
 }
 
+let selectedRoomIds: any[] = [];
+function toggleRoom(roomId: any, isChecked: any) {
+    if (isChecked) {
+      selectedRoomIds = [...selectedRoomIds, roomId];
+    } else {
+      selectedRoomIds = selectedRoomIds.filter(id => id !== roomId);
+    }
+    console.log('Selected rooms:', selectedRoomIds); // For debugging
+  }
 
 </script>
 <div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
@@ -295,7 +358,7 @@ function handleInputName(event: { target: { value: any; }; }) {
         </div>
       </div>
     {#if isBankSelected}
-    <div class="my-5 grid grid-cols-1 lg:px-5" style="height: 100px;">
+    <div class="my-5 grid grid-cols-1 lg:px-5" >
         <div class=" w-full">
             <div class=" font-semibold my-5">บัญชีธนาคาร</div>
             <div class="relative w-full px-2">
@@ -356,6 +419,27 @@ function handleInputName(event: { target: { value: any; }; }) {
             </div>
             </div>
             </div>
+            
+            {#each rooms as rooms }
+            <div class="flex w-full my-3 border-2 rounded-lg ">
+            <div class="avatar p-2">
+              <div class="w-full  flex justify-center min-w-15 content-center    bg-green-800 p-3 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" {...$$props}>
+                  <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
+                </svg>
+              </div>
+            </div>
+            <div class="w-full content-center mx-3 truncate">{rooms.RoomName}</div>
+            <div class=" content-center flex justify-end items-center lg:mx-2"><input
+              type="checkbox"
+              value="synthwave"
+              class="toggle theme-controller toggle-success"
+              id="menuToggle"
+              on:change={(e) => toggleRoom(rooms.Id, e.target.checked)}
+            />
+              </div>
+            </div>
+            {/each}
             <div class="flex justify-center sm:justify-end lg:justify-end my-0 sm:my-2 lg:my-2 mx-2"><Button
               type="submit"
               variant="outline"

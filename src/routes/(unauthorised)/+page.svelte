@@ -464,10 +464,9 @@
 								</div></Button
 							>
 						</div> -->
-						<div class="flex justify-center hover:text-black">
+						<div class="flex justify-center hover:text-white">
 							<Button
-								variant="outline"
-								class="my-2 flex text-center py-0 px-0 lg:bg-green-500 md:bg-green-500 sm:bg-green-500 lg:rounded-md sm:rounded-md bg-green-800 rounded-full"
+								class="my-2 flex text-center py-0 px-0  lg:bg-green-500 md:bg-green-500 sm:bg-green-500 lg:rounded-md sm:rounded-md hover:bg-green-800 rounded-full"
 								on:click={line}
 								style="width:80%;height:40px"
 								><div class="rounded-sm w-20" style="height:100%">
@@ -490,7 +489,7 @@
 								</div>
 								<div
 									style="width: 100%;height:100%"
-									class="content-center lg:block md:block sm:block hidden hover:text-black"
+									class="content-center lg:block md:block sm:block hidden hover:text-white"
 								>
 									Sign up with Line
 								</div></Button

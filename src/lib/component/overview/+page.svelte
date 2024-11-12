@@ -551,6 +551,18 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             
         </Card.Footer>
     </Card.Root>
+
+    <!-- <Card.Root class="col-span-2 md:col-span-2 lg:col-span-1">
+        <Card.Header
+            class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
+        >
+            <Card.Title class="text-xl font-semibold " style="height:20px">โควต้า</Card.Title>
+           
+        </Card.Header>
+        <Card.Content class="text-center lg:my-5 py-2">
+            <Pie {data} {options}  width={180} height={180}/>
+        </Card.Content>
+    </Card.Root> -->
     
 </div>
 

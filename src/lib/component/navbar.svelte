@@ -151,8 +151,8 @@ onMount(() => {
 					
 				  </summary>
 				  <ul tabindex="0"  class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
-					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button  >โปรไฟล์</button></a></li>{/if}
-					<li><a class="py-2 px-4 hover:bg-gray-100 rounded  whitespace-nowrap"><button on:click={handleLogout} style="color:#F04438;">ออกจากระบบ</button></a></li>
+					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button>โปรไฟล์</button></a></li>{/if}
+					<li><a class="py-2 px-4 hover:bg-gray-100 rounded  whitespace-nowrap " on:click={handleLogout}><button   style="color:#F04438;">ออกจากระบบ</button></a></li>
 				  </ul>
 				</div>
 			  </div>
