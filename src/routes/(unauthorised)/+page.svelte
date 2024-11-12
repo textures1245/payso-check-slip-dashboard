@@ -423,7 +423,7 @@
 					</div> -->
 					<hr class="my-5" />
 					<div
-						class="flex my-3 grid gap-1 grid-cols-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
+						class="flex my-3 grid gap-1 grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
 						style="width:100%;"
 					>
 						<!-- <div class="flex justify-center hover:text-black">
@@ -466,7 +466,7 @@
 						</div> -->
 						<div class="flex justify-center hover:text-white">
 							<Button
-								class="my-2 flex text-center py-0 px-0  lg:bg-green-500 md:bg-green-500 sm:bg-green-500 lg:rounded-md sm:rounded-md hover:bg-green-800 rounded-full"
+								class="my-2 flex text-center py-0 px-0  lg:bg-green-500 md:bg-green-500 sm:bg-green-500 bg-green-500 lg:rounded-md sm:rounded-md hover:bg-green-800 rounded-full"
 								on:click={line}
 								style="width:80%;height:40px"
 								><div class="rounded-sm w-20" style="height:100%">
