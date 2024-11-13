@@ -17,5 +17,7 @@ export type RoomMerchantData = {
 	TransactionSummary :string 
 	RoomName :string 
 	PackageName :string 
-	Index : number
+	Index : number 
+	TotalCount : number;   
+
 }

@@ -163,7 +163,6 @@
         // Calculate totalCount and handle case where result is an empty array
         const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 
-        // Map the result to packageData
         packageData = data.result.map((item: PackageData, Index: number) => ({
             Id: item.Id,
             Name: item.Name,

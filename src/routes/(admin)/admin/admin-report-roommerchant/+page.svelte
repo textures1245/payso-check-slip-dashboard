@@ -29,12 +29,12 @@
 		fetchData(offset, limit, '');
 	}
 
-	async function fetchData(offset = 1, limit = 10, searchkeyword = '') {
+	async function fetchData(currentOffset : number, currentLimit: number, searchkeyword = '') {
 		loadingtable = true;
 		loadingPage = true;
 		try {
 			const response = await fetch(
-				`${PUBLIC_API_ENDPOINT}/admin/getRoomMerchantReport?offset=${offset}&limit=${limit}&searchkeyword=${searchkeyword}`,
+				`${PUBLIC_API_ENDPOINT}/admin/getRoomMerchantReport?offset=${currentOffset}&limit=${currentLimit}&searchkeyword=${searchkeyword}`,
 				{
 					headers: {
 						'Content-Type': 'application/json',
@@ -55,9 +55,10 @@
 			}
 
 			const data = await response.json();
-		
+			const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 
-			roomMerchantData = (data.result || []).map((item: RoomMerchantData, index: number) => ({
+
+			roomMerchantData = (data.result || []).map((item: RoomMerchantData, Index: number) => ({
 				Id: item.Id,
 				MerchantId: item.MerchantId,
 				MerchantName: item.MerchantName,
@@ -75,9 +76,10 @@
 				TransactionSummary: item.TransactionSummary,
 				RoomName: item.RoomName,
 				PackageName: item.PackageName,
-				Index: index + (offset - 1) * limit + 1
+				TotalCount : item.TotalCount,   
+				Index: Index + (currentOffset - 1) * currentLimit + 1
 			}));
-			totalItems = data.total || roomMerchantData.length;
+			totalPages = Math.ceil(totalCount / limit);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		} finally {
@@ -88,37 +90,28 @@
 	}
 
 	function nextPage() {
-        if (currentPage < totalPages) {
-            offset++;
-            currentPage++;
-            handleSearch();
-        }
-    }
+		if (currentPage < totalPages) {
+			offset++;
+			currentPage++;
+		}
+		handleSearch();
+	}
 
-    function prevPage() {
-        if (currentPage > 1) {
-            offset--;
-            currentPage--;
-            handleSearch();
-        }
-    }
-
+	function prevPage() {
+		if (currentPage > 1) {
+			offset--;
+			currentPage--;
+		}
+		handleSearch();
+	}
 	function firstPage() {
 		if (currentPage > 1) {
 			offset = 1;
 			currentPage = 1;
-			handleSearch();
 		}
+		handleSearch();
 	}
 
-	$: {
-		// Reset offset and currentPage when limit changes
-		if (limit) {
-			offset = 1;
-			currentPage = 1;
-			fetchData(offset, limit, searchkeyword);
-		}
-	}
 
 
 </script>
@@ -187,7 +180,7 @@
 				{:else if roomMerchantData.length === 0}
 					<tr><td colspan="7">ไม่พบข้อมูล</td></tr>
 				{:else}
-					{#each roomMerchantData.slice((currentPage - 1) * limit, currentPage * limit) as item}
+					{#each roomMerchantData as item}
 						<tr class="border-b border-gray-300">
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.Index}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title="{item.RoomName}">{item.RoomName}</td>

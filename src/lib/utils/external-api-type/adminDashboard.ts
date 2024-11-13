@@ -35,6 +35,8 @@ export type TransactionOverviewStat = {
 	BANK_ACC_NOT_MATCHCount: number;
 	REQUEST_REJECTEDCount : number;
 	RESPOND_REJECTEDCount : number;
+	REQUEST_REJECTED_TRANSECTION_COUNT : number;
+	INVALID_MIN_AMOUNT_RECEIVECount : number;
 	Year: string;
 	Month: string;
 };

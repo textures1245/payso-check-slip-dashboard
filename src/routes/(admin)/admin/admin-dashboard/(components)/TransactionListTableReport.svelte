@@ -30,12 +30,8 @@
 			}}
 		>
 			<div class="flex gap-3">
-				<label class="form-control  w-[160px]">
-					<select
-						class="select select-sm select-bordered  w-[160px]"
-						name="status"
-						id="status"
-					>
+				<label class="form-control w-[160px]">
+					<select class="select select-sm select-bordered w-[160px]" name="status" id="status">
 						<option disabled selected>สถานะ</option>
 						<option value="">ทั้งหมด</option>
 						<option value="SUCCESS">SUCCESS</option>
@@ -44,28 +40,26 @@
 						<option value="RESPOND_REJECTED">RESPOND REJECTED</option>
 						<option value="REQUEST_REJECTED">REQUEST REJECTED</option>
 						<option value="BANK_ACC_NOT_MATCH">BANK ACC NOT MATCH</option>
+						<option value="INVALID_MIN_AMOUNT_RECEIVE">INVALID_MIN_AMOUNT_RECEIVE</option>
 					</select>
 				</label>
 				<label class="form-control w-[180px]">
-					<select
-						class="select select-sm select-bordered w-full"
-						name="sortOrder"
-						id="sortOrder"
-					>
+					<select class="select select-sm select-bordered w-full" name="sortOrder" id="sortOrder">
 						<option value="DESC">เรียงตามวันที่</option>
 						<option value="DESC">มากไปน้อย</option>
 						<option value="ASC">น้อยไปมาก</option>
 					</select>
 				</label>
 				<label class="max-w-sm self-end">
-					<button class="btn bg-primary text-primary-content btn-sm hover:bg-[#050680]" type="submit">ค้นหา</button>
+					<button
+						class="btn bg-primary text-primary-content btn-sm hover:bg-[#050680]"
+						type="submit">ค้นหา</button
+					>
 				</label>
 			</div>
 		</form>
 	</div>
 </div>
-
-
 
 <Table.Root>
 	<Table.Header>
@@ -92,54 +86,83 @@
 				<Table.Cell>{t.MerchantId}</Table.Cell>
 				<Table.Cell>{t.MerchantName}</Table.Cell>
 				<Table.Cell>
-					{t.QrCode.slice(18, 21) === '002' ? 'BBL'
-						: t.QrCode.slice(18, 21) === '004' ? 'KBANK'
-						: t.QrCode.slice(18, 21) === '006' ? 'KTB'
-						: t.QrCode.slice(18,21) === '011' ? 'TMB'
-						: t.QrCode.slice(18,21) === '014' ? 'SCB'
-						: t.QrCode.slice(18,21) === '017' ? 'CITI'
-						: t.QrCode.slice(18,21) === '020' ? 'SCBT'
-						: t.QrCode.slice(18,21) === '022' ? 'UOBT'
-						: t.QrCode.slice(18,21) === '024' ? 'UOBT'
-						: t.QrCode.slice(18,21) === '025' ? 'BAY'
-						: t.QrCode.slice(18,21) === '030' ? 'GOV'
-						: t.QrCode.slice(18, 21) === '031' ? 'HSBC'
-						: t.QrCode.slice(18, 21) === '033' ? 'GHB'
-						: t.QrCode.slice(18,21) === '034' ? 'AGRI'
-						: t.QrCode.slice(18,21) === '039' ? 'MHCB'
-						: t.QrCode.slice(18,21) === '065' ? 'TBANK'
-						: t.QrCode.slice(18,21) === '066' ? 'ISBT'
-						: t.QrCode.slice(18,21) === '067' ? 'TISCO'
-						: t.QrCode.slice(18,21) === '069' ? 'KK'
-						: t.QrCode.slice(18,21) === '070' ? 'ACL'
-						: t.QrCode.slice(18,21) === '071' ? 'TCRB'
-						: t.QrCode.slice(18,21) === '073' ? 'LHBANK'
-						: t.QrCode.slice(18,21) === '079' ? 'ANZ'
-						: t.QrCode.slice(18,21) === '080' ? 'SMTB'
-						: t.QrCode.slice(18,21) === '098' ? 'SMEB' : t.QrCode.slice(18,21)
-							}
+					{t.QrCode.slice(18, 21) === '002'
+						? 'BBL'
+						: t.QrCode.slice(18, 21) === '004'
+							? 'KBANK'
+							: t.QrCode.slice(18, 21) === '006'
+								? 'KTB'
+								: t.QrCode.slice(18, 21) === '011'
+									? 'TMB'
+									: t.QrCode.slice(18, 21) === '014'
+										? 'SCB'
+										: t.QrCode.slice(18, 21) === '017'
+											? 'CITI'
+											: t.QrCode.slice(18, 21) === '020'
+												? 'SCBT'
+												: t.QrCode.slice(18, 21) === '022'
+													? 'UOBT'
+													: t.QrCode.slice(18, 21) === '024'
+														? 'UOBT'
+														: t.QrCode.slice(18, 21) === '025'
+															? 'BAY'
+															: t.QrCode.slice(18, 21) === '030'
+																? 'GOV'
+																: t.QrCode.slice(18, 21) === '031'
+																	? 'HSBC'
+																	: t.QrCode.slice(18, 21) === '033'
+																		? 'GHB'
+																		: t.QrCode.slice(18, 21) === '034'
+																			? 'AGRI'
+																			: t.QrCode.slice(18, 21) === '039'
+																				? 'MHCB'
+																				: t.QrCode.slice(18, 21) === '065'
+																					? 'TBANK'
+																					: t.QrCode.slice(18, 21) === '066'
+																						? 'ISBT'
+																						: t.QrCode.slice(18, 21) === '067'
+																							? 'TISCO'
+																							: t.QrCode.slice(18, 21) === '069'
+																								? 'KK'
+																								: t.QrCode.slice(18, 21) === '070'
+																									? 'ACL'
+																									: t.QrCode.slice(18, 21) === '071'
+																										? 'TCRB'
+																										: t.QrCode.slice(18, 21) === '073'
+																											? 'LHBANK'
+																											: t.QrCode.slice(18, 21) === '079'
+																												? 'ANZ'
+																												: t.QrCode.slice(18, 21) === '080'
+																													? 'SMTB'
+																													: t.QrCode.slice(18, 21) === '098'
+																														? 'SMEB'
+																														: t.QrCode.slice(18, 21)}
 				</Table.Cell>
 				<Table.Cell>
 					<span
-					   class:text-success-bg={t.Status.toLocaleUpperCase() === 'SUCCESS'}
-					   class:text-pending-bg={t.Status.toLocaleUpperCase() === 'PENDING'}
-					   class:text-respond-rejected-bg={t.Status.toLocaleUpperCase() === 'RESPOND_REJECTED'}
-					   class:text-request-rejected-bg={t.Status.toLocaleUpperCase() === 'REQUEST_REJECTED'}
-					   class:text-bank-acc-not-match-bg={t.Status.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'}
-					   class:text-rejected-bg={t.Status.toLocaleUpperCase() === 'REJECTED' || t.Status.toLocaleUpperCase() === 'FAILED'}
-					   class="badge badge-outline badge-sm uppercase text-xs flex items-center"
+						class:text-success-bg={t.Status.toLocaleUpperCase() === 'SUCCESS'}
+						class:text-pending-bg={t.Status.toLocaleUpperCase() === 'PENDING'}
+						class:text-respond-rejected-bg={t.Status.toLocaleUpperCase() === 'RESPOND_REJECTED'}
+						class:text-request-rejected-bg={t.Status.toLocaleUpperCase() === 'REQUEST_REJECTED'}
+						class:text-bank-acc-not-match-bg={t.Status.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'}
+						class:text-INVALID_MIN_AMOUNT_RECEIVE-bg={t.Status.toLocaleUpperCase() ===
+							'INVALID_MIN_AMOUNT_RECEIVE'}
+						class:text-rejected-bg={t.Status.toLocaleUpperCase() === 'REJECTED' ||
+							t.Status.toLocaleUpperCase() === 'FAILED'}
+						class="badge badge-outline badge-sm uppercase text-xs flex items-center"
 					>
-					
-					   
-					   
-
-					   {t.Status}
+						{t.Status.toLocaleUpperCase() === 'RESPOND_REJECTED'
+							? 'RES RJECTED'
+							: t.Status.toLocaleUpperCase() === 'REQUEST_REJECTED'
+								? 'REQ RJECTED'
+								: t.Status.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'
+									? 'BA_NM'
+									: t.Status.toLocaleUpperCase() === 'INVALID_MIN_AMOUNT_RECEIVE'
+										? 'INVALID MIN AMOUNT'
+										: t.Status}
 					</span>
-				 </Table.Cell>
-				 
-				
-				
-			
+				</Table.Cell>
+
 				<Table.Cell>{t.TransferRefId}</Table.Cell>
 			</Table.Row>
 		{/each}
@@ -148,31 +171,35 @@
 
 <style>
 	.text-success-bg {
-	background-color: #DCFAE6; /* พื้นหลังสีเขียวอ่อน */
-	color: #17B26A; /* สีตัวอักษรสีเขียวเข้ม */
-}
+		background-color: #dcfae6; /* พื้นหลังสีเขียวอ่อน */
+		color: #17b26a; /* สีตัวอักษรสีเขียวเข้ม */
+	}
 
-.text-pending-bg {
-	background-color: #FEF0C7; /* พื้นหลังสีเหลืองอ่อน */
-	color: #F79009; /* สีตัวอักษรสีเหลืองเข้ม */
-}
+	.text-pending-bg {
+		background-color: #fef0c7; /* พื้นหลังสีเหลืองอ่อน */
+		color: #f79009; /* สีตัวอักษรสีเหลืองเข้ม */
+	}
 
-.text-rejected-bg {
-	background-color: #FEE4E2; /* พื้นหลังสีแดงอ่อน */
-	color: #F04438; /* สีตัวอักษรสีแดงเข้ม */
-}
-.text-respond-rejected-bg {
-		background-color: #F9FAFB; 
-		color: #61646C; 
+	.text-rejected-bg {
+		background-color: #fee4e2; /* พื้นหลังสีแดงอ่อน */
+		color: #f04438; /* สีตัวอักษรสีแดงเข้ม */
+	}
+	.text-respond-rejected-bg {
+		background-color: #f9fafb;
+		color: #61646c;
 	}
 	.text-request-rejected-bg {
-		background-color: #F9FAFB; 
-		color: #61646C; 
+		background-color: #f9fafb;
+		color: #61646c;
 	}
 
 	.text-bank-acc-not-match-bg {
-		background-color: #F9FAFB; 
-		color: #61646C; 
+		background-color: #f9fafb;
+		color: #61646c;
 	}
 
+	.text-INVALID_MIN_AMOUNT_RECEIVE-bg {
+		background-color: #f9fafb;
+		color: #61646c;
+	}
 </style>
