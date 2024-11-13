@@ -37,12 +37,27 @@
                     <h2 class="text-2xl font-semibold mb-2">ขั้นตอนที่ 2: เข้าสู่ระบบ</h2>
                     <img src={Login} alt="Login Options" height="50%" width="800px" class="mx-auto mb-4 lg:block sm:block hidden mt-5">
                     <img src={Logins} alt="Login Options Mobile" height="50%" width="800px" class="mx-auto mb-4 lg:hidden sm:hidden block mt-5">
-                    <p class="text-gray-600 mt-8">เลือกบัญชีที่ต้องการใช้เข้าสู่ระบบ เช่น Facebook, Google, หรือ Line</p>
+                    <p class="text-gray-600 mt-8">เลือกบัญชีที่ต้องการใช้เข้าสู่ระบบ</p>
                 </div>
             </div></Carousel.Item>
-              <Carousel.Item class="flex justify-center"><div class="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-white shadow-md rounded-lg p-6 mb-6">
+              
+              <Carousel.Item class="flex justify-center "> <div class="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-white shadow-md rounded-lg p-6 mb-6">
                 <div class="text-sm">
-                    <h2 class="text-2xl font-semibold mb-5">ขั้นตอนที่ 3: เชื่อมต่อบัญชี Line</h2>
+                    <h2 class="text-2xl font-semibold mb-2">ขั้นตอนที่ 3: เลือกแพ็คเกจ</h2>
+                    <p class="text-gray-600 my-2">เลือกแพ็คเกจที่เหมาะกับคุณเพื่อเริ่มใช้งาน Check Slip</p>
+                    <div class="flex justify-center">
+                    <img src={packages} alt="Package Options" class="w-full h-auto object-cover lg:hidden sm:hidden block my-3" style="max-width: 600px;">
+                    <img src={packages} alt="Package Options Large" class="w-full h-auto object-cover lg:block sm:block hidden my-3" style="width: 500px;">
+                </div>
+                    <p class="text-gray-600 my-3">เมื่อเลือกแพ็คเกจแล้ว กดปุ่ม "Buy Now" จะมี QR Code ให้สแกนชำระเงิน</p>
+                </div>
+                <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <a href="/package">ไปหน้าการเลือกแพ็คเกจ</a>
+                </button>
+            </div></Carousel.Item>
+            <Carousel.Item class="flex justify-center"><div class="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-white shadow-md rounded-lg p-6 mb-6">
+                <div class="text-sm">
+                    <h2 class="text-2xl font-semibold mb-5">ขั้นตอนที่ 4: เพิ่มบัญชีธนาคาร</h2>
                     <div class="grid lg:grid-cols-2 sm:grid-cols-2 grid-cols-1 gap-4">
                         <div class=""> <img src={profile} alt="Profile" height="20%" width="220px" class="mx-auto mb-4"></div>
                         <div><p class="text-gray-600">คุณสามารถเชื่อมต่อหลายบัญชี Line ได้ ทำตามขั้นตอนด้านล่าง:</p>
@@ -58,20 +73,6 @@
                     </div>
                    
                 </div>
-            </div></Carousel.Item>
-              <Carousel.Item class="flex justify-center "> <div class="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-white shadow-md rounded-lg p-6 mb-6">
-                <div class="text-sm">
-                    <h2 class="text-2xl font-semibold mb-2">ขั้นตอนที่ 4: เลือกแพ็คเกจ</h2>
-                    <p class="text-gray-600 my-2">เลือกแพ็คเกจที่เหมาะกับคุณเพื่อเริ่มใช้งาน Check Slip</p>
-                    <div class="flex justify-center">
-                    <img src={packages} alt="Package Options" class="w-full h-auto object-cover lg:hidden sm:hidden block my-3" style="max-width: 600px;">
-                    <img src={packages} alt="Package Options Large" class="w-full h-auto object-cover lg:block sm:block hidden my-3" style="width: 500px;">
-                </div>
-                    <p class="text-gray-600 my-3">เมื่อเลือกแพ็คเกจแล้ว กดปุ่ม "Buy Now" จะมี QR Code ให้สแกนชำระเงิน</p>
-                </div>
-                <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    <a href="/package">ไปหน้าการเลือกแพ็คเกจ</a>
-                </button>
             </div></Carousel.Item>
               <Carousel.Item class="flex justify-center"><div class="w-full max-w-sm sm:max-w-xl lg:max-w-3xl bg-white shadow-md rounded-lg p-6 mb-6">
                 <div class="text-sm">

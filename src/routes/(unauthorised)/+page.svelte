@@ -34,7 +34,7 @@
 	let showModal = false;
 	let username = [];
 
-	const line = async () => {
+	const line = () => {
 		let loginUrl = `${lineLoginUrl}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
 
 		window.location.replace(loginUrl);
@@ -146,19 +146,15 @@
 		if (!myCookie) {
 			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
 			sessionStorage.removeItem('StatusCoockie');
-			showModal = true;
-
+			line();
 			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
-			setTimeout(() => {
-				showModal = false; // ปิด modal
-			}, 3000);
 		}
 		if (
 			(!myCookie && !statusCookie) ||
 			(myCookie.message === 'invalid token' && statusCookie) ||
 			(myCookie.message === 'invalid token' && !statusCookie)
 		) {
-			linetest();
+			line();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
@@ -230,12 +226,6 @@
 					window.location.href = '/dashboard';
 				}
 			}
-			if (form.status == false) {
-				const modal = document.getElementById('my_modal_2');
-				if (modal) {
-					modal.showModal();
-				}
-			}
 		}
 	});
 
@@ -256,28 +246,10 @@
 	// }
 
 
-	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientIdtest = '2006478813';
-	let redirectUritest = `${PUBLIC_DOMAIN}`;
-	let statetest = '1234';
-	let scopetest = 'profile%20openid%20email';
+	
 
-	const linetest = async () => {
-		let loginUrl = `${lineLoginUrltest}?response_type=code&client_id=${clientIdtest}&redirect_uri=${redirectUritest}&state=${statetest}&scope=${scopetest}`;
 
-		window.location.replace(loginUrl);
-	};
-
-	let showPassword = false;
-	let password = '';
-	function togglePasswordVisibility() {
-		showPassword = !showPassword;
-	}
-	function handlePasswordInput(event: { target: { value: string } }) {
-		// Remove spaces from the input value
-		password = event.target.value.replace(/\s+/g, '');
-		event.target.value = password;
-	}
+	
 
 	// function setCookie(name: string, value: string, days: number) {
 	// 	let d = new Date();
@@ -510,7 +482,7 @@
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
-		<p class=" text-center">Username / Password ไม่ถูกต้อง</p>
+		<p class=" text-center"></p>
 	</div>
 	<form method="dialog" class="modal-backdrop">
 		<button>close</button>

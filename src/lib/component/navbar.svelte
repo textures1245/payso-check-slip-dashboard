@@ -151,7 +151,7 @@ onMount(() => {
 					
 				  </summary>
 				  <ul tabindex="0"  class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
-					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button>โปรไฟล์</button></a></li>{/if}
+					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded  " href="/profile"><button>โปรไฟล์</button></a></li>{/if}
 					<li><a class="py-2 px-4 hover:bg-gray-100 rounded  whitespace-nowrap " on:click={handleLogout}><button   style="color:#F04438;">ออกจากระบบ</button></a></li>
 				  </ul>
 				</div>
@@ -210,14 +210,14 @@ onMount(() => {
 	{#if isMenuOpen}
 		<div class="sm:hidden" id="mobile-menu">
 			<div class="space-y-1 px-2 pb-3 pt-2">
-				<ul class=" text-white">
+				<ul class=" text-white ">
 					{#each navItems as item}
 						<li>
 							<a  href={item.link}>{item.title}</a>
 						</li>
 					{/each}
-					{#if !isAdminPath}<li><a class=" hover:bg-gray-100 rounded" href="/profile"><button>โปรไฟล์</button></a></li>{/if}
-					<button on:click={handleLogout} style="color:#F04438;">ออกจากระบบ</button>
+					{#if !isAdminPath}<li><a class=" hover:bg-gray-100 rounded" href="/profile"><button class=" w-full text-start">โปรไฟล์</button></a></li>{/if}
+					<button on:click={handleLogout} style="color:#F04438;" class="w-full text-start">ออกจากระบบ</button>
 				</ul>
 			</div>
 		</div>

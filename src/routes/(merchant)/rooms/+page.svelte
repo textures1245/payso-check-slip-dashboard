@@ -482,6 +482,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     <div class="mx-2">
                       {#if banks }
                       {#each banks as banks}
+                      {#if banks.Active != false}
                       <div
                         class="flex border my-2 border-gray-300 rounded-lg "
                       >
@@ -518,6 +519,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                       />
                         </div>
                       </div>
+                      {/if}
                 {/each}
                 {/if}
                       
