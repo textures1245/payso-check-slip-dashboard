@@ -30,6 +30,11 @@
 function getCookies() {
   return cookie.parse(document.cookie);
 }
+let isOpen = false;
+  
+  const toggleDropdown = () => {
+    isOpen = !isOpen;
+  };
 
 onMount(() => {
 	console.log(navItems)
@@ -144,12 +149,20 @@ onMount(() => {
 						</svg>{:else}<img src={logoAdmin} class="p-2" />{/if}</div>
 				</div>
 			  </div>
-			  <div class="mx-3 text-white content-center">{displayName}</div>
-			  <div class="relative ">
-				<div class="dropdown dropdown-bottom dropdown-end lg:block md:block sm:block hidden mx-2 my-2">
-				  <summary tabindex="0" class="text-sm  py-2 rounded-2xl  ">
+			  
+			  <div class="relative content-center ">
+				<div class="dropdown dropdown-bottom dropdown-end  mx-2 my-2 ">
+					<div class="flex  w-full h-full">
+						<div class="mx-3 text-white content-center"  >
+							<button class="w-full"> 
+							{displayName}
+						</button>
+						</div>
+				  <summary tabindex="0" class="text-sm  py-1 rounded-2xl lg:block md:block sm:block hidden " on:click={toggleDropdown}>
+				
 					
 				  </summary>
+				</div>
 				  <ul tabindex="0"  class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
 					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded  " href="/profile"><button>โปรไฟล์</button></a></li>{/if}
 					<li><a class="py-2 px-4 hover:bg-gray-100 rounded  whitespace-nowrap " on:click={handleLogout}><button   style="color:#F04438;">ออกจากระบบ</button></a></li>

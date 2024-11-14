@@ -2094,7 +2094,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                       <div class="mt-5 flex justify-center">
                         <Button
                         variant="outline"
-                        class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-70 md:w-70 group"
+                        class=" flex text-center py-0 px-5 bg-primary rounded-md lg:w-full md:w-full group"
                         style="height:40px"
                         on:click={() => StepStatustofinish()} 
                       >
@@ -2115,19 +2115,19 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 
       {:else}
         <!-- Completed -->
-        <div class="text-center py-8">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="text-center py-8 min-h-[calc(100vh-250px)]  ">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h2 class="text-2xl font-semibold mb-2">สามารถใช้งานระบบ SURE SURE ได้แล้ว</h2>
-          <div class="flex justify-center"><Button
+          <div class="flex justify-center mt-5"><Button
   variant="outline"
   class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-70 md:w-70 group"
-  style="height:40px"
+  style="height:50px"
   on:click={() => goto('/dashboard')}
 >
   <div
-    style="width: 100%; height:100%"
+    style="width: 200px; height:200px"
     class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
   >
     ไปหน้า Dashboard
