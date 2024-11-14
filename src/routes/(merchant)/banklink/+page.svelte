@@ -319,10 +319,10 @@ function toggleRoom(roomId: any, isChecked: any) {
   }
 
 </script>
-<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
+<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-5 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
     
     <div class="container max-w-screen-lg  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow ">
-      <div class="flex  justify-start gap-5">
+      <div class="flex  justify-start gap-5 mt-5 sm:mt-0 lg:mt-0">
         <!-- Card ธนาคาร -->
         <div class="w-full sm:w-auto  ">
           <Card.Root class={`w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px] cursor-pointer 
@@ -503,7 +503,7 @@ function toggleRoom(roomId: any, isChecked: any) {
       <div class="px-2">
         <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาไทย</div>
         <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
-          <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96  " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาไทย (ห้ามเขียนคำนำหน้าชื่อ)" bind:value={NameTHPP} required></div>
+          <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96  " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อภาษาไทย(ห้ามเขียนคำนำหน้า)" bind:value={NameTHPP} required></div>
           <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาไทย" bind:value={LastNameTHPP}  required></div>
       </div>
     </div>
@@ -512,7 +512,7 @@ function toggleRoom(roomId: any, isChecked: any) {
     <div class="px-2">
       <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาอังกฤษ</div>
       <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
-        <div class="flex justify-start "><input class=" border-2 w-full px-2 md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} placeholder="ชื่อของบัญชี ภาษาอังกฤษ (ห้ามเขียนคำนำหน้าชื่อ)" maxlength="100" bind:value={NameENPP} required></div>
+        <div class="flex justify-start "><input class=" border-2 w-full px-2 md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} placeholder="ชื่อภาษาอังกฤษ(ห้ามเขียนคำนำหน้า)" maxlength="100" bind:value={NameENPP} required></div>
         <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาอังกฤษ" bind:value={LastNameENPP}  required></div>
     </div>
     </div>

@@ -572,7 +572,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
         </Card.Content>
         <div class=" flex  justify-end text-center text-sm px-2 text-red-600 font-semibold">
             <div>วันหมดอายุ : 
-                {#if (dataOverview)} {new Date(dataOverview.BillDate).toLocaleDateString('th-TH', {
+                {#if (dataOverview) && (dataOverview.BillDate != "-")} {new Date(dataOverview.BillDate).toLocaleDateString('th-TH', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'

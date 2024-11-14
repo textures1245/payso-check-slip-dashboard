@@ -6,7 +6,7 @@
 	import { Label } from '$lib/components/ui/label/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import { Button } from '$lib/components/ui/button';
-	import paysoLogo from '$lib/image/paysologo.jpg';
+	import paysoLogo from '$lib/image/SURE2copy.jpg';
 	import pie from '$lib/image/pie.png';
 	import chart from '$lib/image/chart.png';
 	import statuspic from '$lib/image/status.png';
@@ -22,10 +22,10 @@
 		providerface
 		// @ts-ignore
 	} from '/src/lib/image/firebase.client.js';
-	import { redirect } from '@sveltejs/kit';
+
 
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientId = '2006478813';
+	let clientId = '2006570449';
 	let redirectUri = `${PUBLIC_DOMAIN}`;
 	let state = '1010-1010';
 	let scope = 'profile%20openid%20email';
@@ -106,8 +106,8 @@
 						grant_type: 'authorization_code',
 						code: code,
 						redirect_uri: `${PUBLIC_DOMAIN}`,
-						client_id: '2006478813',
-						client_secret: '28d4c9a577a54f93c61e88c33c304794'
+						client_id: '2006570449',
+						client_secret: '3e5ec3e379a1c57402ea6e7426775c80'
 					})
 				});
 

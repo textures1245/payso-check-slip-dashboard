@@ -361,11 +361,32 @@ let QrToken: string | null = null;
   let errorMessage: string = '';
   const encryptData = (data: string): string | null => {
     try {
-      console.log('Encrypting data:', data);
-      const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY); // ทำให้แน่ใจว่าเป็นคีย์ที่มีขนาด 256 บิต
-      const encrypted = CryptoJS.AES.encrypt(data, key, { mode: CryptoJS.mode.ECB }).toString();
-      console.log('Encrypted result:', encrypted);
-      return encrypted;
+      // console.log('Encrypting data:', data);
+      // const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY); // ทำให้แน่ใจว่าเป็นคีย์ที่มีขนาด 256 บิต
+      // const encrypted = CryptoJS.AES.encrypt(data, key, { mode: CryptoJS.mode.ECB}).toString();
+      // console.log('Encrypted result:', encrypted);
+      // return encrypted;
+
+      // console.log('Encrypting data:', data);
+        
+      //   // แปลง key เป็นรูปแบบที่ถูกต้อง
+      //   const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY);
+        
+      //   // เข้ารหัสและแปลงเป็น Base64
+      //   const encrypted = CryptoJS.AES.encrypt(data, key, { 
+      //       mode: CryptoJS.mode.ECB,
+      //       padding: CryptoJS.pad.Pkcs7
+      //   });
+        
+      //   // แปลงผลลัพธ์เป็น Base64 string
+      //   const base64Result = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
+        
+      //   console.log('Encrypted result:', base64Result);
+      //   return base64Result;
+      console.log(data,CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data)))
+
+      return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data));
+   
     } catch (error) {
       console.error('Encryption error:', error);
       errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
@@ -645,8 +666,8 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 </script>
 <div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0  sm:py-5  xl:px-24 lg:py-5 xl:py-10 ">
     
-    <div class="container max-w-screen-xl  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow ">
-      <div class="flex   justify-evenly gap-5">
+    <div class="container max-w-screen-xl  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow mt-5 sm:mt-0  lg:mt-0">
+      <div class="flex   justify-evenly gap-5 mt-5 sm:mt-0 lg:mt-0">
         <!-- Card ธนาคาร -->
         <div class="w-full sm:w-auto  ">
           <Card.Root class={`w-full min-w-[100px] h-[100px] sm:h-[100px] lg:h-[100px] cursor-pointer 

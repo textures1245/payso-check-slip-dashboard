@@ -156,7 +156,7 @@ function clearRemainingTime() {
         completed: false,
         active: false,
         subSteps: [
-          { label: 'เพิ่มกลุ่มของไลน์', completed: false },
+          { label: 'เพิ่มห้องเพื่อยืนในกลุ่มไลน์', completed: false },
         ]
       },
       {
