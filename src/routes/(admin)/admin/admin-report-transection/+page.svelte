@@ -5,7 +5,6 @@
 	import cookie from 'cookie';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { onMount } from 'svelte';
-	import { Item } from '$lib/components/ui/breadcrumb';
 
 	let offset = 1;
 	let limit = 10;
@@ -183,6 +182,8 @@
 		<option value="RESPOND_REJECTED">RESPOND REJECTED</option>
 		<option value="REQUEST_REJECTED">REQUEST REJECTED</option>
 		<option value="BANK_ACC_NOT_MATCH">BANK_ACC_NOT_MATCH</option>
+		<option value="INVALID_MIN_AMOUNT_RECEIVE">INVALID_MIN_AMOUNT_RECEIVE</option>
+
 
 		
         
@@ -251,6 +252,14 @@
 				: Bank Account Not Match เลขบัญชีธนาคารของผู้รับไม่ตรงกับที่ลงทะเบียน
 			</div>
 		</div>
+		<div class="flex mt-1">
+			<div class="text-respond-rejected-bg badge badge-outline">
+				INVALID MIN AMOUNT
+			</div>
+			<div class="ml-2">
+				: INVALID_MIN_AMOUNT_RECEIVE จำนวนเงินที่ส่งมามีต่ำกว่าจำจวนเงินขั้นต่ำที่กำหนด
+			</div>
+		</div>
 	</div>
       <div>
 		<table class="table w-full table-fixed text-[10px] xs:text-xs sm:text-sm md:text-base bg-white">
@@ -317,6 +326,7 @@
 								class:text-respond-rejected-bg={item.TransectionStatus.toLocaleUpperCase() === 'RESPOND_REJECTED'}
 								class:text-request-rejected-bg={item.TransectionStatus.toLocaleUpperCase() === 'REQUEST_REJECTED'}
 								class:text-bank-acc-not-match-bg={item.TransectionStatus.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'}
+								class:text-INVALID_MIN_AMOUNT_RECEIVE-bg={item.TransectionStatus.toLocaleUpperCase() === 'INVALID_MIN_AMOUNT_RECEIVE'}
 								class:text-rejected-bg={item.TransectionStatus.toLocaleUpperCase() === 'REJECTED' || item.TransectionStatus.toLocaleUpperCase() === 'FAILED'}
 								class="badge badge-outline badge-sm uppercase text-xs flex items-center"
 							 >
@@ -326,6 +336,8 @@
 							 ? 'REQ RJECTED'
 							 : item.TransectionStatus.toLocaleUpperCase() === 'BANK_ACC_NOT_MATCH'
 							 ? 'BA_NM'
+							 : item.TransectionStatus.toLocaleUpperCase() === 'INVALID_MIN_AMOUNT_RECEIVE'
+							 ? 'INVALID MIN AMOUNT'
 							:item.TransectionStatus}
 							 </span>
 							</td>
@@ -410,6 +422,11 @@
 	}
 
 	.text-bank-acc-not-match-bg {
+		background-color: #F9FAFB; 
+		color: #61646C; 
+	}
+
+	.text-INVALID_MIN_AMOUNT_RECEIVE-bg {
 		background-color: #F9FAFB; 
 		color: #61646C; 
 	}

@@ -23,6 +23,7 @@
 	} from '$lib/utils/external-api-type/adminDashboard';
 	import { enhance } from '$app/forms';
 	import Swal from 'sweetalert2';
+	import TransactionListTableReport from './TransactionListTableReport.svelte';
 
 	export let conf: GCanvasConfig = {
 		height: 200
@@ -38,7 +39,11 @@
 		TRANSACTION_COUNT: 'จำนวนสลิปที่ตรวจสอบ',
 		VALID_TRANSACTION_COUNT: 'สลิปถูกต้อง',
 		INVALID_TRANSACTION_COUNT: 'สลิปถูกปฏิเสธ',
-		PENDING_TRANSACTION_COUNT: 'สลิปที่ดำเนินการ'
+		PENDING_TRANSACTION_COUNT: 'สลิปที่ดำเนินการ',
+		BANK_ACC_NOT_MATCH_TRANSACTION_COUNT: 'เลขบัญชีไม่ตรงกันผู้รับ',
+		RESPOND_REJECTED_TRANSECTION_COUNT: 'การตอบกลับถูกปฏิเสธ',
+		REQUEST_REJECTED_TRANSECTION_COUNT: 'การส่งคำขอถูกปฏิเสธ',
+		INVALID_MIN_AMOUNT_RECEIVECount: 'จำนวนเงินมีขั้นต่ำกว่าที่กำหนด'
 	};
 	let optSelected: keyof typeof opt = 'ALL';
 
@@ -105,6 +110,11 @@
 		let invalidTransTotal: number[] = [];
 		let pendingTransTotal: number[] = [];
 		let validTransTotal: number[] = [];
+		let banknotmatchTransTotal: number[] = [];
+		let respondRejectedTransTotal: number[] = [];
+		let requestRejectedTransTotal: number[] = [];
+		let invalidMinAmountRECEIVETotal : number[] =[]
+	
 
 		args.forEach(({ Merchant, Transaction, Month, Year }) => {
 			labels.push(getMonthName('th', +Month));
@@ -113,6 +123,10 @@
 			invalidTransTotal.push(Transaction.InvalidCount);
 			pendingTransTotal.push(Transaction.PendingCount);
 			validTransTotal.push(Transaction.ValidCount);
+			banknotmatchTransTotal.push(Transaction.BANK_ACC_NOT_MATCHCount);
+			respondRejectedTransTotal.push(Transaction.RESPOND_REJECTEDCount);
+			requestRejectedTransTotal.push(Transaction.REQUEST_REJECTEDCount);
+			invalidMinAmountRECEIVETotal.push(Transaction.INVALID_MIN_AMOUNT_RECEIVECount)
 		});
 
 		const dataset = {
@@ -157,6 +171,38 @@
 					borderWidth: 2,
 					borderColor: 'rgb(243, 149, 13)',
 					stack: 'Stack 1'
+				},
+				{
+					label: 'เลขบัญชีไม่ตรงกันผู้รับ',
+					data: banknotmatchTransTotal,
+					backgroundColor: 'rgb(0, 114, 99)',
+					borderWidth: 2,
+					borderColor: 'rgb(0, 150, 136)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'การตอบกลับถูกปฏิเสธ',
+					data: respondRejectedTransTotal,
+					backgroundColor: 'rgb(112, 114, 99)',
+					borderWidth: 2,
+					borderColor: 'rgb(114, 97, 99)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'การส่งคำขอถูกปฏิเสธ',
+					data: requestRejectedTransTotal,
+					backgroundColor: 'rgb(152, 7, 157)',
+					borderWidth: 2,
+					borderColor: 'rgb(103, 58, 183)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'จำนวนเงินมีขั้นต่ำกว่าที่กำหนด',
+					data: invalidMinAmountRECEIVETotal,
+					backgroundColor: 'gray',
+					borderWidth: 2,
+					borderColor: 'gray',
+					stack: 'Stack 1'
 				}
 			]
 		};
@@ -194,6 +240,22 @@
 					...dat,
 					datasets: dat.datasets.filter((d) => d.label === 'สลิปที่ถูกต้อง')
 				};
+			case 'BANK_ACC_NOT_MATCH_TRANSACTION_COUNT':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'เลขบัญชีไม่ตรงกันผู้รับ')
+				};
+				case 'RESPOND_REJECTED_TRANSECTION_COUNT':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'การตอบกลับถูกปฏิเสธ')
+				};
+				case 'INVALID_MIN_AMOUNT_RECEIVECount':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'จำนวนเงินมีขั้นต่ำกว่าที่กำหนด')
+				};
+			
 		}
 	}
 

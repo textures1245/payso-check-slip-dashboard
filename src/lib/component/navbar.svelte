@@ -9,7 +9,7 @@
 <script lang="ts">
 	import * as Tabs from '$lib/components/ui/tabs';
 	import cookie from 'cookie';
-	import logo from '$lib/image/paysologo.png';
+	import logo from '$lib/image/SureSureTH-white@1040x.png';
 	import logoAdmin from '$lib/image/user.png';
 	import logoCustomer from '$lib/image/logoshop.png';
 	import { onMount } from 'svelte';
@@ -31,6 +31,11 @@
 function getCookies() {
   return cookie.parse(document.cookie);
 }
+let isOpen = false;
+  
+  const toggleDropdown = () => {
+    isOpen = !isOpen;
+  };
 
 onMount(() => {
 	console.log(navItems)
@@ -81,7 +86,7 @@ onMount(() => {
 {#if showNavbar}
 <nav class="bg-card"  style="background-color:#1353ec;">
 
-	<div class=" px-2">
+	<div class="">
 		<div class="relative flex h-11 items-center justify-between">
 			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
 				<!-- Mobile menu button-->
@@ -130,14 +135,14 @@ onMount(() => {
 					</svg>
 				</button>
 			</div>
-			<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+			<div class="flex flex-1 items-center mx-10 sm:mx-0 lg:mx-0 sm:items-stretch sm:justify-start">
 				<div class="flex flex-shrink-0  items-center">
-					<img class="h-10 w-auto py-2" src={logo} alt="Your Company" />
+					<img class="h-20 w-25 py-2 sm:pr-0 lg:pr-0" src={logo} alt="Your Company" />
 				</div>
-				<div class="hidden gap-6 items-end py-2 px-5 sm:ml-6 sm:flex text-card-foreground text-white ">
+				<div class="hidden gap-6 items-center py-2   sm:flex text-card-foreground text-white ">
 					{#each navItems as item}
 						<a
-							class="text-xs md:text-sm  transition-colors hover:text-neutral-300 content-end "
+							class="text-xs md:text-sm  transition-colors hover:text-neutral-300  "
 							href={item.link}>{item.title}</a
 						>
 					{/each}
@@ -154,15 +159,23 @@ onMount(() => {
 						</svg>{:else}<img src={logoAdmin} class="p-2" />{/if}</div>
 				</div>
 			  </div>
-			  <div class="mx-3 text-white content-center">{displayName}</div>
-			  <div class="relative ">
-				<div class="dropdown dropdown-bottom dropdown-end lg:block md:block sm:block hidden mx-2 my-2">
-				  <summary tabindex="0" class="text-sm  py-2 rounded-2xl  ">
+			  
+			  <div class="relative content-center ">
+				<div class="dropdown dropdown-bottom dropdown-end  mx-2 my-2 ">
+					<div class="flex  w-full h-full">
+						<div class="mr-3 text-white content-center"  >
+							<button class="w-full"> 
+							{displayName}
+						</button>
+						</div>
+				  <summary tabindex="0" class="text-sm  py-1 rounded-2xl" on:click={toggleDropdown}>
+				
 					
 				  </summary>
+				</div>
 				  <ul tabindex="0"  class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 ">
-					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"><button  >โปรไฟล์</button></a></li>{/if}
-					<li><a class="py-2 px-4 hover:bg-gray-100 rounded  whitespace-nowrap"><button on:click={handleLogout} style="color:#F04438;">ออกจากระบบ</button></a></li>
+					{#if !isAdminPath}<li><a class="py-2 px-4 hover:bg-gray-100 rounded  " href="/profile"><button>โปรไฟล์</button></a></li>{/if}
+					<li><a class="py-2 px-4 hover:bg-gray-100 rounded  whitespace-nowrap " on:click={handleLogout}><button   style="color:#F04438;">ออกจากระบบ</button></a></li>
 				  </ul>
 				</div>
 			  </div>
@@ -220,14 +233,12 @@ onMount(() => {
 	{#if isMenuOpen}
 		<div class="sm:hidden" id="mobile-menu">
 			<div class="space-y-1 px-2 pb-3 pt-2">
-				<ul class=" text-white">
+				<ul class=" text-white ">
 					{#each navItems as item}
 						<li>
 							<a  href={item.link}>{item.title}</a>
 						</li>
 					{/each}
-					{#if !isAdminPath}<li><a class=" hover:bg-gray-100 rounded" href="/profile"><button>โปรไฟล์</button></a></li>{/if}
-					<button on:click={handleLogout} style="color:#F04438;">ออกจากระบบ</button>
 				</ul>
 			</div>
 		</div>

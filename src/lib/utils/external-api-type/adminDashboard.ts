@@ -1,7 +1,9 @@
+
 type PkgStat = {
 	Total: number;
 	ActiveTotal: number;
 	InActiveTotal: number;
+	VisibilityOnTotal : number;
 };
 
 type MerchantStat = {
@@ -30,6 +32,11 @@ export type TransactionOverviewStat = {
 	ValidCount: number;
 	InvalidCount: number;
 	PendingCount: number;
+	BANK_ACC_NOT_MATCHCount: number;
+	REQUEST_REJECTEDCount : number;
+	RESPOND_REJECTEDCount : number;
+	REQUEST_REJECTED_TRANSECTION_COUNT : number;
+	INVALID_MIN_AMOUNT_RECEIVECount : number;
 	Year: string;
 	Month: string;
 };

@@ -77,8 +77,16 @@
 const result = await fetch(apiUrl, config);
 const datas = await result.json();
 		// const count = Array.isArray(datas.result) ? datas.result.length : 0;
-		count = datas.result[0].TotalCount
-		totalPages = Math.ceil(count / limit);
+		if (datas.result && datas.result.length > 0) {
+  count = datas.result[0].TotalCount;
+  totalPages = Math.ceil(count / limit);
+} else {
+  // กรณีที่ไม่มีข้อมูล
+  count = 0;
+  totalPages = 1;
+  // หรือสามารถตั้งค่า default value หรือข้อความแจ้งเตือนตามที่ต้องการ
+  console.log('ไม่มีข้อมูล');
+}
 		console.log("++++++++++++++++++++++++++++",count,"จำนวน",totalPages)
 		
 		if (datas.result) {
@@ -151,14 +159,15 @@ const datas = await result.json();
     if (currentStartDate !== previousStartDate || currentEndDate !== previousEndDate) {
         previousStartDate = currentStartDate;
         previousEndDate = currentEndDate;
+		offset = 0
+		currentPage = 1;
         // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลใหม่
 		const datachart = await Getdata(offset,limit);
 		dataChart=datachart
 		dataSearch = datachart
 		console.log("---------------",dataSearch)
 		statusToSend="all"
-		offset = 0
-		currentPage = 1;
+		
     }
 }
   const statuses = [

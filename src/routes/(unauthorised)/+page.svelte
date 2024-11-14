@@ -6,7 +6,7 @@
 	import { Label } from '$lib/components/ui/label/index';
 	import { Input } from '$lib/components/ui/input/index';
 	import { Button } from '$lib/components/ui/button';
-	import paysoLogo from '$lib/image/paysologo.jpg';
+	import paysoLogo from '$lib/image/SURE2copy.jpg';
 	import pie from '$lib/image/pie.png';
 	import chart from '$lib/image/chart.png';
 	import statuspic from '$lib/image/status.png';
@@ -22,10 +22,10 @@
 		providerface
 		// @ts-ignore
 	} from '/src/lib/image/firebase.client.js';
-	import { redirect } from '@sveltejs/kit';
+
 
 	let lineLoginUrl = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientId = '2006478813';
+	let clientId = '2006570449';
 	let redirectUri = `${PUBLIC_DOMAIN}`;
 	let state = '1010-1010';
 	let scope = 'profile%20openid%20email';
@@ -34,7 +34,7 @@
 	let showModal = false;
 	let username = [];
 
-	const line = async () => {
+	const line = () => {
 		let loginUrl = `${lineLoginUrl}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
 
 		window.location.replace(loginUrl);
@@ -106,8 +106,8 @@
 						grant_type: 'authorization_code',
 						code: code,
 						redirect_uri: `${PUBLIC_DOMAIN}`,
-						client_id: '2006478813',
-						client_secret: '28d4c9a577a54f93c61e88c33c304794'
+						client_id: '2006570449',
+						client_secret: '3e5ec3e379a1c57402ea6e7426775c80'
 					})
 				});
 
@@ -146,19 +146,15 @@
 		if (!myCookie) {
 			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
 			sessionStorage.removeItem('StatusCoockie');
-			showModal = true;
-
+			line();
 			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
-			setTimeout(() => {
-				showModal = false; // ปิด modal
-			}, 3000);
 		}
 		if (
 			(!myCookie && !statusCookie) ||
 			(myCookie.message === 'invalid token' && statusCookie) ||
 			(myCookie.message === 'invalid token' && !statusCookie)
 		) {
-			linetest();
+			line();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
@@ -222,18 +218,12 @@
 
 				if (form.data.PackageId == '0') {
 					if (form.status == 'create') {
-						window.location.href = '/package'; // ถ้าจริงต้องมาหน้า detail ก่อน
+						window.location.href = '/advice'; // ถ้าจริงต้องมาหน้า detail ก่อน
 					} else {
 						window.location.href = '/package';
 					}
 				} else {
 					window.location.href = '/dashboard';
-				}
-			}
-			if (form.status == false) {
-				const modal = document.getElementById('my_modal_2');
-				if (modal) {
-					modal.showModal();
 				}
 			}
 		}
@@ -256,28 +246,10 @@
 	// }
 
 
-	let lineLoginUrltest = 'https://access.line.me/oauth2/v2.1/authorize';
-	let clientIdtest = '2006478813';
-	let redirectUritest = `${PUBLIC_DOMAIN}`;
-	let statetest = '1234';
-	let scopetest = 'profile%20openid%20email';
+	
 
-	const linetest = async () => {
-		let loginUrl = `${lineLoginUrltest}?response_type=code&client_id=${clientIdtest}&redirect_uri=${redirectUritest}&state=${statetest}&scope=${scopetest}`;
 
-		window.location.replace(loginUrl);
-	};
-
-	let showPassword = false;
-	let password = '';
-	function togglePasswordVisibility() {
-		showPassword = !showPassword;
-	}
-	function handlePasswordInput(event: { target: { value: string } }) {
-		// Remove spaces from the input value
-		password = event.target.value.replace(/\s+/g, '');
-		event.target.value = password;
-	}
+	
 
 	// function setCookie(name: string, value: string, days: number) {
 	// 	let d = new Date();
@@ -423,7 +395,7 @@
 					</div> -->
 					<hr class="my-5" />
 					<div
-						class="flex my-3 grid gap-1 grid-cols-2 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
+						class="flex my-3 grid gap-1 grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-1 sm:px-20 md:px-32 lg:px-0 px-10 text-white"
 						style="width:100%;"
 					>
 						<!-- <div class="flex justify-center hover:text-black">
@@ -464,10 +436,9 @@
 								</div></Button
 							>
 						</div> -->
-						<div class="flex justify-center hover:text-black">
+						<div class="flex justify-center hover:text-white">
 							<Button
-								variant="outline"
-								class="my-2 flex text-center py-0 px-0 lg:bg-green-500 md:bg-green-500 sm:bg-green-500 lg:rounded-md sm:rounded-md bg-green-800 rounded-full"
+								class="my-2 flex text-center py-0 px-0  lg:bg-green-500 md:bg-green-500 sm:bg-green-500 bg-green-500 lg:rounded-md sm:rounded-md hover:bg-green-800 rounded-full"
 								on:click={line}
 								style="width:80%;height:40px"
 								><div class="rounded-sm w-20" style="height:100%">
@@ -490,7 +461,7 @@
 								</div>
 								<div
 									style="width: 100%;height:100%"
-									class="content-center lg:block md:block sm:block hidden hover:text-black"
+									class="content-center lg:block md:block sm:block hidden hover:text-white"
 								>
 									Sign up with Line
 								</div></Button
@@ -513,7 +484,7 @@
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
-		<p class=" text-center">Username / Password ไม่ถูกต้อง</p>
+		<p class=" text-center"></p>
 	</div>
 	<form method="dialog" class="modal-backdrop">
 		<button>close</button>

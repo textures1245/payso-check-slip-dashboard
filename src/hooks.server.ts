@@ -10,7 +10,8 @@ export const handle = async ({ resolve, event }) => {
 		'/admin/admin-log',
 		'/admin/admin-update',
 		'/admin/admin-manage-package',
-		'/admin/admin-report-transection'
+		'/admin/admin-report-transection',
+		'/admin/admin-report-roommerchant'
 	];
 	const isAdminPath = adminPaths.some((path) => event.url.pathname.startsWith(path));
 

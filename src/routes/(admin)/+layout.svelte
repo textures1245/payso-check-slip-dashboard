@@ -46,6 +46,11 @@
 				link: '/admin/admin-report-transection',
 				icon: 'icon-park-outline:transaction',
 			},
+			{
+				title: 'รายงานห้องของลูกค้า',
+				link: '/admin/admin-report-roommerchant',
+				icon: 'streamline:group-meeting-call',
+			},
 		]
 	};
 </script>

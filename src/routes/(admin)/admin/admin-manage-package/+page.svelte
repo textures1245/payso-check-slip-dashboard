@@ -18,7 +18,8 @@
 		TotalCount: 0,
 		Visibility: false,
 		AmountLimit: 100,
-		Index: 0
+		Index: 0,
+		DaysDueDuration:30
 	};
 	let packagename = '';
 	let searchInpage = '';
@@ -162,7 +163,6 @@
         // Calculate totalCount and handle case where result is an empty array
         const totalCount = data.result.length > 0 ? data.result[0].TotalCount : 0;
 
-        // Map the result to packageData
         packageData = data.result.map((item: PackageData, Index: number) => ({
             Id: item.Id,
             Name: item.Name,
@@ -172,6 +172,7 @@
             TotalCount: item.TotalCount,
             Visibility: item.Visibility,
             AmountLimit: item.AmountLimit,
+			DaysDueDuration:item.DaysDueDuration,
             Index: Index + (currentOffset - 1) * currentLimit + 1
         }));
 
@@ -208,7 +209,8 @@
 			TotalCount: 0,
 			Visibility: false,
 			AmountLimit: 100,
-			Index: 0
+			Index: 0,
+			DaysDueDuration :30
 		};
 		const modal = document.getElementById('create_modal');
 		// @ts-ignore
@@ -272,7 +274,8 @@
 				TotalCount: 0,
 				Visibility: false,
 				AmountLimit: 100,
-				Index: 0
+				Index: 0,
+				DaysDueDuration:0
 			};
 		} catch (error) {
 			console.error('Error creating package:', error);
@@ -415,7 +418,7 @@
 <div class="w-full py-4 px-2 sm:px-4">
 	<span
 		class="text-3xl font-bold text-black flex lg:justify-start md:justify-start sm:justify-center justify-center"
-		>แพ็คเก็จ</span
+		>จัดการแพ็คเก็จ</span
 	>
 
 	<div
@@ -486,6 +489,7 @@
 						<div class="lg:block sm:block hidden">คงเหลือ (ที่ขายได้)</div>
 						<div class="lg:hidden sm:hidden block">คงเหลือ</div>
 					</th>
+					<th class="p-1 sm:p-2 text-sm  ">เวลาแพ็คเก็จ</th>
 
 					<th class="p-1 sm:p-2 text-sm  ">สถานะ</th>
 					<th class="p-1 sm:p-2 text-sm">การมองเห็น</th>
@@ -512,6 +516,7 @@
 								>  {item.AmountLimit === 0 ? 'Unlimited' : item.AmountLimit.toLocaleString()}
 								</td
 							>
+							<td class="p-1 sm:p-2 lg:text-sm text-right truncate">{item.DaysDueDuration}</td>
 
 							<!-- <td class={item.Visibility ?' text-success' : 'text-destructive'}>{item.Visibility ? 'แสดง' : 'ซ่อน'}</td> -->
 
@@ -565,33 +570,7 @@
 				{/if}
 			</tbody>
 		</table>
-		<!-- <div class="grid col-2 w-full justify-end sm:w-auto">
-			<div class="text-right text-sm">Page {currentPage} of {totalPages}</div>
-			<div class="flex">
-				<select
-					class="select-sm w-full max-w-xs h-1 rounded-md bg-white"
-					bind:value={limit}
-					on:change={firstPage}
-				>
-					<option value={5}>5</option>
-					<option value={10}>10</option>
-					<option value={15}>15</option>
-					<option value={20}>20</option>
-					<option value={25}>25</option>
-					<option value={30}>30</option>
-				</select>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline  mx-1"
-					on:click={prevPage}
-					disabled={currentPage === 1}>Previous</button
-				>
-				<button
-					class="join-item btn btn-xs sm:btn-sm btn-outline "
-					on:click={nextPage}
-					disabled={currentPage === totalPages}>Next</button
-				>
-			</div>
-		</div> -->
+		
 		<div class="grid w-full sm:w-auto mt-3">
 			<div class="flex items-center justify-between w-full">
 				<div class="text-sm ">หน้าที่ {currentPage} จากทั้งหมด {totalPages} หน้า</div>
@@ -725,6 +704,18 @@
 						on:input={validateInputAmountlimit}
 					/>
 				</label>
+				<label class="label">
+					<span class="label-text text-black w-2/5">เวลาแพ็คเก็จ:</span>
+					<input
+						type="number"
+						maxlength="9"
+						min="1"
+						max="9999"
+						class="input input-bordered border-black bg-white w-80"
+						bind:value={editingPackage.DaysDueDuration}
+						on:input={validateInputAmountlimit}
+					/>
+				</label>
 
 				<!-- Package Status (Active/Inactive) -->
 				<label class="label cursor-pointer bg-white flex">
@@ -820,6 +811,16 @@
 					type="number"
 					class="input input-bordered border-black bg-white w-80"
 					bind:value={newPackage.AmountLimit}
+					min="1"
+					on:input={validateInputAmountlimit}
+				/>
+			</label>
+			<label class="label">
+				<span class="label-text text-black w-2/5">เวลาแพ็คเก็จ:</span>
+				<input
+					type="number"
+					class="input input-bordered border-black bg-white w-80"
+					bind:value={newPackage.DaysDueDuration}
 					min="1"
 					on:input={validateInputAmountlimit}
 				/>

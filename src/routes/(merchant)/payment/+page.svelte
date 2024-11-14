@@ -171,18 +171,19 @@
 			
 			if (seconds <= 0 || data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial")) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
 				clearInterval((window as any).intervalId); // หยุดการนับเวลา
-				clearRemainingTime()
 				messageVisible = false; // ซ่อนข้อความ
 				if (data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial") ) {   //    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
-                    UpdatePackage()
+					UpdatePayment()
+					UpdatePackage()
 					if(datatest.OrderAmount == datatest.AmountLimit-1){   //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 						UpdateLimitPackage()
 					}
-					deleteCookie("account_create");
+					clearRemainingTime()
                     window.location.assign("/banklink")
 				}
 				
 				if (seconds <= 0 ) {
+					clearRemainingTime()
                     window.location.assign("/package")
 				}
 			}
@@ -354,6 +355,30 @@
   }
 }
 
+
+const UpdatePayment = async () => {
+		// Create URL parameters from form data
+			const refNo = localStorage.getItem('RefNo');
+			console.log(refNo)
+		    let config = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+			},
+			body: JSON.stringify({
+				RefNo: refNo
+			})
+		};
+		var result = await fetch(`${PUBLIC_API_ENDPOINT}/payment/callback`, config);
+
+		const data = await result.json();
+		console.log('Check data:', data);
+		if (data) {
+			return data;
+		}
+	};
+
+	
 
 const UpdateLimitPackage = async () => {
 		const packagegId = sessionStorage.getItem('packageId')

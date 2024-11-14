@@ -54,6 +54,9 @@
 	  responsive: true,
 	  maintainAspectRatio: false,
       plugins: {
+        legend: {
+      display: false // ปิดการแสดงแถบสี (legend)
+    },
         datalabels: {
           display: true,
           anchor: 'center',    // ตำแหน่งกลางของ Pie chart
@@ -395,7 +398,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 
 
 
-<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 " style="width: 100%;">
+<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 " style="width: 100%;">
     <Card.Root>
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2"
@@ -550,6 +553,34 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             </div>
             
         </Card.Footer>
+    </Card.Root>
+
+    <Card.Root class="col-span-2 md:col-span-2 lg:col-span-1">
+        <Card.Header
+            class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
+        >
+            <Card.Title class="text-xl font-semibold " style="height:40px">จำนวนการใช้งาน</Card.Title>
+           
+        </Card.Header>
+        <Card.Content class="text-center lg:my-1 py-2">
+            <div>
+            <Pie {data} {options} class="w-[180px] sm:w-[180px] md:w-[180px] lg:w-[120px] xl:w-[160px]"/>
+        </div>
+        <div class="mt-2 font-semibold">{dataOverview ? (dataOverview.QuotaLimit-dataOverview.QuotaUsage) : 1} / {dataOverview ? dataOverview.QuotaLimit : 1}</div>
+        
+        
+        </Card.Content>
+        <div class=" flex  justify-end text-center text-sm px-2 text-red-600 font-semibold">
+            <div>วันหมดอายุ : 
+                {#if (dataOverview) && (dataOverview.BillDate != "-")} {new Date(dataOverview.BillDate).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })}
+              {:else}
+                -
+              {/if}</div>
+        </div>
     </Card.Root>
     
 </div>
