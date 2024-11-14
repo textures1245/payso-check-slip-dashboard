@@ -320,7 +320,7 @@ function toggleRoom(roomId: any, isChecked: any) {
     console.log('Selected rooms:', selectedRoomIds); // For debugging
   }
 
-let selectedMethod='bank' ;
+
 
 
 
