@@ -197,12 +197,14 @@ function sendData(
 ) {
     console.log('Bank:', Bank);
     console.log('AccNoBank:', AccNoBank);
-    console.log('NameTHBank:', NameTHBank);
-    console.log('NameENBank:', NameENBank);
+    console.log('NameTHBank:', NameTHBank + " " + LastNameTHBank);
+    console.log('NameENBank:', NameENBank + " " + LastNameENBank);
     console.log('PPType:', PPType);
     console.log('AccNoPP:', AccNoPP);
     console.log('NameTHPP:', NameTHPP);
     console.log('NameENPP:', NameENPP);
+    console.log('NameTHPP:', NameTHPP + " " + LastNameTHPP);
+    console.log('NameENPP:', NameENPP + " " + LastNameENPP);
 
     // Call createBank with the parameters received
     if (Bank) {
@@ -253,6 +255,10 @@ function handleInputName(event: { target: { value: any; }; }) {
 
   event.target.value = inputValue;
 }
+
+
+let selectedMethod='bank' ;
+
 
 
 </script>
@@ -338,6 +344,7 @@ function handleInputName(event: { target: { value: any; }; }) {
             </div>
             <hr >
             <div class=" grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1">
+            <div class=" grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1">
               
               <div class="px-2">
                 <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาไทย</div>
@@ -409,10 +416,13 @@ function handleInputName(event: { target: { value: any; }; }) {
           </div>
         <!-- Inputs for PromptPay -->
         <form on:submit|preventDefault={() => sendData(null,null,null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP,LastNameTHPP,LastNameENPP)}>
+        <form on:submit|preventDefault={() => sendData(null,null,null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP,LastNameTHPP,LastNameENPP)}>
          <div class="my-5 px-2">
+        <input class="border-2 w-full px-2 " on:input={handleInput} style="height: 40px;" placeholder="ใส่ข้อมูลตามที่เลือก" bind:value={AccNoPP} required>
         <input class="border-2 w-full px-2 " on:input={handleInput} style="height: 40px;" placeholder="ใส่ข้อมูลตามที่เลือก" bind:value={AccNoPP} required>
     </div>
     <hr class="">
+    <div class=" grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 ">
     <div class=" grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 ">
               
       <div class="px-2">
@@ -452,6 +462,9 @@ function handleInputName(event: { target: { value: any; }; }) {
 <dialog id="my_modal_3" class="modal">
 	<div class="modal-box ">
 		<div class="text-lg font-bold flex justify-center">
+			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
 			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
 				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
 				<path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />

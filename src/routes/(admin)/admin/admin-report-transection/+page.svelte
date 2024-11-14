@@ -282,7 +282,7 @@
 							<td class="p-1 sm:p-2 lg:text-sm text-left">{item.index}</td>
 							<td class="p-1 sm:p-2 lg:text-sm text-left" title="{item.VerifiedDate}">{item.VerifiedDate ? new Date(item.VerifiedDate).toLocaleDateString('en-EN') : '-'}</td>
 							<td class="p-1 sm:p-2 lg:text-sm text-left" >{item.TransectionId}</td>
-							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId}</td>
+							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.MerchantId === 0 ? '' : item.MerchantId}</td>
 							<td class="p-1 sm:p-2 lg:text-sm text-left truncate" title="{item.MerchantName}">{item.MerchantName}</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">{item.QrCode.slice(18, 21) === '002' ? 'BBL'
 								: item.QrCode.slice(18, 21) === '004' ? 'KBANK'

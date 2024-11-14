@@ -178,6 +178,7 @@
 					if(datatest.OrderAmount == datatest.AmountLimit-1){   //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 						UpdateLimitPackage()
 					}
+					deleteCookie("account_create");
                     window.location.assign("/banklink")
 				}
 				
@@ -219,6 +220,9 @@
     // }, 5000);
 	}
 	
+	function deleteCookie(name: string): void {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
+  }
 	function formatTime(seconds: number) {
 		const minutes = Math.floor(seconds / 60); // คำนวณนาที
 		const remainingSeconds = seconds % 60; // คำนวณวินาทีที่เหลือ

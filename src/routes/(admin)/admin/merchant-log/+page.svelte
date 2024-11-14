@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { LogAdmin } from './+page.server';
+	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+
 
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;

@@ -258,7 +258,7 @@
 				offset: 0,
 				color: '#000',
 				font: {
-					size: 12, // ขนาดตัวอักษร
+					size: 8, // ขนาดตัวอักษร
 					weight: 'bold'
 				},
 				padding: {

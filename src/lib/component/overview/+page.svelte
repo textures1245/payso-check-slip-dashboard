@@ -452,8 +452,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 class="spin "
                 x="0px"
                 y="0px"
-                width="100"
-                height="100"
+                width="80"
+                height="80"
                 viewBox="0 0 128 128"
             >
                 <path
@@ -490,8 +490,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                   width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path
@@ -529,8 +529,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                     class="spin "
                     x="0px"
                     y="0px"
-                    width="100"
-                    height="100"
+                   width="80"
+                height="80"
                     viewBox="0 0 128 128"
                 >
                     <path

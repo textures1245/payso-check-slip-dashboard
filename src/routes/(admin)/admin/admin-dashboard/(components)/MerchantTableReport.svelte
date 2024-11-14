@@ -95,7 +95,7 @@
 			<!-- content here -->
 			<Table.Row class="text-xs">
 				<Table.Cell class="font-semibold">{i + 1}</Table.Cell>
-				<Table.Cell>{m.Id}</Table.Cell>
+				<Table.Cell>{m.MerchantId === 0 ? '' : m.MerchantId}</Table.Cell>
 				<Table.Cell class="w-[100px] truncate"  title="{m.MerchantName}">{m.MerchantName}</Table.Cell>
 				<Table.Cell>{m.Email}</Table.Cell>
 				<Table.Cell>{m.MerchantRole}</Table.Cell>

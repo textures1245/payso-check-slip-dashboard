@@ -26,6 +26,7 @@
 	let adminName="";
 	let displayName = '';
 	let isAdminPath: boolean;
+	let showNavbar:boolean; // ค่าตั้งต้นให้ Navbar แสดงผล
 // ฟังก์ชันสำหรับดึงข้อมูลจากคุกกี้
 function getCookies() {
   return cookie.parse(document.cookie);
@@ -36,7 +37,7 @@ onMount(() => {
     const cookies = getCookies();
 	const cookieData = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 	merchantName = cookieData?.MerchantName ?? null;
-
+	const cookieCheck = cookies['account_create'] ? JSON.parse(cookies['account_create']) : null;	
 	const adminData = cookies['admin_account'] ? JSON.parse(cookies['admin_account']) : null;
     adminName = adminData?.MerchantName ?? null;
 	$page.url.pathname.includes('admin') 
@@ -44,6 +45,15 @@ onMount(() => {
       : displayName = merchantName;
     console.log('Merchant Name:', merchantName);
 		isAdminPath = window.location.pathname.includes('/admin');
+	if (cookieData && cookieCheck) {
+      showNavbar = false;
+      return; // ไม่ต้องทำงานต่อหากไม่ต้องการแสดง Navbar
+    }else{
+		showNavbar = true;
+		return; // ไม่ต้องทำงานต่อหากไม่ต้องการแสดง Navbar
+	}
+	
+		
 		
   });
  
@@ -56,6 +66,7 @@ onMount(() => {
   function handleLogout() {
     deleteCookie('merchant_account');
     deleteCookie('admin_account');
+	deleteCookie('account_create');
 	if(isAdminPath){
 		window.location.assign("/login-admin")
 	}else{
@@ -67,8 +78,7 @@ onMount(() => {
 
   
 </script>
-
-
+{#if showNavbar}
 <nav class="bg-card"  style="background-color:#1353ec;">
 
 	<div class=" px-2">
@@ -223,7 +233,7 @@ onMount(() => {
 		</div>
 	{/if}
 </nav>
-
+{/if}
 
 <style scoped>
     .dropdown summary {

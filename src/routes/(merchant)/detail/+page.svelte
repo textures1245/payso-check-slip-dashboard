@@ -52,7 +52,7 @@
                                 <li>ถ้าอยากเชื่อมต่อบัญชีเพิ่ม ให้คลิก "Login With Line" อีกครั้ง</li>
                             </ul>
                             <p class="text-gray-600 my-2">หากต้องการยกเลิกการเชื่อมต่อ ให้คลิกเมนูข้างหลังชื่อบัญชีที่ต้องการยกเลิก</p>
-                            <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <button class="w-full  text-white py-2 rounded-lg  transition-colors bg-primary hover:bg-[#050680]">
                                 <a href="/profile">ไปหน้าการเชื่อมต่อ Line</a>
                             </button></div>
                     </div>
@@ -69,7 +69,7 @@
                 </div>
                     <p class="text-gray-600 my-3">เมื่อเลือกแพ็คเกจแล้ว กดปุ่ม "Buy Now" จะมี QR Code ให้สแกนชำระเงิน</p>
                 </div>
-                <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <button class="w-full  text-white py-2 rounded-lg  transition-colors bg-primary hover:bg-[#050680]">
                     <a href="/package">ไปหน้าการเลือกแพ็คเกจ</a>
                 </button>
             </div></Carousel.Item>
