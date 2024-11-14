@@ -42,7 +42,7 @@ export const actions: Actions = {
                 UserName: namesBase64,
                 MerchantId: id,
                 AvatarUrl: avatar,
-                Roles:"DASHBOARD,PACKAGE,SLIP_CHECKER"
+                Roles:"DASHBOARD,PACKAGE,CREATE_ROOM"
             })
         };
 

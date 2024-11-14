@@ -491,11 +491,14 @@ const handleReceiverToggle = () => {
 };
 
 const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
+  const cookies = getCookies();
+  const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
   const bankIds = bankData.map(bank => bank.Id);
   console.log('data', dataupdate,bankIds);
   const requestBody = {
             rooms: dataupdate,
-            bank: bankIds
+            bank: bankIds,
+            email:myCookie.Email
         };
 		let config = {
 			method: 'PUT', // Use GET instead of POST
@@ -516,11 +519,20 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 
 		const result = await fetch(url, config);
 		const data = await result.json();
-		const modal = document.getElementById('my_modal_3');
+    if (data.message == 'permission denied') {
+				const modal = document.getElementById('my_modal_4');
 				if (modal) {
 					modal.showModal();
 				}
-		return data.result;
+				return false;
+			}else {
+				const modal = document.getElementById('my_modal_3');
+				if (modal) {
+					modal.showModal();
+				}
+		      return data.result;
+			}
+		
 	};
 
   async function handleCheckboxChange(event: { target: { checked: boolean } }, id: any) {
@@ -675,7 +687,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
                   </g>
                 </svg>
               </div>
-              <div class="text-center">สาขา</div>
+              <div class="text-center">ห้อง</div>
             </Card.Content>
           </Card.Root>
           
@@ -1387,3 +1399,5 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 		<button>close</button>
 	</form>
 </dialog>
+
+

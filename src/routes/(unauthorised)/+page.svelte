@@ -218,7 +218,7 @@
 
 				if (form.data.PackageId == '0') {
 					if (form.status == 'create') {
-						window.location.href = '/package'; // ถ้าจริงต้องมาหน้า detail ก่อน
+						window.location.href = '/advice'; // ถ้าจริงต้องมาหน้า detail ก่อน
 					} else {
 						window.location.href = '/package';
 					}

@@ -413,7 +413,7 @@
 		if (isChecked1) selectedText += 'DASHBOARD';
 		if (isChecked2) selectedText += selectedText ? ',PACKAGE' : 'PACKAGE';
 		if (isChecked3) selectedText += selectedText ? ',USER_MANAGEMENT' : 'USER_MANAGEMENT';
-		if (isChecked4) selectedText += selectedText ? ',SLIP_CHECKER' : 'SLIP_CHECKER';
+		if (isChecked4) selectedText += selectedText ? ',CREATE_ROOM' : 'CREATE_ROOM';
 		UpdateLineRoles(Id, selectedText);
 	}
 
@@ -440,7 +440,7 @@
 		if (rolesArray.includes('USER_MANAGEMENT')) {
 			isChecked3 = true;
 		}
-		if (rolesArray.includes('SLIP_CHECKER')) {
+		if (rolesArray.includes('CREATE_ROOM')) {
 			isChecked4 = true;
 		}
 		const modal = document.getElementById('my_modal_1');
@@ -455,7 +455,7 @@
 		if (isCheckedLink1) selectedText += 'DASHBOARD';
 		if (isCheckedLink2) selectedText += selectedText ? ',PACKAGE' : 'PACKAGE';
 		if (isCheckedLink3) selectedText += selectedText ? ',USER_MANAGEMENT' : 'USER_MANAGEMENT';
-		if (isCheckedLink4) selectedText += selectedText ? ',SLIP_CHECKER' : 'SLIP_CHECKER';
+		if (isCheckedLink4) selectedText += selectedText ? ',CREATE_ROOM' : 'CREATE_ROOM';
 		if (isCheckedLink1 || isCheckedLink2 || isCheckedLink3 || isCheckedLink4) {
 			const myDate = myCookie.RegisterDate.split('T')[0];
 			const result = `${myCookie.Id}:${myDate}:${selectedText}`;
@@ -811,7 +811,7 @@
 		</form>
 		<h3 class="text-lg font-bold">รายละเอียดข้อมูล</h3>
 
-		<div class="   grid grid-rows-4 px-5 bg-[#94969C] rounded-md" style="height: 350px;">
+		<div class="   grid grid-rows-3 px-5 bg-[#94969C] rounded-md" style="height: 300px;">
 			<div class=" content-center p-2">
 				<label class="flex bg-white rounded-lg h-full">
 					<div class=" content-center pl-5">
@@ -846,27 +846,9 @@
 						/>
 					</div>
 					<div class="mx-5 py-3">
-						<div class="font-md font-semibold">Slip Checker</div>
-						<div class="font-xs lg:bolck md:block sm:hidden hidden">สามารถใช้งานCheck Slip</div>
-						<div class="font-xs lg:hidden md:hidden sm:block block">ใช้งานCheck Slip</div>
-					</div>
-				</label>
-			</div>
-			<div class=" content-center p-2">
-				<label class="flex bg-white rounded-lg h-full">
-					<div class=" content-center pl-5">
-						<input
-							type="checkbox"
-							class="checkbox checkbox-lg flex flex-col justify-center"
-							bind:checked={isChecked3}
-						/>
-					</div>
-					<div class="mx-5 py-3">
-						<div class="font-md font-semibold">User Management</div>
-						<div class="font-xs lg:bolck md:block sm:hidden hidden">
-							สามารถแก้สิทธิ์ Line เชื่อมต่อ
-						</div>
-						<div class="font-xs lg:hidden md:hidden sm:block block">แก้สิทธิ์ Line เชื่อมต่อ</div>
+						<div class="font-md font-semibold">Create Room</div>
+						<div class="font-xs lg:bolck md:block sm:hidden hidden">สามารถสร้างห้องกลุ่มไลน์</div>
+						<div class="font-xs lg:hidden md:hidden sm:block block">สร้างห้องกลุ่มไลน์</div>
 					</div>
 				</label>
 			</div>
@@ -915,7 +897,7 @@
 		</form>
 		<h3 class="text-lg font-bold">เลือกสิทธิ์ในการเข้าถึง</h3>
 
-		<div class="   grid grid-rows-4 px-5 bg-[#94969C] rounded-md" style="height: 350px;">
+		<div class="   grid grid-rows-3 px-5 bg-[#94969C] rounded-md" style="height: 300px;">
 			<div class=" content-center p-2">
 				<label class="flex bg-white rounded-lg h-full">
 					<div class=" content-center pl-5">
@@ -950,27 +932,9 @@
 						/>
 					</div>
 					<div class="mx-5 py-3">
-						<div class="font-md font-semibold">Slip Checker</div>
-						<div class="font-xs lg:bolck md:block sm:hidden hidden">สามารถใช้งานCheck Slip</div>
-						<div class="font-xs lg:hidden md:hidden sm:block block">ใช้งานCheck Slip</div>
-					</div>
-				</label>
-			</div>
-			<div class=" content-center p-2">
-				<label class="flex bg-white rounded-lg h-full">
-					<div class=" content-center pl-5">
-						<input
-							type="checkbox"
-							class="checkbox checkbox-lg flex flex-col justify-center"
-							bind:checked={isCheckedLink3}
-						/>
-					</div>
-					<div class="mx-5 py-3">
-						<div class="font-md font-semibold">Manage User</div>
-						<div class="font-xs lg:bolck md:block sm:hidden hidden">
-							สามารถแก้สิทธิ์ Line เชื่อมต่อ
-						</div>
-						<div class="font-xs lg:hidden md:hidden sm:block block">แก้สิทธิ์ Line เชื่อมต่อ</div>
+						<div class="font-md font-semibold">Create Room</div>
+						<div class="font-xs lg:bolck md:block sm:hidden hidden">สามารถสร้างห้องกลุ่มไลน์</div>
+						<div class="font-xs lg:hidden md:hidden sm:block block">สร้างห้องกลุ่มไลน์</div>
 					</div>
 				</label>
 			</div>

@@ -9,7 +9,7 @@
   import CryptoJS from 'crypto-js';
     let loading=false;
     let banks: any[] = [];
-    let minPayment = 10;
+    let minPayment = 1;
     let paymentAmount = minPayment;
     let Name = ""
      let NotiOnLineGroupId = ""
@@ -336,9 +336,12 @@ const handleReceiverToggle = () => {
 const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
   const bankIds = bankData.map(bank => bank.Id);
   console.log('data', dataupdate,bankIds);
+  const cookies = getCookies();
+	const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
   const requestBody = {
             rooms: dataupdate,
-            bank: bankIds
+            bank: bankIds,
+            email:myCookie.Email
         };
 		let config = {
 			method: 'POST', // Use GET instead of POST
@@ -359,11 +362,21 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 
 		const result = await fetch(url, config);
 		const data = await result.json();
-    const modal = document.getElementById('my_modal_3');
+    if (data.message == 'permission denied') {
+				const modal = document.getElementById('my_modal_4');
 				if (modal) {
 					modal.showModal();
 				}
-		return data.result;
+				return false;
+			} else {
+				const modal = document.getElementById('my_modal_3');
+				if (modal) {
+					modal.showModal();
+          return data.result;
+				}
+			}
+    
+		
 	};
   let QrToken: string;
   let qrcanvas1: HTMLCanvasElement;
@@ -842,4 +855,30 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 	<!-- <form method="dialog" class="modal-backdrop">
 		<button>close</button>
 	</form> -->
+</dialog>
+
+<dialog id="my_modal_4" class="modal">
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="100"
+				height="100"
+				viewBox="0 0 15 15"
+				{...$$props}
+			>
+				<path
+					fill="#F04438"
+					fill-rule="evenodd"
+					d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0"
+					clip-rule="evenodd"
+				/>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">ล้มเหลว</p>
+		<p class=" text-center">คุณไม่มีสิทธิ์ในการสร้างห้อง</p>
+	</div>
+	<form method="dialog" class="modal-backdrop">
+		<button>close</button>
+	</form>
 </dialog>

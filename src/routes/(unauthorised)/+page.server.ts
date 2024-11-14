@@ -218,7 +218,7 @@ export const actions: import('./$types').Actions = {
                             SuperUserLineId:lineData.userId,
                             AvatarUrl: lineData.pictureUrl,
                             Name:namesBase64,
-                            Roles:"DASHBOARD,PACKAGE,USER_MANAGEMENT,SLIP_CHECKER",
+                            Roles:"DASHBOARD,PACKAGE,USER_MANAGEMENT,CREATE_ROOM",
                         })
                     };
 

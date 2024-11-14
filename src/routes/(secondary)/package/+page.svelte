@@ -80,7 +80,7 @@ function clearRemainingTime() {
 		
 	</div>
 	<div class="text-center mx-5 mb-4"><h5>เพิ่มความสะดวกสบายและประหยัดเวลาด้วยบริการตรวจสอบสลิปธนาคารของเรา เลือกแพ็คเกจที่เหมาะกับคุณ</h5></div>
-	<div class="flex gap-2 flex-wrap justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-10 ">
+	<div class="flex gap-2 flex-wrap justify-center grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mx-5 sm:mx-5 md:mx-5 lg:mx-10 ">
 		{#each packages as pkg,i}
         {#if pkg.OrderAmount != pkg.AmountLimit || pkg.AmountLimit==0  }
 			<div class=" lg:my-3 md:my-3 sm:my-2 my-3 lg:mx-2 md:mx-2 sm:mx-0 mx-0 transition-transform hover:scale-105 drop-shadow-lg" >
