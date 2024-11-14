@@ -1102,7 +1102,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
             </div>
            
             <div class="flex justify-between">
-              <div>ซ่อนเลขบัญชีผู้โอน</div>
+              <div>ซ่อนเลขบัญชีผู้รับ</div>
               <div> <input
                 type="checkbox"
                 value="synthwave"
