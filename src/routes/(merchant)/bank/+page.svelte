@@ -476,9 +476,10 @@ let QrToken: string | null = null;
     
     // การตั้งค่าการซ่อนข้อมูล
 
-    HideSenderDetail: CheckedHideSenderDetail,
-      HideReceiverDetail: CheckedHideReceiverDetail,
-
+    // HideSenderDetail: CheckedHideSenderDetail,
+    //   HideReceiverDetail: CheckedHideReceiverDetail,
+    HideSenderDetail: false,
+    HideReceiverDetail: false,
     
     // การตั้งค่าการแจ้งเตือน Line
 
@@ -1114,7 +1115,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
     +
   </button>
           </div>
-          <div class="m-2">
+          <!-- <div class="m-2">
             <div class="flex justify-between">
               <div>ซ่อนเลขบัญชีผู้โอน</div>
               <div> <input
@@ -1138,7 +1139,7 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
                 on:change={handleReceiverToggle}
               /></div>
             </div>
-          </div>
+          </div> -->
 
           <div>Line Notify 1 ( การแจ้งเตือน)</div>
           <div class="flex flex-col gap-4 p-4">
