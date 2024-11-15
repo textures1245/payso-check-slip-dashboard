@@ -105,7 +105,7 @@ export const actions: import('./$types').Actions = {
 
         const config: RequestInit = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json','apikey': "F1kFAbG25a"},
+            headers: { 'Content-Type': 'application/json',apikey: "F1kFAbG25a"},
             body: JSON.stringify({
                 MerchantName: name,
                 MerchantRole: 'ACTIVE',
@@ -128,7 +128,7 @@ export const actions: import('./$types').Actions = {
                 const namesBase64 = toBase64(name);
                 const createConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json','apikey': "F1kFAbG25a"},
+                    headers: { 'Content-Type': 'application/json',apikey: "F1kFAbG25a"},
                     body: JSON.stringify({
                         MerchantName: name,
                         MerchantRole: 'NOT_PAYSO',
@@ -170,8 +170,7 @@ export const actions: import('./$types').Actions = {
         const config: RequestInit = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                apikey: API_KEY,
+                'Content-Type': 'application/json'
             }
         };
 
