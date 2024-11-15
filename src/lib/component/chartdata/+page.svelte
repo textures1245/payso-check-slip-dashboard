@@ -35,6 +35,8 @@
 				})
 			],
 			locale: Thai,
+			disableMobile: true, // เพิ่มเพื่อให้ทำงานได้ทุกอุปกรณ์
+    		allowInput: false,
 			onChange: (selectedDates) => {
 				selectedStartDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
 				startDatePicker.value = formatDateSelect(selectedStartDate); // อัปเดตค่าของ input เมื่อเปลี่ยนเดือน
@@ -438,8 +440,9 @@
 				<input
 					type="text"
 					bind:this={startDatePicker}
-					class="max-w-44 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent"
-					readonly
+					class="max-w-44 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent appearance-none text-base"
+    autocomplete="off"
+    readonly
 				/>
 				<img
 					src={date}
