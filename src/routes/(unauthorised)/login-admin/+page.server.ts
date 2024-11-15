@@ -19,12 +19,11 @@ export const actions: Actions = {
             })
         };
         const data = await fetch("https://stg-apis.paysolutions.asia/slip-backend/api/v1/merchant/loginadmin", config)
-        .then((response) => response.text())
-        .then((result) => {return result})
-        .catch((error) => console.error(error));;
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
         // const result = await fetch(`${API_ENDPOINT}/merchant/loginadmin`, config);
        
-        console.log(data);
+        console.log("++++++++++++++",typeof data);
 
         if (data.message !== 'Non Admin') {
             cookies.set('admin_account', JSON.stringify(data.result[1]), cookiesConfig);
