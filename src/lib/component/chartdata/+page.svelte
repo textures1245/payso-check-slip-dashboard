@@ -132,9 +132,10 @@
 		const id = sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		console.log('id: ', id, typeof id);
 		let apiUrl;
-		if (myCookie && myCookie.Type === 'Line') {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
-		} else if (myCookie) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
+		// } else 
+		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
@@ -395,9 +396,10 @@
 		console.log('++++++++++', myCookie.Id, myCookie.Email);
 
 		let apiUrl;
-		if (myCookie && myCookie.Type === 'Line') {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
-		} else if (myCookie) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
+		// } else 
+		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
