@@ -54,6 +54,9 @@
 	  responsive: true,
 	  maintainAspectRatio: false,
       plugins: {
+        legend: {
+      display: false // ปิดการแสดงแถบสี (legend)
+    },
         datalabels: {
           display: true,
           anchor: 'center',    // ตำแหน่งกลางของ Pie chart
@@ -104,6 +107,8 @@ const formatDate = (/** @type {Date} */ date: Date) => {
         flatpickr(startDatePicker, {
         dateFormat: 'Y-m-d', // ส่งวันที่ในรูปแบบปี-เดือน-วัน
         locale: Thai,
+        disableMobile: true,
+        allowInput: false,
         defaultDate: startDate, // ตั้งค่าวันที่เริ่มต้นใน Flatpickr
         onChange: (selectedDates: Date[]) => {
           selectedStartDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
@@ -114,6 +119,8 @@ const formatDate = (/** @type {Date} */ date: Date) => {
       flatpickr(endDatePicker, {
         dateFormat: 'Y-m-d', // ส่งวันที่ในรูปแบบปี-เดือน-วัน
         locale: Thai,
+        disableMobile: true,
+        allowInput: false,
         defaultDate: endDate, // ตั้งค่าวันที่สิ้นสุดใน Flatpickr
         onChange: (selectedDates: Date[]) => {
           selectedEndDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
@@ -173,18 +180,19 @@ const formatDate = (/** @type {Date} */ date: Date) => {
 	const GetTransactionByid = async () => {
 		// const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		// console.log( 'id: ', id , typeof(id));
+        console.log('กำลังค้นหาจากวันที่' ,startDate,endDate);
         const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
-		localStorage.setItem('startDate', startDate.toISOString().split('T')[0]);
-        localStorage.setItem('endDate', endDate.toISOString().split('T')[0]);
+		localStorage.setItem('startDate', startDate.toLocaleDateString('en-CA').split('T')[0]);
+        localStorage.setItem('endDate', endDate.toLocaleDateString('en-CA').split('T')[0]);
         const formattedStartDate = getFormattedDate(selectedStartDate);
         const formattedEndDate = getFormattedDate(selectedEndDate);
-		console.log('checking get transaction' ,startDate,endDate);
+		
 
 		// Create URL parameters from form data
 		let apiUrl;
-    // if (myCookie && myCookie.Type === "Line") {
+    // if (myCookie && myCookie.Type === "Line1") {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     // } else 
     if (myCookie) {
@@ -228,7 +236,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
         const formattedStartDate = getFormattedDate(selectedStartDate);
         const formattedEndDate = getFormattedDate(selectedEndDate);
         let apiUrl;
-    // if (myCookie && myCookie.Type === "Line") {
+    // if (myCookie && myCookie.Type === "Line1") {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/exportexcelline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     // } else 
     if (myCookie) {
@@ -350,7 +358,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             <input
                 type="text"
                 bind:this={startDatePicker}
-                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8"
+                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8 text-base appearance-none"
+                autocomplete="off"
                 readonly
             />
             <img
@@ -365,7 +374,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             <input
                 type="text"
                 bind:this={endDatePicker}
-                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8"
+                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8 text-base appearance-none"
+                autocomplete="off"
                 readonly
             />
             <img
@@ -394,7 +404,45 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 
 
 
-<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 " style="width: 100%;">
+<div class="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 " style="width: 100%;">
+    <Card.Root>
+        <Card.Header
+            class="flex flex-row items-center justify-center space-y-0 pb-2"
+        >
+            <Card.Title class="text-xl  font-semibold text-center" style="height:60px">สลิปที่ตรวจสอบทั้งหมด </Card.Title>
+            
+        </Card.Header>
+        <Card.Content class="text-center ">
+            <div>
+                <p class=" w-100 lg:h-32 content-center text-8xl">
+
+                   {#if loading}
+                   <div class="flex justify-center">
+                    <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="spin "
+                    x="0px"
+                    y="0px"
+                    width="100"
+                    height="100"
+                    viewBox="0 0 128 128"
+                >
+                    <path
+                        d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
+                    ></path>
+                </svg>
+            </div>
+               {:else}
+                   <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
+                       {dataOverview ? dataOverview.Total_count : 0}
+                       
+                   </div>
+               {/if}
+                </p>
+                </div>
+                <div class=" w-100 mt-2 mb-3  " ><Button  class="w-4/5 h-12 text-white  bg-primary font-semibold hover:bg-[#050680]" on:click={dowloadExportExcel} >ดาวน์โหลดไฟล์ Excel</Button></div>
+        </Card.Content>
+    </Card.Root>
     <Card.Root >
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 "
@@ -423,7 +471,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             </svg>
         </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.Success_count : 0}
                 </div>
             {/if}
@@ -461,7 +509,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
                     {dataOverview ? dataOverview.false_count : 0}
                 </div>
             {/if}
@@ -478,7 +526,7 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
         <Card.Header
             class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
         >
-            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปรอตรวจสอบ</Card.Title>
+            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปที่ชื่อบัญชีไม่ตรง</Card.Title>
            
         </Card.Header>
         <Card.Content class="text-center lg:my-5">
@@ -500,132 +548,47 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
                 </svg>
             </div>
             {:else}
-                <div class="text-8xl font-bold w-100">
-                    {dataOverview ? dataOverview.Pending_count : 0}
+                <div class="text-6xl sm:text-6xl md:text-8xl lg:text-8xl font-bold w-100">
+                    {dataOverview ? dataOverview.BANK_ACC_NOT_MATCH_Count : 0}
                 </div>
             {/if}
             </div>
         </Card.Content>
         <Card.Footer class="flex justify-center content-end lg:h-20 mt-auto">
-            <div class="text-lg  w-100 text-stone-400 text-center" ><a class="text-black font-semibold">{#if dataOverview && dataOverview.Pending_count == 0 || loading}0{:else}{((dataOverview.Pending_count/dataOverview.Total_count)*100).toFixed(2)}{/if}%</a> ของสลีปทั้งหมด
+            <div class="text-lg  w-100 text-stone-400 text-center" ><a class="text-black font-semibold">{#if dataOverview && dataOverview.BANK_ACC_NOT_MATCH_Count == 0 || loading}0{:else}{((dataOverview.BANK_ACC_NOT_MATCH_Count/dataOverview.Total_count)*100).toFixed(2)}{/if}%</a> ของสลีปทั้งหมด
             </div>
             
         </Card.Footer>
     </Card.Root>
-    <Card.Root >
-        <Card.Header
-            class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
-        >
-            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปปฏิเสธคำขอ</Card.Title>
-           
-        </Card.Header>
-        <Card.Content class="text-center lg:my-5">
-            <div class=" content-center  w-100 h-30">
-                {#if loading}
-                <div class="flex justify-center">
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="spin "
-                    x="0px"
-                    y="0px"
-                    width="100"
-                    height="100"
-                    viewBox="0 0 128 128"
-                >
-                    <path
-                        d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
-                    ></path>
-                </svg>
-            </div>
-            {:else}
-                <div class="text-8xl font-bold w-100">
-                    {dataOverview ? dataOverview.Request_Rejected_Count : 0}
-                </div>
-            {/if}
-            </div>
-        </Card.Content>
-        <Card.Footer class="flex justify-center content-end lg:h-20 mt-auto">
-            <div class="text-lg  w-100 text-stone-400 text-center" ><a class="text-black font-semibold">{#if dataOverview && dataOverview.Request_Rejected_Count == 0 || loading}0{:else}{((dataOverview.Request_Rejected_Count/dataOverview.Total_count)*100).toFixed(2)}{/if}%</a> ของสลีปทั้งหมด
-            </div>
-            
-        </Card.Footer>
-    </Card.Root>
-    <Card.Root >
-        <Card.Header
-            class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
-        >
-            <Card.Title class="text-xl font-semibold " style="height:60px">สลิปปฏิเสธตอบกลับ</Card.Title>
-           
-        </Card.Header>
-        <Card.Content class="text-center lg:my-5 my-5">
-            <div class=" content-center  w-100 h-30">
-                {#if loading}
-                <div class="flex justify-center">
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="spin "
-                    x="0px"
-                    y="0px"
-                    width="100"
-                    height="100"
-                    viewBox="0 0 128 128"
-                >
-                    <path
-                        d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
-                    ></path>
-                </svg>
-            </div>
-            {:else}
-                <div class="text-8xl font-bold w-100">
-                    {dataOverview ? dataOverview.Respond_Rejected_Count : 0}
-                </div>
-            {/if}
-            </div>
-        </Card.Content>
-        <Card.Footer class="flex justify-center content-end lg:h-20 mt-auto">
-            <div class="text-lg  w-100 text-stone-400 text-center" ><a class="text-black font-semibold">{#if dataOverview && dataOverview.Respond_Rejected_Count == 0 || loading}0{:else}{((dataOverview.Respond_Rejected_Count/dataOverview.Total_count)*100).toFixed(2)}{/if}%</a> ของสลีปทั้งหมด
-            </div>
-            
-        </Card.Footer>
-    </Card.Root>
-    <Card.Root>
-        <Card.Header
-            class="flex flex-row items-center justify-center space-y-0 pb-2"
-        >
-            <Card.Title class="text-xl  font-semibold text-center" style="height:60px">จำนวนทั้งหมดที่ใช้งาน </Card.Title>
-            
-        </Card.Header>
-        <Card.Content class="text-center ">
-            <div>
-                <p class=" w-100 h-32 content-center text-8xl">
 
-                   {#if loading}
-                   <div class="flex justify-center">
-                    <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="spin "
-                    x="0px"
-                    y="0px"
-                    width="100"
-                    height="100"
-                    viewBox="0 0 128 128"
-                >
-                    <path
-                        d="M14.5 39.8c-1.5-.6-3.3.1-3.9 1.6-2.4 5.8-3.9 11.9-4.4 18.1-.1 1.7 1.1 3.1 2.8 3.2.1 0 .2 0 .2 0 1.6 0 2.9-1.2 3-2.8.4-5.6 1.8-11.1 3.9-16.2C16.7 42.2 16 40.5 14.5 39.8zM113.1 39.1c-1.5.7-2.2 2.4-1.5 4 8.7 19.8 4.5 42.5-10.8 57.8C90.9 110.6 77.9 116 64 116c-11.2 0-21.9-3.5-30.8-10.1l0 0h4.9c1.7 0 3-1.3 3-3s-1.3-3-3-3h-13c-1.7 0-3 1.3-3 3v13c0 1.7 1.3 3 3 3s3-1.3 3-3v-6.3l0 0C38.6 117.8 51.3 122 64 122c14.9 0 29.7-5.7 41-17 17.1-17.1 21.8-42.3 12.1-64.4C116.4 39.1 114.6 38.4 113.1 39.1zM90.1 22.1c-1.6 0-3.1 1.2-3.2 2.8-.1 1.7 1.3 3.2 3 3.2h13c1.7 0 3-1.3 3-3V12.3c0-1.6-1.2-3.1-2.8-3.2-1.7-.1-3.2 1.3-3.2 3v6.3C78 1.1 46.3 1.9 25.3 20.8 24 22 24 24 25.2 25.2c1.1 1.1 2.9 1.2 4.1.1C38.9 16.7 51.1 12 64 12c11.2 0 21.9 3.5 30.8 10.1l0 0H90.1zM11.5 77.69999999999999A2.9 2.9 0 1 0 11.5 83.5 2.9 2.9 0 1 0 11.5 77.69999999999999z"
-                    ></path>
-                </svg>
-            </div>
-               {:else}
-                   <div class="text-8xl font-bold w-100">
-                       {dataOverview ? dataOverview.Total_count : 0}
-                       
-                   </div>
-               {/if}
-                </p>
-                </div>
-                <div class=" w-100 mt-2 mb-3  " ><Button  class="w-4/5 h-12 text-white  bg-primary font-semibold hover:bg-[#050680]" on:click={dowloadExportExcel} >ดาวน์โหลดไฟล์ Excel</Button></div>
+    <Card.Root class="col-span-2 md:col-span-2 lg:col-span-1">
+        <Card.Header
+            class="flex flex-row items-center justify-center space-y-0 pb-2 text-center"
+        >
+            <Card.Title class="text-xl font-semibold " style="height:40px">จำนวนการใช้งาน</Card.Title>
+           
+        </Card.Header>
+        <Card.Content class="text-center lg:my-1 py-2">
+            <div>
+            <Pie {data} {options} class="w-[180px] sm:w-[180px] md:w-[180px] lg:w-[120px] xl:w-[160px]"/>
+        </div>
+        <div class="mt-2 font-semibold">{dataOverview ? (dataOverview.QuotaLimit-dataOverview.QuotaUsage) : 1} / {dataOverview ? dataOverview.QuotaLimit : 1}</div>
+        
+        
         </Card.Content>
+        <div class=" flex  justify-end text-center text-sm px-2 text-red-600 font-semibold">
+            <div>วันหมดอายุ : 
+                {#if (dataOverview) && (dataOverview.BillDate != "-")} {new Date(dataOverview.BillDate).toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })}
+              {:else}
+                -
+              {/if}</div>
+        </div>
     </Card.Root>
+    
 </div>
 
 <style scoped>
@@ -641,4 +604,12 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 			transform: rotate(360deg);
 		}
 	}
+    .date-picker-input {
+    font-size: 16px; /* ป้องกัน iOS zoom */
+    padding: 8px 12px;
+    width: 100%;
+    -webkit-appearance: none; /* ป้องกันสไตล์เริ่มต้นของ iOS */
+    -moz-appearance: none;
+    appearance: none;
+}
 </style>

@@ -12,14 +12,17 @@
   let statusToSend="all";
   let previousStartDate: string | null = null;
   let previousEndDate: string | null = null;
-  
-
+	let count=0;
+	let offset = 0
+	let limit = 15
+	let totalPages = 1
+	let currentPage = 1;
 	let dataChart: any[] = [];
 	onMount(async () => {
 		previousStartDate = localStorage.getItem('startDate');
     	previousEndDate = localStorage.getItem('endDate');
 		try {
-			const datachart = await Getdata();
+			const datachart = await Getdata(offset,limit);
 			dataChart=datachart;
 
 			console.log('Chart : ',datachart);
@@ -43,20 +46,20 @@
 	function getCookies() {
   return cookie.parse(document.cookie);
 }
-	 const Getdata = async () => {
+	 const Getdata = async (offset: number,limit:number) => {
 		// const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		// console.log( 'id: ', id , typeof(id));
 		const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		const startDate = localStorage.getItem('startDate');
 		const endDate = localStorage.getItem('endDate');
-
+		
 		let apiUrl;
     // if (myCookie && myCookie.Type === "Line") {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
     // } else 
 	if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}/${offset}/${limit}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/pending/${startDate}/${endDate}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/5/2024-08-01/2024-09-10`;
     } else {
@@ -73,13 +76,26 @@
 		};
 const result = await fetch(apiUrl, config);
 const datas = await result.json();
+		// const count = Array.isArray(datas.result) ? datas.result.length : 0;
+		if (datas.result && datas.result.length > 0) {
+  count = datas.result[0].TotalCount;
+  totalPages = Math.ceil(count / limit);
+} else {
+  // กรณีที่ไม่มีข้อมูล
+  count = 0;
+  totalPages = 1;
+  // หรือสามารถตั้งค่า default value หรือข้อความแจ้งเตือนตามที่ต้องการ
+  console.log('ไม่มีข้อมูล');
+}
+		console.log("++++++++++++++++++++++++++++",count,"จำนวน",totalPages)
+		
 		if (datas.result) {
             return datas.result;
         }
 
 	};
 
-	const searchGetdata = async (param1: string) => {
+	const searchGetdata = async (param1: string,offset: number,limit:number) => {
 		// const id= sessionStorage.getItem('merchant_id'); // Waiting for id from another page
 		// console.log( 'id: ', id , typeof(id));
 		const startDate = localStorage.getItem('startDate');
@@ -88,14 +104,13 @@ const datas = await result.json();
 		const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
-		
 		console.log('checking transaction month');
 		let apiUrl;
     // if (myCookie && myCookie.Type === "Line") {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}/${startDate}/${endDate}`;
     // } else 
 	if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}/${startDate}/${endDate}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}/${startDate}/${endDate}/${offset}/${limit}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -111,18 +126,31 @@ const datas = await result.json();
 		var result = await fetch(apiUrl, config);
 		const datas = await result.json();
 		console.timeEnd('Fetch Only Getdata');
+		if (datas.result && datas.result.length > 0) {
+  count = datas.result[0].TotalCount;
+  totalPages = Math.ceil(count / limit);
+} else {
+  // กรณีที่ไม่มีข้อมูล
+  count = 0;
+  totalPages = 1;
+  // หรือสามารถตั้งค่า default value หรือข้อความแจ้งเตือนตามที่ต้องการ
+  console.log('ไม่มีข้อมูล');
+}
 		return datas.result
 
 	};
 	let searchPerformed = false;
 	let dataSearch: any[] = [];
     async function SearchData(param1: string) {
+		console.log(offset,limit)
+		currentPage=1
+		offset=0
 	if(param1=="all"){
-		const data = await Getdata();
+		const data = await Getdata(offset,limit);
 		dataSearch = data
 		console.log("Search" ,dataSearch)
 	}else{
-		const data = await searchGetdata(param1);
+		const data = await searchGetdata(param1,offset,limit);
 		dataSearch = data
 		console.log("Search" ,dataSearch)
 	}
@@ -136,24 +164,24 @@ const datas = await result.json();
   async function checkLocalStorageChanges() {
     const currentStartDate = localStorage.getItem('startDate');
     const currentEndDate = localStorage.getItem('endDate');
-
     if (currentStartDate !== previousStartDate || currentEndDate !== previousEndDate) {
         previousStartDate = currentStartDate;
         previousEndDate = currentEndDate;
+		offset = 0
+		currentPage = 1;
         // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลใหม่
-		const datachart = await Getdata();
+		const datachart = await Getdata(offset,limit);
 		dataChart=datachart
 		dataSearch = datachart
+		console.log("---------------",dataSearch)
 		statusToSend="all"
+		
     }
 }
   const statuses = [
 	{ value: 'all', label: 'ทั้งหมด' },
   { value: 'success', label: 'ถูกต้อง' },
   { value: 'failed', label: 'ผิด' },
-  { value: 'pending', label: 'กำลังดำเนินการ' },
-  { value: 'REQUEST_REJECTED', label: 'คำขอถูกปฏิเสธ' },
-  { value: 'RESPOND_REJECTED', label: 'ปฏิเสธการตอบ' },
   { value: 'BANK_ACC_NOT_MATCH', label: 'ชื่อบัญชีไม่ตรง' }
 ];
 
@@ -187,6 +215,48 @@ function formatTime(dateString: string) {
         // คืนค่ารูปแบบ HH:MM
         return `${hours}:${minutes}`;
     }
+
+
+	function prevPage(param1: string) {
+    if (currentPage > 1) {
+      currentPage--;
+	  offset-=limit;
+	  Paginations(param1,offset,limit)
+      dispatchEvent(new CustomEvent('pageChange', { 
+        detail: { page: currentPage }
+      }));
+    }
+  }
+
+  function nextPage(param1: string) {
+    if (currentPage < totalPages) {
+      currentPage++;
+	  offset+=limit;
+	  console.log("++++",offset,param1)
+	  Paginations(param1,offset,limit)
+      dispatchEvent(new CustomEvent('pageChange', { 
+        detail: { page: currentPage }
+      }));
+    }
+  }
+
+  async function Paginations(param1: string,offset: number,limit: number) {
+		console.log(offset,limit,totalPages,currentPage)
+	if(param1=="all"){
+		const data = await Getdata(offset,limit);
+		dataSearch = data
+		console.log("Search" ,dataSearch,offset,limit)
+	}else{
+		const data = await searchGetdata(param1,offset,limit);
+		dataSearch = data
+		console.log("Search" ,dataSearch,offset,limit)
+	}
+		searchPerformed = true;
+	
+	
+ // Replace with your actual URL
+
+  }
   </script>
 <div class="flex justify-between mx-2 my-2">
 	<div class="content-center font-semibold">
@@ -262,22 +332,24 @@ style="width:40%;height:30px;"
 				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #FEF0C7;color:#F79009;border-color:#F79009">PENDING</div></span>
-				{:else if item.Status === 'RESPOND_REJECTED'}
+				<!-- {:else if item.Status === 'RESPOND_REJECTED'}
 				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Response Rejected</div></span>
-					{:else if item.Status === 'REQUEST_REJECTED'}
+					{:else if item.Status === 'REQUEST_REJECTED'} -->
 				<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Request Rejected</div></span>
-			  {:else if item.Status === 'FAILED'}
+			  {:else if item.Status === 'FAILED' || item.Status === 'REQUEST_REJECTED' || item.Status === 'RESPOND_REJECTED'}
 				<span class=" flex items-center " style="color:#F04438;"><svg xmlns="http://www.w3.org/2000/svg" class="lg:hidden  md:hidden sm:block block" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
 					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3 " style="background-color: #FEE4E2;color:#F04438;border-color:#F04438">FAILED</div></span>
 					{:else if item.Status === 'BANK_ACC_NOT_MATCH'}
-					<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
+					<span class=" text-warning flex  items-center  " style="min-height: 50px;">
+						<svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 						<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
-						</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Bank Name NOT MATCH</div></span>
+						</svg>
+						<div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Bank Name NOT MATCH</div></span>
 			  {:else}
 				<span class="text-gray-500">Unknown Status</span>
 			  {/if}</Table.Cell>
@@ -332,15 +404,15 @@ style="width:40%;height:30px;"
 				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="#facd15" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M25,2c-12.683,0 -23,10.317 -23,23c0,12.683 10.317,23 23,23c12.683,0 23,-10.317 23,-23c0,-12.683 -10.317,-23 -23,-23zM25,28c-0.462,0 -0.895,-0.113 -1.286,-0.3l-6.007,6.007c-0.195,0.195 -0.451,0.293 -0.707,0.293c-0.256,0 -0.512,-0.098 -0.707,-0.293c-0.391,-0.391 -0.391,-1.023 0,-1.414l6.007,-6.007c-0.187,-0.391 -0.3,-0.824 -0.3,-1.286c0,-1.304 0.837,-2.403 2,-2.816v-14.184c0,-0.553 0.447,-1 1,-1c0.553,0 1,0.447 1,1v14.184c1.163,0.413 2,1.512 2,2.816c0,1.657 -1.343,3 -3,3z"></path></g></g>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3" style="background-color: #FEF0C7;color:#F79009;border-color:#F79009">PENDING</div></span>
-				{:else if item.Status === 'RESPOND_REJECTED'}
+				<!-- {:else if item.Status === 'RESPOND_REJECTED'}
 				<span class=" text-warning flex  items-center "><svg class="lg:hidden  md:hidden sm:block block" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#767676"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Response Rejected</div></span>
-					{:else if item.Status === 'REQUEST_REJECTED'}
+					{:else if item.Status === 'REQUEST_REJECTED'} -->
 				<span class=" text-warning flex  items-center  " style="min-height: 50px;"><svg class="lg:hidden  md:hidden sm:block block " xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0,0,256,256">
 					<g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M44,24c0,11.045 -8.955,20 -20,20c-11.045,0 -20,-8.955 -20,-20c0,-11.045 8.955,-20 20,-20c11.045,0 20,8.955 20,20z" fill="#000000"></path><path d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828,-2.828z" fill="#ffffff"></path><path d="M32.484,29.656l-2.828,2.828l-14.14,-14.14l2.828,-2.828z" fill="#ffffff"></path></g></g>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-xs lg:flex md:flex p-3 whitespace-nowrap" style="background-color: #F9FAFB ; color: #61646C; border-color: #61646C;">Request Rejected</div></span>
-			  {:else if item.Status === 'FAILED'}
+			  {:else if item.Status === 'FAILED' || item.Status === 'REQUEST_REJECTED' || item.Status === 'RESPOND_REJECTED'}
 				<span class=" flex items-center " style="color:#F04438;"><svg xmlns="http://www.w3.org/2000/svg" class="lg:hidden  md:hidden sm:block block" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">
 					<path fill="#f44336" d="M44,24c0,11.045-8.955,20-20,20S4,35.045,4,24S12.955,4,24,4S44,12.955,44,24z"></path><path fill="#fff" d="M29.656,15.516l2.828,2.828l-14.14,14.14l-2.828-2.828L29.656,15.516z"></path><path fill="#fff" d="M32.484,29.656l-2.828,2.828l-14.14-14.14l2.828-2.828L32.484,29.656z"></path>
 					</svg><div class="lg:block md:block sm:hidden hidden badge badge-outline badge-sm uppercase text-sm lg:flex md:flex p-3 " style="background-color: #FEE4E2;color:#F04438;border-color:#F04438">FAILED</div></span>
@@ -364,7 +436,33 @@ style="width:40%;height:30px;"
        
     </div>
     </div>
+
     </ScrollArea>
+	<div class="flex justify-between my-2">
+		<div class="content-center mx-2">
+		<span class="text-gray-700  font-semibold text-sm">
+			หน้า {currentPage} จากทั้งหมด {totalPages}
+		  </span>
+		 </div>
+		 <div class=" mx-2">
+		<button
+		  class="join-item btn btn-sm bg-blue-500 text-white px-2 py-0 rounded-lg hover:bg-blue-600 focus:outline-none disabled:bg-gray-300 disabled:cursor-not-allowed"
+		  on:click={() => prevPage(statusToSend)}
+		  disabled={currentPage === 1}
+		>
+		  « Previous
+		</button>
+		
+		<button
+		  class="join-item btn btn-sm bg-blue-500 text-white px-2 py-0 rounded-lg hover:bg-blue-600 focus:outline-none disabled:bg-gray-300 disabled:cursor-not-allowed"
+		  on:click={() => nextPage(statusToSend)}
+		  disabled={currentPage === totalPages}
+		>
+		  Next »
+		</button>
+	</div>
+	  </div>
+	
 
 
 	
