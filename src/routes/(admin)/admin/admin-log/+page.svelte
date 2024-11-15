@@ -5,6 +5,7 @@
 	import Modal from './(component)/Modal.svelte';
 	import * as Table from '$lib/components/ui/table';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import {PUBLIC_BACKEND_API_KEY} from '$env/static/public'
 	let LogAdmin: LogAdmin[] = [];
 	let offset = 1;
 	let limit = 10;
@@ -43,7 +44,8 @@
 				{
 					headers: {
 						'Content-Type': 'application/json',
-						'ngrok-skip-browser-warning': 'true'
+						'ngrok-skip-browser-warning': 'true',
+						'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 					}
 				}
 			);

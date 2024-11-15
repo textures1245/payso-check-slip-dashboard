@@ -3,6 +3,7 @@
 	import type { PackageData } from './+page.server.ts';
 	import cookie from 'cookie';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import {PUBLIC_BACKEND_API_KEY} from '$env/static/public'
 
 	let packageData: PackageData[] = [];
 	let currentPage = 1;
@@ -94,7 +95,8 @@
                     'Content-Type': 'application/json',
                     'Actor-Id': myCookie.Id,
                     'Actor-Name': myCookie.Email,
-                    'Actor-Role': 'ADMIN'
+                    'Actor-Role': 'ADMIN',
+					'apikey' : `${PUBLIC_BACKEND_API_KEY}`
                 }
             }
         );
@@ -129,7 +131,8 @@
             {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+					'apikey' : `${PUBLIC_BACKEND_API_KEY}`
                 },
             }
         );
@@ -238,7 +241,8 @@
 					'Content-Type': 'application/json',
 					'Actor-Id': myCookie.Id,
 					'Actor-Name': myCookie.Email,
-					'Actor-Role': 'ADMIN'
+					'Actor-Role': 'ADMIN',
+					'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 				},
 				body: JSON.stringify({
 					...newPackage,
@@ -314,7 +318,8 @@
 					'Content-Type': 'application/json',
 					'Actor-Id': myCookie.Id,
 					'Actor-Name': myCookie.Email,
-					'Actor-Role': 'ADMIN'
+					'Actor-Role': 'ADMIN',
+					'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 				},
 				body: JSON.stringify(editingPackage)
 			});

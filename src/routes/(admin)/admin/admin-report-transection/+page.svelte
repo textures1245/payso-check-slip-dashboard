@@ -5,6 +5,7 @@
 	import cookie from 'cookie';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { onMount } from 'svelte';
+	import { PUBLIC_BACKEND_API_KEY } from '$env/static/public'
 
 	let offset = 1;
 	let limit = 10;
@@ -93,7 +94,8 @@
 				{
 					headers: {
 						'Content-Type': 'application/json',
-						'ngrok-skip-browser-warning': 'true'
+						'ngrok-skip-browser-warning': 'true',
+						'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 					}
 				}
 			);

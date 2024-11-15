@@ -3,6 +3,7 @@ import { API_ENDPOINT } from '$env/static/private';
 import axios, { type AxiosRequestConfig } from 'axios';
 import type { MerchantTransactionDetail } from '../../../routes/(admin)/admin/admin-dashboard/(mockdata)/data';
 import type { Transaction } from '$lib/utils/external-api-type/transaction';
+import { PUBLIC_BACKEND_API_KEY } from '$env/static/public'
 
 interface TransactionController {
 	GetInvalidTransaction: (qOpt?: QueryOpt) => Promise<DataResponse<MerchantTransactionDetail[]>>;
@@ -26,7 +27,8 @@ export class TransactionExternalAPI implements TransactionController {
 			method: 'GET',
 			url: `${this.endpoint}/transaction/get-all?${status ? `status=${status}` : ''}${getQueryFilterParams(qOpt,false)}`,
 			headers: {
-				'Access-Control-Allow-Origin': this.endpoint
+				'Access-Control-Allow-Origin': this.endpoint,
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {
@@ -44,6 +46,7 @@ export class TransactionExternalAPI implements TransactionController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json',
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {

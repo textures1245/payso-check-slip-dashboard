@@ -2,6 +2,7 @@ import { getQueryFilterParams, type DataResponse, type QueryOpt } from '$lib/uti
 import { API_ENDPOINT } from '$env/static/private';
 import axios, { type AxiosRequestConfig } from 'axios';
 import type { Package } from '$lib/utils/external-api-type/package';
+import { PUBLIC_BACKEND_API_KEY } from '$env/static/public'
 
 interface PackageController {
 	GetPackages: (qOpt: QueryOpt) => Promise<DataResponse<Package[]>>;
@@ -25,6 +26,7 @@ export class PackageExternalAPI implements PackageController {
             headers: {
                 'Access-Control-Allow-Origin': this.endpoint,
                 'Content-Type': 'application/json',
+                'apikey' : `${PUBLIC_BACKEND_API_KEY}`
             }
         };
         return axios(config).then((response) => {
