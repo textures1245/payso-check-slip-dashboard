@@ -3,7 +3,7 @@
 	import * as Table from "$lib/components/ui/table";
     // Register Chart.js components
     import { ScrollArea } from "$lib/components/ui/scroll-area/index.js";
-	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	import { onDestroy, onMount } from 'svelte';
 	import cookie from 'cookie';
 	import failed  from '$lib/image/failed.png';
@@ -71,7 +71,8 @@
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'apikey': PUBLIC_BACKEND_API_KEY
             }
 		};
 const result = await fetch(apiUrl, config);
@@ -119,7 +120,8 @@ const datas = await result.json();
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'apikey': PUBLIC_BACKEND_API_KEY
             }
 		};
 		console.time('Fetch Only Getdata');

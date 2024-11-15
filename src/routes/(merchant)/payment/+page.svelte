@@ -3,7 +3,7 @@
 	import cookie from 'cookie';
 	// @ts-ignore
 	import { PUBLIC_oauth_KEY } from '$env/static/public';
-	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	import { onMount } from 'svelte';
     import * as Card from "$lib/components/ui/card";
 	import dowlaod from"$lib/image/downloads.png";
@@ -66,6 +66,7 @@
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				RefNo : refNo,
@@ -278,6 +279,7 @@
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				RefNo : refNo
@@ -330,6 +332,7 @@
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				PackageId: parseInt(Id, 10),
@@ -364,6 +367,7 @@ const UpdatePayment = async () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				RefNo: refNo
@@ -386,6 +390,7 @@ const UpdateLimitPackage = async () => {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
+				'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		var result = await fetch(

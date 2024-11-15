@@ -4,7 +4,7 @@
 	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import Icon from '@iconify/svelte';
 	import { Colors } from 'chart.js';
-    import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	
 	import { onMount } from 'svelte';
 	let packages: any[] = [];
@@ -34,6 +34,7 @@
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
                 'Content-Type': 'application/json',
+        'apikey': PUBLIC_BACKEND_API_KEY
             }
 		};
 		var result = await fetch(`${PUBLIC_API_ENDPOINT}/package/packageactive`, config);

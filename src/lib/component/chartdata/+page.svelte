@@ -6,7 +6,7 @@
 	import { afterUpdate, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import cookie from 'cookie';
-	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	import flatpickr from 'flatpickr';
 	import { Thai } from 'flatpickr/dist/l10n/th.js';
 	import monthSelectPlugin from 'flatpickr/dist/plugins/monthSelect/index';
@@ -138,6 +138,7 @@
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
 				'Content-Type': 'application/json',
+				'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		var result = await fetch(apiUrl, config);
@@ -398,6 +399,7 @@
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
+				'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		const result = await fetch(apiUrl, config);

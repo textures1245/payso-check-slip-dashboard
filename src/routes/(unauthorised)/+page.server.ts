@@ -1,5 +1,5 @@
 import { cookiesConfig } from '$lib/cookies';
-import { API_ENDPOINT, API_KEY } from '$env/static/private';
+import { API_ENDPOINT, API_KEY,BACKEND_API_KEY } from '$env/static/private';
 
 interface Merchant {
     Id: string;
@@ -104,7 +104,7 @@ export const actions: import('./$types').Actions = {
 
         const config: RequestInit = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json',},
+            headers: { 'Content-Type': 'application/json','apikey': BACKEND_API_KEY},
             body: JSON.stringify({
                 MerchantName: name,
                 MerchantRole: 'ACTIVE',
@@ -127,7 +127,7 @@ export const actions: import('./$types').Actions = {
                 const namesBase64 = toBase64(name);
                 const createConfig: RequestInit = {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json',},
+                    headers: { 'Content-Type': 'application/json','apikey': BACKEND_API_KEY},
                     body: JSON.stringify({
                         MerchantName: name,
                         MerchantRole: 'NOT_PAYSO',

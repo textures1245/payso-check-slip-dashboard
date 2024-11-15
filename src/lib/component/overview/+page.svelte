@@ -7,7 +7,7 @@
 	import 'chart.js/auto';
     import { afterUpdate, onMount } from 'svelte';
     import cookie from 'cookie';
-    import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
     import date from"$lib/image/calendar.png";
 
     import { Thai } from 'flatpickr/dist/l10n/th.js';
@@ -207,7 +207,8 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'apikey': PUBLIC_BACKEND_API_KEY
         }
     };
 
@@ -250,7 +251,8 @@ const formatDate = (/** @type {Date} */ date: Date) => {
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'apikey': PUBLIC_BACKEND_API_KEY
             }
 		};
 		var result = await fetch(apiUrl, config);
@@ -307,7 +309,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'apikey': PUBLIC_BACKEND_API_KEY
         }
     };
 

@@ -3,7 +3,7 @@
     import { Button } from '$lib/components/ui/button';
     import * as Card from "$lib/components/ui/card";
     import payment from"$lib/image/thai-qr.png";
-    import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
     import cookie from 'cookie';
 	import { onMount } from 'svelte';
     let isOpen = false;
@@ -81,7 +81,8 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -207,6 +208,8 @@ const createBank = async (info: BankInfo | PPInfo) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
       },
       body: JSON.stringify(requestBody)
     });

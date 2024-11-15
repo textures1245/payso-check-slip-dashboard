@@ -18,7 +18,7 @@
 	import Icon from '@iconify/svelte';
 	import { createEventDispatcher } from 'svelte';
 	import cookie from 'cookie';
-	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 
 	const dispatch = createEventDispatcher();
 
@@ -58,6 +58,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 

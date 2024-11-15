@@ -4,7 +4,7 @@
     import * as Card from "$lib/components/ui/card";
     import * as Carousel from "$lib/components/ui/carousel";
     import payment from"$lib/image/thai-qr.png";
-    import { PUBLIC_API_ENDPOINT,PUBLIC_SECRETKEY } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_SECRETKEY,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
     import cookie from 'cookie';
 	import { afterUpdate, onMount } from 'svelte';
 	import { Plus } from 'svelte-radix';
@@ -237,7 +237,8 @@ let QrToken: string | null = null;
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -268,7 +269,8 @@ let QrToken: string | null = null;
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -293,7 +295,8 @@ let QrToken: string | null = null;
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -525,7 +528,8 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 			method: 'PUT', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			},
       body: JSON.stringify(
   requestBody),
@@ -598,7 +602,8 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 			method: 'PUT', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		console.log(id);

@@ -4,7 +4,7 @@
 	import logo from '$lib/image/logoshop.png';
 	import { onDestroy, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	import { PUBLIC_DOMAIN } from '$env/static/public';
 	import logo_customer from '$lib/image/customer_logo.png';
 	let cookieValues = null;
@@ -142,6 +142,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -201,6 +202,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -235,6 +237,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -261,6 +264,7 @@
 			method: 'DELETE', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -298,7 +302,8 @@
 			method: 'DELETE', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -336,6 +341,7 @@
 			method: 'PUT', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		console.log(id);
@@ -366,6 +372,7 @@
 			method: 'PUT', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		console.log(id);
@@ -400,6 +407,7 @@
 			method: 'PUT', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		console.log(id);
@@ -591,7 +599,8 @@
 			method: 'POST', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        		'apikey': PUBLIC_BACKEND_API_KEY
 			},body: JSON.stringify(
 				requestBody),
 		};

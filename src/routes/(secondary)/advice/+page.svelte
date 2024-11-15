@@ -2,7 +2,7 @@
 <script lang='ts'>
     import { writable } from 'svelte/store';
     import PackageCard from './(components)/PackageCards.svelte';
-    import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
     import addGroup from '$lib/image/addGroup.png';
 	import { afterUpdate, onMount } from 'svelte';
 	let packages: any[] = [];
@@ -32,6 +32,7 @@
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
                 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+                'apikey': PUBLIC_BACKEND_API_KEY
             }
 		};
 		var result = await fetch(`${PUBLIC_API_ENDPOINT}/package/packageactive`, config);
@@ -275,6 +276,7 @@ function clearRemainingTime() {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				RefNo : refNo,
@@ -419,6 +421,7 @@ function clearRemainingTime() {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				RefNo : refNo
@@ -451,6 +454,7 @@ function clearRemainingTime() {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				PackageId: parseInt(Id, 10),
@@ -477,6 +481,7 @@ const UpdatePayment = async () => {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify({
 				RefNo: refNo
@@ -499,6 +504,7 @@ const UpdateLimitPackage = async () => {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		var result = await fetch(
@@ -692,6 +698,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
       },
       body: JSON.stringify(requestBody)
     });
@@ -1004,7 +1011,8 @@ function toggleRoom(roomId: any, isChecked: any) {
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -1136,7 +1144,8 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 			method: 'POST', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+        'apikey': PUBLIC_BACKEND_API_KEY
 			},
       body: JSON.stringify(
   requestBody),
