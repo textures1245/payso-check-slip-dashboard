@@ -1149,15 +1149,15 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[0] === 'LINE GROUP'}
-                  on:click={() => selectOption(0, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[0] === 'LINE_GROUP'}
+                  on:click={() => selectOption(0, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[0] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(0, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[0] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(0, 'LINE_GROUP_PRIVATE')}
                 >
                 LINE GROUP PRIVATE
                 </button>
@@ -1178,15 +1178,15 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[1] === 'LINE GROUP'}
-                  on:click={() => selectOption(1, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[1] === 'LINE_GROUP'}
+                  on:click={() => selectOption(1, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[1] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(1, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[1] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(1, 'LINE_GROUP_PRIVATE')}
                 >
                 LINE GROUP PRIVATE
                 </button>
@@ -1208,15 +1208,15 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[2] === 'LINE GROUP'}
-                  on:click={() => selectOption(2, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[2] === 'LINE_GROUP'}
+                  on:click={() => selectOption(2, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[2] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(2, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[2] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(2, 'LINE_GROUP_PRIVATE')}
                 >
                 LINE GROUP PRIVATE
                 </button>
@@ -1235,15 +1235,15 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[3] === 'LINE GROUP'}
-                  on:click={() => selectOption(3, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[3] === 'LINE_GROUP'}
+                  on:click={() => selectOption(3, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[3] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(3, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[3] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(3, 'LINE_GROUP_PRIVATE')}
                 >
                 LINE GROUP PRIVATE
                 </button>
@@ -1262,17 +1262,17 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[4] === 'LINE GROUP'}
-                  on:click={() => selectOption(4, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[4] === 'LINE_GROUP'}
+                  on:click={() => selectOption(4, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[4] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(4, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(4, 'LINE_GROUP_PRIVATE')}
                 >
-                LINE GROUP PRIVATE
+                LINE_GROUP_PRIVATE
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
@@ -1289,17 +1289,17 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[5] === 'LINE GROUP'}
-                  on:click={() => selectOption(5, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[5] === 'LINE_GROUP'}
+                  on:click={() => selectOption(5, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[5] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(5, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(5, 'LINE_GROUP_PRIVATE')}
                 >
-                LINE GROUP PRIVATE
+                LINE_GROUP_PRIVATE
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
@@ -1316,15 +1316,15 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[6] === 'LINE GROUP'}
-                  on:click={() => selectOption(6, 'LINE GROUP')}
+                  class:bg-blue-500={selectedOptions[6] === 'LINE_GROUP'}
+                  on:click={() => selectOption(6, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[6] === 'LINE GROUP PRIVATE'}
-                  on:click={() => selectOption(6, 'LINE GROUP PRIVATE')}
+                  class:bg-green-500={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
+                  on:click={() => selectOption(6, 'LINE_GROUP_PRIVATE')}
                 >
                   Line กลุ่ม
                 </button>
@@ -1343,8 +1343,8 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
               <div class="flex space-x-2">
                 <button
                   class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[7] === 'LINE GROUP'}
-                  on:click={() => selectOption(7, 'LINE GROUP')}
+                  class:bg-green-500={selectedOptions[7] === 'LINE_GROUP'}
+                  on:click={() => selectOption(7, 'LINE_GROUP')}
                 >
                   LINE GROUP
                 </button>

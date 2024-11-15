@@ -27,7 +27,7 @@
 		return cookie.parse(document.cookie);
 	}
 	async function sendData(packagePrice: any, packageName: string, packageId: any) {
-    const response = await GetProfile();
+
     
     // dispatch event พร้อมข้อมูลแพ็คเกจ
 	sessionStorage.setItem('packageprice', packagePrice);
@@ -40,26 +40,6 @@
         id: packageId
     });
 }
-	const GetProfile = async () => {
-		// const email = sessionStorage.getItem('email');
-		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
-		const cookies = getCookies();
-		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		// Create URL parameters from form data
-		let config = {
-			method: 'GET', // Use GET instead of POST
-			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
-			}
-		};
-
-		let url;
-			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
-		const result = await fetch(url, config);
-		const data = await result.json();
-		console.log(data);
-		return data.result.PackageName;
-	};
 	
 
 	// let progressClass = ((pkg.AmountLimit-pkg.OrderAmount)/pkg.AmountLimit)*100 <10 ? 'progress-dark-red' : 'progress-success';
