@@ -1,5 +1,4 @@
 import { API_ENDPOINT} from '$env/static/private';
-import { PUBLIC_BACKEND_API_KEY } from '$env/static/private';
 import type { Actions } from './$types';
 
 interface UpdateLineResponse {
@@ -34,7 +33,7 @@ export const actions: Actions = {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json; charset=UTF-8',
-                 'apikey': PUBLIC_BACKEND_API_KEY,
+                 'apikey': "F1kFAbG25a",
                 'Actor-Id': id,
                 'Actor-Name': atob(namesBase64),
                 'Actor-Role': 'MERCHANT'
