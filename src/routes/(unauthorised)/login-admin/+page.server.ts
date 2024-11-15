@@ -1,6 +1,5 @@
 import { cookiesConfig } from '$lib/cookies';
 import { API_ENDPOINT } from '$env/static/private';
-import { PUBLIC_BACKEND_API_KEY } from '$env/static/private';
 import type { Actions } from './$types'; // Adjust the import according to your project structure
 
 export const actions: Actions = {
@@ -12,7 +11,7 @@ export const actions: Actions = {
         const config: RequestInit = {
             method: 'POST', // การทำงาน get post update delete
             headers: {
-                'Content-Type': 'application/json','apikey': PUBLIC_BACKEND_API_KEY
+                'Content-Type': 'application/json','apikey': "F1kFAbG25a"
             },
             body: JSON.stringify({
                 username: username, // ใช้ชื่อจากข้อมูลฟอร์ม
