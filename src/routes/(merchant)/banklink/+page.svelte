@@ -5,6 +5,7 @@
     import payment from"$lib/image/thai-qr.png";
     import { PUBLIC_API_ENDPOINT } from '$env/static/public';
     import cookie from 'cookie';
+	import { onMount } from 'svelte';
     let isOpen = false;
     let selectedBank: { imageUrl: any; name: any;code:any; } | null = null;
     let AccNoBank = ""
@@ -19,35 +20,79 @@
     let LastNameENPP =""
     let selectedMethod='bank' 
     const banks = [
-    { code: "002", name: "ธนาคารกรุงเทพ จำกัด (มหาชน)", imageUrl: "/src/lib/image/bank/bankkok.jpg" },
-    { code: "004", name: "ธนาคารกสิกรไทย จำกัด (มหาชน)", imageUrl: "/src/lib/image/bank/kbank.jpg" },
-    { code: "006", name: "ธนาคารกรุงไทย จำกัด (มหาชน)", imageUrl: "/src/lib/image/bank/KTB.jpg" },
-    { code: "009", name: "ธนาคารโอเวอร์ซี-ไชนีสแบงกิ้งคอร์ปอเรชั่น จำกัด", imageUrl: "/src/lib/image/bank/overbank.png" },
-    { code: "011", name: "ธนาคารทหารไทยธนชาต จำกัด (มหาชน)" , imageUrl: "/src/lib/image/bank/ttb.png"},
-    { code: "014", name: "ธนาคารไทยพาณิชย์ จำกัด (มหาชน)", imageUrl: "/src/lib/image/bank/SCB.png" },
-    { code: "017", name: "ธนาคารซิตี้แบงก์ เอ็น.เอ.", imageUrl: "/src/lib/image/bank/citi.jpg" },
-    { code: "018", name: "ธนาคารซูมิโตโม มิตซุย แบงกิ้ง คอร์ปอเรชั่น " ,imageUrl: "/src/lib/image/bank/SMBC.png"},
-    { code: "020", name: "ธนาคารสแตนดาร์ดชาร์เตอร์ด (ไทย) จำกัด (มหาชน)",imageUrl: "/src/lib/image/bank/Standdard.png" },
-    { code: "022", name: "ธนาคารซีไอเอ็มบี ไทย จำกัด (มหาชน)",imageUrl: "/src/lib/image/bank/CIMB.png" },
-    { code: "024", name: "ธนาคารยูโอบี จำกัด (มหาชน)" ,imageUrl: "/src/lib/image/bank/UOB.png"},
-    { code: "025", name: "ธนาคารกรุงศรีอยุธยา จำกัด (มหาชน)" ,imageUrl: "/src/lib/image/bank/kungsri.png"},
-    { code: "030", name: "ธนาคารออมสิน",imageUrl: "/src/lib/image/bank/omsinbank.jpg" },
-    { code: "031", name: "ธนาคารฮ่องกงและเซี่ยงไฮ้แบงกิ้งคอร์ปอเรชั่น จำกัด" ,imageUrl: "/src/lib/image/bank/HSBC.png"},
-    { code: "032", name: "ธนาคารดอยซ์แบงก์",imageUrl: "/src/lib/image/bank/Doybank.png" },
-    { code: "033", name: "ธนาคารอาคารสงเคราะห์" ,imageUrl: "/src/lib/image/bank/GHB.png"},
-    { code: "034", name: "ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร",imageUrl: "/src/lib/image/bank/k.png" },
-    { code: "039", name: "ธนาคารมิซูโฮ จำกัด" ,imageUrl: "/src/lib/image/bank/Mizho.png"},
-    { code: "045", name: "ธนาคารบีเอ็นพี พารีบาส์",imageUrl: "/src/lib/image/bank/BNP.png" },
-    { code: "052", name: "ธนาคารแห่งประเทศจีน (ไทย) จำกัด (มหาชน)",imageUrl: "/src/lib/image/bank/BankChina.jpg" },
-    { code: "066", name: "ธนาคารอิสลามแห่งประเทศไทย",imageUrl: "/src/lib/image/bank/islambank.png" },
-    { code: "067", name: "ธนาคารทิสโก้ จำกัด (มหาชน)",imageUrl: "/src/lib/image/bank/tisco.png"  },
-    { code: "069", name: "ธนาคารเกียรตินาคิน จำกัด (มหาชน)",imageUrl: "/src/lib/image/bank/kiatnakin.png" },
-    { code: "070", name: "ธนาคารไอซีบีซี (ไทย) จำกัด (มหาชน)",imageUrl: "/src/lib/image/bank/ICBC.png" },
-    { code: "071", name: "ธนาคารไทยเครดิต เพื่อรายย่อย จำกัด (มหาชน)" ,imageUrl: "/src/lib/image/bank/thaicredit.png"},
-    { code: "073", name: "ธนาคารแลนด์ แอนด์ เฮ้าส์ จำกัด (มหาชน)" ,imageUrl: "/src/lib/image/bank/LH.png"},
-    { code: "098", name: "ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย",imageUrl: "/src/lib/image/bank/SMEBank.png" }
+    { code: "002", name: "ธนาคารกรุงเทพ จำกัด (มหาชน)", imageUrl: "https://moneyexpo.net/wp-content/uploads/2023/05/BBL.jpg" },
+    { code: "004", name: "ธนาคารกสิกรไทย จำกัด (มหาชน)", imageUrl: "https://i.pinimg.com/736x/cb/7c/ca/cb7cca77e49eece5ce042aa9f25ad27c.jpg" },
+    { code: "006", name: "ธนาคารกรุงไทย จำกัด (มหาชน)", imageUrl: "https://moneyexpo.net/wp-content/uploads/2023/05/KTB.jpg" },
+    { code: "009", name: "ธนาคารโอเวอร์ซี-ไชนีสแบงกิ้งคอร์ปอเรชั่น จำกัด", imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_ocbc@2x.png" },
+    { code: "011", name: "ธนาคารทหารไทยธนชาต จำกัด (มหาชน)" , imageUrl: "https://media.ttbbank.com/1/global/ttb.jpg"},
+    { code: "014", name: "ธนาคารไทยพาณิชย์ จำกัด (มหาชน)", imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_sb@2x.png" },
+    { code: "017", name: "ธนาคารซิตี้แบงก์ เอ็น.เอ.", imageUrl: "https://moneyandbanking.co.th/wp-content/uploads/2024/04/Citi-Bank-905x613.webp" },
+    { code: "018", name: "ธนาคารซูมิโตโม มิตซุย แบงกิ้ง คอร์ปอเรชั่น " ,imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_smbc@2x.png"},
+    { code: "020", name: "ธนาคารสแตนดาร์ดชาร์เตอร์ด (ไทย) จำกัด (มหาชน)",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_scthai@2x.png" },
+    { code: "022", name: "ธนาคารซีไอเอ็มบี ไทย จำกัด (มหาชน)",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_cimbthai@2x.png" },
+    { code: "024", name: "ธนาคารยูโอบี จำกัด (มหาชน)" ,imageUrl: "https://cms-tpq.theparq.com/wp-content/uploads/2020/07/UOB_LOGO_800x800.png"},
+    { code: "025", name: "ธนาคารกรุงศรีอยุธยา จำกัด (มหาชน)" ,imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhQjvxKz4c3kDRgXc3YS1gVDAv1rlVu6NIEA&s"},
+    { code: "030", name: "ธนาคารออมสิน",imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKB3R_1uIDD6IOdNF0ASnynXcUrrdxs3OUVw&s" },
+    { code: "031", name: "ธนาคารฮ่องกงและเซี่ยงไฮ้แบงกิ้งคอร์ปอเรชั่น จำกัด" ,imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_hsbc@2x.png"},
+    { code: "032", name: "ธนาคารดอยซ์แบงก์",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_deutsche@2x.png" },
+    { code: "033", name: "ธนาคารอาคารสงเคราะห์" ,imageUrl: "https://ghbloyalty.ghbank.co.th/logo_ghb.png"},
+    { code: "034", name: "ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร",imageUrl: "https://s.isanook.com/mn/0/ud/175/877323/fack.jpg" },
+    { code: "039", name: "ธนาคารมิซูโฮ จำกัด" ,imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_mizuho@2x.png"},
+    { code: "045", name: "ธนาคารบีเอ็นพี พารีบาส์",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_bnpparibas@2x.png" },
+    { code: "052", name: "ธนาคารแห่งประเทศจีน (ไทย) จำกัด (มหาชน)",imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMrfV_dWH9d6FO7JrEw11bWRbiIx0izN_I5g&s" },
+    { code: "066", name: "ธนาคารอิสลามแห่งประเทศไทย",imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIzQBxnxe1oqnWPkll8vmLqnxJcaRanB23ow&s" },
+    { code: "067", name: "ธนาคารทิสโก้ จำกัด (มหาชน)",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_tisco@2x.png"  },
+    { code: "069", name: "ธนาคารเกียรตินาคิน จำกัด (มหาชน)",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_kkp@2x.png" },
+    { code: "070", name: "ธนาคารไอซีบีซี (ไทย) จำกัด (มหาชน)",imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_icbc@2x.png" },
+    { code: "071", name: "ธนาคารไทยเครดิต เพื่อรายย่อย จำกัด (มหาชน)" ,imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_thaicredit@2x.png"},
+    { code: "073", name: "ธนาคารแลนด์ แอนด์ เฮ้าส์ จำกัด (มหาชน)" ,imageUrl: "https://www.dpa.or.th/storage/uploads/bank/dpa_bank_lhbank@2x.png"},
+    { code: "098", name: "ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย",imageUrl: "https://csrgroup.co.th/img/Client258-6.png" }
   ];
 
+  let loading=false;
+  onMount(async () => {
+		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
+		
+		try {
+		} catch (error) {
+			console.error('Error fetching profile:', error);
+		} finally {
+			// การอัปเดตสถานะการโหลด
+			loading = false;
+		}
+
+	});
+  const GetRoomLink = async () => {
+		// const email = sessionStorage.getItem('email');
+		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+
+		console.log('++++++++++', myCookie.Id, myCookie.Email);
+		// console.log('email: ', email, 'id: ', id , );
+
+		// Create URL parameters from form data
+		let config = {
+			method: 'GET', // Use GET instead of POST
+			headers: {
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
+			}
+		};
+
+		let url;
+		if (myCookie.Id) {
+			console.log('Get by Merchant Id');
+			url = `${PUBLIC_API_ENDPOINT}/roomdata/${myCookie.Id}`;
+		} else {
+			throw new Error('Neither email nor id is provided.');
+		}
+
+		const result = await fetch(url, config);
+		const data = await result.json();
+		console.log('Link Room', data);
+		return data.result || [];
+	};
   function selectBank(bank: any) {
     selectedBank = bank;
     isOpen = false;
@@ -85,8 +130,8 @@
   // สถานะเปิดปิดเมนู dropdown
   let selectedOption = "";  // ตัวเลือกที่เลือกไว้
   const options = [
-    { label: "เบอร์โทร", value: "NATID",imageUrl: "/src/lib/image/phone.png" },
-    { label: "เลขประจำตัว", value: "MSISDN" ,imageUrl: "/src/lib/image/bg-people.png"},
+    { label: "เบอร์โทร", value: "MSISDN",imageUrl: "/src/lib/image/phone.png" },
+    { label: "เลขประจำตัว", value: "NATID" ,imageUrl: "/src/lib/image/bg-people.png"},
     { label: "e-Wallet ID", value: "EWALLETID",imageUrl: "/src/lib/image/phone.png" },
     { label: "บัญชีธนาคาร", value: "BANKAC",imageUrl: "/src/lib/image/bg-people.png" }
   ];
@@ -126,7 +171,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       MerchantId: myCookie.Id,
       BankCode: info.Bank,
       PPTYPE: null,
-      AccountNo: Number(info.AccountNo),
+      AccountNo: info.AccountNo.toString(),
       TypeAccount: 'BANK',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -137,7 +182,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       MerchantId: myCookie.Id,
       BankCode: null,
       PPTYPE: info.PPType,
-      AccountNo: Number(info.AccountNo),
+      AccountNo: info.AccountNo.toString(),
       TypeAccount: 'PP',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -148,18 +193,23 @@ const createBank = async (info: BankInfo | PPInfo) => {
 
     
   try {
+    const requestBody = {
+            rooms: selectedRoomIds,
+            bank: payload
+        };
+        console.log("AccountNo",requestBody)
     const response = await fetch(`${PUBLIC_API_ENDPOINT}/create/bank`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
+   
     console.log('Bank information created successfully!');
     const modal = document.getElementById('my_modal_3');
 				if (modal) {
@@ -253,12 +303,14 @@ function handleInputName(event: { target: { value: any; }; }) {
   event.target.value = inputValue;
 }
 
+let selectedRoomIds: any[] = [];
+
 
 </script>
-<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
+<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-5 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
     
     <div class="container max-w-screen-lg  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow ">
-      <div class="flex  justify-start gap-5">
+      <div class="flex  justify-start gap-5 mt-5 sm:mt-0 lg:mt-0">
         <!-- Card ธนาคาร -->
         <div class="w-full sm:w-auto  ">
           <Card.Root class={`w-full min-w-[120px] h-[120px] sm:h-[120px] lg:h-[130px] cursor-pointer 
@@ -294,7 +346,7 @@ function handleInputName(event: { target: { value: any; }; }) {
         </div>
       </div>
     {#if isBankSelected}
-    <div class="my-5 grid grid-cols-1 lg:px-5" style="height: 100px;">
+    <div class="my-5 grid grid-cols-1 lg:px-5" >
         <div class=" w-full">
             <div class=" font-semibold my-5">บัญชีธนาคาร</div>
             <div class="relative w-full px-2">
@@ -341,8 +393,8 @@ function handleInputName(event: { target: { value: any; }; }) {
               <div class="px-2">
                 <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาไทย</div>
                 <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
-                  <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาไทย" bind:value={NameTHBank}  required></div>
-                  <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาไทย" bind:value={LastNameTHBank}  required></div>
+                  <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อภาษาไทย(ห้ามเขียนคำนำหน้า)" bind:value={NameTHBank}  required></div>
+                  <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลภาษาไทย" bind:value={LastNameTHBank}  required></div>
               </div>
             </div>
            
@@ -350,11 +402,13 @@ function handleInputName(event: { target: { value: any; }; }) {
             <div class="px-2">
               <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาอังกฤษ</div>
               <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
-                <div class="flex justify-start "> <input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาอังกฤษ" bind:value={NameENBank} required></div>
-                <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาอังกฤษ" bind:value={LastNameENBank}  required></div>
+                <div class="flex justify-start "> <input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อภาษาอังกฤษ(ห้ามเขียนคำนำหน้า)" bind:value={NameENBank} required></div>
+                <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลภาษาอังกฤษ" bind:value={LastNameENBank}  required></div>
             </div>
             </div>
             </div>
+            
+           
             <div class="flex justify-center sm:justify-end lg:justify-end my-0 sm:my-2 lg:my-2 mx-2"><Button
               type="submit"
               variant="outline"
@@ -369,7 +423,7 @@ function handleInputName(event: { target: { value: any; }; }) {
     {/if}
     {#if isPromptPaySelected}
    
-  <div class="my-5 grid grid-cols-1 lg:px-5" style="height: 100px;">
+  <div class="my-5 grid grid-cols-1 lg:px-5" >
     <div class="w-full">
       <div class="font-semibold my-5">พร้อมเพย์</div>
       <div class="relative w-full ">
@@ -407,6 +461,7 @@ function handleInputName(event: { target: { value: any; }; }) {
             {/if}
           </div>
         <!-- Inputs for PromptPay -->
+         
         <form on:submit|preventDefault={() => sendData(null,null,null,null,null,null,selectedOption.value,AccNoPP,NameTHPP,NameENPP,LastNameTHPP,LastNameENPP)}>
          <div class="my-5 px-2">
         <input class="border-2 w-full px-2 " on:input={handleInput} style="height: 40px;" placeholder="ใส่ข้อมูลตามที่เลือก" bind:value={AccNoPP} required>
@@ -417,7 +472,7 @@ function handleInputName(event: { target: { value: any; }; }) {
       <div class="px-2">
         <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาไทย</div>
         <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
-          <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96  " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อของบัญชี ภาษาไทย" bind:value={NameTHPP} required></div>
+          <div class="flex justify-start "><input class="  border-2 w-full px-2  md:w-72 lg:w-96 xl:w-96  " style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="ชื่อภาษาไทย(ห้ามเขียนคำนำหน้า)" bind:value={NameTHPP} required></div>
           <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาไทย" bind:value={LastNameTHPP}  required></div>
       </div>
     </div>
@@ -426,7 +481,7 @@ function handleInputName(event: { target: { value: any; }; }) {
     <div class="px-2">
       <div class=" font-semibold mt-5 mb-3">ชื่อบัญชี ภาษาอังกฤษ</div>
       <div class=" grid sm:grid-cols-2 lg:grid-cols-2 ">
-        <div class="flex justify-start "><input class=" border-2 w-full px-2 md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} placeholder="ชื่อของบัญชี ภาษาอังกฤษ" maxlength="100" bind:value={NameENPP} required></div>
+        <div class="flex justify-start "><input class=" border-2 w-full px-2 md:w-72 lg:w-96 xl:w-96 " style="height: 40px;" on:input={handleInputName} placeholder="ชื่อภาษาอังกฤษ(ห้ามเขียนคำนำหน้า)" maxlength="100" bind:value={NameENPP} required></div>
         <div class="flex justify-end mt-2 sm:mt-0 lg:mt-0"><input class="  border-2 w-full px-2 flex  md:w-72 lg:w-96  xl:w-96" style="height: 40px;" on:input={handleInputName} maxlength="100" placeholder="นามสกุลของบัญชี ภาษาอังกฤษ" bind:value={LastNameENPP}  required></div>
     </div>
     </div>
