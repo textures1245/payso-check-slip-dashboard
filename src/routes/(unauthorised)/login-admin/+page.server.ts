@@ -18,9 +18,12 @@ export const actions: Actions = {
                 password: password
             })
         };
-
-        const result = await fetch(`${API_ENDPOINT}/merchant/loginadmin`, config);
-        const data = await result.json();
+        const data = await fetch("https://stg-apis.paysolutions.asia/slip-backend/api/v1/merchant/loginadmin", config)
+        .then((response) => response.text())
+        .then((result) => {return result})
+        .catch((error) => console.error(error));;
+        // const result = await fetch(`${API_ENDPOINT}/merchant/loginadmin`, config);
+       
         console.log(data);
 
         if (data.message !== 'Non Admin') {
