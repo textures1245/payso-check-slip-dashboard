@@ -351,7 +351,7 @@ function clearRemainingTime() {
 					}
 					clearRemainingTime()
           updateStepStatus();
-          currentStep+=1
+          currentStep=2
           currentSubStep = 0;
 				}
 				
@@ -1124,10 +1124,13 @@ const handleReceiverToggle = () => {
 
 const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
   const bankIds = bankData.map(bank => bank.Id);
+  const cookies = getCookies();
+	const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
   console.log('data', dataupdate,bankIds);
   const requestBody = {
             rooms: dataupdate,
-            bank: bankIds
+            bank: bankIds,
+            email:myCookie.Email
         };
 		let config = {
 			method: 'POST', // Use GET instead of POST
