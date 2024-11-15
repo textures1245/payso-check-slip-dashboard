@@ -117,9 +117,11 @@ export const actions: import('./$types').Actions = {
         };
 
         try {
-            const result = await fetch(`${API_ENDPOINT}/merchant/loginline`, config);
-
-            const datalogin: LoginResponse = await result.json();
+            const datalogin = await fetch("https://stg-apis.paysolutions.asia/slip-backend/api/v1/merchant/loginline", config)
+            .then((response) => response.json())
+            .catch((error) => console.error(error));
+            // const result = await fetch(`${API_ENDPOINT}/merchant/loginline`, config);
+            // const datalogin: LoginResponse = await result.json();
             console.log(datalogin);
 
             if (datalogin.message === 'Non Merchant') {
@@ -141,11 +143,12 @@ export const actions: import('./$types').Actions = {
                         Roles:"DASHBOARD,PACKAGE,USER_MANAGEMENT,SLIP_CHECKER",
                     })
                 };
+                const datacreate = await fetch("https://stg-apis.paysolutions.asia/slip-backend/api/v1/merchant/createwithLine", createConfig)
+        .then((response) => response.json())
+        .catch((error) => console.error(error));
 
-                const resultcreate = await fetch(`${API_ENDPOINT}/merchant/createwithLine`, createConfig);
-                if (!resultcreate.ok) throw new Error('Failed to create merchant');
-
-                const datacreate: LoginResponse = await resultcreate.json();
+                // const resultcreate = await fetch(`${API_ENDPOINT}/merchant/createwithLine`, createConfig);
+                // const datacreate: LoginResponse = await resultcreate.json();
                 cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
                 return { data: datacreate.result[0], status: 'create' };
             } else {

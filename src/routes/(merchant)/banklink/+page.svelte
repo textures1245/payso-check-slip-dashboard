@@ -90,12 +90,16 @@
 		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
 			url = `${PUBLIC_API_ENDPOINT}/roomdata/${myCookie.Id}`;
+      
 		} else {
 			throw new Error('Neither email nor id is provided.');
 		}
 
-		const result = await fetch(url, config);
-		const data = await result.json();
+		// const result = await fetch(url, config);
+		// const data = await result.json();
+    const data = await fetch(url, config)
+            .then((response) => response.json())
+            .catch((error) => console.error(error));
 		console.log('Link Room', data);
 		return data.result || [];
 	};
@@ -213,6 +217,7 @@ const createBank = async (info: BankInfo | PPInfo) => {
       },
       body: JSON.stringify(requestBody)
     });
+    
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
