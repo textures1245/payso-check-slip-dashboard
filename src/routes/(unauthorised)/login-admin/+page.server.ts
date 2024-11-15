@@ -1,6 +1,6 @@
 import { cookiesConfig } from '$lib/cookies';
 import { API_ENDPOINT } from '$env/static/private';
-import { PUBLIC_BACKEND_API_KEY } from '$env/static/public';
+import { PUBLIC_BACKEND_API_KEY } from '$env/static/private';
 import type { Actions } from './$types'; // Adjust the import according to your project structure
 
 export const actions: Actions = {

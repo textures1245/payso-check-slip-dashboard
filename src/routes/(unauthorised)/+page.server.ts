@@ -1,6 +1,6 @@
-import { PUBLIC_BACKEND_API_KEY } from '$env/static/public';
+
 import { cookiesConfig } from '$lib/cookies';
-import { API_ENDPOINT, API_KEY } from '$env/static/private';
+import { API_ENDPOINT, API_KEY,PUBLIC_BACKEND_API_KEY } from '$env/static/private';
 
 interface Merchant {
     Id: string;
