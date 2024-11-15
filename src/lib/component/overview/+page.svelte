@@ -107,6 +107,8 @@ const formatDate = (/** @type {Date} */ date: Date) => {
         flatpickr(startDatePicker, {
         dateFormat: 'Y-m-d', // ส่งวันที่ในรูปแบบปี-เดือน-วัน
         locale: Thai,
+        disableMobile: true,
+        allowInput: false,
         defaultDate: startDate, // ตั้งค่าวันที่เริ่มต้นใน Flatpickr
         onChange: (selectedDates: Date[]) => {
           selectedStartDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
@@ -354,7 +356,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             <input
                 type="text"
                 bind:this={startDatePicker}
-                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8"
+                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8 text-base appearance-none"
+                autocomplete="off"
                 readonly
             />
             <img
@@ -598,4 +601,12 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
 			transform: rotate(360deg);
 		}
 	}
+    .date-picker-input {
+    font-size: 16px; /* ป้องกัน iOS zoom */
+    padding: 8px 12px;
+    width: 100%;
+    -webkit-appearance: none; /* ป้องกันสไตล์เริ่มต้นของ iOS */
+    -moz-appearance: none;
+    appearance: none;
+}
 </style>
