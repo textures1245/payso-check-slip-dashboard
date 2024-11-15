@@ -2,6 +2,7 @@ import { getQueryFilterParams, type DataResponse, type QueryOpt } from '$lib/uti
 import { API_ENDPOINT } from '$env/static/private';
 import axios, { type AxiosRequestConfig } from 'axios';
 import type { MerchantPKG } from '$lib/utils/external-api-type/merchant';
+import { PUBLIC_BACKEND_API_KEY } from '$env/static/public'
 
 interface MerchantController {
 	GetMerchantsDetail: (qOpt?: QueryOpt) => Promise<DataResponse<MerchantPKG[]>>;
@@ -25,6 +26,7 @@ export class MerchantExternalAPI implements MerchantController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json',
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {

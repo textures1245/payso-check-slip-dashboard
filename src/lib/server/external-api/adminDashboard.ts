@@ -1,5 +1,6 @@
 import { getQueryFilterParams, type DataResponse, type QueryOpt } from '$lib/utils/types';
 import { API_ENDPOINT } from '$env/static/private';
+
 import axios, { type AxiosRequestConfig } from 'axios';
 import type {
 	AdminDBStats,
@@ -9,6 +10,8 @@ import type {
 	ReceiptStat,
 	TransactionCountRecord
 } from '$lib/utils/external-api-type/adminDashboard';
+import {PUBLIC_BACKEND_API_KEY} from '$env/static/public'
+
 
 interface AdminDBController {
 	GetStats: () => Promise<DataResponse<AdminDBStats>>;
@@ -49,6 +52,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json', 
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {
@@ -67,6 +71,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json', 
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {
@@ -80,6 +85,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json', 
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {
@@ -96,6 +102,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json', 
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {
@@ -112,6 +119,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json',
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {
@@ -126,6 +134,7 @@ export class AdminDBExternalAPI implements AdminDBController {
 			headers: {
 				'Access-Control-Allow-Origin': this.endpoint,
 				'Content-Type': 'application/json', 
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			}
 		};
 		return axios(config).then((response) => {

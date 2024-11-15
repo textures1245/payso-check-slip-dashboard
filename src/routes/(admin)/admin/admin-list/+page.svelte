@@ -4,6 +4,7 @@
 	import type { PackageData } from './+page.server.ts';
 	import cookie from 'cookie';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import {PUBLIC_BACKEND_API_KEY} from '$env/static/public'
 
 	let userData: UserData[] = [];
 	let searchInpage = '';
@@ -70,7 +71,8 @@
 				{
 					headers: {
 						'Content-Type': 'application/json',
-						'ngrok-skip-browser-warning': 'true'
+						'ngrok-skip-browser-warning': 'true',
+						'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 					}
 				}
 			);
@@ -131,7 +133,8 @@
 			const response = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/packages`, 	{
 					headers: {
 						'Content-Type': 'application/json',
-						'ngrok-skip-browser-warning': 'true'
+						'ngrok-skip-browser-warning': 'true',
+						'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 					}
 				});
 			if (!response.ok) {
@@ -183,7 +186,8 @@
 				'Content-Type': 'application/json',
 				'Actor-Id': myCookie.Id,
 				'Actor-Name': myCookie.Email,
-				'Actor-Role': 'ADMIN'
+				'Actor-Role': 'ADMIN',
+				'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 			},
 			body: JSON.stringify({
 				PackageId: editingUser.PackageId,
@@ -200,7 +204,8 @@
 			{
 				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'apikey' : `${PUBLIC_BACKEND_API_KEY}`
 				},
 				body: JSON.stringify({ Status: editingUser.Status })
 			}
