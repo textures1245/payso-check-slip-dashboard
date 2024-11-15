@@ -78,7 +78,7 @@ export const actions: import('./$types').Actions = {
                 };
                 
                 const resultcreate = await fetch(`${API_ENDPOINT}/merchant/create`, createConfig);
-                if (!resultcreate.ok) throw new Error('Failed to create merchant');
+                if (!resultcreate.ok) throw new Error('Failed to create merchant ');
 
                 const datacreate: LoginResponse = await resultcreate.json();
                 cookies.set('merchant_account', JSON.stringify(datacreate.result[1]), cookiesConfig);
