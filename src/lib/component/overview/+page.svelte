@@ -119,6 +119,8 @@ const formatDate = (/** @type {Date} */ date: Date) => {
       flatpickr(endDatePicker, {
         dateFormat: 'Y-m-d', // ส่งวันที่ในรูปแบบปี-เดือน-วัน
         locale: Thai,
+        disableMobile: true,
+        allowInput: false,
         defaultDate: endDate, // ตั้งค่าวันที่สิ้นสุดใน Flatpickr
         onChange: (selectedDates: Date[]) => {
           selectedEndDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
@@ -372,7 +374,8 @@ const SearchTransaction = async (startDate:string,endDate:string) => {
             <input
                 type="text"
                 bind:this={endDatePicker}
-                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8"
+                class="px-2 py-1 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent pr-8 text-base appearance-none"
+                autocomplete="off"
                 readonly
             />
             <img
