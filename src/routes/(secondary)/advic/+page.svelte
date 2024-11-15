@@ -209,6 +209,7 @@ function clearRemainingTime() {
     import * as Card from "$lib/components/ui/card";
 	import dowlaod from"$lib/image/downloads.png";
 	import payment from"$lib/image/Payment.png";
+	import { goto } from '$app/navigation';
 	const date = new Date();
 	const year = date.getFullYear().toString();
 	const month = (date.getMonth() + 1).toString().padStart(2, '0'); // getMonth() is zero-based
