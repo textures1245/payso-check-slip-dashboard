@@ -286,19 +286,31 @@
 
 	const UpdateBankLink = async (id: String, status: boolean) => {
 		// Create configuration for the fetch request
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log(id, status);
 		let config = {
 			method: 'PUT', // Use GET method
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			}
 		};
 		console.log(id);
 		try {
 			// Make the fetch request
-			const result = await fetch(`${PUBLIC_API_ENDPOINT}/update/bankdata/${id}/${status}`, config);
+			const type = myCookie.Type || 'PaySo';
+			const result = await fetch(`${PUBLIC_API_ENDPOINT}/update/bankdata/${id}/${status}/${myCookie.Email}/${type}/${myCookie.Id}`, config);
 			const datas = await result.json();
-			console.log(datas);
+			if (datas.message == 'permission denied') {
+				const modal = document.getElementById('my_modal_4');
+				if (modal) {
+					modal.showModal();
+				}
+				return false;
+			}else {
+				return true;
+			}
 		} catch (error) {
 			console.error('Error fetching transaction data:', error);
 		}
