@@ -351,7 +351,7 @@ function clearRemainingTime() {
 					}
 					clearRemainingTime()
           updateStepStatus();
-          currentStep+=1
+          currentStep=2
           currentSubStep = 0;
 				}
 				
