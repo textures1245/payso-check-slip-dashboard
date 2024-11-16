@@ -146,7 +146,7 @@
 		if (!myCookie) {
 			// ลบ StatusCoockie หากคุกกี้ UserLineId ไม่มีอยู่ (หมดอายุ)
 			sessionStorage.removeItem('StatusCoockie');
-			showModal = true;
+			line();
 
 			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
 			setTimeout(() => {
@@ -158,7 +158,7 @@
 			(myCookie.message === 'invalid token' && statusCookie) ||
 			(myCookie.message === 'invalid token' && !statusCookie)
 		) {
-			linetest();
+			line();
 			sessionStorage.setItem('StatusCoockie', 'rr');
 		}
 
