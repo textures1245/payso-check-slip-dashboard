@@ -5,8 +5,9 @@
 	import Icon from '@iconify/svelte';
 	import { Colors } from 'chart.js';
     import { PUBLIC_API_ENDPOINT } from '$env/static/public';
-	
+	import { Button } from '$lib/components/ui/button';
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	let packages: any[] = [];
 	let maxIndex ='';
 	let loading = false;
@@ -68,6 +69,10 @@ function clearRemainingTime() {
 			modal2.showModal();
 		}
 	}
+	function closeModal() {
+		const modal2 = document.getElementById('my_modal_2') as HTMLDialogElement;
+    	modal2.close();
+  }
 </script>
 {#if loading}
 <svg xmlns="http://www.w3.org/2000/svg" class="spin" x="0px" y="0px" width="100" height="100" viewBox="0 0 128 128">
@@ -97,17 +102,44 @@ function clearRemainingTime() {
 {/if}
 
 <dialog id="my_modal_2" class="modal">
-	<div class="modal-box">
+	<div class="modal-box min-h-[280px]">
 	  <div class="text-lg font-bold flex justify-center">
 		<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15">
 		  <path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 		</svg>
 	  </div>
-	  <p class="py-4 text-center font-bold text-2xl">คุณมีแพ็คเกจอยู่แล้ว คุณต้องการเปลี่ยนแพ็คเกจใช่หรือไม่?</p>
+	  <p class="py-4 text-center font-bold text-2xl">คุณมีแพ็คเกจอยู่แล้ว </p>
+	  <div class="flex  justify-evenly">
+		  <Button
+		  variant="outline"
+		  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-28 md:w-24 group"
+		  style="height:40px"
+		  on:click={() => goto('/payment')}
+		>
+		  <div
+			style="width: 150px; height:100px"
+			class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
+		  >
+		  ต้องการเปลี่ยน
+		  </div>
+		</Button>
+		<Button
+		  variant="outline"
+		  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-28 md:w-24 group"
+		  style="height:40px"
+		  on:click={closeModal}
+		>
+		  <div
+			style="width: 150px; height:100px"
+			class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
+		  >
+		  ไม่ต้องการเปลี่ยน
+		  </div>
+		</Button>
+		  
+		</div>
 	</div>
-	<form method="dialog" class="modal-backdrop">
-	  <button>close</button>
-	</form>
+	
   </dialog>
 
   <dialog id="my_modal_1" class="modal">

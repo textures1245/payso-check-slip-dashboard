@@ -28,17 +28,22 @@
 	}
 	async function sendData(packagePrice: any,packageName:string,packageId:any) {
 		// console.log(param1); // Replace with your actual URL
-		const hasShownWarning = sessionStorage.getItem('hasShownWarning');
+
 		const response = await GetProfile();
 		console.log(response)
 		if (response === "Free trial" && packageName === "Free trial") {
         // Show error message or dispatch modal
 		dispatch('showModal1');
+		
         return;
     }
-		if (response != "-" && !hasShownWarning) {
+		if (response != "-") {
 			// ถ้ามี package และยังไม่เคยแสดง alert
 			dispatch('showModal2');
+			sessionStorage.setItem('packageprice', packagePrice);
+			sessionStorage.setItem('packagename', packageName);
+			sessionStorage.setItem('packageId', packageId);
+			localStorage.removeItem('timerCleared');
 			sessionStorage.setItem('hasShownWarning', 'true');
 			return; // ออกจากฟังก์ชันโดยยังไม่ดำเนินการต่อ
 		}

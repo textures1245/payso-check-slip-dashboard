@@ -316,6 +316,21 @@ function clearRemainingTime() {
         if (seconds > 0) {
             seconds -= 1; // ลดค่าการนับเวลา
             localStorage.setItem('remainingTime', seconds.toString());
+            if((packagePrice == "0.00" && packageName == "Free trial")){
+					UpdatePayment()
+					UpdatePackage()
+					clearRemainingTime()
+					const modal = document.getElementById('my_modal_4');
+					if (modal) {
+					modal.showModal();
+					setTimeout(() => {
+            updateStepStatus();
+          currentStep=2
+          currentSubStep = 0;
+          modal.close()
+        			}, 2000);
+				}
+			}
             setTimeout(countdown, 1000); // ทำงานซ้ำทุกๆ 1 วินาที
         }
     }
@@ -350,9 +365,16 @@ function clearRemainingTime() {
 						UpdateLimitPackage()
 					}
 					clearRemainingTime()
-          updateStepStatus();
+          const modal = document.getElementById('my_modal_4');
+					if (modal) {
+					modal.showModal();
+					setTimeout(() => {
+            updateStepStatus();
           currentStep=2
           currentSubStep = 0;
+          modal.close()
+        			}, 2000);
+				}
 				}
 				
 				if (seconds <= 0 ) {
@@ -2123,7 +2145,8 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <h2 class="text-2xl font-semibold mb-2">สามารถใช้งานระบบ SURE SURE ได้แล้ว</h2>
-          <div class="flex justify-center mt-5"><Button
+          <div class="flex justify-center mt-5">
+            <Button
   variant="outline"
   class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-70 md:w-70 group"
   style="height:50px"
@@ -2154,6 +2177,32 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
       </div>
       <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
       <p class=" text-center">บันทึกข้อมูลสำเร็จ</p>
+      <div class="flex  w-full  justify-around mt-5">
+      <div class="flex content-center">
+        <!-- Button to close the modal -->
+        
+  
+        <!-- Button to go to another page -->
+        <p class=" text-center">รอประมาณ 3 วินาที ไปขั้นตอนถัดไป</p>
+    </div>
+  </div>
+    </div>
+    <!-- <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form> -->
+  </dialog>
+
+
+  <dialog id="my_modal_4" class="modal">
+    <div class="modal-box ">
+      <div class="text-lg font-bold flex justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+          <path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+          <path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+        </svg>
+      </div>
+      <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+      <p class=" text-center">การชำระเงินสำเร็จแล้ว</p>
       <div class="flex  w-full  justify-around mt-5">
       <div class="flex content-center">
         <!-- Button to close the modal -->
