@@ -88,7 +88,7 @@
 					>{t.VerifiedDate ? new Date(t.VerifiedDate).toLocaleDateString('en-EN') : '-'}
 				</Table.Cell>
 				<Table.Cell>{t.Id}</Table.Cell>
-				<Table.Cell>{t.MerchantId}</Table.Cell>
+				<Table.Cell>{t.MerchantId === 0 ? '' : t.MerchantId}</Table.Cell>
 				<Table.Cell>{t.MerchantName}</Table.Cell>
 				<Table.Cell>
 					{t.QrCode.slice(18, 21) === '002' ? 'BBL'

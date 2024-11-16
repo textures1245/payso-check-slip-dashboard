@@ -38,7 +38,10 @@
 		TRANSACTION_COUNT: 'จำนวนสลิปที่ตรวจสอบ',
 		VALID_TRANSACTION_COUNT: 'สลิปถูกต้อง',
 		INVALID_TRANSACTION_COUNT: 'สลิปถูกปฏิเสธ',
-		PENDING_TRANSACTION_COUNT: 'สลิปที่ดำเนินการ'
+		PENDING_TRANSACTION_COUNT: 'สลิปที่ดำเนินการ',
+		RESPOND_REJECTEDCount: 'การตอบกลับถูกปฏิเสธ',
+		REQUEST_REJECTEDCount: 'การส่งคำขอถูกปฏิเสธ',
+		BANK_ACC_NOT_MATCHCount: 'เลขบัญชีผู้รับไม่ตรง'
 	};
 	let optSelected: keyof typeof opt = 'ALL';
 
@@ -105,6 +108,9 @@
 		let invalidTransTotal: number[] = [];
 		let pendingTransTotal: number[] = [];
 		let validTransTotal: number[] = [];
+		let respondRejectedCount: number[] = [];
+		let requestRejectedCount: number[] = [];
+		let bankAccNotMatchCount: number[] = [];
 
 		args.forEach(({ Merchant, Transaction, Month, Year }) => {
 			labels.push(getMonthName('th', +Month));
@@ -113,6 +119,9 @@
 			invalidTransTotal.push(Transaction.InvalidCount);
 			pendingTransTotal.push(Transaction.PendingCount);
 			validTransTotal.push(Transaction.ValidCount);
+			respondRejectedCount.push(Transaction.REQUEST_REJECTEDCount);
+			requestRejectedCount.push(Transaction.RESPOND_REJECTEDCount);
+			bankAccNotMatchCount.push(Transaction.BANK_ACC_NOT_MATCHCount);
 		});
 
 		const dataset = {
@@ -157,6 +166,30 @@
 					borderWidth: 2,
 					borderColor: 'rgb(243, 149, 13)',
 					stack: 'Stack 1'
+				},
+				{
+					label: 'การตอบกลับถูกปฏิเสธ',
+					data: respondRejectedCount,
+					backgroundColor: 'rgba(153, 102, 255, 0.6)', // สีม่วง
+					borderWidth: 2,
+					borderColor: 'rgb(153, 102, 255)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'การส่งคำขอถูกปฏิเสธ',
+					data: requestRejectedCount,
+					backgroundColor: 'rgba(255, 99, 132, 0.6)', // สีชมพู
+					borderWidth: 2,
+					borderColor: 'rgb(255, 99, 132)',
+					stack: 'Stack 1'
+				},
+				{
+					label: 'เลขบัญชีผู้รับไม่ตรง',
+					data: bankAccNotMatchCount,
+					backgroundColor: 'rgba(201, 203, 207, 0.6)', // สีเทา
+					borderWidth: 2,
+					borderColor: 'rgb(201, 203, 207)',
+					stack: 'Stack 1'
 				}
 			]
 		};
@@ -193,6 +226,21 @@
 				return {
 					...dat,
 					datasets: dat.datasets.filter((d) => d.label === 'สลิปที่ถูกต้อง')
+				};
+			case 'RESPOND_REJECTEDCount':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'การตอบกลับถูกปฏิเสธ')
+				};
+			case 'REQUEST_REJECTEDCount':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'การส่งคำขอถูกปฏิเสธ')
+				};
+			case 'BANK_ACC_NOT_MATCHCount':
+				return {
+					...dat,
+					datasets: dat.datasets.filter((d) => d.label === 'เลขบัญชีผู้รับไม่ตรง')
 				};
 		}
 	}

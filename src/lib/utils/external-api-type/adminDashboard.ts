@@ -30,6 +30,10 @@ export type TransactionOverviewStat = {
 	ValidCount: number;
 	InvalidCount: number;
 	PendingCount: number;
+	RESPOND_REJECTEDCount : number;
+	REQUEST_REJECTEDCount : number;
+	BANK_ACC_NOT_MATCHCount : number;
+	INVALID_MIN_AMOUNT_RECEIVECount : number;
 	Year: string;
 	Month: string;
 };
