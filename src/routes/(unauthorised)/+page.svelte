@@ -149,9 +149,7 @@
 			line();
 
 			// ตั้งเวลาหลังจาก 2-3 วินาทีให้รีโหลดหน้า
-			setTimeout(() => {
-				showModal = false; // ปิด modal
-			}, 3000);
+			
 		}
 		if (
 			(!myCookie && !statusCookie) ||
