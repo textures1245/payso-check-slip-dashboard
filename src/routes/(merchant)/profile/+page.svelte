@@ -517,10 +517,38 @@
 	}
 
 	
-	function handleCheckboxChange(event: { target: { checked: boolean } }, id: any) {
+
+	async function handleCheckboxChange(event: { target: { checked: boolean } }, id: any) {
 		const isChecked = event.target.checked;
-		UpdateBankLink(id, isChecked); // ส่งค่า 1 หรือ 0
+		try {
+		const permissionGranted = await UpdateBankLink(id, isChecked); // Send value 1 or 0
 		console.log(id, isChecked);
+
+		if (!permissionGranted) {
+			// Revert the checkbox value if permission denied
+			event.target.checked = !isChecked;
+			// You might also want to revert the state in the banks array
+			const bank = banks.find(b => b.Id === id);
+			if (bank) {
+				bank.Active = !isChecked; // Ensure the bank state reflects the checkbox state
+			}
+		} else {
+			// If the operation is successful, update the banks array to reflect the new status
+			const bank = banks.find(b => b.Id === id);
+			if (bank) {
+				bank.Active = isChecked; // Update the active state
+			}
+		}
+	} 
+	catch (error) {
+		console.error("Error updating bank link:", error);
+		// Revert the checkbox state if there was an error
+		event.target.checked = !isChecked;
+		const bank = banks.find(b => b.Id === id);
+		if (bank) {
+			bank.Active = !isChecked; // Ensure the bank state reflects the checkbox state
+		}
+	}
 	}
 	async function handleCheckboxChangeLine(event: { target: { checked: boolean } }, id: any) {
 		const isChecked = event.target.checked;
