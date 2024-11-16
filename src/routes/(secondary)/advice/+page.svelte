@@ -346,7 +346,8 @@ function clearRemainingTime() {
 				if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            		window.location.assign("/package");
+            currentStep=2
+            currentSubStep = 0;
         			}, 2000);
 				}
 				
@@ -379,7 +380,8 @@ function clearRemainingTime() {
 				
 				if (seconds <= 0 ) {
 					clearRemainingTime()
-                    window.location.assign("/package")
+          currentStep=0
+          currentSubStep = 0;
 				}
 			}
 		}, 5000); // ทำงานทุกๆ 1 วินาที

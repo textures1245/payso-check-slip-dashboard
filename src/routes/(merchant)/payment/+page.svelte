@@ -172,7 +172,7 @@
 				if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            		window.location.assign("/dashboard");
+            		window.location.assign("/package");
         			}, 2000);
 				}
 				
@@ -195,7 +195,7 @@
 					if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            		window.location.assign("/package");
+            		window.location.assign("/dashboard");
         			}, 2000);
 				}
                    
