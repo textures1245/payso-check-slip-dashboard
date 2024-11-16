@@ -320,7 +320,7 @@ function clearRemainingTime() {
             updateStepStatus();
           currentStep=2
           currentSubStep = 0;
-          modal.closest()
+          modal.close()
         			}, 2000);
 				}
 			}
@@ -359,9 +359,16 @@ function clearRemainingTime() {
 						UpdateLimitPackage()
 					}
 					clearRemainingTime()
-          updateStepStatus();
+          const modal = document.getElementById('my_modal_4');
+					if (modal) {
+					modal.showModal();
+					setTimeout(() => {
+            updateStepStatus();
           currentStep=2
           currentSubStep = 0;
+          modal.close()
+        			}, 2000);
+				}
 				}
 				
 				if (seconds <= 0 ) {
@@ -1452,7 +1459,7 @@ let selectedRoomIds: any[] = [];
           <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h2 class="text-2xl font-semibold mb-2">สามารถใช้งานระบบ SURE SURE ได้แล้ว</h2>
+          <h2 class="text-2xl font-semibold mb-2">สามารถใช้งานระบบ Check Slip ได้แล้ว</h2>
           <div class="flex justify-center mt-5"><Button
   variant="outline"
   class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-70 md:w-70 group"

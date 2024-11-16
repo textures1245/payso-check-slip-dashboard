@@ -73,7 +73,7 @@ function clearRemainingTime() {
 	function closeModal() {
 		const modal2 = document.getElementById('my_modal_2') as HTMLDialogElement;
 		if (modal2) {
-			modal2.showModal();
+			modal2.close();
 		}
 	}
 </script>
