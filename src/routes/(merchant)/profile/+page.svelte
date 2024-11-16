@@ -146,9 +146,10 @@
 		};
 
 		let url;
-		if (myCookie && myCookie.Type === 'Line') {
-			url = `${PUBLIC_API_ENDPOINT}/merchant/profileline/${myCookie.Email}`;
-		} else if (myCookie.Id) {
+		// if (myCookie && myCookie.Type === 'Line') {
+		// 	url = `${PUBLIC_API_ENDPOINT}/merchant/profileline/${myCookie.Email}`;
+		// } else 
+		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
 			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
 		} else {

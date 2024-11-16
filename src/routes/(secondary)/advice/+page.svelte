@@ -156,7 +156,7 @@ function clearRemainingTime() {
         completed: false,
         active: false,
         subSteps: [
-          { label: 'สร้างกลุ่มของในไลน์และเชิญ SURESURE', completed: false },
+          { label: 'สร้างกลุ่มของในไลน์และเชิญbot CheckSlip', completed: false },
         ]
       },
       {
