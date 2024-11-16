@@ -346,7 +346,7 @@ function clearRemainingTime() {
 				if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            currentStep=2
+            currentStep=0
             currentSubStep = 0;
         			}, 2000);
 				}
