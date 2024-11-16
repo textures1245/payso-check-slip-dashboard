@@ -146,6 +146,18 @@
         if (seconds > 0) {
             seconds -= 1; // ลดค่าการนับเวลา
             localStorage.setItem('remainingTime', seconds.toString());
+			if((packagePrice == "0.00" && packageName == "Free trial")){
+					UpdatePayment()
+					UpdatePackage()
+					clearRemainingTime()
+					const modal = document.getElementById('my_modal_3');
+					if (modal) {
+					modal.showModal();
+					setTimeout(() => {
+            		window.location.assign("/dashboard");
+        			}, 2000);
+				}
+			}
             setTimeout(countdown, 1000); // ทำงานซ้ำทุกๆ 1 วินาที
         }
     }
@@ -180,7 +192,14 @@
 						UpdateLimitPackage()
 					}
 					clearRemainingTime()
-                    window.location.assign("/banklink")
+					const modal = document.getElementById('my_modal_3');
+					if (modal) {
+					modal.showModal();
+					setTimeout(() => {
+            		window.location.assign("/dashboard");
+        			}, 2000);
+				}
+                   
 				}
 				
 				if (seconds <= 0 ) {
@@ -530,7 +549,30 @@ const downloadImage = async (imageUrl: string, filename: string) => {
 	</form>
 </dialog>
 
-
+<dialog id="my_modal_3" class="modal">
+    <div class="modal-box ">
+      <div class="text-lg font-bold flex justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
+          <path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+          <path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
+        </svg>
+      </div>
+      <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+      <p class=" text-center">การชำระเงินสำเร็จแล้ว</p>
+      <div class="flex  w-full  justify-around mt-5">
+      <div class="flex content-center">
+        <!-- Button to close the modal -->
+        
+  
+        <!-- Button to go to another page -->
+        <p class=" text-center">รอประมาณ 3 วินาที </p>
+    </div>
+  </div>
+    </div>
+    <!-- <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form> -->
+  </dialog>
 <style scoped>
 .truncate {
     white-space: nowrap; /* ไม่ให้ข้อความแถวใหม่ */
