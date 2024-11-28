@@ -1189,18 +1189,50 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
   let encryptedData: string = '';
   let errorMessage: string = '';
   
-  const encryptData = (data: string): string | null => {
-    try {
-      console.log('Encrypting data:', data);
-      const encrypted = CryptoJS.AES.encrypt(data, PUBLIC_SECRETKEY).toString();
-      console.log('Encrypted result:', encrypted);
-      return encrypted;
-    } catch (error) {
-      console.error('Encryption error:', error);
-      errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
-      return null;
-    }
-  };
+  const encryptData = async (data: string): Promise<string | null> => {
+  try {
+    console.log('Encrypting data:', data);
+
+    const encoder = new TextEncoder();
+    const plaintextBytes = encoder.encode(data);
+
+    // สร้าง nonce แบบสุ่ม (16 ไบต์สำหรับ AES-CTR)
+    const nonce = crypto.getRandomValues(new Uint8Array(16));
+
+    // นำเข้ากุญแจสำหรับ AES-CTR
+    const keyBytes = encoder.encode(PUBLIC_PAYSO_DEFAULT_SECRET);
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-CTR" },
+      false,
+      ["encrypt"]
+    );
+
+    // เข้ารหัส plaintext โดยใช้ AES-CTR
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-CTR", counter: nonce, length: 128 },
+      cryptoKey,
+      plaintextBytes
+    );
+
+    // รวม nonce และ ciphertext
+    const combined = new Uint8Array(nonce.length + ciphertext.byteLength);
+    combined.set(nonce);
+    combined.set(new Uint8Array(ciphertext), nonce.length);
+
+    // แปลงเป็น Base64 และคืนค่า
+    const encrypted = btoa(String.fromCharCode(...combined));
+    console.log('Encrypted result:', encrypted);
+
+    return encrypted;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    const errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
+    console.log(errorMessage);
+    return null;
+  }
+};
   
   // Function to generate QR code
   const generateQR = async (data: string): Promise<void> => {
@@ -1231,7 +1263,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
     QrToken = `PAYSO_ROOM_TOKEN:${myCookie.Id}:${timestampUtcSec}`;
     // Encrypt data
-    const encrypted = encryptData(QrToken);
+    const encrypted =await encryptData(QrToken);
     if (encrypted) {
       encryptedData = encrypted;
       console.log("QRtoken ",QrToken)
