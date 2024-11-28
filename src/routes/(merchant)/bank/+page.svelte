@@ -4,7 +4,7 @@
     import * as Card from "$lib/components/ui/card";
     import * as Carousel from "$lib/components/ui/carousel";
     import payment from"$lib/image/thai-qr.png";
-    import { PUBLIC_API_ENDPOINT,PUBLIC_SECRETKEY,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_SECRETKEY,PUBLIC_BACKEND_API_KEY,PUBLIC_PAYSO_DEFAULT_SECRET } from '$env/static/public';
     import cookie from 'cookie';
 	import { afterUpdate, onMount } from 'svelte';
 	import { Plus } from 'svelte-radix';
@@ -362,40 +362,50 @@ let QrToken: string | null = null;
   let qrcanvas1: HTMLCanvasElement;
   let encryptedData: string = '';
   let errorMessage: string = '';
-  const encryptData = (data: string): string | null => {
-    try {
-      // console.log('Encrypting data:', data);
-      // const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY); // ทำให้แน่ใจว่าเป็นคีย์ที่มีขนาด 256 บิต
-      // const encrypted = CryptoJS.AES.encrypt(data, key, { mode: CryptoJS.mode.ECB}).toString();
-      // console.log('Encrypted result:', encrypted);
-      // return encrypted;
+  const encryptData = async (data: string): Promise<string | null> => {
+  try {
+    console.log('Encrypting data:', data);
 
-      // console.log('Encrypting data:', data);
-        
-      //   // แปลง key เป็นรูปแบบที่ถูกต้อง
-      //   const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY);
-        
-      //   // เข้ารหัสและแปลงเป็น Base64
-      //   const encrypted = CryptoJS.AES.encrypt(data, key, { 
-      //       mode: CryptoJS.mode.ECB,
-      //       padding: CryptoJS.pad.Pkcs7
-      //   });
-        
-      //   // แปลงผลลัพธ์เป็น Base64 string
-      //   const base64Result = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
-        
-      //   console.log('Encrypted result:', base64Result);
-      //   return base64Result;
-      console.log(data,CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data)))
+    const encoder = new TextEncoder();
+    const plaintextBytes = encoder.encode(data);
 
-      return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data));
-   
-    } catch (error) {
-      console.error('Encryption error:', error);
-      errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
-      return null;
-    }
-  };
+    // สร้าง nonce แบบสุ่ม (16 ไบต์สำหรับ AES-CTR)
+    const nonce = crypto.getRandomValues(new Uint8Array(16));
+
+    // นำเข้ากุญแจสำหรับ AES-CTR
+    const keyBytes = encoder.encode(PUBLIC_PAYSO_DEFAULT_SECRET);
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-CTR" },
+      false,
+      ["encrypt"]
+    );
+
+    // เข้ารหัส plaintext โดยใช้ AES-CTR
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-CTR", counter: nonce, length: 128 },
+      cryptoKey,
+      plaintextBytes
+    );
+
+    // รวม nonce และ ciphertext
+    const combined = new Uint8Array(nonce.length + ciphertext.byteLength);
+    combined.set(nonce);
+    combined.set(new Uint8Array(ciphertext), nonce.length);
+
+    // แปลงเป็น Base64 และคืนค่า
+    const encrypted = btoa(String.fromCharCode(...combined));
+    console.log('Encrypted result:', encrypted);
+
+    return encrypted;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    const errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
+    console.log(errorMessage);
+    return null;
+  }
+};
   afterUpdate(async () => {
   if (QrToken) {
     await handleGenerate();  // เรียกใช้เพื่อสร้าง QR Code ถ้าข้อมูลเปลี่ยน
@@ -431,7 +441,7 @@ let QrToken: string | null = null;
     const dataString = `${QrToken}`;
     
     // Encrypt data
-    const encrypted = encryptData(dataString);
+    const encrypted =await encryptData(dataString);
     if (encrypted) {
       encryptedData = encrypted;
       await generateQR(encrypted);
@@ -669,6 +679,67 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
         // Only allow alphanumeric characters
         selectedRoom.NotiOnLineGroupId = event.target.value.replace(/[^A-Za-z0-9]/g, "");
     }
+
+    async function maskMiddle(accountNumber: string) {
+    try {
+        // ถอดรหัส Account Number
+        const decryptedAccountNumber = await decryptAccountNo(accountNumber);
+        
+        // ตรวจสอบความยาว
+        const length = decryptedAccountNumber.length;
+        if (length < 7) return "Invalid Account Number"; // ต้องยาวพอจะแบ่งส่วนได้
+        let middleLength = Math.max(4, Math.floor(length / 3)); // อย่างน้อย 4 ตัว
+
+        // ถ้าความยาวของเลขบัญชีเป็น 15 ตัว
+        if (length === 15) {
+            middleLength = 5; // กำหนดให้แสดงเลขกลาง 5 ตัวสำหรับบัญชีที่มี 15 ตัว
+        }
+
+        // แสดงเลขกลางจากตำแหน่งที่ 3 (index 3) ไปจนถึง middleLength
+        const middle = decryptedAccountNumber.slice(3, 3 + middleLength);
+        const prefix = "xxx"; // ซ่อนเลขต้น
+
+        const suffix = "xxx"; // ซ่อนเลขท้าย
+        
+        return `${prefix}-${middle}-${suffix}`;
+    } catch (error) {
+        console.error("Error in maskMiddle:", error);
+        return "Error: Unable to mask account number";
+    }
+}
+async function decryptAccountNo(encryptedBase64: string): Promise<string> {
+  const combined = new Uint8Array(atob(encryptedBase64).split('').map(c => c.charCodeAt(0)));
+  
+  // Extract the nonce (first 16 bytes)
+  const nonce = combined.slice(0, 16);
+
+  // Extract the ciphertext (remaining bytes after nonce)
+  const ciphertext = combined.slice(16);
+
+  // Recreate the key used for encryption (assuming you have access to the same secret)
+  const key = new TextEncoder().encode(PUBLIC_PAYSO_DEFAULT_SECRET);
+
+  // Import the key for decryption
+  const cryptoKey = await window.crypto.subtle.importKey(
+    "raw", 
+    key, 
+    { name: "AES-CTR" }, 
+    false, 
+    ["decrypt"]
+  );
+
+  // Decrypt the ciphertext using AES-CTR
+  const decryptedBytes = await window.crypto.subtle.decrypt(
+    { name: "AES-CTR", counter: nonce, length: 128 },
+    cryptoKey,
+    ciphertext
+  );
+
+  // Decode the decrypted bytes back to a string
+  const decoder = new TextDecoder();
+  return decoder.decode(decryptedBytes);
+}
+
 </script>
 <div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0  sm:py-5  xl:px-24 lg:py-5 xl:py-10 ">
     
@@ -774,7 +845,13 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
                 </div>
 									<div class="col-span-5  min-w-full mx-3 text-md my-2">
                     <div class="font-semibold"> {banks.NameTH}</div> 
-                    <div class="text-slate-400"> {banks.AccountNo}</div>
+                    {#await maskMiddle(banks.AccountNo)}
+                    <div class="text-slate-400">กำลังโหลด...</div>
+                  {:then maskedAccountNo}
+                    <div class="text-slate-400">{maskedAccountNo}</div>
+                  {:catch error}
+                    <div class="text-red-500">Error: {error.message}</div>
+                  {/await}
                     <!-- <div class="flex justify-end">
                       <div class="content-end"><button
                         class="dropdown dropdown-bottom flex flex-col justify-center mx-3 bg-none items-center"
@@ -968,9 +1045,15 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 									<div class=" font-semibold">
                     {bankLinkRoom.NameTH}
                   </div>
-                  <div class=" text-slate-400">
-                    {bankLinkRoom.AccountNo}
-                  </div>
+
+                    {#await maskMiddle(bankLinkRoom.AccountNo)}
+                    <div class="text-slate-400">กำลังโหลด...</div>
+                  {:then maskedAccountNo}
+                    <div class="text-slate-400">{maskedAccountNo}</div>
+                  {:catch error}
+                    <div class="text-red-500">Error: {error.message}</div>
+                  {/await}
+
 									</div>
 									<!-- svelte-ignore a11y-click-events-have-key-events -->
 									<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -1060,9 +1143,13 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
                 <div class=" font-semibold">
                   {banks.NameTH}
                 </div>
-                <div class=" text-slate-400">
-                  {banks.AccountNo}
-                </div>
+                {#await maskMiddle(banks.AccountNo)}
+                    <div class="text-slate-400">กำลังโหลด...</div>
+                  {:then maskedAccountNo}
+                    <div class="text-slate-400">{maskedAccountNo}</div>
+                  {:catch error}
+                    <div class="text-red-500">Error: {error.message}</div>
+                  {/await}
                 </div>
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                 <!-- svelte-ignore a11y-no-static-element-interactions -->

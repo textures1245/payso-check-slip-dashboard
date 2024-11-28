@@ -3,7 +3,7 @@
     import { Button } from '$lib/components/ui/button';
     import * as Card from "$lib/components/ui/card";
     import payment from"$lib/image/thai-qr.png";
-    import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY, PUBLIC_PAYSO_DEFAULT_SECRET } from '$env/static/public';
     import cookie from 'cookie';
 	import { onMount } from 'svelte';
     let isOpen = false;
@@ -176,23 +176,25 @@ const createBank = async (info: BankInfo | PPInfo) => {
 
   let payload;
   if ('Bank' in info) {
+    const encryptedAccountNo = await encryptAccountNo(info.AccountNo.toString());
     // กรณีที่มี BankCode
     payload = {
       MerchantId: myCookie.Id,
       BankCode: info.Bank,
       PPTYPE: null,
-      AccountNo: info.AccountNo.toString(),
+      AccountNo: encryptedAccountNo,
       TypeAccount: 'BANK',
       NameTH: info.NameTH,
       NameEN: info.NameEN
     };
   } else if ('PPType' in info) {
+    const encryptedAccountNo = await encryptAccountNo(info.AccountNo.toString());
     // กรณีที่มี PPTYPE
     payload = {
       MerchantId: myCookie.Id,
       BankCode: null,
       PPTYPE: info.PPType,
-      AccountNo: info.AccountNo.toString(),
+      AccountNo: encryptedAccountNo,
       TypeAccount: 'PP',
       NameTH: info.NameTH,
       NameEN: info.NameEN
@@ -329,6 +331,39 @@ function toggleRoom(roomId: any, isChecked: any) {
   }
 
 
+  async function encryptAccountNo(accountNo: string): Promise<string> {
+   
+   const encoder = new TextEncoder();
+ const plaintextBytes = encoder.encode(accountNo);
+
+ // สร้าง nonce แบบสุ่ม (ขนาดของบล็อก AES)
+ const nonce = new Uint8Array(16); // ขนาดบล็อก AES คือ 16 ไบต์
+ window.crypto.getRandomValues(nonce);
+ const key = new TextEncoder().encode(PUBLIC_PAYSO_DEFAULT_SECRET); 
+ // นำเข้ากุญแจสำหรับการเข้ารหัส AES-CTR
+ const cryptoKey = await window.crypto.subtle.importKey(
+   "raw", 
+   key, 
+   { name: "AES-CTR" }, 
+   false, 
+   ["encrypt"]
+ );
+
+ // เข้ารหัส plaintext โดยใช้ AES-CTR
+ const ciphertext = await window.crypto.subtle.encrypt(
+   { name: "AES-CTR", counter: nonce, length: 128 }, 
+   cryptoKey, 
+   plaintextBytes
+ );
+
+ // รวม nonce และ ciphertext และเข้ารหัสเป็น base64
+ const combined = new Uint8Array(nonce.length + ciphertext.byteLength);
+ combined.set(nonce);
+ combined.set(new Uint8Array(ciphertext), nonce.length);
+
+ // แปลงผลลัพธ์เป็น base64
+ return btoa(String.fromCharCode(...combined));
+}
 
 
 
