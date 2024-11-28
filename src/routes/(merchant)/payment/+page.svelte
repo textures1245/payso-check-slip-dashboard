@@ -127,7 +127,7 @@
 	let timerStarted = false;
 	let seconds = 10*60;
 	let messageVisible = true;
-
+	let isExecuted = false;
 	// ฟังก์ชันเริ่มต้นนับเวลา
 	function startTimer() {
 		timerStarted = true; // ตั้งค่าสถานะว่าเริ่มต้นแล้ว
@@ -145,7 +145,8 @@
         if (seconds > 0) {
             seconds -= 1; // ลดค่าการนับเวลา
             localStorage.setItem('remainingTime', seconds.toString());
-			if((packagePrice == "0.00" && packageName == "Free trial")){
+			if((!isExecuted && packagePrice == "0.00" && packageName == "Free trial")){
+					isExecuted = true;
 					UpdatePayment()
 					UpdatePackage()
 					clearRemainingTime()
@@ -181,7 +182,7 @@
 			// 		console.log("--------",packagePrice,packageName)
 			// 	}
 			
-			if (seconds <= 0 || data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial")) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
+			if (seconds <= 0 || data.length > 0 ) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
 				clearInterval((window as any).intervalId); // หยุดการนับเวลา
 				messageVisible = false; // ซ่อนข้อความ
 				if (data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial") ) {   //    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี

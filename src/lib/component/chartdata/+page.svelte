@@ -3,7 +3,7 @@
 	import { Chart, registerables, type ChartOptions } from 'chart.js';
 	import ChartDataLabels from 'chartjs-plugin-datalabels';
 	import * as Card from '$lib/components/ui/card';
-	import { afterUpdate, onMount } from 'svelte';
+	import { afterUpdate, onDestroy, onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import cookie from 'cookie';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
@@ -23,6 +23,7 @@
 	let newlabels: string[] = [];
 	let startDatePicker: Node;
 	let selectedStartDate = new Date();
+	let previousbranch: string | null = null;
 	let chart: { update: () => void };
 	onMount(async () => {
 		flatpickr(startDatePicker, {
@@ -47,7 +48,7 @@
 		try {
 			const datachart = await GetdataChart();
 			dataChart = datachart;
-
+			previousbranch = localStorage.getItem('branchId')
 			console.log('Chart : ', datachart);
 			const newlabels = Array.from(new Set(dataChart.map((item) => formatDate(item.CreatedAt))));
 			const counts = {
@@ -98,6 +99,17 @@
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		}
+
+		await checkLocalStorageChanges();
+    
+    // ตั้งเวลาให้ตรวจสอบการเปลี่ยนแปลงในบางช่วงเวลา (เช่นทุก 1 วินาที)
+    const intervalId = setInterval(checkLocalStorageChanges, 1000);
+
+    // ลบ interval เมื่อ component ถูกทำลาย
+    onDestroy(() => {
+        clearInterval(intervalId);
+    });
+		
 	});
 
 	function formatDate(dateString: any) {
@@ -128,7 +140,7 @@
 		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
 		// } else
 		if (myCookie) {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
+			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/13/${month}/${year}/-`;
 		} else {
 			console.error('No valid merchant account cookie found.');
 			return;
@@ -316,7 +328,10 @@
 	let searchPerformed = false;
 	let dataSearch: any[] = [];
 	async function SearchData() {
-		const formattedStartDate = selectedStartDate.toISOString().slice(0, 7);
+		const formattedStartDate = selectedStartDate.toLocaleDateString('en-CA', {
+  year: 'numeric',
+  month: '2-digit'
+});
 		const datasearch = await searchGetdata(formattedStartDate);
 
 		dataSearch = datasearch;
@@ -371,11 +386,11 @@
 	}
 	const searchGetdata = async (param1: string) => {
 		// const id = sessionStorage.getItem('merchant_id');
-
+		console.log("1231313212313",param1)
 		let [year, month] = param1.split('-');
 
 		month = parseInt(month, 10);
-		month += 1; // Increment month
+		// month += 1; // Increment month
 		if (month > 12) {
 			month = 1; // Wrap around to January
 			year = (parseInt(year, 10) + 1).toString(); // Increment year
@@ -389,8 +404,12 @@
 		// if (myCookie && myCookie.Type === 'Line') {
 		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
 		// } else
+		let branchId = localStorage.getItem('branchId');
+		console.log("branchId",branchId)
+		branchId = branchId === 'All' ? '-' : branchId;
+		console.log("branchId-----------------------",branchId)
 		if (myCookie) {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}`;
+			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/13/${month}/${year}/${branchId}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
 			return;
@@ -400,7 +419,8 @@
 			headers: {
 				'Content-Type': 'application/json',
 				'ngrok-skip-browser-warning': 'true'
-			}
+			},
+			cache: 'no-store'
 		};
 		const result = await fetch(apiUrl, config);
 		const datas = await result.json();
@@ -432,6 +452,34 @@
 		const year = date.getFullYear(); // ใช้ปี ค.ศ.
 		return `${month} ${year}`;
 	};
+
+	async function checkLocalStorageChanges() {
+    try {
+        const currentBranchId = localStorage.getItem('branchId');
+
+        // ตรวจสอบการเปลี่ยนแปลงหรือการโหลดครั้งแรก
+        if (currentBranchId !== previousbranch) {
+            console.log('Branch changed or initial load detected');
+            
+            // รอให้ SearchData() ทำงานเสร็จก่อน
+             await SearchData();
+            
+            // อัพเดทค่า previousbranch หลังจาก SearchData ทำงานเสร็จ
+            previousbranch = currentBranchId;
+
+            // รอให้ chart อัพเดทเสร็จ
+            if (chart) {
+                await new Promise(resolve => {
+                    chart.update();
+                    // รอให้ chart render เสร็จ
+                    requestAnimationFrame(resolve);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error in checkLocalStorageChanges:', error);
+    }
+}
 </script>
 
 <div class="" style="height: 100%;">
@@ -463,10 +511,8 @@
 		</div>
 	</div>
 	<div style="width:96%;min-height: 21.8rem;" class="content-center h-80 md:h-80 lg:h-full mt-5 sm:mt-0 lg:mt-0  ">
-		{#if searchPerformed == true}
-			<Bar {data} {options} class="min-h-full min-w-full" />
-		{:else}
-			<Bar {data} {options} class="min-h-full min-w-full" />
-		{/if}
+			<Bar {data} {options} />
+		
 	</div>
+	
 </div>

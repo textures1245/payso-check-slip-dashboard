@@ -1,15 +1,17 @@
 <script lang="ts">
      import * as Card from "$lib/components/ui/card";
     import * as Carousel from "$lib/components/ui/carousel";
+
     import payment from"$lib/image/thai-qr.png";
-    import { PUBLIC_API_ENDPOINT,PUBLIC_SECRETKEY } from '$env/static/public';
+    import { PUBLIC_API_ENDPOINT,PUBLIC_PAYSO_DEFAULT_SECRET } from '$env/static/public';
     import cookie from 'cookie';
 	import { onMount } from 'svelte';
   import QRCode from 'qrcode';
   import CryptoJS from 'crypto-js';
+	import { ShowerHead } from "lucide-svelte";
     let loading=false;
     let banks: any[] = [];
-    let minPayment = 1;
+    let minPayment = 0;
     let paymentAmount = minPayment;
     let Name = ""
      let NotiOnLineGroupId = ""
@@ -176,13 +178,13 @@
 
 			banks = bank;
       
-           selectedOptions[0] = "ALL",           // สลิปถูกต้อง
-     selectedOptions[1]= "ALL",            // สลิปถูกใช้งานแล้ว
-     selectedOptions[2]= "ALL",         // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
-    selectedOptions[3]= "ALL",      // สลิปผู้รับเงินไม่ตรง
-    selectedOptions[4]= "ALL",        // ยอดโอนต่ำกว่ากำหนด
-     selectedOptions[5]= "ALL",     // การแจ้งเตือนเติมโควตาและต่ออายุ
-     selectedOptions[6]= "ALL",
+           selectedOptions[0] = "LINE GROUP",           // สลิปถูกต้อง
+     selectedOptions[1]= "LINE GROUP",            // สลิปถูกใช้งานแล้ว
+     selectedOptions[2]= "LINE GROUP",         // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
+    selectedOptions[3]= "LINE GROUP",      // สลิปผู้รับเงินไม่ตรง
+    selectedOptions[4]= "LINE GROUP",        // ยอดโอนต่ำกว่ากำหนด
+     selectedOptions[5]= "LINE GROUP",     // การแจ้งเตือนเติมโควตาและต่ออายุ
+     selectedOptions[6]= "LINE GROUP",
     selectedOptions[7]= "DISABLE"   // สรุปยอดสาขารายวัน
 
 		} catch (error) {
@@ -382,25 +384,57 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
   let qrcanvas1: HTMLCanvasElement;
   let encryptedData: string = '';
   let errorMessage: string = '';
-  const encryptData = (data: string): string | null => {
-    try {
-      console.log('Encrypting data:', data);
-      const encrypted = CryptoJS.AES.encrypt(data, PUBLIC_SECRETKEY).toString();
-      console.log('Encrypted result:', encrypted);
-      return encrypted;
-    } catch (error) {
-      console.error('Encryption error:', error);
-      errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
-      return null;
-    }
-  };
+  const encryptData = async (data: string): Promise<string | null> => {
+  try {
+    console.log('Encrypting data:', data);
+
+    const encoder = new TextEncoder();
+    const plaintextBytes = encoder.encode(data);
+
+    // สร้าง nonce แบบสุ่ม (16 ไบต์สำหรับ AES-CTR)
+    const nonce = crypto.getRandomValues(new Uint8Array(16));
+
+    // นำเข้ากุญแจสำหรับ AES-CTR
+    const keyBytes = encoder.encode(PUBLIC_PAYSO_DEFAULT_SECRET);
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyBytes,
+      { name: "AES-CTR" },
+      false,
+      ["encrypt"]
+    );
+
+    // เข้ารหัส plaintext โดยใช้ AES-CTR
+    const ciphertext = await crypto.subtle.encrypt(
+      { name: "AES-CTR", counter: nonce, length: 128 },
+      cryptoKey,
+      plaintextBytes
+    );
+
+    // รวม nonce และ ciphertext
+    const combined = new Uint8Array(nonce.length + ciphertext.byteLength);
+    combined.set(nonce);
+    combined.set(new Uint8Array(ciphertext), nonce.length);
+
+    // แปลงเป็น Base64 และคืนค่า
+    const encrypted = btoa(String.fromCharCode(...combined));
+    console.log('Encrypted result:', encrypted);
+
+    return encrypted;
+  } catch (error) {
+    console.error('Encryption error:', error);
+    const errorMessage = 'การเข้ารหัสผิดพลาด: ' + (error as Error).message;
+    console.log(errorMessage);
+    return null;
+  }
+};
   
   // Function to generate QR code
   const generateQR = async (data: string): Promise<void> => {
     try {
       if (qrcanvas1) {
       await QRCode.toCanvas(qrcanvas1, data, {
-        width: 150,
+        width: 200,
         margin: 2,
         color: {
           dark: '#000000',
@@ -426,7 +460,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
     QrToken = `PAYSO_ROOM_TOKEN:${myCookie.Id}:${timestampUtcSec}`;
     // Encrypt data
-    const encrypted = encryptData(QrToken);
+    const encrypted =await encryptData(QrToken);
     if (encrypted) {
       encryptedData = encrypted;
       await generateQR(encrypted);
@@ -437,10 +471,29 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
         NotiOnLineGroupId = event.target.value.replace(/[^A-Za-z0-9]/g, "");
     }
 
-    
+    let isSettingEnabled = false;
+    function handleSettingChange() {
+    if (!isSettingEnabled) {
+       CheckedHideSenderDetail = false
+      CheckedHideReceiverDetail = false
+      paymentAmount=0
+      selectedOptions = [
+        "LINE GROUP", // สลิปถูกต้อง
+        "LINE GROUP", // สลิปถูกใช้งานแล้ว
+        "LINE GROUP", // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
+        "LINE GROUP", // สลิปผู้รับเงินไม่ตรง
+        "LINE GROUP", // ยอดโอนต่ำกว่ากำหนด
+        "LINE GROUP", // การแจ้งเตือนเติมโควตาและต่ออายุ
+        "LINE GROUP", // ยังไม่ตั้งค่า
+        "DISABLE"     // ถูกปิด
+      ];
+    } else {
+
+    }
+  }
 </script>
 
-<div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
+<div class="flex justify-center bg-primary-foreground min-h-screen px-5 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
     
     <div class="container max-w-screen-xl  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow ">
       
@@ -457,30 +510,45 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                       </div>
                     </div>
                     <div class="mx-2 w-full">
-                      <div class="font-semibold text-xl w-full sm:max-w-full truncate" >
-                        
+                      <div class="font-semibold text-xl w-full sm:max-w-full truncate">
+                        <label for="nameInput" class="block text-gray-700 text-md font-semibold">
+                          ชื่อห้อง :
+                        </label>
+                        <div 
+    class="tooltip tooltip-error w-full" 
+    data-tip="กรุณากรอกชื่อห้อง"
+  >
                         <input 
-                        id="nameInput"
-              type="text" 
-              placeholder="กรอกข้อมูลที่นี่" 
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
-              bind:value={Name}
-              required
-              />
-              {#if errorMessage && !Name}
-              <p class="text-red-500 text-sm mt-1">{errorMessage}</p> <!-- แสดงข้อความแจ้งเตือน -->
-            {/if}
+                          id="nameInput"
+                          type="text" 
+                          placeholder="ต้องกรอกข้อมูล" 
+                          class="input input-bordered w-full"
+                          bind:value={Name}
+                          required
+                        />
+                        </div>
+                        {#if errorMessage && !Name}
+                          <p class="text-red-500 text-sm mt-1">{errorMessage}</p>
+                        {/if}
                       </div>
+                      
                     </div>
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
                    
                     
                   </div>
-                  <div class=" mx-2 my-5"><div class="canvas-container">
+                  <!-- <div class=" mx-2 my-5"><div class="canvas-container">
                     <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
-                  </div></div>
-                  <div class="my-3">
-                    Notion Line Group Id:
+                  </div></div> -->
+                  <div class="my-3 relative">
+                    <div class="flex items-center">
+                      Notion Line Group Id:
+                      <div class="tooltip tooltip-info ml-2" data-tip="รหัสกลุ่มไลน์ที่ได้จากการสร้างห้อง">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                       </div>
+                    </div>
                     <input 
               type="text" 
               placeholder="เลือกกรอกหรือไม่ก็ได้" 
@@ -539,290 +607,398 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                     </div>
                   </div>
                   <!-- Add any other detailed information you want to display here -->
-                   <div>ตั้งค่า ระบบการตรวจสอบ</div>
-                   <div>เตือน ยอดเงินขั่นต่ำ *</div>
-                   <div class="relative inline-flex items-center w-full">
-                    <!-- ช่องกรอกจำนวนเงิน -->
-        
-                    <input
-                      id="paymentAmount"
-                      type="number"
-                      bind:value={paymentAmount}
-                      min={minPayment}
-                      step="1"
-                      class="text-start px-5 py-2   border rounded-lg pr-12 pl-10 w-full" 
-                    />
-                    <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl text-gray-500">
-                      ฿
-                    </span>
-                    <!-- ปุ่ม + และ - อยู่ข้างในช่อง input ทางขวา -->
-                    <button 
-            on:click={decreaseAmount} 
-            class="absolute right-12 top-1/2 transform -translate-y-1/2 text-xl bg-red-500 text-white py-1 px-2 rounded-full"
-          >
-            -
-          </button>
-          
-          <!-- ปุ่ม + อยู่ขวาใกล้สุด -->
-          <button 
-            on:click={increaseAmount} 
-            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xl bg-green-500 text-white py-1 px-2 rounded-full"
-          >
-            +
-          </button>
-                  </div>
-                  <div class="m-2">
-                    <div class="flex justify-between">
-                      <div>ซ่อนเลขบัญชีผู้โอน</div>
-                      <div> <input
-                        type="checkbox"
-                        value="synthwave"
-                        class="toggle theme-controller toggle-success"
-                        id="menuToggle"
-                        checked={CheckedHideSenderDetail}
-                        on:change={handleSenderToggle}
-                      /></div>
+                 
+                  <div class="flex items-center space-x-4">
+                    <div class="text-lg font-semibold">
+                      ตั้งค่า ระบบการตรวจสอบ
                     </div>
-                   
-                    <div class="flex justify-between">
-                      <div>ซ่อนเลขบัญชีผู้รับ</div>
-                      <div> <input
-                        type="checkbox"
-                        value="synthwave"
-                        class="toggle theme-controller toggle-success"
-                        id="menuToggle"
-                        checked={CheckedHideReceiverDetail}
-                        on:change={handleReceiverToggle}
-                      /></div>
+                    <div class="flex items-center space-x-2">
+                      <div class="tooltip" data-tip="เปิด/ปิดการตั้งค่าระบบการตรวจสอบด้วยตนเอง">
+                        <label for="enableSettings" class="block">
+                          {#if isSettingEnabled}
+                            เปิดการตั้งค่าเอง
+                          {:else}
+                            ปิดการตั้งค่าเอง
+                          {/if}
+                        </label>
+                      </div>
+                      <div class="tooltip" data-tip="สลับการเปิด/ปิดการตั้งค่าระบบการตรวจสอบ">
+                        <input 
+                          id="enableSettings" 
+                          type="checkbox" 
+                          bind:checked={isSettingEnabled} 
+                          on:change={handleSettingChange} 
+                          class="toggle"
+                        />
+                      </div>
                     </div>
                   </div>
+                  {#if isSettingEnabled}
+                    <div class="tooltip" data-tip="กำหนดยอดเงินขั้นต่ำสำหรับการแจ้งเตือน">
+                      <div>เตือน ยอดเงินขั่นต่ำ *</div>
+                    </div>
+                    <div class="relative inline-flex items-center w-full">
+                      <!-- ช่องกรอกจำนวนเงิน -->
+                      <input
+                        id="paymentAmount"
+                        type="number"
+                        bind:value={paymentAmount}
+                        min={minPayment}
+                        step="1"
+                        class="text-start px-5 py-2 border rounded-lg pr-12 pl-10 w-full" 
+                        data-tip="กรอกจำนวนเงินขั้นต่ำ"
+                      />
+                      <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl text-gray-500">
+                        ฿
+                      </span>
+                      <!-- ปุ่ม + และ - อยู่ข้างในช่อง input ทางขวา -->
+                      <div class="tooltip" data-tip="ลดจำนวนเงิน">
+                        <button 
+                          on:click={decreaseAmount} 
+                          class="absolute right-12 top-1/2 transform -translate-y-1/2 text-xl bg-red-500 text-white py-1 px-2 rounded-full"
+                        >
+                          -
+                        </button>
+                      </div>
+                      
+                      <!-- ปุ่ม + อยู่ขวาใกล้สุด -->
+                      <div class="tooltip" data-tip="เพิ่มจำนวนเงิน">
+                        <button 
+                          on:click={increaseAmount} 
+                          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xl bg-green-500 text-white py-1 px-2 rounded-full"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div class="m-2">
+                      <div class="flex justify-between items-center">
+                        <div class="tooltip" data-tip="ซ่อนรายละเอียดเลขบัญชีผู้โอน">
+                          <span>ซ่อนเลขบัญชีผู้โอน</span>
+                        </div>
+                        <div class="tooltip" data-tip="เปิด/ปิดการซ่อนเลขบัญชีผู้โอน">
+                          <input
+                            type="checkbox"
+                            value="synthwave"
+                            class="toggle theme-controller toggle-success"
+                            id="senderDetailToggle"
+                            checked={CheckedHideSenderDetail}
+                            on:change={handleSenderToggle}
+                          />
+                        </div>
+                      </div>
+                     
+                      <div class="flex justify-between items-center">
+                        <div class="tooltip" data-tip="ซ่อนรายละเอียดเลขบัญชีผู้รับ">
+                          <span>ซ่อนเลขบัญชีผู้รับ</span>
+                        </div>
+                        <div class="tooltip" data-tip="เปิด/ปิดการซ่อนเลขบัญชีผู้รับ">
+                          <input
+                            type="checkbox"
+                            value="synthwave"
+                            class="toggle theme-controller toggle-success"
+                            id="receiverDetailToggle"
+                            checked={CheckedHideReceiverDetail}
+                            on:change={handleReceiverToggle}
+                          />
+                        </div>
+                      </div>
+                    </div>
         
                   <div>Line Notify 1 ( การแจ้งเตือน)</div>
                   <div class="flex flex-col gap-4 p-4">
-                    <!-- แถว 1 -->
-                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
-                      
-                      <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[0] === 'LINE OA'}
-                          on:click={() => selectOption(0, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[0] === 'LINE GROUP'}
-                          on:click={() => selectOption(0, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[0] === 'ALL'}
-                          on:click={() => selectOption(0, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
-                      </div>
-                    </div>
+                     <!-- แถว 1 - สลิป ถูกต้อง -->
+  <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+    <div class="tooltip" data-tip="การแจ้งเตือนเมื่อสลิปถูกตรวจสอบและถูกต้องสมบูรณ์">
+      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
+    </div>
+    
+    <div class="flex space-x-2">
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-blue-500={selectedOptions[0] === 'LINE OA'}
+          on:click={() => selectOption(0, 'LINE OA')}
+        >
+          Line OA
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-green-500={selectedOptions[0] === 'LINE GROUP'}
+          on:click={() => selectOption(0, 'LINE GROUP')}
+        >
+          Line กลุ่ม
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-red-500={selectedOptions[0] === 'ALL'}
+          on:click={() => selectOption(0, 'ALL')}
+        >
+          ทั้งสอง
+        </button>
+      </div>
+    </div>
+  </div>
                   
-                    <!-- แถว 2 -->
-                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
-                      
-                      <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[1] === 'LINE OA'}
-                          on:click={() => selectOption(1, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[1] === 'LINE GROUP'}
-                          on:click={() => selectOption(1, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[1] === 'ALL'}
-                          on:click={() => selectOption(1, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
-                      </div>
-                    </div>
+                   <!-- แถว 2 - สลิป ถูกใช้งานแล้ว -->
+  <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+    <div class="tooltip" data-tip="การแจ้งเตือนเมื่อสลิปถูกใช้งานแล้ว">
+      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
+    </div>
+    
+    <div class="flex space-x-2">
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-blue-500={selectedOptions[1] === 'LINE OA'}
+          on:click={() => selectOption(1, 'LINE OA')}
+        >
+          Line OA
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-green-500={selectedOptions[1] === 'LINE GROUP'}
+          on:click={() => selectOption(1, 'LINE GROUP')}
+        >
+          Line กลุ่ม
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-red-500={selectedOptions[1] === 'ALL'}
+          on:click={() => selectOption(1, 'ALL')}
+        >
+          ทั้งสอง
+        </button>
+      </div>
+    </div>
+  </div>
                   
                     <!-- แถว 3 - 8 -->
         
+                    <!-- แถว 3 - สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป -->
+  <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+    <div class="tooltip" data-tip="การแจ้งเตือนเมื่อสลิปหาไม่เจอ หมดอายุ หรือไม่พบ QR Code">
+      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
+    </div>
+    
+    <div class="flex space-x-2">
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-blue-500={selectedOptions[2] === 'LINE OA'}
+          on:click={() => selectOption(2, 'LINE OA')}
+        >
+          Line OA
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-green-500={selectedOptions[2] === 'LINE GROUP'}
+          on:click={() => selectOption(2, 'LINE GROUP')}
+        >
+          Line กลุ่ม
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-red-500={selectedOptions[2] === 'ALL'}
+          on:click={() => selectOption(2, 'ALL')}
+        >
+          ทั้งสอง
+        </button>
+      </div>
+    </div>
+  </div>
+                    <!-- แถว 4 - สลิป ผู้รับเงินไม่ตรง -->
+  <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+    <div class="tooltip" data-tip="การแจ้งเตือนเมื่อผู้รับเงินไม่ตรงกับข้อมูลที่ระบุ">
+      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
+    </div>
+    
+    <div class="flex space-x-2">
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-blue-500={selectedOptions[3] === 'LINE OA'}
+          on:click={() => selectOption(3, 'LINE OA')}
+        >
+          Line OA
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-green-500={selectedOptions[3] === 'LINE GROUP'}
+          on:click={() => selectOption(3, 'LINE GROUP')}
+        >
+          Line กลุ่ม
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-red-500={selectedOptions[3] === 'ALL'}
+          on:click={() => selectOption(3, 'ALL')}
+        >
+          ทั้งสอง
+        </button>
+      </div>
+    </div>
+  </div>
+                     <!-- แถว 5 - ยอดโอนต่ำกว่ากำหนด -->
+  <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+    <div class="tooltip" data-tip="การแจ้งเตือนเมื่อยอดโอนต่ำกว่ายอดเงินขั้นต่ำที่กำหนด">
+      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
+    </div>
+    
+    <div class="flex space-x-2">
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-blue-500={selectedOptions[4] === 'LINE OA'}
+          on:click={() => selectOption(4, 'LINE OA')}
+        >
+          Line OA
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-green-500={selectedOptions[4] === 'LINE GROUP'}
+          on:click={() => selectOption(4, 'LINE GROUP')}
+        >
+          Line กลุ่ม
+        </button>
+      </div>
+      <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+        <button
+          class="px-4 py-2 rounded-lg"
+          class:bg-red-500={selectedOptions[4] === 'ALL'}
+          on:click={() => selectOption(4, 'ALL')}
+        >
+          ทั้งสอง
+        </button>
+      </div>
+    </div>
+  </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
+                      <div class="tooltip" data-tip="การแจ้งเตือนเมื่อต้องเติมโควตาหรือต่ออายุการใช้งาน">
+                        <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
+                      </div>
                       
                       <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[2] === 'LINE OA'}
-                          on:click={() => selectOption(2, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[2] === 'LINE GROUP'}
-                          on:click={() => selectOption(2, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[2] === 'ALL'}
-                          on:click={() => selectOption(2, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
+                        <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                          <button
+                            class="px-4 py-2 rounded-lg"
+                            class:bg-blue-500={selectedOptions[5] === 'LINE OA'}
+                            on:click={() => selectOption(5, 'LINE OA')}
+                          >
+                            Line OA
+                          </button>
+                        </div>
+                        <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                          <button
+                            class="px-4 py-2 rounded-lg"
+                            class:bg-green-500={selectedOptions[5] === 'LINE GROUP'}
+                            on:click={() => selectOption(5, 'LINE GROUP')}
+                          >
+                            Line กลุ่ม
+                          </button>
+                        </div>
+                        <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+                          <button
+                            class="px-4 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[5] === 'ALL'}
+                            on:click={() => selectOption(5, 'ALL')}
+                          >
+                            ทั้งสอง
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
+                      <div class="tooltip" data-tip="การแจ้งเตือนเมื่อพบสลิปที่มีการใช้ซ้ำ">
+                        <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
+                      </div>
                       
                       <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[3] === 'LINE OA'}
-                          on:click={() => selectOption(3, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[3] === 'LINE GROUP'}
-                          on:click={() => selectOption(3, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[3] === 'ALL'}
-                          on:click={() => selectOption(3, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
+                        <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                          <button
+                            class="px-4 py-2 rounded-lg"
+                            class:bg-blue-500={selectedOptions[6] === 'LINE OA'}
+                            on:click={() => selectOption(6, 'LINE OA')}
+                          >
+                            Line OA
+                          </button>
+                        </div>
+                        <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                          <button
+                            class="px-4 py-2 rounded-lg"
+                            class:bg-green-500={selectedOptions[6] === 'LINE GROUP'}
+                            on:click={() => selectOption(6, 'LINE GROUP')}
+                          >
+                            Line กลุ่ม
+                          </button>
+                        </div>
+                        <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
+                          <button
+                            class="px-4 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[6] === 'ALL'}
+                            on:click={() => selectOption(6, 'ALL')}
+                          >
+                            ทั้งสอง
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
-                      
-                      <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[4] === 'LINE OA'}
-                          on:click={() => selectOption(4, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[4] === 'LINE GROUP'}
-                          on:click={() => selectOption(4, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[4] === 'ALL'}
-                          on:click={() => selectOption(4, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
-                      </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
-                      
-                      <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[5] === 'LINE OA'}
-                          on:click={() => selectOption(5, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[5] === 'LINE GROUP'}
-                          on:click={() => selectOption(5, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[5] === 'ALL'}
-                          on:click={() => selectOption(5, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
-                      </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
-                      
-                      <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-blue-500={selectedOptions[6] === 'LINE OA'}
-                          on:click={() => selectOption(6, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[6] === 'LINE GROUP'}
-                          on:click={() => selectOption(6, 'LINE GROUP')}
-                        >
-                          Line กลุ่ม
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[6] === 'ALL'}
-                          on:click={() => selectOption(6, 'ALL')}
-                        >
-                        ทั้งสอง
-                        </button>
-                      </div>
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
-                      
-                      <div class="flex space-x-2">
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-green-500={selectedOptions[7] === 'LINE OA'}
-                          on:click={() => selectOption(7, 'LINE OA')}
-                        >
-                          Line OA
-                        </button>
-                        <button
-                          class="px-4 py-2 rounded-lg"
-                          class:bg-red-500={selectedOptions[7] === 'DISABLE'}
-                          on:click={() => selectOption(7, 'DISABLE')}
-                        >
-                          ปิด
-                        </button>
-                      </div>
-                    </div>
+                    <!-- แถว 8 - สรุปยอดสาขารายวัน -->
+<div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+  <div class="tooltip" data-tip="การแจ้งเตือนสรุปยอดการทำธุรกรรมของสาขาประจำวัน">
+    <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
+  </div>
+  
+  <div class="flex space-x-2">
+    <div class="tooltip" data-tip="ส่งสรุปยอดรายวันผ่าน Line Official Account">
+      <button
+        class="px-4 py-2 rounded-lg"
+        class:bg-green-500={selectedOptions[7] === 'LINE OA'}
+        on:click={() => selectOption(7, 'LINE OA')}
+      >
+        Line OA
+      </button>
+    </div>
+    <div class="tooltip" data-tip="ปิดการแจ้งเตือนสรุปยอดรายวัน">
+      <button
+        class="px-4 py-2 rounded-lg"
+        class:bg-red-500={selectedOptions[7] === 'DISABLE'}
+        on:click={() => selectOption(7, 'DISABLE')}
+      >
+        ปิด
+      </button>
+    </div>
+  </div>
+</div>
                     <!-- คุณสามารถทำซ้ำรูปแบบด้านบนและแก้ไขตัวแปรใน `selectedOptions` ให้เหมาะสม -->
-                     <button 
+                    
+                
+                  </div>
+                  {/if}
+                  <button 
                   class="w-full bg-black text-white py-2 rounded-lg mt-4"
                   on:click={Update}
                 >
                   บันทึกการเปลี่ยนแปลง
                 </button>
-                
-                  </div>
                 </div>
             
               </div>
@@ -841,7 +1017,12 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
-		<p class=" text-center">บันทึกข้อมูลสำเร็จ</p>
+    <div class=" mx-2 mb-5 flex justify-center"><div class="canvas-container">
+      <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
+    </div></div>
+		<p class=" text-center">1.แคป QR CODE นี้ </p>
+    <p class=" text-center">2.นำรูป QR CODE นี้ส่งในกลุ่มไลน์ที่ต้องการใช้งาน </p>
+    <p class=" text-center">** 1 กลุ่มสามารถใช้ QR CODE ได้แค่ 1 อันไม่สามารถเปลี่ยนได้ ** </p>
     <div class="flex  w-full  justify-around mt-5">
     <div class="flex content-center">
       <!-- Button to close the modal -->

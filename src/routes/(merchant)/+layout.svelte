@@ -29,17 +29,20 @@
     if (Object.values(cookies).some(cookieValue => typeof cookieValue === 'string' && cookieValue.includes('DASHBOARD'))) {
         addItem({ id: 1, title: 'แดชบอร์ด', link: '/dashboard' });
         addItem({ id: 3, title: 'จัดการบัญชี', link: '/bank' });
+        addItem({ id: 4, title: 'จัดการห้อง', link: '/detailroom' });
     }
 
     if (Object.values(cookies).some(cookieValue => typeof cookieValue === 'string' && cookieValue.includes('PACKAGE'))) {
         addItem({ id: 2, title: 'แพ็คเกจ', link: '/package' });
         addItem({ id: 3, title: 'จัดการบัญชี', link: '/bank' });
+        addItem({ id: 4, title: 'จัดการห้อง', link: '/detailroom' });
     }
 
     if (Object.values(cookies).some(cookieValue => typeof cookieValue === 'string' && cookieValue.includes('-/All/-'))) {
         addItem({ id: 1, title: 'แดชบอร์ด', link: '/dashboard' });
         addItem({ id: 2, title: 'แพ็คเกจ', link: '/package' });
         addItem({ id: 3, title: 'จัดการบัญชี', link: '/bank' });
+        addItem({ id: 4, title: 'จัดการห้อง', link: '/detailroom' });
     }
 
     return validItems.sort((a, b) => a.id - b.id); // ส่งเฉพาะรายการที่ตรงเงื่อนไข

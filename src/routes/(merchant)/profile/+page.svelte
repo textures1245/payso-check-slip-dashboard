@@ -414,7 +414,7 @@
 		if (isChecked1) selectedText += 'DASHBOARD';
 		if (isChecked2) selectedText += selectedText ? ',PACKAGE' : 'PACKAGE';
 		if (isChecked3) selectedText += selectedText ? ',USER_MANAGEMENT' : 'USER_MANAGEMENT';
-		if (isChecked4) selectedText += selectedText ? ',CREATE_ROOM' : 'CREATE_ROOM';
+		if (isChecked4) selectedText += selectedText ? ',LINE_MANAGEMENT' : 'LINE_MANAGEMENT';
 		UpdateLineRoles(Id, selectedText);
 	}
 
@@ -441,7 +441,7 @@
 		if (rolesArray.includes('USER_MANAGEMENT')) {
 			isChecked3 = true;
 		}
-		if (rolesArray.includes('CREATE_ROOM')) {
+		if (rolesArray.includes('LINE_MANAGEMENT')) {
 			isChecked4 = true;
 		}
 		const modal = document.getElementById('my_modal_1');
@@ -456,7 +456,7 @@
 		if (isCheckedLink1) selectedText += 'DASHBOARD';
 		if (isCheckedLink2) selectedText += selectedText ? ',PACKAGE' : 'PACKAGE';
 		if (isCheckedLink3) selectedText += selectedText ? ',USER_MANAGEMENT' : 'USER_MANAGEMENT';
-		if (isCheckedLink4) selectedText += selectedText ? ',CREATE_ROOM' : 'CREATE_ROOM';
+		if (isCheckedLink4) selectedText += selectedText ? ',LINE_MANAGEMENT' : 'LINE_MANAGEMENT';
 		if (isCheckedLink1 || isCheckedLink2 || isCheckedLink3 || isCheckedLink4) {
 			const myDate = myCookie.RegisterDate.split('T')[0];
 			const result = `${myCookie.Id}:${myDate}:${selectedText}`;

@@ -12,6 +12,7 @@
   let statusToSend="all";
   let previousStartDate: string | null = null;
   let previousEndDate: string | null = null;
+  let previousBranch: string | null = null;
 	let count=0;
 	let offset = 0
 	let limit = 15
@@ -21,6 +22,7 @@
 	onMount(async () => {
 		previousStartDate = localStorage.getItem('startDate');
     	previousEndDate = localStorage.getItem('endDate');
+		previousBranch = localStorage.getItem('branchId');
 		try {
 			const datachart = await Getdata(offset,limit);
 			dataChart=datachart;
@@ -53,13 +55,14 @@
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		const startDate = localStorage.getItem('startDate');
 		const endDate = localStorage.getItem('endDate');
-		
+		let branchParam = localStorage.getItem('branchId');
+		branchParam = branchParam === 'All' ? '-' : branchParam;
 		let apiUrl;
     // if (myCookie && myCookie.Type === "Line") {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
     // } else 
 	if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}/${offset}/${limit}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/-/${startDate}/${endDate}/${offset}/${limit}/${branchParam}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/pending/${startDate}/${endDate}`;
 		// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/5/2024-08-01/2024-09-10`;
     } else {
@@ -105,12 +108,14 @@ const datas = await result.json();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log("++++++++++",myCookie.Id , myCookie.Email);
 		console.log('checking transaction month');
+		let branchParam = localStorage.getItem('branchId');
+		branchParam = branchParam === 'All' ? '-' : branchParam;
 		let apiUrl;
     // if (myCookie && myCookie.Type === "Line") {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}/${startDate}/${endDate}`;
     // } else 
 	if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}/${startDate}/${endDate}/${offset}/${limit}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/${param1}/${startDate}/${endDate}/${offset}/${limit}/${branchParam}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -126,8 +131,16 @@ const datas = await result.json();
 		var result = await fetch(apiUrl, config);
 		const datas = await result.json();
 		console.timeEnd('Fetch Only Getdata');
-		count = datas.result[0].TotalCount
-		totalPages = Math.ceil(count / limit);
+		if (datas.result && datas.result.length > 0) {
+  count = datas.result[0].TotalCount;
+  totalPages = Math.ceil(count / limit);
+} else {
+  // กรณีที่ไม่มีข้อมูล
+  count = 0;
+  totalPages = 1;
+  // หรือสามารถตั้งค่า default value หรือข้อความแจ้งเตือนตามที่ต้องการ
+  console.log('ไม่มีข้อมูล');
+}
 		return datas.result
 
 	};
@@ -156,9 +169,11 @@ const datas = await result.json();
   async function checkLocalStorageChanges() {
     const currentStartDate = localStorage.getItem('startDate');
     const currentEndDate = localStorage.getItem('endDate');
-    if (currentStartDate !== previousStartDate || currentEndDate !== previousEndDate) {
+	const currentbranchParam = localStorage.getItem('branchId');
+    if (currentStartDate !== previousStartDate || currentEndDate !== previousEndDate || currentbranchParam !==previousBranch) {
         previousStartDate = currentStartDate;
         previousEndDate = currentEndDate;
+		previousBranch = currentbranchParam
 		offset = 0
 		currentPage = 1;
         // เรียกใช้ฟังก์ชันเพื่อดึงข้อมูลใหม่
