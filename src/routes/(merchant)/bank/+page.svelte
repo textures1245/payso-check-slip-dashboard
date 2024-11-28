@@ -435,17 +435,35 @@ let QrToken: string | null = null;
       errorMessage = 'การสร้าง QR Code ผิดพลาด: ' + (error as Error).message;
     }
   };
-
+  const encryptedCache = new Map<string, string>();
   const handleGenerate =async (): Promise<void> => {
     console.log('handleGenerate called'); // Debug log
     const dataString = `${QrToken}`;
     
-    // Encrypt data
-    const encrypted =await encryptData(dataString);
+    // // Encrypt data
+    // const encrypted =await encryptData(dataString);
+    // if (encrypted) {
+    //   encryptedData = encrypted;
+    //   await generateQR(encrypted);
+    //   encryptedCache.set(dataString, encrypted);
+    // }
+    if (encryptedCache.has(dataString)) {
+    console.log('Using cached encrypted data');
+    encryptedData = encryptedCache.get(dataString)!;
+  } else {
+    console.log('Encrypting new data');
+    const encrypted = await encryptData(dataString);
     if (encrypted) {
       encryptedData = encrypted;
-      await generateQR(encrypted);
+      // Store in cache
+      encryptedCache.set(dataString, encrypted);
     }
+  }
+
+  // Generate QR Code
+  if (encryptedData) {
+    await generateQR(encryptedData);
+  }
   };
 
   
