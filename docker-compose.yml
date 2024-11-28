@@ -1,3 +1,33 @@
+# version: '3.0'
+
+# services:
+#   sveltekit-app:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.app
+#     expose:  # Change from ports to expose
+#       - "3000"
+#     environment:
+#       NODE_ENV: production
+#     networks:
+#       - web_network
+
+#   ngx:
+#     image: nginx:alpine
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - /root/nginx/conf.d:/etc/nginx/conf.d:ro
+#     depends_on:
+#       - sveltekit-app
+#     networks:
+#       - web_network
+
+# networks:
+#   web_network:
+#     driver: bridge
+
+
 # nginx config doesn't work yet
 # only the sveltekit-app service works
 
