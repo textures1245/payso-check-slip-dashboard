@@ -700,8 +700,13 @@ const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
 
     async function maskMiddle(accountNumber: string) {
     try {
-        // ถอดรหัส Account Number
-        const decryptedAccountNumber = await decryptAccountNo(accountNumber);
+        // ตรวจสอบว่าเป็นตัวเลขทั้งหมดหรือไม่
+        const isNumeric = /^\d+$/.test(accountNumber);
+        
+        // ถ้าเป็นตัวเลขทั้งหมด ใช้เลขนำเข้าโดยตรง
+        const decryptedAccountNumber = isNumeric 
+            ? accountNumber 
+            : await decryptAccountNo(accountNumber);
         
         // ตรวจสอบความยาว
         const length = decryptedAccountNumber.length;
@@ -1377,7 +1382,7 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
                   class:bg-green-500={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
                   on:click={() => selectOption(4, 'LINE_GROUP_PRIVATE')}
                 >
-                LINE_GROUP_PRIVATE
+                LINE GROUP PRIVATE
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
@@ -1404,7 +1409,7 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
                   class:bg-green-500={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
                   on:click={() => selectOption(5, 'LINE_GROUP_PRIVATE')}
                 >
-                LINE_GROUP_PRIVATE
+                LINE GROUP PRIVATE
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
@@ -1431,7 +1436,7 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
                   class:bg-green-500={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
                   on:click={() => selectOption(6, 'LINE_GROUP_PRIVATE')}
                 >
-                  Line กลุ่ม
+                LINE GROUP PRIVATE
                 </button>
                 <button
                   class="px-4 py-2 rounded-lg"
