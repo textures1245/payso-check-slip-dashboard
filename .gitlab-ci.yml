@@ -9,4 +9,4 @@ build-job:
     - export NODE_OPTIONS="--max-old-space-size=1024" # จำกัดหน่วยความจำในการ build แค่ 1GB เท่านั้น
     - echo $ENV | sed 's/ /\n/g' > .env
     - cat .env
-    - docker compose up -d --build
+    - docker compose up sveltekit-app -d --build
