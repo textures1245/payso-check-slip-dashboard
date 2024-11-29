@@ -471,7 +471,70 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
         NotiOnLineGroupId = event.target.value.replace(/[^A-Za-z0-9]/g, "");
     }
 
-    
+    async function maskMiddle(accountNumber: string) {
+    try {
+        // ตรวจสอบว่าเป็นตัวเลขทั้งหมดหรือไม่
+        const isNumeric = /^\d+$/.test(accountNumber);
+        
+        // ถ้าเป็นตัวเลขทั้งหมด ใช้เลขนำเข้าโดยตรง
+        const decryptedAccountNumber = isNumeric 
+            ? accountNumber 
+            : await decryptAccountNo(accountNumber);
+        
+        // ตรวจสอบความยาว
+        const length = decryptedAccountNumber.length;
+        if (length < 7) return "Invalid Account Number"; // ต้องยาวพอจะแบ่งส่วนได้
+        let middleLength = Math.max(4, Math.floor(length / 3)); // อย่างน้อย 4 ตัว
+
+        // ถ้าความยาวของเลขบัญชีเป็น 15 ตัว
+        if (length === 15) {
+            middleLength = 5; // กำหนดให้แสดงเลขกลาง 5 ตัวสำหรับบัญชีที่มี 15 ตัว
+        }
+
+        // แสดงเลขกลางจากตำแหน่งที่ 3 (index 3) ไปจนถึง middleLength
+        const middle = decryptedAccountNumber.slice(3, 3 + middleLength);
+        const prefix = "xxx"; // ซ่อนเลขต้น
+
+        const suffix = "xxx"; // ซ่อนเลขท้าย
+        
+        return `${prefix}-${middle}-${suffix}`;
+    } catch (error) {
+        console.error("Error in maskMiddle:", error);
+        return "Error: Unable to mask account number";
+    }
+}
+async function decryptAccountNo(encryptedBase64: string): Promise<string> {
+  const combined = new Uint8Array(atob(encryptedBase64).split('').map(c => c.charCodeAt(0)));
+  
+  // Extract the nonce (first 16 bytes)
+  const nonce = combined.slice(0, 16);
+
+  // Extract the ciphertext (remaining bytes after nonce)
+  const ciphertext = combined.slice(16);
+
+  // Recreate the key used for encryption (assuming you have access to the same secret)
+  const key = new TextEncoder().encode(PUBLIC_PAYSO_DEFAULT_SECRET);
+
+  // Import the key for decryption
+  const cryptoKey = await window.crypto.subtle.importKey(
+    "raw", 
+    key, 
+    { name: "AES-CTR" }, 
+    false, 
+    ["decrypt"]
+  );
+
+  // Decrypt the ciphertext using AES-CTR
+  const decryptedBytes = await window.crypto.subtle.decrypt(
+    { name: "AES-CTR", counter: nonce, length: 128 },
+    cryptoKey,
+    ciphertext
+  );
+
+  // Decode the decrypted bytes back to a string
+  const decoder = new TextDecoder();
+  return decoder.decode(decryptedBytes);
+}
 </script>
 
 <div class="flex justify-center bg-primary-foreground min-h-screen px-10 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-20 ">
@@ -550,9 +613,13 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                         <div class=" font-semibold">
                           {banks.NameTH}
                         </div>
-                        <div class=" text-slate-400">
-                          {banks.AccountNo}
-                        </div>
+                        {#await maskMiddle(banks.AccountNo)}
+                        <div class="text-slate-400">กำลังโหลด...</div>
+                      {:then maskedAccountNo}
+                        <div class="text-slate-400">{maskedAccountNo}</div>
+                      {:catch error}
+                        <div class="text-red-500">Error: {error.message}</div>
+                      {/await}
                         </div>
                         <!-- svelte-ignore a11y-click-events-have-key-events -->
                         <!-- svelte-ignore a11y-no-static-element-interactions -->
