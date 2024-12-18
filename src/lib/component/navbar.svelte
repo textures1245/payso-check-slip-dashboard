@@ -74,7 +74,7 @@ onMount(() => {
 </script>
 
 
-<nav class="bg-card fixed top-0 left-0 w-full z-50"  style="background-color:#1353ec;">
+<nav class="{isAdminPath ? '' : 'fixed'} bg-card top-0 left-0 w-full z-50" style="background-color:#1353ec;">
 
 	<div class="">
 		<div class="relative flex h-11 items-center justify-between">

@@ -420,10 +420,11 @@ let QrToken: string | null = null;
     await handleGenerate();  // เรียกใช้เพื่อสร้าง QR Code ถ้าข้อมูลเปลี่ยน
   }
 });
-  
+
   // Function to generate QR code
   const generateQR = async (data: string): Promise<void> => {
     try {
+     
       if (qrcanvas1) {
       await QRCode.toCanvas(qrcanvas1, data, {
         width: 150,
