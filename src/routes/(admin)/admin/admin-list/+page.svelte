@@ -329,7 +329,7 @@ function closeErrorModal() {
 						<tr class="border-b border-gray-300">
 							<th class="p-1 sm:p-2 lg:text-sm truncate font-normal">{item.index}</th>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left">
-								{Number(item.MerchantId) === 0 ? '' : item.MerchantId}
+								{Number(item.Id) === 0 ? '' : item.Id}
 							</td>
 							<td class="p-1 sm:p-2 lg:text-sm truncate text-left" title={item.Email}
 								>{item.Email}</td
