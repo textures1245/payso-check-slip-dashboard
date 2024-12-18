@@ -161,6 +161,7 @@
 	];
 
 	let rooms: any[] = [];
+  let idRoomsAll: any[] = []
 	let loading = false;
 	onMount(async () => {
 		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
@@ -170,6 +171,8 @@
 			// Use profileData here
 			rooms = room;
 			console.log(rooms);
+      idRoomsAll = rooms.map(item => item.Id);
+      console.log("-+++/--/-/-/-",idRoomsAll)
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		} finally {
@@ -336,11 +339,13 @@
 		} else {
 			throw new Error('Invalid information provided');
 		}
-
+    console.log("aaaaaaaaaaaaaaaaaaaaa",idRoomsAll)
 		try {
 			const requestBody = {
 				rooms: selectedRoomIds,
-				bank: payload
+				bank: payload,
+        idroomall:idRoomsAll,
+
 			};
 			console.log('AccountNo', requestBody);
 			const response = await fetch(`${PUBLIC_API_ENDPOINT}/create/bank`, {
