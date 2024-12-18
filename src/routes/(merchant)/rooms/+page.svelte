@@ -171,9 +171,7 @@
 		}
 	];
 	onMount(async () => {
-
 		try {
-			
 			handleGenerate();
 			const bank = await GetBankLink();
 
@@ -539,48 +537,49 @@
 		return decoder.decode(decryptedBytes);
 	}
 
-  function openLineGroupCreation() {
-    // More type-safe user agent detection
-    const userAgent = navigator.userAgent.toLowerCase();
-    
-    const isIOS = /ipad|iphone|ipod/.test(userAgent);
-    const isAndroid = /android/.test(userAgent);
+	function openLineGroupCreation() {
+		// More type-safe user agent detection
+		const userAgent = navigator.userAgent.toLowerCase();
 
-    // Line deep links for group creation
-    const iosLineLink = 'https://line.me/ti/g/createGroup';
-    const androidLineLink = 'line://ti/g/createGroup';
+		const isIOS = /ipad|iphone|ipod/.test(userAgent);
+		const isAndroid = /android/.test(userAgent);
 
-    // Web store links for Line app
-    const iosAppStoreLink = 'https://apps.apple.com/app/line/id443904275';
-    const androidPlayStoreLink = 'https://play.google.com/store/apps/details?id=jp.naver.line.android';
+		// Line deep links for group creation
+		const iosLineLink = 'https://line.me/ti/g/createGroup';
+		const androidLineLink = 'line://ti/g/createGroup';
 
-    try {
-        if (isIOS) {
-            window.location.href = androidLineLink;
-            setTimeout(() => {
-                window.location.href = iosLineLink;
-            }, 100);
-        } else if (isAndroid) {
-            window.location.href = androidLineLink;
-        } else {
-            // Fallback for other platforms
-            window.location.href = iosLineLink;
-        }
+		// Web store links for Line app
+		const iosAppStoreLink = 'https://apps.apple.com/app/line/id443904275';
+		const androidPlayStoreLink =
+			'https://play.google.com/store/apps/details?id=jp.naver.line.android';
 
-        // Fallback mechanism to app stores if Line is not installed
-        setTimeout(() => {
-            if (isIOS) {
-                window.location.href = iosAppStoreLink;
-            } else if (isAndroid) {
-                window.location.href = androidPlayStoreLink;
-            } else {
-                alert('กรุณาติดตั้งแอพ Line');
-            }
-        }, 1500);
-    } catch (error) {
-        alert('ไม่สามารถเปิดแอพ Line ได้ กรุณาตรวจสอบการติดตั้ง');
-    }
-}
+		try {
+			if (isIOS) {
+				window.location.href = androidLineLink;
+				setTimeout(() => {
+					window.location.href = iosLineLink;
+				}, 100);
+			} else if (isAndroid) {
+				window.location.href = androidLineLink;
+			} else {
+				// Fallback for other platforms
+				window.location.href = iosLineLink;
+			}
+
+			// Fallback mechanism to app stores if Line is not installed
+			setTimeout(() => {
+				if (isIOS) {
+					window.location.href = iosAppStoreLink;
+				} else if (isAndroid) {
+					window.location.href = androidPlayStoreLink;
+				} else {
+					alert('กรุณาติดตั้งแอพ Line');
+				}
+			}, 1500);
+		} catch (error) {
+			alert('ไม่สามารถเปิดแอพ Line ได้ กรุณาตรวจสอบการติดตั้ง');
+		}
+	}
 </script>
 
 <div
@@ -693,11 +692,11 @@
 							</div>
 						</div>
 						<!-- Add any other detailed information you want to display here -->
-            <hr style="height: 5px; background-color: gray; border: none;" class="my-4 mx-2">
+						<hr style="height: 5px; background-color: gray; border: none;" class="my-4 mx-2" />
 						<div class="flex items-center space-x-4">
 							<div class="text-lg font-semibold mx-2">ตั้งค่า ระบบการตรวจสอบ</div>
-							<div class="flex items-center space-x-2 ">
-								<div class="tooltip" >
+							<div class="flex items-center space-x-2">
+								<div class="tooltip">
 									<label for="enableSettings" class="block">
 										{#if isSettingEnabled}
 											ตั้งค่าขั้นสูง
@@ -706,7 +705,7 @@
 										{/if}
 									</label>
 								</div>
-								<div class="tooltip" >
+								<div class="tooltip">
 									<input
 										id="enableSettings"
 										type="checkbox"
@@ -858,7 +857,7 @@
 											</svg>
 										</div>
 									</div>
-									<div class="tooltip" >
+									<div class="tooltip">
 										<input
 											type="checkbox"
 											value="synthwave"
@@ -874,67 +873,125 @@
 							<div class="mt-3 mx-2">การแจ้งเตือน</div>
 							<div class="flex flex-col gap-4 p-4">
 								<!-- แถว 1 - สลิป ถูกต้อง -->
-								<div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                  <div class="flex">
-                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
-                      <div class="tooltip ml-2" data-tip="การแจ้งเตือนเมื่อสลิปถูกตรวจสอบและถูกต้องสมบูรณ์">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                      </div>
-                  </div>
-              
-                  <div class="flex space-x-2 justify-center items-center">
-                      <div>
-                          <div>
-                              <button
-                                  class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                  class:bg-blue-500={selectedOptions[0] === 'LINE_GROUP_PRIVATE'}
-                                  on:click={() => selectOption(0, 'LINE_GROUP_PRIVATE')}
-                                  class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP_PRIVATE'} 
-                                  class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP_PRIVATE'} 
-                              >
-                                  <span class={selectedOptions[0] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                  <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                      <svg xmlns="http://www.w3.org/2000/svg"  class={selectedOptions[0] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                      </svg>
-                                  </div>
-                              </button>
-                          </div>
-                      </div>
-              
-                      <div>
-                          <div>
-                              <button
-                                  class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                  class:bg-green-500={selectedOptions[0] === 'LINE_GROUP'}
-                                  on:click={() => selectOption(0, 'LINE_GROUP')}
-                                  class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP'} 
-                                  class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP'} 
-                              >
-                                  <span class={selectedOptions[0] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                  <div class="tooltip flex justify-center ml-2 " data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                      <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[0] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h -1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                      </svg>
-                                  </div>
-                              </button>
-                          </div>
-                      </div>
-                      <div >
-                          <button
-                              class="px-2 py-2  rounded-lg"
-                              class:bg-red-500={selectedOptions[0] === 'ALL'}
-                              on:click={() => selectOption(0, 'ALL')}
-                              class:bg-blue-600={selectedOptions[0] === 'ALL'} 
-                              class:bg-gray-300={selectedOptions[0] !== 'ALL'} 
-                          >
-                              <span class={selectedOptions[0] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                          </button>
-                      </div>
-                  </div>
-              </div>
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
+										<div
+											class="tooltip ml-2"
+											data-tip="การแจ้งเตือนเมื่อสลิปถูกตรวจสอบและถูกต้องสมบูรณ์"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[0] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(0, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[0] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[0] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[0] === 'LINE_GROUP'}
+													on:click={() => selectOption(0, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[0] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[0] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h -1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[0] === 'ALL'}
+												on:click={() => selectOption(0, 'ALL')}
+												class:bg-blue-600={selectedOptions[0] === 'ALL'}
+												class:bg-gray-300={selectedOptions[0] !== 'ALL'}
+											>
+												<span class={selectedOptions[0] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
+								</div>
 
 								<!-- แถว 2 - สลิป ถูกใช้งานแล้ว -->
 								<div
@@ -963,56 +1020,98 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[1] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(1, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[1] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[1] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-green-500={selectedOptions[1] === 'LINE_GROUP'}
-                                on:click={() => selectOption(1, 'LINE_GROUP')}
-                                class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP'} 
-                                class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP'} 
-                            >
-                                <span class={selectedOptions[1] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[1] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[1] === 'ALL'}
-                            on:click={() => selectOption(1, 'ALL')}
-                            class:bg-blue-600={selectedOptions[1] === 'ALL'} 
-                            class:bg-gray-300={selectedOptions[1] !== 'ALL'} 
-                        >
-                            <span class={selectedOptions[1] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[1] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(1, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[1] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[1] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[1] === 'LINE_GROUP'}
+													on:click={() => selectOption(1, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[1] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[1] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[1] === 'ALL'}
+												on:click={() => selectOption(1, 'ALL')}
+												class:bg-blue-600={selectedOptions[1] === 'ALL'}
+												class:bg-gray-300={selectedOptions[1] !== 'ALL'}
+											>
+												<span class={selectedOptions[1] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 
 								<!-- แถว 3 - 8 -->
@@ -1022,7 +1121,8 @@
 									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
 								>
 									<div class="flex">
-										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left md:block md:whitespace-pre-line md:max-w-none sm:max-w-[160px] max-w-[160px]"
+										<span
+											class="flex-1 mb-2 sm:mb-0 text-center sm:text-left md:block md:whitespace-pre-line md:max-w-none sm:max-w-[160px] max-w-[160px]"
 											>สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span
 										>
 										<div
@@ -1047,56 +1147,98 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[2] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(2, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[2] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[2] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-green-500={selectedOptions[2] === 'LINE_GROUP'}
-                                on:click={() => selectOption(2, 'LINE_GROUP')}
-                                class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP'} 
-                                class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP'} 
-                            >
-                                <span class={selectedOptions[2] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[2] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[2] === 'ALL'}
-                            on:click={() => selectOption(2, 'ALL')}
-                            class:bg-blue-600={selectedOptions[2] === 'ALL'} 
-                            class:bg-gray-300={selectedOptions[2] !== 'ALL'} 
-                        >
-                            <span class={selectedOptions[2] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[2] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(2, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[2] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[2] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[2] === 'LINE_GROUP'}
+													on:click={() => selectOption(2, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[2] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[2] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[2] === 'ALL'}
+												on:click={() => selectOption(2, 'ALL')}
+												class:bg-blue-600={selectedOptions[2] === 'ALL'}
+												class:bg-gray-300={selectedOptions[2] !== 'ALL'}
+											>
+												<span class={selectedOptions[2] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 								<!-- แถว 4 - สลิป ผู้รับเงินไม่ตรง -->
 								<div
@@ -1128,56 +1270,98 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[3] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(3, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[3] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[3] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-green-500={selectedOptions[3] === 'LINE_GROUP'}
-                                on:click={() => selectOption(3, 'LINE_GROUP')}
-                                class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP'} 
-                                class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP'} 
-                            >
-                                <span class={selectedOptions[3] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[3] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[3] === 'ALL'}
-                            on:click={() => selectOption(3, 'ALL')}
-                            class:bg-blue-600={selectedOptions[3] === 'ALL'} 
-                            class:bg-gray-300={selectedOptions[3] !== 'ALL'} 
-                        >
-                            <span class={selectedOptions[3] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[3] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(3, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[3] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[3] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[3] === 'LINE_GROUP'}
+													on:click={() => selectOption(3, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[3] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[3] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[3] === 'ALL'}
+												on:click={() => selectOption(3, 'ALL')}
+												class:bg-blue-600={selectedOptions[3] === 'ALL'}
+												class:bg-gray-300={selectedOptions[3] !== 'ALL'}
+											>
+												<span class={selectedOptions[3] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 								<!-- แถว 5 - ยอดโอนต่ำกว่ากำหนด -->
 								<div
@@ -1209,62 +1393,105 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(4, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[4] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[4] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-green-500={selectedOptions[4] === 'LINE_GROUP'}
-                                on:click={() => selectOption(4, 'LINE_GROUP')}
-                                class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP'} 
-                                class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP'} 
-                            >
-                                <span class={selectedOptions[4] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[4] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[4] === 'ALL'}
-                            on:click={() => selectOption(4, 'ALL')}
-                            class:bg-blue-600={selectedOptions[4] === 'ALL'} 
-                            class:bg-gray-300={selectedOptions[4] !== 'ALL'} 
-                        >
-                            <span class={selectedOptions[4] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(4, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[4] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[4] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[4] === 'LINE_GROUP'}
+													on:click={() => selectOption(4, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[4] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[4] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[4] === 'ALL'}
+												on:click={() => selectOption(4, 'ALL')}
+												class:bg-blue-600={selectedOptions[4] === 'ALL'}
+												class:bg-gray-300={selectedOptions[4] !== 'ALL'}
+											>
+												<span class={selectedOptions[4] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 								<div
 									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
 								>
 									<div class="flex">
-										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left md:block md:whitespace-pre-line md:max-w-none sm:max-w-[150px] max-w-[150px]" 
+										<span
+											class="flex-1 mb-2 sm:mb-0 text-center sm:text-left md:block md:whitespace-pre-line md:max-w-none sm:max-w-[150px] max-w-[150px]"
 											>การแจ้งเตือนเติมโควตาและต่ออายุ</span
 										>
 										<div
@@ -1289,56 +1516,98 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(5, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[5] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[5] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-green-500={selectedOptions[5] === 'LINE_GROUP'}
-                                on:click={() => selectOption(5, 'LINE_GROUP')}
-                                class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP'} 
-                                class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP'} 
-                            >
-                                <span class={selectedOptions[5] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[5] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[5] === 'ALL'}
-                            on:click={() => selectOption(5, 'ALL')}
-                            class:bg-blue-600={selectedOptions[5] === 'ALL'} 
-                            class:bg-gray-300={selectedOptions[5] !== 'ALL'} 
-                        >
-                            <span class={selectedOptions[5] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(5, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[5] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[5] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[5] === 'LINE_GROUP'}
+													on:click={() => selectOption(5, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[5] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[5] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[5] === 'ALL'}
+												on:click={() => selectOption(5, 'ALL')}
+												class:bg-blue-600={selectedOptions[5] === 'ALL'}
+												class:bg-gray-300={selectedOptions[5] !== 'ALL'}
+											>
+												<span class={selectedOptions[5] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 								<div
 									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
@@ -1366,56 +1635,98 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(6, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[6] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[6] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-green-500={selectedOptions[6] === 'LINE_GROUP'}
-                                on:click={() => selectOption(6, 'LINE_GROUP')}
-                                class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP'} 
-                                class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP'} 
-                            >
-                                <span class={selectedOptions[6] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
-                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[6] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[6] === 'ALL'}
-                            on:click={() => selectOption(6, 'ALL')}
-                            class:bg-blue-600={selectedOptions[6] === 'ALL'} 
-                            class:bg-gray-300={selectedOptions[6] !== 'ALL'} 
-                        >
-                            <span class={selectedOptions[6] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(6, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[6] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[6] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-green-500={selectedOptions[6] === 'LINE_GROUP'}
+													on:click={() => selectOption(6, 'LINE_GROUP')}
+													class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP'}
+													class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP'}
+												>
+													<span
+														class={selectedOptions[6] === 'LINE_GROUP'
+															? 'text-white'
+															: 'text-black'}>กลุ่มสาธารณะ</span
+													>
+													<div
+														class="tooltip flex justify-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[6] === 'LINE_GROUP'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[6] === 'ALL'}
+												on:click={() => selectOption(6, 'ALL')}
+												class:bg-blue-600={selectedOptions[6] === 'ALL'}
+												class:bg-gray-300={selectedOptions[6] !== 'ALL'}
+											>
+												<span class={selectedOptions[6] === 'ALL' ? 'text-white' : 'text-black'}
+													>ทั้งสอง</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 								<!-- แถว 8 - สรุปยอดสาขารายวัน -->
 								<div
@@ -1447,37 +1758,59 @@
 									</div>
 
 									<div class="flex space-x-2 justify-center items-center">
-                    <div>
-                        <div>
-                            <button
-                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
-                                class:bg-blue-500={selectedOptions[7] === 'LINE_GROUP_PRIVATE'}
-                                on:click={() => selectOption(7, 'LINE_GROUP_PRIVATE')}
-                                class:bg-blue-600={selectedOptions[7] === 'LINE_GROUP_PRIVATE'} 
-                                class:bg-gray-300={selectedOptions[7] !== 'LINE_GROUP_PRIVATE'} 
-                            >
-                                <span class={selectedOptions[7] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
-                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[7] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                
-                    <div>
-                        <button
-                            class="px-2 py-2 rounded-lg"
-                            class:bg-red-500={selectedOptions[7] === 'DISABLE'}
-                            on:click={() => selectOption(7, 'DISABLE')}
-                            class:bg-blue-600={selectedOptions[7] === 'DISABLE'} 
-                            class:bg-gray-300={selectedOptions[7] !== 'DISABLE'} 
-                        >
-                            <span class={selectedOptions[7] === 'DISABLE' ? 'text-white' : 'text-black'}>ปิด</span>
-                        </button>
-                    </div>
-                </div>
+										<div>
+											<div>
+												<button
+													class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+													class:bg-blue-500={selectedOptions[7] === 'LINE_GROUP_PRIVATE'}
+													on:click={() => selectOption(7, 'LINE_GROUP_PRIVATE')}
+													class:bg-blue-600={selectedOptions[7] === 'LINE_GROUP_PRIVATE'}
+													class:bg-gray-300={selectedOptions[7] !== 'LINE_GROUP_PRIVATE'}
+												>
+													<span
+														class={selectedOptions[7] === 'LINE_GROUP_PRIVATE'
+															? 'text-white'
+															: 'text-black'}>กลุ่มส่วนตัว</span
+													>
+													<div
+														class="tooltip flex justify-center items-center ml-2"
+														data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															class={selectedOptions[7] === 'LINE_GROUP_PRIVATE'
+																? 'text-white h-5 w-5 cursor-help'
+																: 'text-blue-500 h-5 w-5 cursor-help'}
+															fill="none"
+															viewBox="0 0 24 24"
+															stroke="currentColor"
+														>
+															<path
+																stroke-linecap="round"
+																stroke-linejoin="round"
+																stroke-width="2"
+																d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+															/>
+														</svg>
+													</div>
+												</button>
+											</div>
+										</div>
+
+										<div>
+											<button
+												class="px-2 py-2 rounded-lg"
+												class:bg-red-500={selectedOptions[7] === 'DISABLE'}
+												on:click={() => selectOption(7, 'DISABLE')}
+												class:bg-blue-600={selectedOptions[7] === 'DISABLE'}
+												class:bg-gray-300={selectedOptions[7] !== 'DISABLE'}
+											>
+												<span class={selectedOptions[7] === 'DISABLE' ? 'text-white' : 'text-black'}
+													>ปิด</span
+												>
+											</button>
+										</div>
+									</div>
 								</div>
 								<!-- คุณสามารถทำซ้ำรูปแบบด้านบนและแก้ไขตัวแปรใน `selectedOptions` ให้เหมาะสม -->
 							</div>
@@ -1516,17 +1849,22 @@
 			</div>
 		</div>
 		<p class=" text-center">1.แคป QR CODE นี้</p>
-		<p class=" text-center">2.นำรูป QR CODE นี้ส่งในกลุ่มไลน์ที่ต้องการใช้งานโดยกลุ่มไลน์ต้องมี Sure Sure Line OA อยู่ในกลุ่ม</p>
-		<p class=" text-center text-red-500">** 1 กลุ่มสามารถใช้ QR CODE ได้แค่ 1 อันไม่สามารถเปลี่ยนได้ **</p>
+		<p class=" text-center">
+			2.นำรูป QR CODE นี้ส่งในกลุ่มไลน์ที่ต้องการใช้งานโดยกลุ่มไลน์ต้องมี Sure Sure Line OA
+			อยู่ในกลุ่ม
+		</p>
+		<p class=" text-center text-red-500">
+			** 1 กลุ่มสามารถใช้ QR CODE ได้แค่ 1 อันไม่สามารถเปลี่ยนได้ **
+		</p>
 		<div class="flex w-full justify-around mt-5">
 			<div class="flex content-center mx-2">
-				<a href="/dashboard"
-					><button class="btn text-black ">ไปหน้า แดชบอร์ด</button></a
-				>
-			
+				<a href="/dashboard"><button class="btn text-black">ไปหน้า แดชบอร์ด</button></a>
 			</div>
-      <div class="flex content-center">
-				<button class="btn bg-primary text-white  hover:bg-primary" on:click={() =>openLineGroupCreation()}>เข้าหน้าสร้างกลุ่มไลน์</button>
+			<div class="flex content-center">
+				<button
+					class="btn bg-primary text-white hover:bg-primary"
+					on:click={() => openLineGroupCreation()}>เข้าหน้าสร้างกลุ่มไลน์</button
+				>
 			</div>
 		</div>
 	</div>
@@ -1561,14 +1899,13 @@
 	</form>
 </dialog>
 
-
 <style scoped>
 	.tooltip:before {
-	  max-width: 10rem; /* 320px */
-	  white-space: normal; /* อนุญาตให้ข้อความขึ้นบรรทัดใหม่ */
-	  word-wrap: break-word; /* แบ่งคำเมื่อยาวเกินขอบเขต */
-	  overflow-wrap: break-word; /* การแบ่งคำทางเลือกสำหรับความเข้ากันได้ */
-	  hyphens: auto; /* ตัดคำอัตโนมัติ */
-	  text-align: center; /* จัดข้อความให้อยู่กึ่งกลาง */
-  }
-  </style>
+		max-width: 10rem; /* 320px */
+		white-space: normal; /* อนุญาตให้ข้อความขึ้นบรรทัดใหม่ */
+		word-wrap: break-word; /* แบ่งคำเมื่อยาวเกินขอบเขต */
+		overflow-wrap: break-word; /* การแบ่งคำทางเลือกสำหรับความเข้ากันได้ */
+		hyphens: auto; /* ตัดคำอัตโนมัติ */
+		text-align: center; /* จัดข้อความให้อยู่กึ่งกลาง */
+	}
+</style>

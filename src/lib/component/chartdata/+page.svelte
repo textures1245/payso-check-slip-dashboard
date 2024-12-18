@@ -37,7 +37,7 @@
 			],
 			locale: Thai,
 			disableMobile: true, // เพิ่มเพื่อให้ทำงานได้ทุกอุปกรณ์
-    		allowInput: false,
+			allowInput: false,
 			onChange: (selectedDates) => {
 				selectedStartDate = selectedDates[0]; // อัปเดตค่าวันที่เมื่อเปลี่ยน
 				startDatePicker.value = formatDateSelect(selectedStartDate); // อัปเดตค่าของ input เมื่อเปลี่ยนเดือน
@@ -48,7 +48,7 @@
 		try {
 			const datachart = await GetdataChart();
 			dataChart = datachart;
-			previousbranch = localStorage.getItem('branchId')
+			previousbranch = localStorage.getItem('branchId');
 			console.log('Chart : ', datachart);
 			const newlabels = Array.from(new Set(dataChart.map((item) => formatDate(item.CreatedAt))));
 			const counts = {
@@ -101,15 +101,14 @@
 		}
 
 		await checkLocalStorageChanges();
-    
-    // ตั้งเวลาให้ตรวจสอบการเปลี่ยนแปลงในบางช่วงเวลา (เช่นทุก 1 วินาที)
-    const intervalId = setInterval(checkLocalStorageChanges, 1000);
 
-    // ลบ interval เมื่อ component ถูกทำลาย
-    onDestroy(() => {
-        clearInterval(intervalId);
-    });
-		
+		// ตั้งเวลาให้ตรวจสอบการเปลี่ยนแปลงในบางช่วงเวลา (เช่นทุก 1 วินาที)
+		const intervalId = setInterval(checkLocalStorageChanges, 1000);
+
+		// ลบ interval เมื่อ component ถูกทำลาย
+		onDestroy(() => {
+			clearInterval(intervalId);
+		});
 	});
 
 	function formatDate(dateString: any) {
@@ -329,9 +328,9 @@
 	let dataSearch: any[] = [];
 	async function SearchData() {
 		const formattedStartDate = selectedStartDate.toLocaleDateString('en-CA', {
-  year: 'numeric',
-  month: '2-digit'
-});
+			year: 'numeric',
+			month: '2-digit'
+		});
 		const datasearch = await searchGetdata(formattedStartDate);
 
 		dataSearch = datasearch;
@@ -386,7 +385,7 @@
 	}
 	const searchGetdata = async (param1: string) => {
 		// const id = sessionStorage.getItem('merchant_id');
-		console.log("1231313212313",param1)
+		console.log('1231313212313', param1);
 		let [year, month] = param1.split('-');
 
 		month = parseInt(month, 10);
@@ -405,9 +404,9 @@
 		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
 		// } else
 		let branchId = localStorage.getItem('branchId');
-		console.log("branchId",branchId)
+		console.log('branchId', branchId);
 		branchId = branchId === 'All' ? '-' : branchId;
-		console.log("branchId-----------------------",branchId)
+		console.log('branchId-----------------------', branchId);
 		if (myCookie) {
 			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/13/${month}/${year}/${branchId}`;
 		} else {
@@ -454,45 +453,45 @@
 	};
 
 	async function checkLocalStorageChanges() {
-    try {
-        const currentBranchId = localStorage.getItem('branchId');
+		try {
+			const currentBranchId = localStorage.getItem('branchId');
 
-        // ตรวจสอบการเปลี่ยนแปลงหรือการโหลดครั้งแรก
-        if (currentBranchId !== previousbranch) {
-            console.log('Branch changed or initial load detected');
-            
-            // รอให้ SearchData() ทำงานเสร็จก่อน
-             await SearchData();
-            
-            // อัพเดทค่า previousbranch หลังจาก SearchData ทำงานเสร็จ
-            previousbranch = currentBranchId;
+			// ตรวจสอบการเปลี่ยนแปลงหรือการโหลดครั้งแรก
+			if (currentBranchId !== previousbranch) {
+				console.log('Branch changed or initial load detected');
 
-            // รอให้ chart อัพเดทเสร็จ
-            if (chart) {
-                await new Promise(resolve => {
-                    chart.update();
-                    // รอให้ chart render เสร็จ
-                    requestAnimationFrame(resolve);
-                });
-            }
-        }
-    } catch (error) {
-        console.error('Error in checkLocalStorageChanges:', error);
-    }
-}
+				// รอให้ SearchData() ทำงานเสร็จก่อน
+				await SearchData();
+
+				// อัพเดทค่า previousbranch หลังจาก SearchData ทำงานเสร็จ
+				previousbranch = currentBranchId;
+
+				// รอให้ chart อัพเดทเสร็จ
+				if (chart) {
+					await new Promise((resolve) => {
+						chart.update();
+						// รอให้ chart render เสร็จ
+						requestAnimationFrame(resolve);
+					});
+				}
+			}
+		} catch (error) {
+			console.error('Error in checkLocalStorageChanges:', error);
+		}
+	}
 </script>
 
 <div class="" style="height: 100%;">
 	<div class="flex justify-between my-2 font-semibold" style="height: 30px;width:100%">
-		<div >กราฟแสดงข้อมูลในช่วงเดือน</div>
+		<div>กราฟแสดงข้อมูลในช่วงเดือน</div>
 		<div class="flex justify-end">
 			<div class=" relative mx-3">
 				<input
 					type="text"
 					bind:this={startDatePicker}
 					class="max-w-44 border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#17B26A] focus:border-transparent appearance-none text-base"
-    autocomplete="off"
-    readonly
+					autocomplete="off"
+					readonly
 				/>
 				<img
 					src={date}
@@ -510,9 +509,10 @@
 			</Button>
 		</div>
 	</div>
-	<div style="width:96%;min-height: 21.8rem;" class="content-center h-80 md:h-80 lg:h-full mt-5 sm:mt-0 lg:mt-0  ">
-			<Bar {data} {options} />
-		
+	<div
+		style="width:96%;min-height: 21.8rem;"
+		class="content-center h-80 md:h-80 lg:h-full mt-5 sm:mt-0 lg:mt-0"
+	>
+		<Bar {data} {options} />
 	</div>
-	
 </div>

@@ -5,9 +5,9 @@
 	import { PUBLIC_oauth_KEY } from '$env/static/public';
 	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { onMount } from 'svelte';
-    import * as Card from "$lib/components/ui/card";
-	import dowlaod from"$lib/image/downloads.png";
-	import payment from"$lib/image/Payment.png";
+	import * as Card from '$lib/components/ui/card';
+	import dowlaod from '$lib/image/downloads.png';
+	import payment from '$lib/image/Payment.png';
 	const date = new Date();
 	const year = date.getFullYear().toString();
 	const month = (date.getMonth() + 1).toString().padStart(2, '0'); // getMonth() is zero-based
@@ -15,34 +15,34 @@
 
 	// Generate a random 4-digit number
 	const randomNumber = Math.floor(1000 + Math.random() * 9000).toString(); // Ensures a 4-digit number
-	let packageprice="";
-	let packagename="";
+	let packageprice = '';
+	let packagename = '';
 	// Concatenate to form RefNo
 	let refNo = `${year}${month}${day}${randomNumber}`;
 
 	const Create = async () => {
 		const price = sessionStorage.getItem('packageprice');
 		const name = sessionStorage.getItem('packagename');
-        const cookies = getCookies();
-			const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		console.log('Package : ', price, name , myCookie.Email);
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		console.log('Package : ', price, name, myCookie.Email);
 		// Create URL parameters from form data
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true',
 				Accept: 'application/json',
 				Authorization: `Bearer ${PUBLIC_oauth_KEY}`
 			}
 		};
 		let url;
-		if(myCookie.Type != "Line"){
-			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=${myCookie.Email}&customerName=customer&total=${price}&referenceNo=${refNo}`
-		}else{
-			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=napatone123@gmail.com&customerName=customer&total=${price}&referenceNo=${refNo}`
-			
+		if (myCookie.Type != 'Line') {
+			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=${myCookie.Email}&customerName=customer&total=${price}&referenceNo=${refNo}`;
+		} else {
+			url = `https://apis.paysolutions.asia/tep/api/v2/promptpay?merchantID=31817563&productDetail=${name}&customerEmail=napatone123@gmail.com&customerName=customer&total=${price}&referenceNo=${refNo}`;
 		}
-		console.log(" URL ",url)
+		console.log(' URL ', url);
 		console.time('Fetch Only Create');
 		const result = await fetch(url, config);
 		const data = await result.json();
@@ -58,26 +58,24 @@
 		const price = sessionStorage.getItem('packageprice');
 		const name = sessionStorage.getItem('packagename');
 		const Id = sessionStorage.getItem('packageId');
-        const cookies = getCookies();
-			const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		console.log('Package : ', price, name);
 		// Create URL parameters from form data
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			},
 			body: JSON.stringify({
-				RefNo : refNo,
-    			ProductId : Id,
-    			MerchantId : myCookie.Id,
-				Total : price
-            })
+				RefNo: refNo,
+				ProductId: Id,
+				MerchantId: myCookie.Id,
+				Total: price
+			})
 		};
-		var result = await fetch(
-			`${PUBLIC_API_ENDPOINT}/payment/create`,
-			config
-		);
+		var result = await fetch(`${PUBLIC_API_ENDPOINT}/payment/create`, config);
 		const data = await result.json();
 		console.log('Fetched data:', data);
 		if (data) {
@@ -85,7 +83,7 @@
 			// return data.data.orderNo
 		}
 	};
-	let dataImg="";
+	let dataImg = '';
 
 	onMount(async () => {
 		packageprice = sessionStorage.getItem('packageprice') as string;
@@ -94,38 +92,32 @@
 		localStorage.removeItem('timerCleared');
 		const Img = localStorage.getItem('Img');
 		sessionStorage.removeItem('hasShownWarning');
-		
-		
-    if (storedTime) {
-        seconds = parseInt(storedTime, 10); // นำค่าที่เก็บไว้มาใช้
-		dataImg = Img as string
-		console.log('data : ', dataImg);
-    }else{
-		try {
-			
-			const data = await Create();
-			
-			console.time('Fetch Only Create onMount');
-			CreateRefno();
-			console.timeEnd('Fetch Only Create onMount');
-			dataImg = data;
-			console.log('dataIMG : ', dataImg);
-			localStorage.setItem('Img', dataImg.toString());
-			localStorage.setItem('RefNo', refNo.toString());
-		} catch (error) {
-			console.error('Error fetching profile:', error);
+
+		if (storedTime) {
+			seconds = parseInt(storedTime, 10); // นำค่าที่เก็บไว้มาใช้
+			dataImg = Img as string;
+			console.log('data : ', dataImg);
+		} else {
+			try {
+				const data = await Create();
+
+				console.time('Fetch Only Create onMount');
+				CreateRefno();
+				console.timeEnd('Fetch Only Create onMount');
+				dataImg = data;
+				console.log('dataIMG : ', dataImg);
+				localStorage.setItem('Img', dataImg.toString());
+				localStorage.setItem('RefNo', refNo.toString());
+			} catch (error) {
+				console.error('Error fetching profile:', error);
+			}
 		}
-	}
-    if (!timerStarted) {
-        startTimer();
-		
-    }
-
-
-		
+		if (!timerStarted) {
+			startTimer();
+		}
 	});
 	let timerStarted = false;
-	let seconds = 10*60;
+	let seconds = 10 * 60;
 	let messageVisible = true;
 	let isExecuted = false;
 	// ฟังก์ชันเริ่มต้นนับเวลา
@@ -133,114 +125,116 @@
 		timerStarted = true; // ตั้งค่าสถานะว่าเริ่มต้นแล้ว
 		localStorage.setItem('remainingTime', seconds.toString());
 		const packagePrice = sessionStorage.getItem('packageprice');
-    	const packageName = sessionStorage.getItem('packagename');
+		const packageName = sessionStorage.getItem('packagename');
 		function countdown() {
 			const isTimerCleared = localStorage.getItem('timerCleared');
-		
-    // ถ้าตัวจับเวลาถูกล้าง ไม่ให้ทำงานต่อ
-    if (isTimerCleared === 'true') {
-        console.log('Timer was cleared on another page.');
-        return; // หยุดการทำงาน
-    }
-        if (seconds > 0) {
-            seconds -= 1; // ลดค่าการนับเวลา
-            localStorage.setItem('remainingTime', seconds.toString());
-			if((!isExecuted && packagePrice == "0.00" && packageName == "Free trial")){
+
+			// ถ้าตัวจับเวลาถูกล้าง ไม่ให้ทำงานต่อ
+			if (isTimerCleared === 'true') {
+				console.log('Timer was cleared on another page.');
+				return; // หยุดการทำงาน
+			}
+			if (seconds > 0) {
+				seconds -= 1; // ลดค่าการนับเวลา
+				localStorage.setItem('remainingTime', seconds.toString());
+				if (!isExecuted && packagePrice == '0.00' && packageName == 'Free trial') {
 					isExecuted = true;
-					UpdatePayment()
-					UpdatePackage()
-					clearRemainingTime()
+					UpdatePayment();
+					UpdatePackage();
+					clearRemainingTime();
 					const modal = document.getElementById('my_modal_3');
 					if (modal) {
-					modal.showModal();
-					setTimeout(() => {
-            		window.location.assign("/dashboard");
-        			}, 2000);
+						modal.showModal();
+						setTimeout(() => {
+							window.location.assign('/dashboard');
+						}, 2000);
+					}
 				}
+				setTimeout(countdown, 1000); // ทำงานซ้ำทุกๆ 1 วินาที
 			}
-            setTimeout(countdown, 1000); // ทำงานซ้ำทุกๆ 1 วินาที
-        }
-    }
+		}
 		(window as any).intervalId = setInterval(async () => {
 			// seconds -= 1; // ลดค่าการนับเวลา
 			// localStorage.setItem('remainingTime', seconds.toString());
 			const data = await Check();
-			const datatest = await CheckLimit();  // ต้องลบถ้ามี postback 
+			const datatest = await CheckLimit(); // ต้องลบถ้ามี postback
 			// console.log("Check : ",data,datatest)
 			// ตรวจสอบว่าหมดเวลา  ถ้าเป็น Postback ต้องเปิด อันนี้ test ใช้ อินคิวรี ปิดก่อน
-			if(datatest.OrderAmount ==datatest.AmountLimit){  //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
+			if (datatest.OrderAmount == datatest.AmountLimit) {
+				//ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
 				const modal = document.getElementById('my_modal_2');
 				if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            		window.location.assign("/package");
-        			}, 2000);
+						window.location.assign('/package');
+					}, 2000);
 				}
-				
 			}
 			// if(packagePrice == "0.00" && packageName == "Free trial"){
 			// 		console.log("--------",packagePrice,packageName)
 			// 	}
-			
-			if (seconds <= 0 || data.length > 0 ) {					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
+
+			if (seconds <= 0 || data.length > 0) {
+				//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
 				clearInterval((window as any).intervalId); // หยุดการนับเวลา
 				messageVisible = false; // ซ่อนข้อความ
-				if (data.length > 0 || (packagePrice == "0.00" && packageName == "Free trial") ) {   //    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
-					UpdatePayment()
-					UpdatePackage()
-					if(datatest.OrderAmount == datatest.AmountLimit-1){   //ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
-						UpdateLimitPackage()
+				if (data.length > 0 || (packagePrice == '0.00' && packageName == 'Free trial')) {
+					//    || data.Status == "SUCCESS" ถ้าเป็น Postback ต้องใช้เงื่อนไขนี้ อันนี้ test ใช้ อินคิวรี
+					UpdatePayment();
+					UpdatePackage();
+					if (datatest.OrderAmount == datatest.AmountLimit - 1) {
+						//ถ้าเป็น Postback datatest จะเปลี่ยนเป็น data เฉยๆ เพราะใช้แค่ตัวเดียวเช็ค
+						UpdateLimitPackage();
 					}
-					clearRemainingTime()
+					clearRemainingTime();
 					const modal = document.getElementById('my_modal_3');
 					if (modal) {
-					modal.showModal();
-					setTimeout(() => {
-            		window.location.assign("/dashboard");
-        			}, 2000);
+						modal.showModal();
+						setTimeout(() => {
+							window.location.assign('/dashboard');
+						}, 2000);
+					}
 				}
-                   
-				}
-				
-				if (seconds <= 0 ) {
-					clearRemainingTime()
-                    window.location.assign("/package")
+
+				if (seconds <= 0) {
+					clearRemainingTime();
+					window.location.assign('/package');
 				}
 			}
 		}, 5000); // ทำงานทุกๆ 1 วินาที
 		countdown();
-	
-// เช็คเวลาแบบตรวจทุกๆ 5 วินาที
-	// 	const intervalId = setInterval(async () => {
-    //     seconds -= 1; // ลดค่าการนับเวลา
-    //     localStorage.setItem('remainingTime', seconds.toString());
 
-    //     // ตรวจสอบว่าหมดเวลา
-    //     if (seconds <= 0) {
-    //         clearInterval(intervalId); // หยุดการนับเวลา
-    //         clearRemainingTime();
-    //         messageVisible = false; // ซ่อนข้อความ
-    //         window.location.assign("/package"); // ไปยังหน้า package
-    //     }
-    // }, 1000); // นับเวลาทุก 1 วินาที
-	// 	const checkIntervalId = setInterval(async () => {
-    //     const data = await Check(); // ฟังก์ชัน Check ถูกเรียกใช้งานที่นี่
+		// เช็คเวลาแบบตรวจทุกๆ 5 วินาที
+		// 	const intervalId = setInterval(async () => {
+		//     seconds -= 1; // ลดค่าการนับเวลา
+		//     localStorage.setItem('remainingTime', seconds.toString());
 
-    //     if (seconds <= 0 || data.length > 0) {
-    //         clearInterval(intervalId); // หยุดการนับเวลา
-    //         clearInterval(checkIntervalId); // หยุดการตรวจสอบ
-    //         clearRemainingTime();
-    //         messageVisible = false; // ซ่อนข้อความ
-    //         if (data.length > 0) {
-    //             UpdatePackage();
-    //             window.location.assign("/dashboard");
-    //         } else {
-    //             window.location.assign("/package");
-    //         }
-    //     }
-    // }, 5000);
+		//     // ตรวจสอบว่าหมดเวลา
+		//     if (seconds <= 0) {
+		//         clearInterval(intervalId); // หยุดการนับเวลา
+		//         clearRemainingTime();
+		//         messageVisible = false; // ซ่อนข้อความ
+		//         window.location.assign("/package"); // ไปยังหน้า package
+		//     }
+		// }, 1000); // นับเวลาทุก 1 วินาที
+		// 	const checkIntervalId = setInterval(async () => {
+		//     const data = await Check(); // ฟังก์ชัน Check ถูกเรียกใช้งานที่นี่
+
+		//     if (seconds <= 0 || data.length > 0) {
+		//         clearInterval(intervalId); // หยุดการนับเวลา
+		//         clearInterval(checkIntervalId); // หยุดการตรวจสอบ
+		//         clearRemainingTime();
+		//         messageVisible = false; // ซ่อนข้อความ
+		//         if (data.length > 0) {
+		//             UpdatePackage();
+		//             window.location.assign("/dashboard");
+		//         } else {
+		//             window.location.assign("/package");
+		//         }
+		//     }
+		// }, 5000);
 	}
-	
+
 	function formatTime(seconds: number) {
 		const minutes = Math.floor(seconds / 60); // คำนวณนาที
 		const remainingSeconds = seconds % 60; // คำนวณวินาทีที่เหลือ
@@ -256,7 +250,7 @@
 		// 	},
 		// 	body: JSON.stringify({
 		// 		RefNo : refNo
-        //     })
+		//     })
 		// };
 		// var result = await fetch(
 		// 	`${PUBLIC_API_ENDPOINT}/payment/get`,
@@ -266,14 +260,15 @@
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true',
 				Accept: 'application/json',
 				apikey: 'AptnQj3WuOI',
 				merchantSecretKey: 'BPWiTNc5bmMJzeqH',
 				merchantID: '17563'
 			},
 			body: JSON.stringify({
-				merchantId: '17563', 
+				merchantId: '17563',
 				refno: refNo,
 				productDetail: 'QWERTY'
 			})
@@ -281,29 +276,27 @@
 		var result = await fetch(`https://apis.paysolutions.asia/order/orderdetailpost`, config);
 
 		const data = await result.json();
-		console.log("asdaada",data)
+		console.log('asdaada', data);
 		if (data) {
-			return data;			// Postback ใช้ data.result
+			return data; // Postback ใช้ data.result
 		}
 	};
-	
-//////////////////////////////////////////////////////////////////////////
-	// ต้องลบถ้ามี postback 
+
+	//////////////////////////////////////////////////////////////////////////
+	// ต้องลบถ้ามี postback
 	const CheckLimit = async () => {
 		const refNo = localStorage.getItem('RefNo');
 		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			},
 			body: JSON.stringify({
-				RefNo : refNo
-            })
+				RefNo: refNo
+			})
 		};
-		var result = await fetch(
-			`${PUBLIC_API_ENDPOINT}/payment/get`,
-			config
-		);
+		var result = await fetch(`${PUBLIC_API_ENDPOINT}/payment/get`, config);
 		// Create URL parameters from form data
 		// let config = {
 		// 	method: 'POST',
@@ -315,7 +308,7 @@
 		// 		merchantID: '17563'
 		// 	},
 		// 	body: JSON.stringify({
-		// 		merchantId: '17563', 
+		// 		merchantId: '17563',
 		// 		refno: refNo,
 		// 		productDetail: 'QWERTY'
 		// 	})
@@ -323,34 +316,33 @@
 		// var result = await fetch(`https://apis.paysolutions.asia/order/orderdetailpost`, config);
 
 		const data = await result.json();
-		console.log("asdaada",data)
+		console.log('asdaada', data);
 		if (data) {
-			return data.result;			//data.result
+			return data.result; //data.result
 		}
 	};
 
-
 	//////////////////////////////////////////////////////////////////////////
-
 
 	function getCookies() {
 		return cookie.parse(document.cookie);
 	}
-    
-    const UpdatePackage = async () => {
+
+	const UpdatePackage = async () => {
 		// Create URL parameters from form data
-       		 const Id = sessionStorage.getItem('packageId') as string;
-			const cookies = getCookies();
-			const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-			console.log('package Id :', typeof(Id), typeof(myCookie.Id));
-		    let config = {
+		const Id = sessionStorage.getItem('packageId') as string;
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
+		console.log('package Id :', typeof Id, typeof myCookie.Id);
+		let config = {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			},
 			body: JSON.stringify({
 				PackageId: parseInt(Id, 10),
-                MerchantId: parseInt(myCookie.Id, 10),
+				MerchantId: parseInt(myCookie.Id, 10)
 			})
 		};
 		var result = await fetch(`${PUBLIC_API_ENDPOINT}/merchant/updatepackage`, config);
@@ -363,24 +355,24 @@
 	};
 
 	function clearRemainingTime() {
-    localStorage.removeItem('remainingTime'); 
-	localStorage.removeItem('Img');
-	localStorage.removeItem('RefNo');
-	if ((window as any).intervalId) {
-    clearInterval((window as any).intervalId);
-    console.log('Timer stopped.');
-  }
-}
+		localStorage.removeItem('remainingTime');
+		localStorage.removeItem('Img');
+		localStorage.removeItem('RefNo');
+		if ((window as any).intervalId) {
+			clearInterval((window as any).intervalId);
+			console.log('Timer stopped.');
+		}
+	}
 
-
-const UpdatePayment = async () => {
+	const UpdatePayment = async () => {
 		// Create URL parameters from form data
-			const refNo = localStorage.getItem('RefNo');
-			console.log(refNo)
-		    let config = {
+		const refNo = localStorage.getItem('RefNo');
+		console.log(refNo);
+		let config = {
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			},
 			body: JSON.stringify({
 				RefNo: refNo
@@ -395,14 +387,13 @@ const UpdatePayment = async () => {
 		}
 	};
 
-	
-
-const UpdateLimitPackage = async () => {
-		const packagegId = sessionStorage.getItem('packageId')
+	const UpdateLimitPackage = async () => {
+		const packagegId = sessionStorage.getItem('packageId');
 		let config = {
 			method: 'PUT',
 			headers: {
-				'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+				'Content-Type': 'application/json',
+				'ngrok-skip-browser-warning': 'true'
 			}
 		};
 		var result = await fetch(
@@ -415,61 +406,58 @@ const UpdateLimitPackage = async () => {
 	};
 
 	const filename = 'QRcode.png';
-// 	function downloadImage(imageUrl: string, filename: string) {
-//     const link = document.createElement('a'); // สร้างลิงค์ใหม่
-//     link.href = imageUrl; // ตั้งค่า URL ของรูปภาพ
-//     link.download = filename; // ตั้งชื่อไฟล์เมื่อดาวน์โหลด
+	// 	function downloadImage(imageUrl: string, filename: string) {
+	//     const link = document.createElement('a'); // สร้างลิงค์ใหม่
+	//     link.href = imageUrl; // ตั้งค่า URL ของรูปภาพ
+	//     link.download = filename; // ตั้งชื่อไฟล์เมื่อดาวน์โหลด
 
-//     // เพิ่มลิงค์ลงในเอกสารและคลิกเพื่อดาวน์โหลด
-//     document.body.appendChild(link);
-//     link.click(); // เริ่มการดาวน์โหลด
-//     document.body.removeChild(link); // ลบลิงค์หลังจากดาวน์โหลดเสร็จ
-// }
-const downloadImage = async (imageUrl: string, filename: string) => {
-    try {
-      // สร้าง Blob จาก URL
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      
-      // สร้าง Object URL
-      
-      
-      // ย้ายการตรวจสอบ iOS มาไว้ในฟังก์ชัน
-      const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent);
-	  const canUseShare = navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] });
-      
-      if (isMobile && canUseShare) {
-        // สำหรับ iOS: เปิดรูปในแท็บใหม่
-        // window.open(blobUrl, '_blank');
-		await navigator.share({
-        files: [new File([blob], filename, { type: blob.type })],
-        title: 'ดาวน์โหลดรูปภาพ',
-        text: 'บันทึกภาพลงในเครื่องของคุณ',
-      });
-        
-      } else {
-        // สำหรับระบบปฏิบัติการอื่นๆ
-		const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-		setTimeout(() => {
-        window.URL.revokeObjectURL(blobUrl);
-      }, 100);
-      }
-      
-      // ทำความสะอาด Object URL
-      
-      
-    } catch (error) {
-      console.error('เกิดข้อผิดพลาดในการดาวน์โหลดรูปภาพ:', error);
-      alert('ไม่สามารถดาวน์โหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
-    }
-  };
-    
+	//     // เพิ่มลิงค์ลงในเอกสารและคลิกเพื่อดาวน์โหลด
+	//     document.body.appendChild(link);
+	//     link.click(); // เริ่มการดาวน์โหลด
+	//     document.body.removeChild(link); // ลบลิงค์หลังจากดาวน์โหลดเสร็จ
+	// }
+	const downloadImage = async (imageUrl: string, filename: string) => {
+		try {
+			// สร้าง Blob จาก URL
+			const response = await fetch(imageUrl);
+			const blob = await response.blob();
+
+			// สร้าง Object URL
+
+			// ย้ายการตรวจสอบ iOS มาไว้ในฟังก์ชัน
+			const isMobile = /iPad|iPhone|iPod|Android/.test(navigator.userAgent);
+			const canUseShare =
+				navigator.canShare &&
+				navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] });
+
+			if (isMobile && canUseShare) {
+				// สำหรับ iOS: เปิดรูปในแท็บใหม่
+				// window.open(blobUrl, '_blank');
+				await navigator.share({
+					files: [new File([blob], filename, { type: blob.type })],
+					title: 'ดาวน์โหลดรูปภาพ',
+					text: 'บันทึกภาพลงในเครื่องของคุณ'
+				});
+			} else {
+				// สำหรับระบบปฏิบัติการอื่นๆ
+				const blobUrl = window.URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				link.href = blobUrl;
+				link.download = filename;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				setTimeout(() => {
+					window.URL.revokeObjectURL(blobUrl);
+				}, 100);
+			}
+
+			// ทำความสะอาด Object URL
+		} catch (error) {
+			console.error('เกิดข้อผิดพลาดในการดาวน์โหลดรูปภาพ:', error);
+			alert('ไม่สามารถดาวน์โหลดรูปภาพได้ กรุณาลองใหม่อีกครั้ง');
+		}
+	};
 </script>
 
 <!-- {#if messageVisible}
@@ -478,61 +466,80 @@ const downloadImage = async (imageUrl: string, filename: string) => {
     {/if}
 	<p>เวลาที่เหลือ: {formatTime(seconds)} วินาที</p>
 {/if} -->
-<div class="flex justify-center items-center flex-col h-[calc(100vh-41px)]  bg-primary-foreground ">
-<Card.Root class=" lg:w-2/5 md:w-3/5">
-    <Card.Header
-        class="p-0 items-center justify-center "
-    >
-        <Card.Title class="text-lg font-medium"></Card.Title>
-        
-    </Card.Header>
-    <Card.Content class="flex justify-center text-center ">
-        
-        <div>
-        <p class="text-2xl mt-5 font-semibold">สแกนเพื่อชำระเงิน</p>
-        {#if messageVisible}
-		
-        {#if dataImg}
-		<div class="flex justify-center mt-3">
-		<div class="border-2 border-[#113566] rounded-md overflow-hidden w-5/5  ">
-		<!-- svelte-ignore a11y-missing-attribute -->
-		<div class=" bg-[#113566]  flex justify-center"> <img src={payment}  width="120px" height="100px"/> </div>
-		<!-- svelte-ignore a11y-missing-attribute -->
-		<div class=""><img src={dataImg}  class="w-[220px] h-[220px] lg:w-[250px] lg:h-[230px]"/></div>
-	</div>
-	</div>
-        {/if}
-        <div class="text-lg flex justify-center items-center mt-3" >
-			<span>แพ็คเกจ :</span>
-			<p class="ml-2 text-lg  font-semibold  truncate">{packagename}</p>
-		  </div>
-		<div class="text-lg flex justify-center items-center">
-			<span>จำนวนเงิน :</span>
-			<p class="ml-2 text-2xl font-semibold " style="color:#1353EC">{(packageprice).toLocaleString()} Bath</p>
-		  </div>
-    {/if}
-	
-    </div>
-    </Card.Content>
-	<div class="m-5">
-	<div class=" text-center p-3  bg-[#FEF6F6] text-[#E02424]">
-        <p class=" lg:text-xl md:text-xl text-xl  font-semibold">หมดอายุใน  {formatTime(seconds)} นาที</p>
-		<p class=" text-sm">*จ่ายสำเร็จแล้ว โปรดรอจนหน้าจอกลับไปยังหน้าหลัก</p>
-		<p class=" text-sm">คิวอาร์โค้ดที่จ่ายสำเร็จแล้ว ไม่สามารถจ่ายซ้ำได้</p>
-		<p class="text-sm">**สำหรับผู้ใช้มือถือสามารถแคปหน้าจอได้ทันที</p>
+<div class="flex justify-center items-center flex-col h-[calc(100vh-41px)] bg-primary-foreground">
+	<Card.Root class=" lg:w-2/5 md:w-3/5">
+		<Card.Header class="p-0 items-center justify-center ">
+			<Card.Title class="text-lg font-medium"></Card.Title>
+		</Card.Header>
+		<Card.Content class="flex justify-center text-center ">
+			<div>
+				<p class="text-2xl mt-5 font-semibold">สแกนเพื่อชำระเงิน</p>
+				{#if messageVisible}
+					{#if dataImg}
+						<div class="flex justify-center mt-3">
+							<div class="border-2 border-[#113566] rounded-md overflow-hidden w-5/5">
+								<!-- svelte-ignore a11y-missing-attribute -->
+								<div class=" bg-[#113566] flex justify-center">
+									<img src={payment} width="120px" height="100px" />
+								</div>
+								<!-- svelte-ignore a11y-missing-attribute -->
+								<div class="">
+									<img src={dataImg} class="w-[220px] h-[220px] lg:w-[250px] lg:h-[230px]" />
+								</div>
+							</div>
+						</div>
+					{/if}
+					<div class="text-lg flex justify-center items-center mt-3">
+						<span>แพ็คเกจ :</span>
+						<p class="ml-2 text-lg font-semibold truncate">{packagename}</p>
+					</div>
+					<div class="text-lg flex justify-center items-center">
+						<span>จำนวนเงิน :</span>
+						<p class="ml-2 text-2xl font-semibold" style="color:#1353EC">
+							{packageprice.toLocaleString()} Bath
+						</p>
+					</div>
+				{/if}
+			</div>
+		</Card.Content>
+		<div class="m-5">
+			<div class=" text-center p-3 bg-[#FEF6F6] text-[#E02424]">
+				<p class=" lg:text-xl md:text-xl text-xl font-semibold">
+					หมดอายุใน {formatTime(seconds)} นาที
+				</p>
+				<p class=" text-sm">*จ่ายสำเร็จแล้ว โปรดรอจนหน้าจอกลับไปยังหน้าหลัก</p>
+				<p class=" text-sm">คิวอาร์โค้ดที่จ่ายสำเร็จแล้ว ไม่สามารถจ่ายซ้ำได้</p>
+				<p class="text-sm">**สำหรับผู้ใช้มือถือสามารถแคปหน้าจอได้ทันที</p>
+			</div>
 		</div>
-	</div>
-	<!-- svelte-ignore a11y-missing-attribute -->
-	<div class="mx-5 mb-5"><Button variant="outline" class="w-full h-12 text-white hover:text-black  bg-primary font-semibold" on:click={() => downloadImage(dataImg, filename)}  ><img src="{dowlaod}" width="18px" height="18px" class="mr-3">ดาวน์โหลดคิวอาร์โค้ด</Button></div>
-</Card.Root>
-
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<div class="mx-5 mb-5">
+			<Button
+				variant="outline"
+				class="w-full h-12 text-white hover:text-black  bg-primary font-semibold"
+				on:click={() => downloadImage(dataImg, filename)}
+				><img src={dowlaod} width="18px" height="18px" class="mr-3" />ดาวน์โหลดคิวอาร์โค้ด</Button
+			>
+		</div>
+	</Card.Root>
 </div>
 
 <dialog id="my_modal_2" class="modal">
-	<div class="modal-box ">
+	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
-			<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 15 15" {...$$props}>
-				<path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="100"
+				height="100"
+				viewBox="0 0 15 15"
+				{...$$props}
+			>
+				<path
+					fill="#F04438"
+					fill-rule="evenodd"
+					d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0"
+					clip-rule="evenodd"
+				/>
 			</svg>
 		</div>
 		<p class="py-4 text-center font-bold text-2xl">แพ็คเกจนี้ถูกซื้อครบจำนวนที่กำหนดแล้ว</p>
@@ -543,35 +550,43 @@ const downloadImage = async (imageUrl: string, filename: string) => {
 </dialog>
 
 <dialog id="my_modal_3" class="modal">
-    <div class="modal-box ">
-      <div class="text-lg font-bold flex justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
-          <path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
-          <path fill="#17B26A" d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12" />
-        </svg>
-      </div>
-      <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
-      <p class=" text-center">การชำระเงินสำเร็จแล้ว</p>
-      <div class="flex  w-full  justify-around mt-5">
-      <div class="flex content-center">
-        <!-- Button to close the modal -->
-        
-  
-        <!-- Button to go to another page -->
-        <p class=" text-center">รอประมาณ 3 วินาที </p>
-    </div>
-  </div>
-    </div>
-    <!-- <form method="dialog" class="modal-backdrop">
+	<div class="modal-box">
+		<div class="text-lg font-bold flex justify-center">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="100"
+				height="100"
+				viewBox="0 0 32 32"
+				{...$$props}
+			>
+				<path fill="#17B26A" d="m14 21.414l-5-5.001L10.413 15L14 18.586L21.585 11L23 12.415z" />
+				<path
+					fill="#17B26A"
+					d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2m0 26a12 12 0 1 1 12-12a12 12 0 0 1-12 12"
+				/>
+			</svg>
+		</div>
+		<p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
+		<p class=" text-center">การชำระเงินสำเร็จแล้ว</p>
+		<div class="flex w-full justify-around mt-5">
+			<div class="flex content-center">
+				<!-- Button to close the modal -->
+
+				<!-- Button to go to another page -->
+				<p class=" text-center">รอประมาณ 3 วินาที</p>
+			</div>
+		</div>
+	</div>
+	<!-- <form method="dialog" class="modal-backdrop">
       <button>close</button>
     </form> -->
-  </dialog>
+</dialog>
 
 <style scoped>
-.truncate {
-    white-space: nowrap; /* ไม่ให้ข้อความแถวใหม่ */
-    overflow: hidden; /* ซ่อนข้อความที่เกิน */
-    text-overflow: ellipsis; /* แสดง ... เมื่อเกิน */
-    max-width: 20ch; /* จำกัดความกว้างให้ไม่เกิน 15 ตัวอักษร */
-}
+	.truncate {
+		white-space: nowrap; /* ไม่ให้ข้อความแถวใหม่ */
+		overflow: hidden; /* ซ่อนข้อความที่เกิน */
+		text-overflow: ellipsis; /* แสดง ... เมื่อเกิน */
+		max-width: 20ch; /* จำกัดความกว้างให้ไม่เกิน 15 ตัวอักษร */
+	}
 </style>
