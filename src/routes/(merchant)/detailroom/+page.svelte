@@ -371,7 +371,12 @@ let QrToken: string | null = null;
   let qrcanvas1: HTMLCanvasElement;
   let encryptedData: string = '';
   let errorMessage: string = '';
+  const encryptionCache: { [key: string]: string } = {};
   const encryptData = async (data: string): Promise<string | null> => {
+    if (encryptionCache[data]) {
+    console.log('กำลังใช้ข้อมูลเข้ารหัสจากแคช');
+    return encryptionCache[data];
+  }
   try {
     console.log('Encrypting data:', data);
 
@@ -406,7 +411,7 @@ let QrToken: string | null = null;
     // แปลงเป็น Base64 และคืนค่า
     const encrypted = btoa(String.fromCharCode(...combined));
     console.log('Encrypted result:', encrypted);
-
+    encryptionCache[data] = encrypted;
     return encrypted;
   } catch (error) {
     console.error('Encryption error:', error);
