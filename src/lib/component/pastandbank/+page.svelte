@@ -58,7 +58,7 @@
 		//     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/-/${startDate}/${endDate}`;
 		// } else
 		if (myCookie) {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/-/${startDate}/${endDate}/${offset}/${limit}/${branchParam}`;
+			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/-/${startDate}/${endDate}/${offset}/${limit}/${branchParam}`;
 			// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/pending/${startDate}/${endDate}`;
 			// apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusall/5/2024-08-01/2024-09-10`;
 		} else {
@@ -111,7 +111,7 @@
 		//     apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatusline/${myCookie.Email}/${param1}/${startDate}/${endDate}`;
 		// } else
 		if (myCookie) {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/13/${param1}/${startDate}/${endDate}/${offset}/${limit}/${branchParam}`;
+			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionstatus/${myCookie.Id}/${param1}/${startDate}/${endDate}/${offset}/${limit}/${branchParam}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
 			return;

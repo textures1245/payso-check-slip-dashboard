@@ -212,7 +212,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     // } else 
     if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/13/${formattedStartDate}/${formattedEndDate}/-`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${formattedStartDate}/${formattedEndDate}/-`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -262,7 +262,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     // } else 
     if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/amount/13/${formattedStartDate}/${formattedEndDate}/-`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/amount/${myCookie.Id}/${formattedStartDate}/${formattedEndDate}/-`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -363,7 +363,7 @@ const SearchTransaction = async (startDate:string,endDate:string,branchId:string
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${startDate}/${endDate}`;
     // } else 
     if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/13/${startDate}/${endDate}/${branchId}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionid/${myCookie.Id}/${startDate}/${endDate}/${branchId}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;
@@ -409,7 +409,7 @@ const SearchTransaction = async (startDate:string,endDate:string,branchId:string
     //     apiUrl = `${PUBLIC_API_ENDPOINT}/trasactionline/${myCookie.Email}/${formattedStartDate}/${formattedEndDate}`;
     // } else 
     if (myCookie) {
-        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/amount/13/${startDate}/${endDate}/${branchId}`;
+        apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/amount/${myCookie.Id}/${startDate}/${endDate}/${branchId}`;
     } else {
         console.error('No valid merchant account cookie found.');
         return;

@@ -139,7 +139,7 @@
 		// 	apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonthline/${myCookie.Email}/${month}/${year}`;
 		// } else
 		if (myCookie) {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/13/${month}/${year}/-`;
+			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}/-`;
 		} else {
 			console.error('No valid merchant account cookie found.');
 			return;
@@ -408,7 +408,7 @@
 		branchId = branchId === 'All' ? '-' : branchId;
 		console.log('branchId-----------------------', branchId);
 		if (myCookie) {
-			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/13/${month}/${year}/${branchId}`;
+			apiUrl = `${PUBLIC_API_ENDPOINT}/trasaction/transactionmonth/${myCookie.Id}/${month}/${year}/${branchId}`;
 		} else {
 			console.error('No valid merchant account cookie found.');
 			return;
