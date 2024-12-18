@@ -29,9 +29,9 @@
 	async function sendData(packagePrice: any,packageName:string,packageId:any) {
 		// console.log(param1); // Replace with your actual URL
 
-		const response = await GetProfile();
+		const response = await GetFreetrial();
 		console.log(response)
-		if (response === "Free trial" && packageName === "Free trial") {
+		if (response >1 && packageName === "Free trial") {
         // Show error message or dispatch modal
 		dispatch('showModal1');
 		
@@ -53,7 +53,7 @@
 		localStorage.removeItem('timerCleared');
 		window.location.assign("/payment")
 	}
-	const GetProfile = async () => {
+	const GetFreetrial = async () => {
 		// const email = sessionStorage.getItem('email');
 		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
 		const cookies = getCookies();
@@ -67,11 +67,11 @@
 		};
 
 		let url;
-			url = `${PUBLIC_API_ENDPOINT}/merchant/profileid/${myCookie.Id}`;
+			url = `${PUBLIC_API_ENDPOINT}/freetrial/${myCookie.Id}`;
 		const result = await fetch(url, config);
 		const data = await result.json();
 		console.log(data);
-		return data.result.PackageName;
+		return data.result;
 	};
 	
 

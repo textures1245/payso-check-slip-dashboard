@@ -216,15 +216,19 @@
 				sessionStorage.setItem('email', form.data.Email);
 				sessionStorage.setItem('merchant_id', form.data.Id);
 
-				if (form.data.PackageId == '0') {
-					if (form.status == 'create') {
-						window.location.href = '/advice'; // ถ้าจริงต้องมาหน้า detail ก่อน
-					} else {
-						window.location.href = '/package';
-					}
-				} else {
-					window.location.href = '/dashboard';
-				}
+				if (sessionStorage.getItem('steps') !== null) {
+      window.location.href = '/advice';
+    } else {
+      if (form.data.PackageId == '0') {
+        if (form.status == 'create') {
+          window.location.href = '/advice'; // ถ้าจริงต้องมาหน้า detail ก่อน
+        } else {
+          window.location.href = '/package';
+        }
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
 			}
 		}
 	});

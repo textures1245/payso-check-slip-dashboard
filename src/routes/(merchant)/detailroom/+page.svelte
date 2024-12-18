@@ -5,6 +5,7 @@
     import * as Carousel from "$lib/components/ui/carousel";
     import payment from"$lib/image/thai-qr.png";
     import { PUBLIC_API_ENDPOINT,PUBLIC_PAYSO_DEFAULT_SECRET } from '$env/static/public';
+    import { writable } from 'svelte/store';
     import cookie from 'cookie';
 	import { afterUpdate, onMount } from 'svelte';
 	import { Plus } from 'svelte-radix';
@@ -21,6 +22,7 @@
     let NotiOnLineGroupId = ""
     interface Room {
   Id: any;
+  LineGroupId:any;
   RoomName: any;
   TotalQuotaUsed: any;
   MinAmountReceive: number;
@@ -37,6 +39,9 @@
   NotiOnLineGroupId?:string;
   NotiOnSlipDuplicated?:string;
 }
+
+
+
 let QrToken: string | null = null;
     const bankchecks = [
       {
@@ -176,8 +181,9 @@ let QrToken: string | null = null;
 	}
 	];
     let hasPermission = false;
+
     onMount(async () => {
-		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
+      
         const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		try {
@@ -188,7 +194,7 @@ let QrToken: string | null = null;
 			banks = bank;
       rooms=room;
     
-      
+    
       
       if (rooms && room.length > 0) {
         handleRoomClick(rooms[0].Id)
@@ -203,7 +209,16 @@ let QrToken: string | null = null;
             hasPermission = true;
             
         }
+
+        handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up the event listener when component is destroyed
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
 		} catch (error) {
+      
 			console.error('Error fetching profile:', error);
 		} finally {
 			// การอัปเดตสถานะการโหลด
@@ -240,7 +255,7 @@ let QrToken: string | null = null;
 		let url;
 		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
-			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}`;
+			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}/-1/-1`;
 		} else {
 			throw new Error('Neither email nor id is provided.');
 		}
@@ -312,12 +327,15 @@ let QrToken: string | null = null;
 
   let selectedRoom: Room | null = null;
   let bankLinkRoom : any[]=[];
-
+  let LineGroupId :any
+  let Id:string
   async function handleRoomClick(roomId: any) {
     showForm = false;
     selectedRoom = rooms.find(r => r.Id === roomId);
     const bank = await GetBankLinkRoom(roomId);
     QrToken=selectedRoom?.QrToken ?? null
+    LineGroupId=selectedRoom?.LineGroupId ?? null
+    Id=selectedRoom?.Id ?? null
     bankLinkRoom = bank
     selectedBankAccounts = bank
     if (QrToken) {
@@ -336,14 +354,14 @@ let QrToken: string | null = null;
     CheckedHideSenderDetail = selectedRoom?.HideSenderDetail?? false;
     CheckedHideReceiverDetail = selectedRoom?.HideReceiverDetail?? false;
     selectedOptions = [
-    selectedRoom?.NotiOnValid ?? 'option1',         // สลิป ถูกต้อง
-    selectedRoom?.NotiOnInvalid ?? 'option1',           // สลิป ถูกใช้งานแล้ว
-    selectedRoom?.NotiOnInvalidUnverified ?? 'option1',       // สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode
-    selectedRoom?.NotiOnInvalidReceiverBankAccount ?? 'option1',  // สลิป ผู้รับเงินไม่ตรง
-    selectedRoom?.NotiOnInvalidMinAmount ?? 'option1',     // ยอดโอนต่ำกว่ากำหนด
-    selectedRoom?.NotiOnQuotaLimitExceed ?? 'option1',    // การแจ้งเตือนเติมโควตาและต่ออายุ
-    selectedRoom?.NotiOnSlipDuplicated ?? 'option2' ,
-    selectedRoom?.TransactionSummary ?? 'option2'        // สรุปยอดสาขารายวัน
+    selectedRoom?.NotiOnValid ?? 'LINE_GROUP',         // สลิป ถูกต้อง
+    selectedRoom?.NotiOnInvalid ?? 'LINE_GROUP',           // สลิป ถูกใช้งานแล้ว
+    selectedRoom?.NotiOnInvalidUnverified ?? 'LINE_GROUP',       // สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode
+    selectedRoom?.NotiOnInvalidReceiverBankAccount ?? 'LINE_GROUP',  // สลิป ผู้รับเงินไม่ตรง
+    selectedRoom?.NotiOnInvalidMinAmount ?? 'LINE_GROUP',     // ยอดโอนต่ำกว่ากำหนด
+    selectedRoom?.NotiOnQuotaLimitExceed ?? 'LINE_GROUP',    // การแจ้งเตือนเติมโควตาและต่ออายุ
+    selectedRoom?.NotiOnSlipDuplicated ?? 'LINE_GROUP' ,
+    selectedRoom?.TransactionSummary ?? 'LINE_GROUP'        // สรุปยอดสาขารายวัน
   ];
     console.log(qrcanvas1)
     console.log(selectedRoom,selectedOptions)
@@ -629,12 +647,94 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
   const decoder = new TextDecoder();
   return decoder.decode(decryptedBytes);
 }
+
+let currentPage = 0;
+
+let windowWidth;
+
+  function handleResize() {
+    windowWidth = window.innerWidth;
+  }
+  $: roomsPerPage = windowWidth < 768 ? 1 : 3;
+
+  // Reactive statement to calculate total pages
+  $: totalPages = Math.ceil(rooms.length / roomsPerPage);
+
+  // Reactive statement to get visible rooms for current page
+  $: visibleRooms = rooms.slice(
+    currentPage * roomsPerPage, 
+    (currentPage * roomsPerPage) + roomsPerPage
+  );
+
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let mouseStartX = 0;
+  let isMouseDown = false;
+
+
+  // Touch Event Handlers
+  function handleTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+  }
+
+  function handleTouchMove(e) {
+    touchEndX = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd() {
+    const diffX = touchStartX - touchEndX;
+    
+    // Minimum swipe distance
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0 && currentPage < totalPages - 1) {
+        // Swipe left, go to next page
+        currentPage++;
+      } else if (diffX < 0 && currentPage > 0) {
+        // Swipe right, go to previous page
+        currentPage--;
+      }
+    }
+  }
+
+  // Mouse Event Handlers
+  function handleMouseDown(e) {
+    isMouseDown = true;
+    mouseStartX = e.clientX;
+  }
+
+  function handleMouseMove(e) {
+    if (!isMouseDown) return;
+  }
+
+  function handleMouseUp(e) {
+    if (!isMouseDown) return;
+    
+    const diffX = mouseStartX - e.clientX;
+    
+    // Minimum swipe distance
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0 && currentPage < totalPages - 1) {
+        // Swipe left, go to next page
+        currentPage++;
+      } else if (diffX < 0 && currentPage > 0) {
+        // Swipe right, go to previous page
+        currentPage--;
+      }
+    }
+    
+    isMouseDown = false;
+  }
+
+  function handleMouseLeave() {
+    isMouseDown = false;
+  }
 </script>
 
 <div class="flex justify-center bg-primary-foreground min-h-screen px-5 py-0  sm:py-5  xl:px-24 lg:py-5 xl:py-10 ">
     
     <div class="container max-w-screen-xl  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow mt-5 sm:mt-0  lg:mt-0">
-    <Carousel.Root  class="mt-5" >
+    <!-- <Carousel.Root  class="mt-5" >
       <div  class="flex justify-end">
         {#if hasPermission}
         <button on:click={() => goto('/rooms')} class="cursor-pointer flex items-center justify-center bg-gray-400 text-white p-2 rounded-md transition hover:bg-gray-500 hover:scale-105  duration-200 ease-in-out">
@@ -645,10 +745,11 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
           </button>
     {/if}</div>
       <Carousel.Content  >
-        {#each rooms as rooms}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        {#each rooms as rooms, index}
+       
+
         <Carousel.Item  class="md:basis-1/1 lg:basis-1/3" >
+
           <div
           class="  p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md" on:click={() => handleRoomClick(rooms.Id)}
         >
@@ -661,7 +762,7 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
             </div>
           </div>
           <div class="mx-2">
-            <div class=" text-slate-400">Line Group</div>
+            <div class=" text-slate-400">LINE GROUP</div>
             <div class="   font-semibold   text-xl max-w-28 sm:max-w-full truncate ">
                 {rooms.RoomName}
 
@@ -674,10 +775,90 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
   {/each}
 
       </Carousel.Content>
+      <div class="flex justify-center w-full py-2 gap-2">
+        {#each rooms as _, index}
+          <button class="btn btn-xs btn-circle" data-carousel-dot={index}>
+
+          </button>
+        {/each}
+      </div>
       <Carousel.Previous />
       <Carousel.Next />
-    </Carousel.Root>
+    </Carousel.Root> -->
+    <div class="flex justify-end mb-4">
+      {#if hasPermission}
+        <button 
+          on:click={() => goto('/rooms')} 
+          class="cursor-pointer flex items-center justify-center bg-gray-400 text-white p-2 rounded-md transition hover:bg-gray-500 hover:scale-105 duration-200 ease-in-out"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 32 32">
+            <path fill="black" d="M16 2A14.173 14.173 0 0 0 2 16a14.173 14.173 0 0 0 14 14a14.173 14.173 0 0 0 14-14A14.173 14.173 0 0 0 16 2m8 15h-7v7h-2v-7H8v-2h7V8h2v7h7Z" />
+            <path fill="none" d="M24 17h-7v7h-2v-7H8v-2h7V8h2v7h7z" />
+          </svg>
+        </button>
+      {/if}
+    </div>
+            
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div 
+      class="relative w-full overflow-hidden touch-pan-y select-none" 
+      on:touchstart={handleTouchStart}
+      on:touchmove={handleTouchMove}
+      on:touchend={handleTouchEnd}
+      on:mousedown={handleMouseDown}
+      on:mousemove={handleMouseMove}
+      on:mouseup={handleMouseUp}
+      on:mouseleave={handleMouseLeave}
+    >
+      <div 
+        class="flex transition-transform duration-300 cursor-grab active:cursor-grabbing" 
+        style="transform: translateX(-{currentPage * 100}%);"
+      >
+        {#each Array(totalPages) as _, pageIndex}
+          <div class="w-full flex-shrink-0">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {#each visibleRooms as room}
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <div class="w-full">
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <div 
+                    class="w-full p-4 bg-white border border-gray-200 shadow-md cursor-pointer"
+                    on:click={() => handleRoomClick(room.Id)}
+                  >
+                    <div class="flex">
+                      <div class="avatar">
+                        <div class="w-full flex justify-center min-w-20 bg-green-800 p-5 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+                            <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="mx-2 flex-1">
+                        <div class="text-slate-400">LINE GROUP</div>
+                        <div class="font-semibold text-xl max-w-28 sm:max-w-full truncate">
+                          {room.RoomName}
+                        </div>
+                        <div>ตรวจสอบไปแล้ว {room.TotalQuotaUsed} ครั้ง</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
     
+      <!-- Navigation Dots -->
+      <div class="flex flex-wrap justify-center mt-4">
+        {#each Array(totalPages) as _, index}
+          <button 
+            class="w-3 h-3 rounded-full mx-2 my-2 {currentPage === index ? 'bg-blue-500' : 'bg-gray-300'}"
+            on:click={() => currentPage = index}
+          ></button>
+        {/each}
+      </div>
+    </div>
     {#if selectedRoom && !showForm}
     <Card.Root class="my-5" >
 			<Card.Content>
@@ -714,9 +895,22 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
             {/if}
               
             </div>
-            <div class=" mx-2 my-5"><div class="canvas-container">
+            <div class=" mx-2 my-5 flex">
+              <div class="canvas-container">
               <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
-            </div></div>
+            </div>
+            <div class="mx-3 font-semibold content-center">
+              <div  class=" text-slate-400">
+                QR LINK สำหรับการใช้ลงทะเบียกลุ่มไลน์สาธารณะ
+              </div>
+              <div >
+                เลขอ้างอิงสาขา
+              </div>
+              <div>
+                #{Id}
+              </div>
+            </div>
+          </div>
             <div>
               <p class=" font-semibold mx-2">บัญชีที่เชื่อมต่อ</p>
               <div class="mx-2">
@@ -758,18 +952,33 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
 									>
 									</div>
 								</div>
+                
           {/each}
           {/if}
                 
               </div>
             </div>
-            <!-- Add any other detailed information you want to display here -->
-             
+            <div class="mx-3 mt-3  font-semibold text-md">
+              <div>
+                <div class=" text-slate-400">สถานะการเชื่อมต่อ</div>
+                <div >{LineGroupId ? 'เชื่อมต่อ' : 'ไม่เชื่อมต่อ'}</div>
+            </div>
+              <div class="my-3">
+                <div class=" text-slate-400">กลุ่มไลน์เชื่อมต่อ</div>
+                <div >{LineGroupId ? LineGroupId : '-'}</div>
+              </div>
+              <div>
+                <div >เลขอ้างอิง</div>
+                <div >#{Id}</div>
+              </div>
+          </div>
           </div>
         </div>
+        
 			</Card.Content>
 		  </Card.Root>
-    
+      
+      
   {/if}
       
   {#if  selectedRoom && showForm }
@@ -803,7 +1012,7 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
             <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
           </div></div>
           <div class="my-3 mx-2">
-            Notion Line Group Id:
+            รหัสอ้างอิงกลุ่มไลน์ :
             <input 
             type="text" 
             placeholder="กรอกข้อมูลที่นี่" 
@@ -929,58 +1138,88 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
             <!-- แถว 1 -->
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[0] === 'LINE OA'}
-                  on:click={() => selectOption(0, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[0] === 'LINE GROUP'}
-                  on:click={() => selectOption(0, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[0] === 'ALL'}
-                  on:click={() => selectOption(0, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <div>
+                        <button
+                            class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                            class:bg-blue-500={selectedOptions[0] === 'LINE_GROUP_PRIVATE'}
+                            on:click={() => selectOption(0, 'LINE_GROUP_PRIVATE')}
+                            class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP_PRIVATE'} 
+                            class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP_PRIVATE'} 
+                        >
+                            <span class={selectedOptions[0] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                        </button>
+                    </div>
+                </div>
+        
+                <div>
+                    <div>
+                        <button
+                            class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                            class:bg-green-500={selectedOptions[0] === 'LINE_GROUP'}
+                            on:click={() => selectOption(0, 'LINE_GROUP')}
+                            class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP'} 
+                            class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP'} 
+                        >
+                            <span class={selectedOptions[0] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                            
+                        </button>
+                    </div>
+                </div>
+                <div >
+                    <button
+                        class="px-4 py-2  rounded-lg"
+                        class:bg-red-500={selectedOptions[0] === 'ALL'}
+                        on:click={() => selectOption(0, 'ALL')}
+                        class:bg-blue-600={selectedOptions[0] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[0] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[0] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
           
             <!-- แถว 2 -->
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[1] === 'LINE OA'}
-                  on:click={() => selectOption(1, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[1] === 'LINE GROUP'}
-                  on:click={() => selectOption(1, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[1] === 'ALL'}
-                  on:click={() => selectOption(1, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-blue-500={selectedOptions[1] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(1, 'LINE_GROUP_PRIVATE')}
+                        class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[1] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-green-500={selectedOptions[1] === 'LINE_GROUP'}
+                        on:click={() => selectOption(1, 'LINE_GROUP')}
+                        class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP'} 
+                        class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP'} 
+                    >
+                        <span class={selectedOptions[1] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[1] === 'ALL'}
+                        on:click={() => selectOption(1, 'ALL')}
+                        class:bg-blue-600={selectedOptions[1] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[1] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[1] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
           
             <!-- แถว 3 - 8 -->
@@ -988,157 +1227,225 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[2] === 'LINE OA'}
-                  on:click={() => selectOption(2, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[2] === 'LINE GROUP'}
-                  on:click={() => selectOption(2, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[2] === 'ALL'}
-                  on:click={() => selectOption(2, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-blue-500={selectedOptions[2] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(2, 'LINE_GROUP_PRIVATE')}
+                        class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[2] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-green-500={selectedOptions[2] === 'LINE_GROUP'}
+                        on:click={() => selectOption(2, 'LINE_GROUP')}
+                        class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP'} 
+                        class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP'} 
+                    >
+                        <span class={selectedOptions[2] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[2] === 'ALL'}
+                        on:click={() => selectOption(2, 'ALL')}
+                        class:bg-blue-600={selectedOptions[2] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[2] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[2] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[3] === 'LINE OA'}
-                  on:click={() => selectOption(3, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[3] === 'LINE GROUP'}
-                  on:click={() => selectOption(3, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[3] === 'ALL'}
-                  on:click={() => selectOption(3, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-blue-500={selectedOptions[3] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(3, 'LINE_GROUP_PRIVATE')}
+                        class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[3] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-green-500={selectedOptions[3] === 'LINE_GROUP'}
+                        on:click={() => selectOption(3, 'LINE_GROUP')}
+                        class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP'} 
+                        class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP'} 
+                    >
+                        <span class={selectedOptions[3] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[3] === 'ALL'}
+                        on:click={() => selectOption(3, 'ALL')}
+                        class:bg-blue-600={selectedOptions[3] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[3] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[3] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[4] === 'LINE OA'}
-                  on:click={() => selectOption(4, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[4] === 'LINE GROUP'}
-                  on:click={() => selectOption(4, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[4] === 'ALL'}
-                  on:click={() => selectOption(4, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-blue-500={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(4, 'LINE_GROUP_PRIVATE')}
+                        class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[4] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-green-500={selectedOptions[4] === 'LINE_GROUP'}
+                        on:click={() => selectOption(4, 'LINE_GROUP')}
+                        class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP'} 
+                        class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP'} 
+                    >
+                        <span class={selectedOptions[4] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[4] === 'ALL'}
+                        on:click={() => selectOption(4, 'ALL')}
+                        class:bg-blue-600={selectedOptions[4] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[4] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[4] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[5] === 'LINE OA'}
-                  on:click={() => selectOption(5, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[5] === 'LINE GROUP'}
-                  on:click={() => selectOption(5, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[5] === 'ALL'}
-                  on:click={() => selectOption(5, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-blue-500={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(5, 'LINE_GROUP_PRIVATE')}
+                        class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[5] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-green-500={selectedOptions[5] === 'LINE_GROUP'}
+                        on:click={() => selectOption(5, 'LINE_GROUP')}
+                        class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP'} 
+                        class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP'} 
+                    >
+                        <span class={selectedOptions[5] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[5] === 'ALL'}
+                        on:click={() => selectOption(5, 'ALL')}
+                        class:bg-blue-600={selectedOptions[5] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[5] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[5] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[6] === 'LINE OA'}
-                  on:click={() => selectOption(6, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[6] === 'LINE GROUP'}
-                  on:click={() => selectOption(6, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[6] === 'ALL'}
-                  on:click={() => selectOption(6, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-blue-500={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(6, 'LINE_GROUP_PRIVATE')}
+                        class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[6] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg lg:flex md:flex sm:flex"
+                        class:bg-green-500={selectedOptions[6] === 'LINE_GROUP'}
+                        on:click={() => selectOption(6, 'LINE_GROUP')}
+                        class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP'} 
+                        class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP'} 
+                    >
+                        <span class={selectedOptions[6] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[6] === 'ALL'}
+                        on:click={() => selectOption(6, 'ALL')}
+                        class:bg-blue-600={selectedOptions[6] === 'ALL'} 
+                        class:bg-gray-300={selectedOptions[6] !== 'ALL'} 
+                    >
+                        <span class={selectedOptions[6] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                    </button>
+                </div>
+            </div>
             </div>
             <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
               <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
               
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[7] === 'LINE OA'}
-                  on:click={() => selectOption(7, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[7] === 'DISABLE'}
-                  on:click={() => selectOption(7, 'DISABLE')}
-                >
-                  ทั้งสอง
-                </button>
-              </div>
+              <div class="flex space-x-2 justify-center items-center">
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-green-500={selectedOptions[7] === 'LINE_GROUP_PRIVATE'}
+                        on:click={() => selectOption(7, 'LINE_GROUP_PRIVATE')}
+                        class:bg-green-600={selectedOptions[7] === 'LINE_GROUP_PRIVATE'} 
+                        class:bg-gray-300={selectedOptions[7] !== 'LINE_GROUP_PRIVATE'} 
+                    >
+                        <span class={selectedOptions[7] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                    </button>
+                </div>
+                <div>
+                    <button
+                        class="px-4 py-2 rounded-lg"
+                        class:bg-red-500={selectedOptions[7] === 'DISABLE'}
+                        on:click={() => selectOption(7, 'DISABLE')}
+                        class:bg-red-600={selectedOptions[7] === 'DISABLE'} 
+                        class:bg-gray-300={selectedOptions[7] !== 'DISABLE'} 
+                    >
+                        <span class={selectedOptions[7] === 'DISABLE' ? 'text-white' : 'text-black'}>ปิด</span>
+                    </button>
+                </div>
+            </div>
             </div>
             <!-- คุณสามารถทำซ้ำรูปแบบด้านบนและแก้ไขตัวแปรใน `selectedOptions` ให้เหมาะสม -->
              <button 
@@ -1207,3 +1514,4 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
 		<button>close</button>
 	</form>
 </dialog>
+

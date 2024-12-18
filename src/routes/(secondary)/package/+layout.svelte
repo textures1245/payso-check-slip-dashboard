@@ -53,7 +53,7 @@
 	<Separator />
 
 
-		<div >
+		<div class="pt-10">
 			<slot></slot>
 		</div>
 

@@ -175,18 +175,18 @@ let QrToken: string | null = null;
 		imageUrl: 'https://csrgroup.co.th/img/Client258-6.png'
 	}
 	];
+
     onMount(async () => {
 		//////////////////// เพิ่มมาเพราะ Production ไม่สามารถอ่าน ไฟ .jsได้
 		
 		try {
-			const bank = await GetBankLink();
+			const bank = await GetBankLink(offset,limit);
       const room = await GetRoomLink();
 			// Use profileData here
 
 			banks = bank;
       rooms=room;
 
-      
 
 		} catch (error) {
 			console.error('Error fetching profile:', error);
@@ -223,13 +223,13 @@ let QrToken: string | null = null;
 		return cookie.parse(document.cookie);
 	}
 
-  const GetBankLink = async () => {
+  const GetBankLink = async (offset:number,limit:number) => {
 		// const email = sessionStorage.getItem('email');
 		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
 		const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 
-		console.log('++++++++++', myCookie.Id, myCookie.Email);
+		console.log('++++++++++', offset, myCookie.Email);
 		// console.log('email: ', email, 'id: ', id , );
 
 		// Create URL parameters from form data
@@ -244,7 +244,7 @@ let QrToken: string | null = null;
 		let url;
 		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
-			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}`;
+			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}/${offset}/${limit}`;
 		} else {
 			throw new Error('Neither email nor id is provided.');
 		}
@@ -252,6 +252,16 @@ let QrToken: string | null = null;
 		const result = await fetch(url, config);
 		const data = await result.json();
 		console.log('Link Line', data);
+    if (data.result && data.result.length > 0) {
+  count = data.result[0].TotalCount;
+  totalPages = Math.ceil(count / limit);
+} else {
+  // กรณีที่ไม่มีข้อมูล
+  count = 0;
+  totalPages = 1;
+  // หรือสามารถตั้งค่า default value หรือข้อความแจ้งเตือนตามที่ต้องการ
+  console.log('ไม่มีข้อมูล');
+}
 		return data.result || [];
 	};
   const GetRoomLink = async () => {
@@ -288,27 +298,7 @@ let QrToken: string | null = null;
     
 	};
 
-  // const GetBankLinkRoom = async (roomId:string) => {
-	// 	let config = {
-	// 		method: 'GET', // Use GET instead of POST
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 			'ngrok-skip-browser-warning': 'true'
-	// 		}
-	// 	};
 
-	// 	let url;
-	// 	if (roomId) {
-	// 		url = `${PUBLIC_API_ENDPOINT}/room/bank/${roomId}`;
-	// 	} else {
-	// 		throw new Error('Neither email nor id is provided.');
-	// 	}
-
-	// 	const result = await fetch(url, config);
-	// 	const data = await result.json();
-	// 	console.log('Bank Link Room', data);
-	// 	return data.result || [];
-	// };
   function getBankImage(bankCode: string) {
 		const bank = bankchecks.find((b) => b.code === bankCode);
 		return bank ? bank.imageUrl : 'https://spoynt.com/wp-content/uploads/2023/12/promtpay-qr.png'; // กรณีไม่พบจะใช้ภาพ default
@@ -320,69 +310,13 @@ let QrToken: string | null = null;
   let selectedRoom: Room | null = null;
   let bankLinkRoom : any[]=[];
 
-  // async function handleRoomClick(roomId: any) {
-  //   showForm = false;
-  //   selectedRoom = rooms.find(r => r.Id === roomId);
-  //   const bank = await GetBankLinkRoom(roomId);
-  //   QrToken=selectedRoom?.QrToken ?? null
-  //   bankLinkRoom = bank
-  //   selectedBankAccounts = bank
-  //   if (QrToken) {
-  //       await handleGenerate();
-  //   }
-  //   console.log(selectedRoom,roomId,bank,QrToken)
-  // }
-  // let showForm = false;
-  // let CheckedHideReceiverDetail = false
-  // let CheckedHideSenderDetail  = false
-  // const toggleForm =async (roomId: any) => {
-  //   showForm = !showForm; // เปลี่ยนสถานะของ showForm
-  //   selectedRoom  = rooms.find(r => r.Id === roomId);
-  //   paymentAmount = selectedRoom?.MinAmountReceive ?? 0;
-  //   CheckedHideSenderDetail = selectedRoom?.HideSenderDetail?? false;
-  //   CheckedHideReceiverDetail = selectedRoom?.HideReceiverDetail?? false;
-  //   selectedOptions = [
-  //   selectedRoom?.NotiOnValid ?? 'option1',         // สลิป ถูกต้อง
-  //   selectedRoom?.NotiOnInvalid ?? 'option1',           // สลิป ถูกใช้งานแล้ว
-  //   selectedRoom?.NotiOnInvalidUnverified ?? 'option1',       // สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode
-  //   selectedRoom?.NotiOnInvalidReceiverBankAccount ?? 'option1',  // สลิป ผู้รับเงินไม่ตรง
-  //   selectedRoom?.NotiOnInvalidMinAmount ?? 'option1',     // ยอดโอนต่ำกว่ากำหนด
-  //   selectedRoom?.NotiOnQuotaLimitExceed ?? 'option1',    // การแจ้งเตือนเติมโควตาและต่ออายุ
-  //   selectedRoom?.NotiOnSlipDuplicated ?? 'option2' ,
-  //   selectedRoom?.TransactionSummary ?? 'option2'        // สรุปยอดสาขารายวัน
-  // ];
-  //   console.log(qrcanvas1)
-  //   console.log(selectedRoom,selectedOptions)
-  // }
- 
-  //////////////////////gen Qrcode
+
   let qrcanvas1: HTMLCanvasElement;
   let encryptedData: string = '';
   let errorMessage: string = '';
   const encryptData = (data: string): string | null => {
     try {
-      // console.log('Encrypting data:', data);
-      // const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY); // ทำให้แน่ใจว่าเป็นคีย์ที่มีขนาด 256 บิต
-      // const encrypted = CryptoJS.AES.encrypt(data, key, { mode: CryptoJS.mode.ECB}).toString();
-      // console.log('Encrypted result:', encrypted);
-      // return encrypted;
-
-      // console.log('Encrypting data:', data);
-        
-      //   // แปลง key เป็นรูปแบบที่ถูกต้อง
-      //   const key = CryptoJS.enc.Utf8.parse(PUBLIC_SECRETKEY);
-        
-      //   // เข้ารหัสและแปลงเป็น Base64
-      //   const encrypted = CryptoJS.AES.encrypt(data, key, { 
-      //       mode: CryptoJS.mode.ECB,
-      //       padding: CryptoJS.pad.Pkcs7
-      //   });
-        
-      //   // แปลงผลลัพธ์เป็น Base64 string
-      //   const base64Result = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
-        
-      //   console.log('Encrypted result:', base64Result);
-      //   return base64Result;
+      
       console.log(data,CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data)))
 
       return CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(data));
@@ -436,125 +370,7 @@ let QrToken: string | null = null;
   };
 
   
-  /////////////////////////////////////////
 
-  // const increaseAmount = () => {
-  //   paymentAmount += 1; // เพิ่มจำนวนเงินทีละ 1
-  // };
-
-  // const decreaseAmount = () => {
-  //   if (paymentAmount > 0) {
-  //     paymentAmount -= 1; // ลดจำนวนเงินทีละ 1 ถ้าจำนวนเงินไม่ต่ำกว่าขั้นต่ำ
-  //   }
-  // };
-
-
-  let selectedOptions = Array(8).fill(null);
-
-  // ฟังก์ชันสำหรับเลือกตัวเลือก
-  // function selectOption(row: number, option: string) {
-  //   selectedOptions[row] = option;
-  //   console.log(selectedOptions)
-  // }
-
-  // function Update() {
-  //   const cookies = getCookies();
-	// 	const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-  //   const updateData = {
-  //   // ชื่อห้อง
-  //   Id  : selectedRoom?.Id,
-  //   RoomName: selectedRoom?.RoomName,
-  //   MerchantId:parseInt(myCookie.Id),
-  //   // บัญชีที่เชื่อมต่อ - กรองเฉพาะบัญชีที่ถูกเลือก (checked)
-  //   // linkedAccounts: selectedBankAccounts,
-  //   NotiOnLineGroupId:selectedRoom?.NotiOnLineGroupId,
-  //   // ยอดเงินขั้นต่ำ
-  //   MinAmountReceive: paymentAmount,
-    
-  //   // การตั้งค่าการซ่อนข้อมูล
-
-  //   HideSenderDetail: CheckedHideSenderDetail,
-  //     HideReceiverDetail: CheckedHideReceiverDetail,
-
-    
-  //   // การตั้งค่าการแจ้งเตือน Line
-
-  //   NotiOnValid: selectedOptions[0],           // สลิปถูกต้อง
-  //   NotiOnInvalid: selectedOptions[1],            // สลิปถูกใช้งานแล้ว
-  //   NotiOnInvalidReceiverBankAccount: selectedOptions[2],         // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
-  //   NotiOnInvalidUnverified: selectedOptions[3],      // สลิปผู้รับเงินไม่ตรง
-  //   NotiOnInvalidMinAmount: selectedOptions[4],        // ยอดโอนต่ำกว่ากำหนด
-  //   NotiOnQuotaLimitExceed: selectedOptions[5],     // การแจ้งเตือนเติมโควตาและต่ออายุ
-  //   NotiOnSlipDuplicated:selectedOptions[6],
-  //   TransactionSummary: selectedOptions[7]   // สรุปยอดสาขารายวัน
-
-  // };
-  // console.log(updateData)
-  // UpdateRoom(updateData,selectedBankAccounts)
-
-  // }
-  let selectedBankAccounts: any[] = [];
-//   const handleBankSelection = (bank: { AccountNo: any; }, isChecked: any) => {
-//   if (isChecked) {
-//     selectedBankAccounts = [...selectedBankAccounts, bank];
-//   } else {
-//     selectedBankAccounts = selectedBankAccounts.filter(acc => acc.AccountNo !== bank.AccountNo);
-//   }
-// };
-
-// const handleSenderToggle = () => {
-//   CheckedHideSenderDetail = !CheckedHideSenderDetail;
-// };
-
-// // handler สำหรับ receiver
-// const handleReceiverToggle = () => {
-//   CheckedHideReceiverDetail = !CheckedHideReceiverDetail;
-// };
-
-// const UpdateRoom = async (dataupdate:any,bankData:any[][]) => {
-//   const cookies = getCookies();
-//   const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-//   const bankIds = bankData.map(bank => bank.Id);
-//   console.log('data', dataupdate,bankIds);
-//   const requestBody = {
-//             rooms: dataupdate,
-//             bank: bankIds,
-//             email:myCookie.Email
-//         };
-// 		let config = {
-// 			method: 'PUT', // Use GET instead of POST
-// 			headers: {
-// 				'Content-Type': 'application/json',
-// 				'ngrok-skip-browser-warning': 'true'
-// 			},
-//       body: JSON.stringify(
-//   requestBody),
-// 		};
-
-// 		let url;
-// 		if (dataupdate) {
-// 			url = `${PUBLIC_API_ENDPOINT}/updateroom`;
-// 		} else {
-// 			throw new Error('Neither email nor id is provided.');
-// 		}
-
-// 		const result = await fetch(url, config);
-// 		const data = await result.json();
-//     if (data.message == 'permission denied') {
-// 				const modal = document.getElementById('my_modal_4');
-// 				if (modal) {
-// 					modal.showModal();
-// 				}
-// 				return false;
-// 			}else {
-// 				const modal = document.getElementById('my_modal_3');
-// 				if (modal) {
-// 					modal.showModal();
-// 				}
-// 		      return data.result;
-// 			}
-		
-// 	};
 
   async function handleCheckboxChange(event: { target: { checked: boolean } }, id: any) {
 		const isChecked = event.target.checked;
@@ -621,48 +437,6 @@ let QrToken: string | null = null;
 		}
 	};
 
-  // const DeleteBankLink = async (id: String) => {
-	// 	// Create configuration for the fetch request
-	// 	const cookies = getCookies();
-	// 	const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-	// 	console.log('++++++++++', myCookie.Id, myCookie.Email);
-	// 	let config = {
-	// 		method: 'DELETE', // Use GET method
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 			'ngrok-skip-browser-warning': 'true'
-	// 		}
-	// 	};
-
-	// 	try {
-	// 		// Make the fetch request
-	// 		const type = myCookie.Type || 'PaySo';
-	// 		const result = await fetch(
-	// 			`${PUBLIC_API_ENDPOINT}/delete/bankdata/${id}/${myCookie.Email}/${type}/${myCookie.Id}`,
-	// 			config
-	// 		);
-	// 		const datas = await result.json();
-	// 		console.log(datas.message);
-	// 		if (datas.message != 'permission denied') {
-	// 			banks = banks.filter((item) => String(item.Id) !== String(id));
-	// 			console.log('banks ', banks);
-	// 			const modal = document.getElementById('my_modal_1');
-	// 			modal.close();
-	// 		} else {
-	// 			const modal = document.getElementById('my_modal_4');
-	// 			if (modal) {
-	// 				modal.showModal();
-	// 			}
-	// 		}
-	// 	} catch (error) {
-	// 		console.error('Error fetching transaction data:', error);
-	// 	}
-	// };
-
-  // function handleInput(event: { target: { value: string; }; }) {
-  //       // Only allow alphanumeric characters
-  //       selectedRoom.NotiOnLineGroupId = event.target.value.replace(/[^A-Za-z0-9]/g, "");
-  //   }
 
     async function maskMiddle(accountNumber: string) {
     try {
@@ -724,13 +498,56 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
   return decoder.decode(decryptedBytes);
 }
 
+let count=0;
+	let offset = 0;
+	let limit = 5;
+	let totalPages = 1
+	let currentPage = 1;
+  async function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    offset -= limit;
+    // Ensure that the GetBankLink function is awaited correctly
+    banks = await GetBankLink(offset, limit);
+    scrollToTop()
+    dispatchEvent(new CustomEvent('pageChange', { 
+      detail: { page: currentPage }
+    }));
+  }
+}
 
-</script>
-<div class="flex justify-center bg-primary-foreground min-h-screen px-5 py-0  sm:py-5  xl:px-24 lg:py-5 xl:py-10 ">
+async function nextPage() {
+  if (currentPage < totalPages) {
+    currentPage++;
+    offset += limit;
+    console.log("++++", offset);
+    // Ensure that the GetBankLink function is awaited correctly
     
-    <div class="container max-w-screen-xl  pt-1 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow mt-5 sm:mt-0  lg:mt-0">
-      <div class="flex   justify-evenly gap-5 mt-5 sm:mt-0 lg:mt-0">
-        <!-- Card ธนาคาร -->
+    banks = await GetBankLink(offset, limit);
+    scrollToTop()
+    dispatchEvent(new CustomEvent('pageChange', { 
+      detail: { page: currentPage }
+    }));
+  }
+}
+
+function scrollToTop() {
+  const carousel = document.querySelector('.carousel-content');
+  if (carousel) {
+    carousel.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  } else {
+    console.error('Carousel not found');
+  }
+}
+</script>
+<div class="bg-primary-foreground min-h-screen px-5 py-5  sm:py-5  xl:px-24 lg:py-5 xl:pt-10 ">
+    
+    <div class="container max-w-screen-xl  pt-5 sm:pt-5 lg:pt-5 mx-auto bg-white rounded-2xl shadow  ">
+      <div class="flex   justify-evenly gap-5 mt-5 sm:mt-0 lg:mt-0 ">
+
         <div class="w-full sm:w-auto  ">
           <Card.Root class={`w-full min-w-[100px] h-[100px] sm:h-[100px] lg:h-[100px] cursor-pointer 
             transition-all duration-200
@@ -754,39 +571,20 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
           </Card.Root>
         </div>
   
-        <!-- Card พร้อมเพย์ -->
-        <!-- <div class="w-full sm:w-auto">
-          <Card.Root class={`w-full min-w-[100px] h-[100px] sm:h-[100px] lg:h-[100px] cursor-pointer 
-            transition-all duration-200
-            ${selectedMethod === 'promptpay' 
-              ? 'border-4 border-[#477DFF] bg-[#F0F4FF]' 
-              : 'border border-[#EAECF0]'}`} on:click={showPromptPayForm}>
-            <Card.Content class="px-5 h-full content-center">
-              <div class="flex justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="50px" height="50px" viewBox="0 0 24 24" {...$$props}>
-                  <g fill="none" stroke="black">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.5 21v-5a1 1 0 0 0-1-1h-3a1 1 0 0 0-1 1v5" />
-                    <path d="M5 11v6c0 1.886 0 2.828.586 3.414S7.114 21 9 21h6c1.886 0 2.828 0 3.414-.586S19 18.886 19 17v-6M4.621 4.515c.182-.728.273-1.091.544-1.303C5.437 3 5.812 3 6.562 3h10.876c.75 0 1.125 0 1.397.212c.27.212.362.575.544 1.303l1.203 4.814c.097.388.146.581.135.739a1 1 0 0 1-.69.883c-.15.049-.354.049-.763.049c-.533 0-.8 0-1.023-.052a2 2 0 0 1-1.393-1.18c-.089-.212-.132-.47-.217-.983c-.024-.144-.036-.216-.05-.235a.1.1 0 0 0-.162 0c-.014.019-.026.09-.05.235l-.081.489l-.018.1A2 2 0 0 1 14.352 11h-.204a2 2 0 0 1-1.936-1.726l-.081-.49c-.024-.143-.036-.215-.05-.234a.1.1 0 0 0-.162 0c-.014.019-.026.09-.05.235l-.081.489l-.018.1A2 2 0 0 1 9.852 11h-.204A2 2 0 0 1 7.73 9.374l-.018-.1l-.081-.49c-.024-.143-.036-.215-.05-.234a.1.1 0 0 0-.162 0c-.014.019-.026.09-.05.235c-.085.514-.128.77-.217.983a2 2 0 0 1-1.392 1.18C5.536 11 5.27 11 4.736 11c-.409 0-.613 0-.763-.049a1 1 0 0 1-.69-.883c-.01-.158.038-.351.135-.739z" />
-                  </g>
-                </svg>
-              </div>
-              <div class="text-center">ห้อง</div>
-            </Card.Content>
-          </Card.Root>
-          
-        </div> -->
+       
         
       </div>
     {#if isBankSelected}
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="my-5 grid grid-cols-1 lg:px-5" >
+    
+    <div class="mt-5 grid grid-cols-1 lg:px-5 " >
         <div class=" w-full">
             <div class=" font-semibold my-3">บัญชีธนาคาร</div>
             </div>
-            <Carousel.Root >
-              <Carousel.Content>
+            <!-- <Carousel.Root class="overflow-y-auto h-96 overflow-x-hidden " > -->
+				<Carousel.Root  >
+              <Carousel.Content class="carousel-content flex flex-col">
                 {#each banks as banks}
-                <Carousel.Item class="md:basis-1/2 lg:basis-1/4">
+                <Carousel.Item class="flex-shrink-0 h-1/3 mx-2">
 								<div
 									class="  p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md"
 								>
@@ -837,59 +635,12 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
                   {:catch error}
                     <div class="text-red-500">Error: {error.message}</div>
                   {/await}
-                    <!-- <div class="flex justify-end">
-                      <div class="content-end"><button
-                        class="dropdown dropdown-bottom flex flex-col justify-center mx-3 bg-none items-center"
-                        on:click={(event) => DeleteBankLink(banks.Id)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="#ff0000"
-                            d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z"
-                          />
-                        </svg>
-                      </button>
-                    </div></div> -->
+                   
                   </div>
 
                 <div>
                   
-									<!-- svelte-ignore a11y-click-events-have-key-events -->
-									<!-- svelte-ignore a11y-no-static-element-interactions -->
-									<!-- <div
-										class="dropdown dropdown-bottom flex flex-row justify-end bg-none my-2 mx-2 items-center col-span-2"
-									>
-										<input
-											type="checkbox"
-											value="synthwave"
-											class="toggle theme-controller toggle-success"
-											id="menuToggle"
-											checked={banks.Active}
-										/>
-
-										<button
-											class="dropdown dropdown-bottom flex flex-col justify-center bg-none my-2 ml-3 items-center"
-											
-										>
-
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												width="30"
-												height="30"
-												viewBox="0 0 24 24"
-											>
-												<path
-													fill="#ff0000"
-													d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zm2-4h2V8H9zm4 0h2V8h-2z"
-												/>
-											</svg>
-										</button>
-									</div> -->
+								
                   
 								</div>
                 
@@ -897,543 +648,71 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
 							{/each}
               
               </Carousel.Content>
-              <Carousel.Previous />
-              <Carousel.Next  />
-            </Carousel.Root>
-            
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="relative w-full h-32 "  on:click={() => {
-            goto('/banklink');
-        }}>
-            <!-- Background and overlay -->
-            <div class="absolute inset-0 overflow-hidden flex items-center  justify-center  bg-slate-50">
-              <svg width="400" height="400" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="60" y="80" width="120" height="80" rx="8" fill="#E2E8F0" opacity="0.5" />
-                <rect x="70" y="100" width="80" height="10" rx="2" fill="#CBD5E1" />
-                <rect x="70" y="120" width="40" height="10" rx="2" fill="#CBD5E1" />
-                <circle cx="150" cy="125" r="15" fill="#CBD5E1" />
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
-              <path fill="#0055ff" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z" />
-            </svg>
-            </div>
-            
-            <!-- Floating button -->
-            <div class="relative h-full flex items-center justify-center  ">
-              <button class="w-full py-4 px-6 flex items-center gap-3 bg-[#ceddf9] hover:bg-[#b5c9ef] transition-colors relative"
-                 >
-                 <div class="w-full flex justify-center ">
-                  <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                      <Plus class="w-5 h-5 text-white" />
-                  </div>
-                  <span class="text-blue-600 font-medium content-center mx-2">สร้างบัญชีธนาคารเพิ่ม</span>
-                </div>
-              </button>
-            </div>
-          </div>
-          </div>
-    {/if}
-    <!-- {#if isRoomSelected}
-
-    <Carousel.Root  class="mt-5" >
-      <div  class="flex justify-end"><a href="/rooms"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 32 32" {...$$props}>
-        <path fill="black" d="M16 2A14.173 14.173 0 0 0 2 16a14.173 14.173 0 0 0 14 14a14.173 14.173 0 0 0 14-14A14.173 14.173 0 0 0 16 2m8 15h-7v7h-2v-7H8v-2h7V8h2v7h7Z" />
-        <path fill="none" d="M24 17h-7v7h-2v-7H8v-2h7V8h2v7h7z" />
-      </svg></a></div>
-      <Carousel.Content  >
-        {#each rooms as rooms}
-   
-
-        <Carousel.Item  class="md:basis-1/1 lg:basis-1/3" >
-          <div
-          class="  p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md" on:click={() => handleRoomClick(rooms.Id)}
-        >
-        <div class="flex ">
-          <div class="avatar ">
-            <div class="w-full  flex justify-center min-w-20    bg-green-800 p-5 rounded-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" {...$$props}>
-                <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
-              </svg>
-            </div>
-          </div>
-          <div class="mx-2">
-            <div class=" text-slate-400">Line Group</div>
-            <div class="   font-semibold   text-xl max-w-28 sm:max-w-full truncate ">
-                {rooms.RoomName}
-
-            </div>
-            <div>ตรวจสอบไปแล้ว {rooms.TotalQuotaUsed} ครั้ง</div>
-          </div>
-        </div>
-        </div>
-      </Carousel.Item>
-  {/each}
-
-      </Carousel.Content>
-      <Carousel.Previous />
-      <Carousel.Next />
-    </Carousel.Root>
-    
-    {#if selectedRoom && !showForm}
-    <Card.Root class="my-5" >
-			<Card.Content>
-				<div class="my-5 grid grid-cols-1 lg:px-5" >
-          <div class="w-full  ">
-            <div class="flex mx-2">
-              <div class="avatar ">
-                <div class="w-full  flex justify-center min-w-15 content-center    bg-green-800 p-3 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
-                    <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
-                  </svg>
-                </div>
-              </div>
-              <div class="mx-2">
-                <div class=" text-slate-400">สาขา</div>
-                <div class="font-semibold text-xl max-w-28 sm:max-w-full truncate" >
-                    {selectedRoom.RoomName}
-                </div>
-              </div>
-
-              <div class="flex justify-end w-full items-center">
-
-                <div on:click={() => {
-                 toggleForm(selectedRoom?.Id);
-              }} ><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
-                  <path fill="black" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5" />
-                </svg></div></div>
-              
-            </div>
-            <div class=" mx-2 my-5"><div class="canvas-container">
-              <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
-            </div></div>
-            <div>
-              <p class=" font-semibold mx-2">บัญชีที่เชื่อมต่อ</p>
-              <div class="mx-2">
-                {#if bankLinkRoom}
-                {#each bankLinkRoom as bankLinkRoom}
-                <div
-									class="flex border my-2 border-gray-300 rounded-lg"
-								>
-									<div class="avatar">
-										<div class="w-10 rounded-full mx-2 my-2">
-											{#if  bankLinkRoom.TypeAccount === 'BANK' || bankLinkRoom.TypeAccount === 'Bank'}
-												<img src={getBankImage(bankLinkRoom.BankCode)} alt="Bank Image" loading="lazy" />
-											{:else}
-												<img
-													src="https://spoynt.com/wp-content/uploads/2023/12/promtpay-qr.png"
-													alt={bankLinkRoom.NameTH}
-													loading="lazy"
-												/>
-											{/if}
-										</div>
-                    
-									</div>
-									<div class=" col-span-2 content-center">
-									<div class=" font-semibold">
-                    {bankLinkRoom.NameTH}
-                  </div>
-                  <div class=" text-slate-400">
-                    {maskMiddle(bankLinkRoom.AccountNo)}
-                  </div>
-									</div>
-
-									<div
-										class="dropdown dropdown-bottom flex flex-row justify-end bg-none my-2 mx-2 items-center col-span-2"
-									>
-									</div>
-								</div>
-          {/each}
-          {/if}
-                
-              </div>
-            </div>
-
              
+            </Carousel.Root>
+            <div class="flex justify-between my-2 mb-5">
+				<div class="content-center mx-2">
+				<span class="text-gray-700  font-semibold text-sm">
+				  หน้า {currentPage} จากทั้งหมด {totalPages}
+				  </span>
+				 </div>
+				 <div class=" mx-2">
+				<button
+				  class="join-item btn btn-sm bg-blue-500 text-white px-2 py-0 rounded-lg hover:bg-blue-600 focus:outline-none disabled:bg-gray-300 disabled:cursor-not-allowed"
+				  on:click={() => prevPage()}
+				  disabled={currentPage === 1}
+				>
+				  « ย้อนกลับ
+				</button>
+				
+				<button
+				  class="join-item btn btn-sm bg-blue-500 text-white px-2 py-0 rounded-lg hover:bg-blue-600 focus:outline-none disabled:bg-gray-300 disabled:cursor-not-allowed"
+				  on:click={() => nextPage()}
+				  disabled={currentPage === totalPages}
+				>
+				  ถัดไป »
+				</button>
+			  </div>
+				</div>
+       
+          
           </div>
-        </div>
-			</Card.Content>
-		  </Card.Root>
+		  <!-- svelte-ignore a11y-click-events-have-key-events -->
+		  <!-- svelte-ignore a11y-no-static-element-interactions -->
+		  <div class="relative w-full  max-w-[70vw]  h-20  sticky bottom-0 mx-auto"  on:click={() => {
+			goto('/banklink');
+		}}>
+			
+			<div class="absolute inset-0 overflow-hidden flex items-center  justify-center  bg-slate-50">
+			  <svg width="400" height="400" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<rect x="60" y="80" width="120" height="80" rx="8" fill="#E2E8F0" opacity="0.5" />
+				<rect x="70" y="100" width="80" height="10" rx="2" fill="#CBD5E1" />
+				<rect x="70" y="120" width="40" height="10" rx="2" fill="#CBD5E1" />
+				<circle cx="150" cy="125" r="15" fill="#CBD5E1" />
+			</svg>
+			<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...$$props}>
+			  <path fill="#0055ff" d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z" />
+			</svg>
+			</div>
+			
+			
+			<div class="relative h-full flex items-center justify-center  ">
+			  <button class="w-full py-2 px-6 flex items-center gap-3 bg-[#ceddf9] hover:bg-[#b5c9ef] transition-colors relative"
+				 >
+				 <div class="w-full flex justify-center ">
+				  <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+					  <Plus class="w-5 h-5 text-white" />
+				  </div>
+				  <span class="text-blue-600 font-medium content-center mx-2">สร้างบัญชีธนาคารเพิ่ม</span>
+				</div>
+			  </button>
+			</div>
+		  </div>
+    {/if}
     
-  {/if}
-      
-  {#if  selectedRoom && showForm }
-  <Card.Root class="my-5" >
-    <Card.Content>
-      <div class="my-5 grid grid-cols-1 lg:px-5" >
-        <div class="w-full  ">
-          <div class="flex mx-2">
-            <div class="avatar ">
-              <div class="w-full  flex justify-center min-w-15 content-center    bg-green-800 p-3 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
-                  <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
-                </svg>
-              </div>
-            </div>
-            <div class="mx-2 w-full">
-              <div class="font-semibold text-xl w-full sm:max-w-full truncate" >
-                <input 
-      type="text" 
-      placeholder="กรอกข้อมูลที่นี่" 
-      class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
-      bind:value={selectedRoom.RoomName}
-      />
-              </div>
-            </div>
-
-           
-            
-          </div>
-          <div class=" mx-2 my-5"><div class="canvas-container">
-            <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
-          </div></div>
-          <div class="my-3 mx-2">
-            Notion Line Group Id:
-            <input 
-            type="text" 
-            placeholder="กรอกข้อมูลที่นี่" 
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
-            pattern="[A-Za-z0-9]*"
-            bind:value={selectedRoom.NotiOnLineGroupId}
-            on:input={handleInput}
-            />
-          </div>
-          <div>
-            <p class=" font-semibold mx-2">บัญชีที่เชื่อมต่อ</p>
-            <div class="mx-2">
-              {#if banks }
-              {#each banks as banks}
-              {#if banks.Active != false}
-              <div
-                class="flex border my-2 border-gray-300 rounded-lg "
-              >
-                <div class="avatar">
-                  <div class="w-10 rounded-full mx-2 my-2">
-                    {#if  banks.TypeAccount === 'BANK' || banks.TypeAccount === 'Bank'}
-                      <img src={getBankImage(banks.BankCode)} alt="Bank Image" loading="lazy" />
-                    {:else}
-                      <img
-                        src="https://spoynt.com/wp-content/uploads/2023/12/promtpay-qr.png"
-                        alt={banks.NameTH}
-                        loading="lazy"
-                      />
-                    {/if}
-                  </div>
-                </div>
-                <div class="  content-center  w-full">
-                <div class=" font-semibold">
-                  {banks.NameTH}
-                </div>
-                <div class=" text-slate-400">
-                  {maskMiddle(banks.AccountNo)}
-                </div>
-                </div>
-
-                <div class=" content-center flex justify-end items-center lg:mx-2"><input
-                type="checkbox"
-                value="synthwave"
-                class="toggle theme-controller toggle-success"
-                id="menuToggle"
-                checked={bankLinkRoom && Array.isArray(bankLinkRoom) && bankLinkRoom.some(bank => bank.AccountNo === banks.AccountNo)}
-                on:change={(e) => handleBankSelection(banks, e.target.checked)}
-              />
-                </div>
-              </div>
-              {/if}
-        {/each}
-        {/if}
-              
-            </div>
-          </div>
-
-           <div>ตั้งค่า ระบบการตรวจสอบ</div>
-           <div>เตือน ยอดเงินขั่นต่ำ *</div>
-           <div class="relative inline-flex items-center w-full">
-
-
-            <input
-              id="paymentAmount"
-              type="number"
-              bind:value={paymentAmount}
-              min={minPayment}
-              step="1"
-              class="text-start px-5 py-2   border rounded-lg pr-12 pl-10 w-full" 
-            />
-            <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl text-gray-500">
-              ฿
-            </span>
-
-            <button 
-    on:click={decreaseAmount} 
-    class="absolute right-12 top-1/2 transform -translate-y-1/2 text-xl bg-red-500 text-white py-1 px-2 rounded-full"
-  >
-    -
-  </button>
-
-  <button 
-    on:click={increaseAmount} 
-    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xl bg-green-500 text-white py-1 px-2 rounded-full"
-  >
-    +
-  </button>
-          </div>
-          <div class="m-2">
-            <div class="flex justify-between">
-              <div>ซ่อนเลขบัญชีผู้โอน</div>
-              <div> <input
-                type="checkbox"
-                value="synthwave"
-                class="toggle theme-controller toggle-success"
-                id="menuToggle"
-                checked={CheckedHideSenderDetail}
-                on:change={handleSenderToggle}
-              /></div>
-            </div>
-           
-            <div class="flex justify-between">
-              <div>ซ่อนเลขบัญชีผู้รับ</div>
-              <div> <input
-                type="checkbox"
-                value="synthwave"
-                class="toggle theme-controller toggle-success"
-                id="menuToggle"
-                checked={CheckedHideReceiverDetail}
-                on:change={handleReceiverToggle}
-              /></div>
-            </div>
-          </div>
-
-          <div>Line Notify 1 ( การแจ้งเตือน)</div>
-          <div class="flex flex-col gap-4 p-4">
-
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[0] === 'LINE OA'}
-                  on:click={() => selectOption(0, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[0] === 'LINE GROUP'}
-                  on:click={() => selectOption(0, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[0] === 'ALL'}
-                  on:click={() => selectOption(0, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-          
-
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[1] === 'LINE OA'}
-                  on:click={() => selectOption(1, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[1] === 'LINE GROUP'}
-                  on:click={() => selectOption(1, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[1] === 'ALL'}
-                  on:click={() => selectOption(1, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-          
-
-
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[2] === 'LINE OA'}
-                  on:click={() => selectOption(2, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[2] === 'LINE GROUP'}
-                  on:click={() => selectOption(2, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[2] === 'ALL'}
-                  on:click={() => selectOption(2, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[3] === 'LINE OA'}
-                  on:click={() => selectOption(3, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[3] === 'LINE GROUP'}
-                  on:click={() => selectOption(3, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[3] === 'ALL'}
-                  on:click={() => selectOption(3, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[4] === 'LINE OA'}
-                  on:click={() => selectOption(4, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[4] === 'LINE GROUP'}
-                  on:click={() => selectOption(4, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[4] === 'ALL'}
-                  on:click={() => selectOption(4, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[5] === 'LINE OA'}
-                  on:click={() => selectOption(5, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[5] === 'LINE GROUP'}
-                  on:click={() => selectOption(5, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[5] === 'ALL'}
-                  on:click={() => selectOption(5, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-blue-500={selectedOptions[6] === 'LINE OA'}
-                  on:click={() => selectOption(6, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[6] === 'LINE GROUP'}
-                  on:click={() => selectOption(6, 'LINE GROUP')}
-                >
-                  Line กลุ่ม
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[6] === 'ALL'}
-                  on:click={() => selectOption(6, 'ALL')}
-                >
-                ทั้งสอง
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
-              
-              <div class="flex space-x-2">
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-green-500={selectedOptions[7] === 'LINE OA'}
-                  on:click={() => selectOption(7, 'LINE OA')}
-                >
-                  Line OA
-                </button>
-                <button
-                  class="px-4 py-2 rounded-lg"
-                  class:bg-red-500={selectedOptions[7] === 'DISABLE'}
-                  on:click={() => selectOption(7, 'DISABLE')}
-                >
-                  ทั้งสอง
-                </button>
-              </div>
-            </div>
-          
-             <button 
-                  class="w-full bg-black text-white py-2 rounded-lg mt-4"
-                  on:click={Update}
-                >
-                  บันทึกการเปลี่ยนแปลง
-                </button>
-          </div>
-        </div>
-      </div>
-    </Card.Content>
-    </Card.Root>
-  {/if}
-  {/if} -->
 </div>
-</div>
+
+</div> 
 
 
 
@@ -1489,3 +768,14 @@ async function decryptAccountNo(encryptedBase64: string): Promise<string> {
 </dialog>
 
 
+<style scoped>
+  
+.fixed-bottom {
+  position: sticky;
+  bottom: 10px;
+  z-index: 50;
+}
+
+
+
+</style>

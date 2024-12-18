@@ -7,6 +7,7 @@
     import { PUBLIC_API_ENDPOINT } from '$env/static/public';
 	import { Button } from '$lib/components/ui/button';
 	import { onMount } from 'svelte';
+	import cookie from 'cookie';
 	import { goto } from '$app/navigation';
 	let packages: any[] = [];
 	let maxIndex ='';
@@ -14,6 +15,7 @@
 	let randomNumber =0;
 
 	onMount(async () => {
+
 		clearRemainingTime()
 		try {
 			const datas = await GetPackage();
@@ -29,8 +31,13 @@
 
 
 	});
+	function getCookies() {
+		return cookie.parse(document.cookie);
+	}
 	const GetPackage = async () => {
 		// Create URL parameters from form data
+		const cookies = getCookies();
+		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		let config = {
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
@@ -112,26 +119,26 @@ function clearRemainingTime() {
 	  <div class="flex  justify-evenly">
 		  <Button
 		  variant="outline"
-		  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-28 md:w-24 group"
+		  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-28 md:w-24  w-24 group hover:bg-primary"
 		  style="height:40px"
 		  on:click={() => goto('/payment')}
 		>
 		  <div
 			style="width: 150px; height:100px"
-			class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
+			class="content-center sm:p-2 lg:p-2 text-white"
 		  >
 		  ต้องการเปลี่ยน
 		  </div>
 		</Button>
 		<Button
-		  variant="outline"
-		  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-28 md:w-24 group"
+		  variant="secondary"
+		  class=" flex text-center py-0 px-0  rounded-md lg:w-28 md:w-24 w-28 group border"
 		  style="height:40px"
 		  on:click={closeModal}
 		>
 		  <div
 			style="width: 150px; height:100px"
-			class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
+			class="content-center sm:p-2 lg:p-2 group-hover:text-black text-black"
 		  >
 		  ไม่ต้องการเปลี่ยน
 		  </div>
@@ -149,11 +156,13 @@ function clearRemainingTime() {
 		  <path fill="#F04438" fill-rule="evenodd" d="M.877 7.5a6.623 6.623 0 1 1 13.246 0a6.623 6.623 0 0 1-13.246 0M7.5 1.827a5.673 5.673 0 1 0 0 11.346a5.673 5.673 0 0 0 0-11.346m2.354 3.32a.5.5 0 0 1 0 .707L8.207 7.5l1.647 1.646a.5.5 0 0 1-.708.708L7.5 8.207L5.854 9.854a.5.5 0 0 1-.708-.708L6.793 7.5L5.146 5.854a.5.5 0 0 1 .708-.708L7.5 6.793l1.646-1.647a.5.5 0 0 1 .708 0" clip-rule="evenodd" />
 		</svg>
 	  </div>
-	  <p class="py-4 text-center font-bold text-2xl">ไม่สามารถซื้อแพ็คเกจ Free trial ได้เนื่องจากคุณกำลังใช้งาน Free trial อยู่ กรุณาเลือกแพ็คเกจอื่น</p>
+	  <p class="py-4 text-center font-bold text-xl">ไม่สามารถซื้อแพ็คเกจ Free trial ได้เนื่องจากแพ็คเกจนี้สามารถซื้อได้เดือนละครั้ง</p>
+	  <!-- ปุ่ม Close -->
+	  <div class="flex justify-center mt-4">
+		<button class="btn bg-primary text-white hover:text-black" on:click={() => document.getElementById('my_modal_1').close()}>ปิดการแจ้งเตือน</button>
+	  </div>	
 	</div>
-	<form method="dialog" class="modal-backdrop">
-	  <button>close</button>
-	</form>
+	
   </dialog>
 
 <style scoped>

@@ -151,6 +151,14 @@ const formatDate = (/** @type {Date} */ date: Date) => {
                 
             }
             
+
+            handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up the event listener when component is destroyed
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
 		} catch (error) {
 			console.error('Error fetching profile:', error);
 		}
@@ -421,6 +429,7 @@ const SearchTransaction = async (startDate:string,endDate:string,branchId:string
         const result = await fetch(apiUrl, config);
         const datas = await result.json();
         console.log("datas",datas.result);
+        
         if (datas.result) {
             return datas.result;
         }
@@ -432,26 +441,7 @@ const SearchTransaction = async (startDate:string,endDate:string,branchId:string
 	
 	};
 
-//     async function SearchData() {
-//         const formattedStartDate = getFormattedDate(selectedStartDate);
-//         const formattedEndDate = getFormattedDate(selectedEndDate);
-//         console.log("กำลังค้นหาจาก:", formattedStartDate, "ถึง:", formattedEndDate);
-// 		const data = await SearchTransaction(formattedStartDate,formattedEndDate);
-//         const dataAmount = await SearchTransactionAmountByid(formattedStartDate,formattedEndDate);
-// 		if (data) {
-//         dataOverview = data; // ตรวจสอบให้แน่ใจว่านี่เป็นแบบ reactive
-//         dataAmountview = dataAmount
-//         totalAmount = dataAmount.reduce((acc: number, curr: { TotalAmount: any; }) => {
-//   const amount = Number(curr.TotalAmount);
-//   return acc + (isNaN(amount) ? 0 : amount);
-// }, 0);
-//     } else {
-//         console.error("ไม่มีข้อมูลส่งคืนจาก SearchTransaction.");
-//     }
-// 		console.log("Search :" ,dataOverview )
-// 		searchPerformed = true;
-	
-//   }
+
 interface TransactionData {
     Id: string;
     RoomName: string;
@@ -459,52 +449,7 @@ interface TransactionData {
     branch?: string;
     // Add other fields as needed
 }
-// async function SearchData(view: 'all' | 'branch' = 'all', branchId?: string) {
-//     try {
-//         const formattedStartDate = getFormattedDate(selectedStartDate);
-//         const formattedEndDate = getFormattedDate(selectedEndDate);
-//         console.log("กำลังค้นหาจาก:", formattedStartDate, "ถึง:", formattedEndDate);
 
-//         let data, dataAmount;
-//         const branchParam = branchId || '-';
-//         if (view === 'all') {
-//             // ค้นหาข้อมูลทั้งหมด
-//             data = await SearchTransaction(formattedStartDate, formattedEndDate);
-//             dataAmount = await SearchTransactionAmountByid(formattedStartDate, formattedEndDate,"-");
-//         } else if (view === 'branch' && branchId) {
-//             // ค้นหาข้อมูลตามสาขา
-//             // data = await SearchTransaction(formattedStartDate, formattedEndDate, branchId);
-//             data = await SearchTransaction(formattedStartDate, formattedEndDate);
-//             dataAmount = await SearchTransactionAmountByid(formattedStartDate, formattedEndDate, "-");
-
-//             console.log("2111111111111111251515151515",dataAmount)
-//         }
-
-//         if (data) {
-//             dataOverview = data;
-//             dataAmountview = dataAmount;
-//             // คำนวณยอดรวมทั้งหมด
-//             totalAmount = dataAmount.reduce((acc: number, curr: TransactionData) => {
-//                 const amount = Number(curr.TotalAmount);
-                
-//                 // ถ้าเป็นการดูทั้งหมด (branchParam === '-') หรือ ตรงกับ branchId ที่เลือก
-//                 if (branchParam === '-' || curr.Id === branchId) {
-//                     return acc + (isNaN(amount) ? 0 : amount);
-//                 }
-//                 return acc;
-//             }, 0);
-
-//             searchPerformed = true;
-//             return { success: true, data, dataAmount };
-//         } else {
-//             console.error("ไม่มีข้อมูลส่งคืนจากการค้นหา");
-//             return { success: false, error: "ไม่พบข้อมูล" };
-//         }
-//     } catch (error) {
-//         console.error("เกิดข้อผิดพลาดในการค้นหา:", error);
-//         return { success: false, error: "เกิดข้อผิดพลาดในการค้นหา" };
-//     }
-// }
 
 async function SearchData(view: 'all' | 'branch' = 'all', branchId?: string) {
     try {
@@ -610,7 +555,87 @@ async function handleBranchSelect(branchId: string) {
 }
 
    
+let currentPage = 0;
 
+let windowWidth;
+
+  function handleResize() {
+    windowWidth = window.innerWidth;
+  }
+  $: roomsPerPage = windowWidth < 768 ? 1 : 3;
+
+  // Reactive statement to calculate total pages
+  $: totalPages = Math.ceil(dataAmountview.length / roomsPerPage);
+
+  // Reactive statement to get visible rooms for current page
+  $: visibleRooms = dataAmountview.slice(
+    currentPage * roomsPerPage, 
+    (currentPage * roomsPerPage) + roomsPerPage
+  );
+
+
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let mouseStartX = 0;
+  let isMouseDown = false;
+
+
+  // Touch Event Handlers
+  function handleTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+  }
+
+  function handleTouchMove(e) {
+    touchEndX = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd() {
+    const diffX = touchStartX - touchEndX;
+    
+    // Minimum swipe distance
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0 && currentPage < totalPages - 1) {
+        // Swipe left, go to next page
+        currentPage++;
+      } else if (diffX < 0 && currentPage > 0) {
+        // Swipe right, go to previous page
+        currentPage--;
+      }
+    }
+  }
+
+  // Mouse Event Handlers
+  function handleMouseDown(e) {
+    isMouseDown = true;
+    mouseStartX = e.clientX;
+  }
+
+  function handleMouseMove(e) {
+    if (!isMouseDown) return;
+  }
+
+  function handleMouseUp(e) {
+    if (!isMouseDown) return;
+    
+    const diffX = mouseStartX - e.clientX;
+    
+    // Minimum swipe distance
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0 && currentPage < totalPages - 1) {
+        // Swipe left, go to next page
+        currentPage++;
+      } else if (diffX < 0 && currentPage > 0) {
+        // Swipe right, go to previous page
+        currentPage--;
+      }
+    }
+    
+    isMouseDown = false;
+  }
+
+  function handleMouseLeave() {
+    isMouseDown = false;
+  }
 </script>
 
 <div class="lg:flex md:flex lg:justify-between md:justify-between font-bold ">
@@ -697,12 +722,12 @@ async function handleBranchSelect(branchId: string) {
             {/each} -->
 
             {#if selectedView === 'branch' && dataAmountview && dataAmountview.length > 0}
-    <Carousel.Root class="mt-5">
+    <!-- <Carousel.Root class="mt-5">
         <Carousel.Content>
             {#each dataAmountview as branch}
                 <Carousel.Item class="md:basis-1/1 lg:basis-1/3">
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <!-- svelte-ignore a11y-no-static-element-interactions -->
+                   
+                  
                     <div 
                         class="p-4 my-2 bg-white border border-gray-200 rounded-lg shadow-md" 
                         on:click={() => handleBranchSelect(branch?.Id)}
@@ -729,8 +754,70 @@ async function handleBranchSelect(branchId: string) {
                 </Carousel.Item>
             {/each}
         </Carousel.Content>
-    </Carousel.Root>
-{/if}
+    </Carousel.Root>  -->
+
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div 
+      class="relative w-full overflow-hidden touch-pan-y select-none" 
+      on:touchstart={handleTouchStart}
+      on:touchmove={handleTouchMove}
+      on:touchend={handleTouchEnd}
+      on:mousedown={handleMouseDown}
+      on:mousemove={handleMouseMove}
+      on:mouseup={handleMouseUp}
+      on:mouseleave={handleMouseLeave}
+    >
+      <div 
+        class="flex transition-transform duration-300 cursor-grab active:cursor-grabbing" 
+        style="transform: translateX(-{currentPage * 100}%);"
+      >
+        {#each Array(totalPages) as _, pageIndex}
+          <div class="w-full flex-shrink-0">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {#each visibleRooms as branch}
+                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                <div class="w-full">
+                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                  <div 
+                    class="w-full p-4 bg-white border border-gray-200 shadow-md cursor-pointer"
+                    on:click={() => handleBranchSelect(branch?.Id)}
+                  >
+                    <div class="flex">
+                      <div class="avatar">
+                        <div class="w-full flex justify-center min-w-20 bg-green-800 p-5 rounded-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+                            <path fill="white" d="m21.914 9.73l-.48-1.66l-1.11-3.17a2.8 2.8 0 0 0-1-1.36a2.74 2.74 0 0 0-1.62-.52H6.234a2.8 2.8 0 0 0-2.65 1.88l-1.13 3.21l-.46 1.62a.8.8 0 0 0 0 .21a3.85 3.85 0 0 0 2.06 3.39v4.83a2.8 2.8 0 0 0 .82 2a2.84 2.84 0 0 0 2 .82h10.28a2.8 2.8 0 0 0 2.81-2.81v-4.83a3.74 3.74 0 0 0 1.35-1.18a3.8 3.8 0 0 0 .7-2.21a1.5 1.5 0 0 0-.1-.22m-6.89 8.4h-6.17a1 1 0 1 1 0-2h6.17a1 1 0 0 1 0 2m5-6.85c-.282.399-.68.7-1.14.86a2.3 2.3 0 0 1-2.08-.31a2.34 2.34 0 0 1-.99-1.86a.75.75 0 1 0-1.5 0v.05a2.4 2.4 0 0 1-.14.74a2.4 2.4 0 0 1-.86 1.12a2.27 2.27 0 0 1-1.33.43a2.32 2.32 0 0 1-2.2-1.57a2 2 0 0 1-.14-.73a.75.75 0 0 0-1.5 0a2.36 2.36 0 0 1-.99 1.87a2.33 2.33 0 0 1-1.35.43a2.6 2.6 0 0 1-.77-.14a2.28 2.28 0 0 1-1.13-.85a2.33 2.33 0 0 1-.42-1.24l.41-1.48l1.11-3.16a1.31 1.31 0 0 1 1.24-.88h11.47c.27.004.535.088.76.24c.219.16.383.383.47.64l1.1 3.12l.43 1.52a2.35 2.35 0 0 1-.47 1.2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="mx-2 flex-1">
+                        <div class="text-slate-400">LINE GROUP</div>
+                        <div class="font-semibold text-xl max-w-28 sm:max-w-full truncate">
+                            {branch?.RoomName || 'ไม่มีชื่อกลุ่ม'}
+                        </div>
+                        <div>ยอดรวมทั้งหมด {(branch?.TotalAmount || 0).toLocaleString()} บาท</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {/each}
+      </div>
+    
+      <!-- Navigation Dots -->
+      <div class="flex flex-wrap justify-center mt-4">
+        {#each Array(totalPages) as _, index}
+          <button 
+            class="w-3 h-3 rounded-full mx-2 my-2 {currentPage === index ? 'bg-blue-500' : 'bg-gray-300'}"
+            on:click={() => currentPage = index}
+          ></button>
+        {/each}
+      </div>
+    </div>
+        
+    {/if}
 
 
     {/if}

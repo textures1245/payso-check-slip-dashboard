@@ -457,7 +457,7 @@ style="width:40%;height:30px;"
 		  on:click={() => prevPage(statusToSend)}
 		  disabled={currentPage === 1}
 		>
-		  « Previous
+		  « ย้อนกลับ
 		</button>
 		
 		<button
@@ -465,7 +465,7 @@ style="width:40%;height:30px;"
 		  on:click={() => nextPage(statusToSend)}
 		  disabled={currentPage === totalPages}
 		>
-		  Next »
+		  ถัดไป »
 		</button>
 	</div>
 	  </div>

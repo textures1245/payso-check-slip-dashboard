@@ -56,11 +56,11 @@
 	
 </script>
 
-<div class=" overflow-y-hidden">
-	<Navbar {navItems}/>
+<div >
+	<Navbar {navItems} />
 	<Separator  />
 
-		<div class=" overflow-y-hidden">
+		<div class="pt-11 ">
 			<slot></slot>
 		</div>
 

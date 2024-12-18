@@ -89,11 +89,9 @@
 			console.log(profileData);
 			const data = await GetProfile();
 			const link = await GetLineLink();
-			const bank = await GetBankLink();
 			// Use profileData here
 			linkline = link;
 			profiles = data;
-			banks = bank;
 			QuotaLimit = data.QuotaLimit;
 			QuotaUse = data.QuotaUsage;
 			id.push(data.Id);
@@ -223,37 +221,7 @@
 		return data.result;
 	};
 
-	const GetBankLink = async () => {
-		// const email = sessionStorage.getItem('email');
-		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
-		const cookies = getCookies();
-		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 
-		console.log('++++++++++', myCookie.Id, myCookie.Email);
-		// console.log('email: ', email, 'id: ', id , );
-
-		// Create URL parameters from form data
-		let config = {
-			method: 'GET', // Use GET instead of POST
-			headers: {
-				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
-			}
-		};
-
-		let url;
-		if (myCookie.Id) {
-			console.log('Get by Merchant Id');
-			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}`;
-		} else {
-			throw new Error('Neither email nor id is provided.');
-		}
-
-		const result = await fetch(url, config);
-		const data = await result.json();
-		console.log('Link Line', data);
-		return data.result;
-	};
 
 	const DeleteLineLink = async (id: String) => {
 		// Create configuration for the fetch request

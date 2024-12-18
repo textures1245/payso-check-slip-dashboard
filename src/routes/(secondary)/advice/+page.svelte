@@ -13,6 +13,16 @@
 	onMount(async () => {
 		clearRemainingTime()
 		try {
+      const storedSteps = sessionStorage.getItem('steps');
+    if (storedSteps) {
+        // ถ้ามีค่า ให้ใช้ค่าใน sessionStorage
+         // อัปเดตสถานะของทุกขั้นตอนก่อนหน้า
+        currentStep = JSON.parse(storedSteps);
+        updateAllPreviousSteps(currentStep);
+    } else {
+        // ถ้าไม่มีค่า ให้ตั้งค่าใหม่
+        sessionStorage.setItem('steps', JSON.stringify(currentStep));
+    }
 			const datas = await GetPackage();
 			// Use profileData here
 			packages = datas.result;
@@ -114,10 +124,10 @@ function clearRemainingTime() {
         startTimer();
 		
     }
-    updateStepStatus()
+    updateStepStatus(currentStep)
     currentStep = 1;
     currentSubStep = 0;
-
+    sessionStorage.setItem('steps', JSON.stringify(currentStep));
     // อัพเดทสถานะ steps
     // $steps = $steps.map((step, index) => ({
     //     ...step,
@@ -178,27 +188,32 @@ function clearRemainingTime() {
     let currentStep = 0;
     let currentSubStep = 0;
   
-  
+    function updateAllPreviousSteps(currentSteptest:any) {
+    for (let i = 0; i < currentSteptest; i++) {
+        console.log(i,currentSteptest)
+        updateStepStatus(i); // อัปเดตสถานะของทุกขั้นตอนก่อนหน้า
+    }
+}
     // อัพเดทสถานะ step
-    function updateStepStatus() {
-      $steps = $steps.map((step, index) => {
-        if (index === currentStep) {
-          const updatedSubSteps = step.subSteps.map((subStep, subIndex) => ({
-            ...subStep,
-            completed: subIndex === currentSubStep ? true : subStep.completed
-          }));
-          
-          const allSubStepsCompleted = updatedSubSteps.every(sub => sub.completed);
-          
-          return {
-            ...step,
-            subSteps: updatedSubSteps,
-            completed: allSubStepsCompleted
-          };
+    function updateStepStatus(stepIndex:any) {
+   $steps = $steps.map((step, index) => {
+        if (index === stepIndex) {
+            const updatedSubSteps = step.subSteps.map((subStep, subIndex) => ({
+                ...subStep,
+                completed: subIndex === currentSubStep ? true : subStep.completed
+            }));
+
+            const allSubStepsCompleted = updatedSubSteps.every(sub => sub.completed);
+
+            return {
+                ...step,
+                subSteps: updatedSubSteps,
+                completed: allSubStepsCompleted
+            };
         }
         return step;
-      });
-    }
+    });
+}
   
 
   
@@ -324,9 +339,11 @@ function clearRemainingTime() {
 					if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            updateStepStatus();
+            updateStepStatus(currentStep);
           currentStep=2
+          
           currentSubStep = 0;
+          sessionStorage.setItem('steps', JSON.stringify(currentStep));
           modal.close()
         			}, 2000);
 				}
@@ -348,6 +365,7 @@ function clearRemainingTime() {
 					setTimeout(() => {
             currentStep=0
             currentSubStep = 0;
+            sessionStorage.setItem('steps', JSON.stringify(currentStep));
         			}, 2000);
 				}
 				
@@ -370,9 +388,10 @@ function clearRemainingTime() {
 					if (modal) {
 					modal.showModal();
 					setTimeout(() => {
-            updateStepStatus();
+            updateStepStatus(currentStep);
           currentStep=2
           currentSubStep = 0;
+          sessionStorage.setItem('steps', JSON.stringify(currentStep));
           modal.close()
         			}, 2000);
 				}
@@ -744,9 +763,10 @@ const createBank = async (info: BankInfo | PPInfo) => {
           NameTHPP =""
           NameENPP = ""
           setTimeout(() => {
-    updateStepStatus();
+            updateStepStatus(currentStep);
     currentStep = 3;
     currentSubStep = 0;
+    sessionStorage.setItem('steps', JSON.stringify(currentStep));
       modal.close();
   }, 3000); // 3000 ms = 3 seconds
           
@@ -1037,7 +1057,7 @@ function toggleRoom(roomId: any, isChecked: any) {
 		let url;
 		if (myCookie.Id) {
 			console.log('Get by Merchant Id');
-			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}`;
+			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}/-1/-1`;
 		} else {
 			throw new Error('Neither email nor id is provided.');
 		}
@@ -1289,14 +1309,14 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
       
       // Set default values for selectedOptions
       selectedOptions = [
-       "LINE GROUP", // สลิปถูกต้อง
-        "LINE GROUP", // สลิปถูกใช้งานแล้ว
-        "LINE GROUP", // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
-        "LINE GROUP", // สลิปผู้รับเงินไม่ตรง
-        "LINE GROUP", // ยอดโอนต่ำกว่ากำหนด
-        "LINE GROUP", // การแจ้งเตือนเติมโควตาและต่ออายุ
-        "LINE GROUP", // ยังไม่ตั้งค่า
-        "DISABLE"     // ถูกปิด
+        "LINE_GROUP", // สลิปถูกต้อง
+        "LINE_GROUP", // สลิปถูกใช้งานแล้ว
+        "LINE_GROUP", // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
+        "LINE_GROUP", // สลิปผู้รับเงินไม่ตรง
+        "LINE_GROUP", // ยอดโอนต่ำกว่ากำหนด
+        "LINE_GROUP", // การแจ้งเตือนเติมโควตาและต่ออายุ
+        "LINE_GROUP", // ยังไม่ตั้งค่า
+        "DISABLE"  
       ];
       
       console.log("Banks loaded:", banks);
@@ -1306,9 +1326,10 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
   }
 
   function StepStatustofinish() {
-    updateStepStatus();  // เรียกฟังก์ชันที่คุณต้องการ
+    updateStepStatus(currentStep);  // เรียกฟังก์ชันที่คุณต้องการ
     currentStep = 5;      // ตั้งค่า currentStep เป็น 4
     currentSubStep = 0;   // ตั้งค่า currentSubStep เป็น 0
+    sessionStorage.setItem('steps', JSON.stringify(currentStep));
   }
   let isSettingEnabled = false;
     function handleSettingChange() {
@@ -1317,13 +1338,13 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
       CheckedHideReceiverDetail = false
       paymentAmount=0
       selectedOptions = [
-        "LINE GROUP", // สลิปถูกต้อง
-        "LINE GROUP", // สลิปถูกใช้งานแล้ว
-        "LINE GROUP", // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
-        "LINE GROUP", // สลิปผู้รับเงินไม่ตรง
-        "LINE GROUP", // ยอดโอนต่ำกว่ากำหนด
-        "LINE GROUP", // การแจ้งเตือนเติมโควตาและต่ออายุ
-        "LINE GROUP", // ยังไม่ตั้งค่า
+        "LINE_GROUP", // สลิปถูกต้อง
+        "LINE_GROUP", // สลิปถูกใช้งานแล้ว
+        "LINE_GROUP", // สลิปไม่เจอ/หมดอายุ/ไม่พบ QR Code
+        "LINE_GROUP", // สลิปผู้รับเงินไม่ตรง
+        "LINE_GROUP", // ยอดโอนต่ำกว่ากำหนด
+        "LINE_GROUP", // การแจ้งเตือนเติมโควตาและต่ออายุ
+        "LINE_GROUP", // ยังไม่ตั้งค่า
         "DISABLE"     // ถูกปิด
       ];
     } else {
@@ -1333,9 +1354,10 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 
   function handleNextStep() {
     const modal = document.getElementById('my_modal_5');
-    updateStepStatus(); // Update step status
+    updateStepStatus(currentStep); // Update step status
     currentStep = 4;    // Set current step to 4
     currentSubStep = 0; // Reset sub step
+    sessionStorage.setItem('steps', JSON.stringify(currentStep));
     modal.close();      // Close the modal
   }
 
@@ -1371,6 +1393,109 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
 
  // แปลงผลลัพธ์เป็น base64
  return btoa(String.fromCharCode(...combined));
+}
+
+async function maskMiddle(accountNumber: string) {
+    try {
+        // ถอดรหัส Account Number
+        const decryptedAccountNumber = await decryptAccountNo(accountNumber);
+        
+        // ตรวจสอบความยาว
+        const length = decryptedAccountNumber.length;
+        if (length < 7) return "Invalid Account Number"; // ต้องยาวพอจะแบ่งส่วนได้
+        let middleLength = Math.max(4, Math.floor(length / 3)); // อย่างน้อย 4 ตัว
+
+        // ถ้าความยาวของเลขบัญชีเป็น 15 ตัว
+        if (length === 15) {
+            middleLength = 5; // กำหนดให้แสดงเลขกลาง 5 ตัวสำหรับบัญชีที่มี 15 ตัว
+        }
+
+        // แสดงเลขกลางจากตำแหน่งที่ 3 (index 3) ไปจนถึง middleLength
+        const middle = decryptedAccountNumber.slice(3, 3 + middleLength);
+        const prefix = "xxx"; // ซ่อนเลขต้น
+
+        const suffix = "xxx"; // ซ่อนเลขท้าย
+        
+        return `${prefix}-${middle}-${suffix}`;
+    } catch (error) {
+        console.error("Error in maskMiddle:", error);
+        return "Error: Unable to mask account number";
+    }
+}
+async function decryptAccountNo(encryptedBase64: string): Promise<string> {
+  const combined = new Uint8Array(atob(encryptedBase64).split('').map(c => c.charCodeAt(0)));
+  
+  // Extract the nonce (first 16 bytes)
+  const nonce = combined.slice(0, 16);
+
+  // Extract the ciphertext (remaining bytes after nonce)
+  const ciphertext = combined.slice(16);
+
+  // Recreate the key used for encryption (assuming you have access to the same secret)
+  const key = new TextEncoder().encode(PUBLIC_PAYSO_DEFAULT_SECRET);
+
+  // Import the key for decryption
+  const cryptoKey = await window.crypto.subtle.importKey(
+    "raw", 
+    key, 
+    { name: "AES-CTR" }, 
+    false, 
+    ["decrypt"]
+  );
+
+  // Decrypt the ciphertext using AES-CTR
+  const decryptedBytes = await window.crypto.subtle.decrypt(
+    { name: "AES-CTR", counter: nonce, length: 128 },
+    cryptoKey,
+    ciphertext
+  );
+
+  // Decode the decrypted bytes back to a string
+  const decoder = new TextDecoder();
+  return decoder.decode(decryptedBytes);
+}
+
+function openLineGroupCreation() {
+    // More type-safe user agent detection
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    const isIOS = /ipad|iphone|ipod/.test(userAgent);
+    const isAndroid = /android/.test(userAgent);
+
+    // Line deep links for group creation
+    const iosLineLink = 'https://line.me/ti/g/createGroup';
+    const androidLineLink = 'line://ti/g/createGroup';
+
+    // Web store links for Line app
+    const iosAppStoreLink = 'https://apps.apple.com/app/line/id443904275';
+    const androidPlayStoreLink = 'https://play.google.com/store/apps/details?id=jp.naver.line.android';
+
+    try {
+        if (isIOS) {
+            window.location.href = androidLineLink;
+            setTimeout(() => {
+                window.location.href = iosLineLink;
+            }, 100);
+        } else if (isAndroid) {
+            window.location.href = androidLineLink;
+        } else {
+            // Fallback for other platforms
+            window.location.href = iosLineLink;
+        }
+
+        // Fallback mechanism to app stores if Line is not installed
+        setTimeout(() => {
+            if (isIOS) {
+                window.location.href = iosAppStoreLink;
+            } else if (isAndroid) {
+                window.location.href = androidPlayStoreLink;
+            } else {
+                alert('กรุณาติดตั้งแอพ Line');
+            }
+        }, 1500);
+    } catch (error) {
+        alert('ไม่สามารถเปิดแอพ Line ได้ กรุณาตรวจสอบการติดตั้ง');
+    }
 }
   </script>
   <div class="mx-auto px-6 pt-6 pb-0 bg-primary-foreground min-h-screen">
@@ -1793,9 +1918,9 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
         {/if}
         {:else if currentStep === 3} <!-- Contact Details -->
         {#if currentSubStep === 0}
-        <div class="flex justify-center bg-primary-foreground min-h-screen px-0 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-5 ">
+        <div class="flex justify-center bg-primary-foreground min-h-screen  px-0 py-0 pb-0 sm:py-5  xl:px-24 lg:py-5 xl:py-10 lg:pb-5 xl:pb-5 ">
     
-          <div class="container max-w-screen-xl   mx-auto bg-white rounded-2xl shadow ">
+          <div class="container max-w-screen-xl  mx-auto bg-white rounded-2xl shadow overflow-x-hidden ">
             
               <Card.Root class="my-5" >
                   <Card.Content>
@@ -1811,7 +1936,9 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                           </div>
                           <div class="mx-2 w-full">
                             <div class="font-semibold text-xl w-full sm:max-w-full truncate" >
-                              
+                              <label for="nameInput" class="block text-gray-700 text-md font-semibold">
+                                ชื่อห้อง :
+                              </label>
                               <input 
                               id="nameInput"
                     type="text" 
@@ -1832,19 +1959,9 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                         <!-- <div class=" mx-2 my-5"><div class="canvas-container">
                           <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
                         </div></div> -->
-                        <div class="my-3 mx-2">
-                          Notion Line Group Id:
-                          <input 
-                    type="text" 
-                    placeholder="เลือกกรอกหรือไม่ก็ได้" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 "
-                    bind:value={NotiOnLineGroupId}
-                    on:input={handleInputNoti}
-                    required
-                    />
-                        </div>
+                        
                         <div>
-                          <p class=" font-semibold mx-2">บัญชีที่เชื่อมต่อ</p>
+                          <p class=" font-semibold mx-2 my-3">บัญชีที่เชื่อมต่อ</p>
                           <div class="mx-2">
                             {#if banks }
                             {#each banks as banks}
@@ -1869,9 +1986,13 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                               <div class=" font-semibold">
                                 {banks.NameTH}
                               </div>
-                              <div class=" text-slate-400">
-                                {banks.AccountNo}
-                              </div>
+                              {#await maskMiddle(banks.AccountNo)}
+														<div class="text-slate-400">กำลังโหลด...</div>
+													{:then maskedAccountNo}
+														<div class="text-slate-400">{maskedAccountNo}</div>
+													{:catch error}
+														<div class="text-red-500">Error: {error.message}</div>
+													{/await}
                               </div>
                               <!-- svelte-ignore a11y-click-events-have-key-events -->
                               <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -1897,7 +2018,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                             ตั้งค่า ระบบการตรวจสอบ
                           </div>
                           <div class="flex items-center space-x-2">
-                            <div class="tooltip" data-tip="เปิด/ปิดการตั้งค่าระบบการตรวจสอบด้วยตนเอง">
+                            <div class="tooltip" >
                               <label for="enableSettings" class="block">
                                 {#if isSettingEnabled}
                                   เปิดการตั้งค่าเอง
@@ -1906,7 +2027,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                                 {/if}
                               </label>
                             </div>
-                            <div class="tooltip" data-tip="สลับการเปิด/ปิดการตั้งค่าระบบการตรวจสอบ">
+                            <div class="tooltip" >
                               <input 
                                 id="enableSettings" 
                                 type="checkbox" 
@@ -1918,365 +2039,770 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                           </div>
                         </div>
                         {#if isSettingEnabled}
-                          <div class="tooltip" data-tip="กำหนดยอดเงินขั้นต่ำสำหรับการแจ้งเตือน">
-                            <div>เตือน ยอดเงินขั่นต่ำ *</div>
-                          </div>
-                          <div class="relative inline-flex items-center w-full">
-                            <!-- ช่องกรอกจำนวนเงิน -->
-                            <input
-                              id="paymentAmount"
-                              type="number"
-                              bind:value={paymentAmount}
-                              min={minPayment}
-                              step="1"
-                              class="text-start px-5 py-2 border rounded-lg pr-12 pl-10 w-full" 
-                              data-tip="กรอกจำนวนเงินขั้นต่ำ"
-                            />
-                            <span class="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl text-gray-500">
-                              ฿
-                            </span>
-                            <!-- ปุ่ม + และ - อยู่ข้างในช่อง input ทางขวา -->
-                            <div class="tooltip" data-tip="ลดจำนวนเงิน">
-                              <button 
-                                on:click={decreaseAmount} 
-                                class="absolute right-12 top-1/2 transform -translate-y-1/2 text-xl bg-red-500 text-white py-1 px-2 rounded-full"
-                              >
-                                -
-                              </button>
-                            </div>
-                            
-                            <!-- ปุ่ม + อยู่ขวาใกล้สุด -->
-                            <div class="tooltip" data-tip="เพิ่มจำนวนเงิน">
-                              <button 
-                                on:click={increaseAmount} 
-                                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-xl bg-green-500 text-white py-1 px-2 rounded-full"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                          <div class="m-2">
-                            <div class="flex justify-between items-center">
-                              <div class="tooltip" data-tip="ซ่อนรายละเอียดเลขบัญชีผู้โอน">
-                                <span>ซ่อนเลขบัญชีผู้โอน</span>
-                              </div>
-                              <div class="tooltip" data-tip="เปิด/ปิดการซ่อนเลขบัญชีผู้โอน">
-                                <input
-                                  type="checkbox"
-                                  value="synthwave"
-                                  class="toggle theme-controller toggle-success"
-                                  id="senderDetailToggle"
-                                  checked={CheckedHideSenderDetail}
-                                  on:change={handleSenderToggle}
-                                />
-                              </div>
-                            </div>
-                           
-                            <div class="flex justify-between items-center">
-                              <div class="tooltip" data-tip="ซ่อนรายละเอียดเลขบัญชีผู้รับ">
-                                <span>ซ่อนเลขบัญชีผู้รับ</span>
-                              </div>
-                              <div class="tooltip" data-tip="เปิด/ปิดการซ่อนเลขบัญชีผู้รับ">
-                                <input
-                                  type="checkbox"
-                                  value="synthwave"
-                                  class="toggle theme-controller toggle-success"
-                                  id="receiverDetailToggle"
-                                  checked={CheckedHideReceiverDetail}
-                                  on:change={handleReceiverToggle}
-                                />
-                              </div>
-                            </div>
-                          </div>
+							<div class="mt-3 mx-2 relative">
+								<div class="flex items-center">
+									รหัสอ้างอิงกลุ่มไลน์
+									<div
+										class="tooltip ml-2"
+										data-tip="รหัสอ้างอิงกลุ่มไลน์ได้จากการสร้างกลุ่มในไลน์โดยจะเขียนอยู่ที่ข้อความต้อนรับ"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-5 w-5 text-blue-500 cursor-help"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+									</div>
+								</div>
+								<input
+									type="text"
+									placeholder="เลือกกรอกหรือไม่ก็ได้"
+									class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+									bind:value={NotiOnLineGroupId}
+									on:input={handleInput}
+									required
+								/>
+							</div>
+							<div class="flex mt-3">
+								<div class="ml-2">เตือน ยอดเงินขั่นต่ำ *</div>
+								<div class="tooltip ml-2" data-tip="กำหนดยอดเงินขั้นต่ำสำหรับการแจ้งเตือนสลิป">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										class="h-5 w-5 text-blue-500 cursor-help"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke="currentColor"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										/>
+									</svg>
+								</div>
+							</div>
+							<div class="relative inline-flex items-center w-full mt-2">
+								<!-- ช่องกรอกจำนวนเงิน -->
+								<input
+									id="paymentAmount"
+									type="number"
+									bind:value={paymentAmount}
+									min={minPayment}
+									step="1"
+									class="text-start px-5 py-2 border rounded-lg mx-2 pr-12 pl-10 w-full"
+									data-tip="กรอกจำนวนเงินขั้นต่ำ"
+								/>
+								<span
+									class="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl text-gray-500"
+								>
+									฿
+								</span>
+								<!-- ปุ่ม + และ - อยู่ข้างในช่อง input ทางขวา -->
+								<div class="tooltip" data-tip="ลดจำนวนเงิน">
+									<button
+										on:click={decreaseAmount}
+										class="absolute right-14 top-1/2 transform -translate-y-1/2 text-xl bg-red-500 text-white py-1 px-2 rounded-full"
+									>
+										-
+									</button>
+								</div>
+
+								<!-- ปุ่ม + อยู่ขวาใกล้สุด -->
+								<div class="tooltip" data-tip="เพิ่มจำนวนเงิน">
+									<button
+										on:click={increaseAmount}
+										class="absolute right-5 top-1/2 transform -translate-y-1/2 text-xl bg-green-500 text-white py-1 px-2 rounded-full"
+									>
+										+
+									</button>
+								</div>
+							</div>
+							<div class="mx-2 mt-3">
+								<div class="flex justify-between items-center">
+									<div class="flex">
+										<span>ซ่อนเลขบัญชีผู้โอน</span>
+										<div class="tooltip ml-2" >
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+									<div class="tooltip" >
+										<input
+											type="checkbox"
+											value="synthwave"
+											class="toggle theme-controller toggle-success"
+											id="senderDetailToggle"
+											checked={CheckedHideSenderDetail}
+											on:change={handleSenderToggle}
+										/>
+									</div>
+								</div>
+
+								<div class="flex justify-between items-center">
+									<div class="flex">
+										<span>ซ่อนเลขบัญชีผู้รับ</span>
+										<div class="tooltip ml-2" data-tip="ซ่อนรายละเอียดเลขบัญชีผู้รับ">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+									<div class="tooltip" data-tip="เปิด/ปิดการซ่อนเลขบัญชีผู้รับ">
+										<input
+											type="checkbox"
+											value="synthwave"
+											class="toggle theme-controller toggle-success"
+											id="receiverDetailToggle"
+											checked={CheckedHideReceiverDetail}
+											on:change={handleReceiverToggle}
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div class="mt-3 mx-2">การแจ้งเตือน</div>
+							<div class="flex flex-col gap-4 p-4">
+								<!-- แถว 1 - สลิป ถูกต้อง -->
+								<div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
+                  <div class="flex">
+                      <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
+                      <div class="tooltip ml-2" data-tip="การแจ้งเตือนเมื่อสลิปถูกตรวจสอบและถูกต้องสมบูรณ์">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                      </div>
+                  </div>
               
-                        <div>Line Notify 1 ( การแจ้งเตือน)</div>
-                        <div class="flex flex-col gap-4 p-4">
-                           <!-- แถว 1 - สลิป ถูกต้อง -->
-        <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-          <div class="tooltip" data-tip="การแจ้งเตือนเมื่อสลิปถูกตรวจสอบและถูกต้องสมบูรณ์">
-            <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกต้อง</span>
-          </div>
-          
-          <div class="flex space-x-2">
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-blue-500={selectedOptions[0] === 'LINE OA'}
-                on:click={() => selectOption(0, 'LINE OA')}
-              >
-                Line OA
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-green-500={selectedOptions[0] === 'LINE GROUP'}
-                on:click={() => selectOption(0, 'LINE GROUP')}
-              >
-                Line กลุ่ม
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-red-500={selectedOptions[0] === 'ALL'}
-                on:click={() => selectOption(0, 'ALL')}
-              >
-                ทั้งสอง
-              </button>
-            </div>
-          </div>
-        </div>
-                        
-                         <!-- แถว 2 - สลิป ถูกใช้งานแล้ว -->
-        <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-          <div class="tooltip" data-tip="การแจ้งเตือนเมื่อสลิปถูกใช้งานแล้ว">
-            <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ถูกใช้งานแล้ว</span>
-          </div>
-          
-          <div class="flex space-x-2">
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-blue-500={selectedOptions[1] === 'LINE OA'}
-                on:click={() => selectOption(1, 'LINE OA')}
-              >
-                Line OA
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-green-500={selectedOptions[1] === 'LINE GROUP'}
-                on:click={() => selectOption(1, 'LINE GROUP')}
-              >
-                Line กลุ่ม
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-red-500={selectedOptions[1] === 'ALL'}
-                on:click={() => selectOption(1, 'ALL')}
-              >
-                ทั้งสอง
-              </button>
-            </div>
-          </div>
-        </div>
-                        
-                          <!-- แถว 3 - 8 -->
+                  <div class="flex space-x-2 justify-center items-center">
+                      <div>
+                          <div>
+                              <button
+                                  class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                  class:bg-blue-500={selectedOptions[0] === 'LINE_GROUP_PRIVATE'}
+                                  on:click={() => selectOption(0, 'LINE_GROUP_PRIVATE')}
+                                  class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP_PRIVATE'} 
+                                  class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP_PRIVATE'} 
+                              >
+                                  <span class={selectedOptions[0] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                  <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                      <svg xmlns="http://www.w3.org/2000/svg"  class={selectedOptions[0] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                  </div>
+                              </button>
+                          </div>
+                      </div>
               
-                          <!-- แถว 3 - สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป -->
-        <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-          <div class="tooltip" data-tip="การแจ้งเตือนเมื่อสลิปหาไม่เจอ หมดอายุ หรือไม่พบ QR Code">
-            <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป</span>
-          </div>
-          
-          <div class="flex space-x-2">
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-blue-500={selectedOptions[2] === 'LINE OA'}
-                on:click={() => selectOption(2, 'LINE OA')}
-              >
-                Line OA
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-green-500={selectedOptions[2] === 'LINE GROUP'}
-                on:click={() => selectOption(2, 'LINE GROUP')}
-              >
-                Line กลุ่ม
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-red-500={selectedOptions[2] === 'ALL'}
-                on:click={() => selectOption(2, 'ALL')}
-              >
-                ทั้งสอง
-              </button>
-            </div>
-          </div>
-        </div>
-                          <!-- แถว 4 - สลิป ผู้รับเงินไม่ตรง -->
-        <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-          <div class="tooltip" data-tip="การแจ้งเตือนเมื่อผู้รับเงินไม่ตรงกับข้อมูลที่ระบุ">
-            <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สลิป ผู้รับเงินไม่ตรง</span>
-          </div>
-          
-          <div class="flex space-x-2">
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-blue-500={selectedOptions[3] === 'LINE OA'}
-                on:click={() => selectOption(3, 'LINE OA')}
-              >
-                Line OA
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-green-500={selectedOptions[3] === 'LINE GROUP'}
-                on:click={() => selectOption(3, 'LINE GROUP')}
-              >
-                Line กลุ่ม
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-red-500={selectedOptions[3] === 'ALL'}
-                on:click={() => selectOption(3, 'ALL')}
-              >
-                ทั้งสอง
-              </button>
-            </div>
-          </div>
-        </div>
-                           <!-- แถว 5 - ยอดโอนต่ำกว่ากำหนด -->
-        <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-          <div class="tooltip" data-tip="การแจ้งเตือนเมื่อยอดโอนต่ำกว่ายอดเงินขั้นต่ำที่กำหนด">
-            <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">ยอดโอนต่ำกว่ากำหนด</span>
-          </div>
-          
-          <div class="flex space-x-2">
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-blue-500={selectedOptions[4] === 'LINE OA'}
-                on:click={() => selectOption(4, 'LINE OA')}
-              >
-                Line OA
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-green-500={selectedOptions[4] === 'LINE GROUP'}
-                on:click={() => selectOption(4, 'LINE GROUP')}
-              >
-                Line กลุ่ม
-              </button>
-            </div>
-            <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-              <button
-                class="px-4 py-2 rounded-lg"
-                class:bg-red-500={selectedOptions[4] === 'ALL'}
-                on:click={() => selectOption(4, 'ALL')}
-              >
-                ทั้งสอง
-              </button>
-            </div>
-          </div>
-        </div>
-                          <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                            <div class="tooltip" data-tip="การแจ้งเตือนเมื่อต้องเติมโควตาหรือต่ออายุการใช้งาน">
-                              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนเติมโควตาและต่ออายุ</span>
-                            </div>
-                            
-                            <div class="flex space-x-2">
-                              <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                <button
-                                  class="px-4 py-2 rounded-lg"
-                                  class:bg-blue-500={selectedOptions[5] === 'LINE OA'}
-                                  on:click={() => selectOption(5, 'LINE OA')}
-                                >
-                                  Line OA
-                                </button>
-                              </div>
-                              <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                <button
-                                  class="px-4 py-2 rounded-lg"
-                                  class:bg-green-500={selectedOptions[5] === 'LINE GROUP'}
-                                  on:click={() => selectOption(5, 'LINE GROUP')}
-                                >
-                                  Line กลุ่ม
-                                </button>
-                              </div>
-                              <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-                                <button
-                                  class="px-4 py-2 rounded-lg"
-                                  class:bg-red-500={selectedOptions[5] === 'ALL'}
-                                  on:click={() => selectOption(5, 'ALL')}
-                                >
-                                  ทั้งสอง
-                                </button>
-                              </div>
-                            </div>
+                      <div>
+                          <div>
+                              <button
+                                  class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                  class:bg-green-500={selectedOptions[0] === 'LINE_GROUP'}
+                                  on:click={() => selectOption(0, 'LINE_GROUP')}
+                                  class:bg-blue-600={selectedOptions[0] === 'LINE_GROUP'} 
+                                  class:bg-gray-300={selectedOptions[0] !== 'LINE_GROUP'} 
+                              >
+                                  <span class={selectedOptions[0] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                  <div class="tooltip flex justify-center ml-2 " data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                      <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[0] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h -1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                      </svg>
+                                  </div>
+                              </button>
                           </div>
-                          <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-                            <div class="tooltip" data-tip="การแจ้งเตือนเมื่อพบสลิปที่มีการใช้ซ้ำ">
-                              <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">การแจ้งเตือนสลิปซ้ำ</span>
-                            </div>
-                            
-                            <div class="flex space-x-2">
-                              <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
-                                <button
-                                  class="px-4 py-2 rounded-lg"
-                                  class:bg-blue-500={selectedOptions[6] === 'LINE OA'}
-                                  on:click={() => selectOption(6, 'LINE OA')}
-                                >
-                                  Line OA
-                                </button>
-                              </div>
-                              <div class="tooltip" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
-                                <button
-                                  class="px-4 py-2 rounded-lg"
-                                  class:bg-green-500={selectedOptions[6] === 'LINE GROUP'}
-                                  on:click={() => selectOption(6, 'LINE GROUP')}
-                                >
-                                  Line กลุ่ม
-                                </button>
-                              </div>
-                              <div class="tooltip" data-tip="ส่งการแจ้งเตือนทั้งทาง Line OA และกลุ่ม Line">
-                                <button
-                                  class="px-4 py-2 rounded-lg"
-                                  class:bg-red-500={selectedOptions[6] === 'ALL'}
-                                  on:click={() => selectOption(6, 'ALL')}
-                                >
-                                  ทั้งสอง
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                          <!-- แถว 8 - สรุปยอดสาขารายวัน -->
-      <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg">
-        <div class="tooltip" data-tip="การแจ้งเตือนสรุปยอดการทำธุรกรรมของสาขาประจำวัน">
-          <span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left">สรุปยอดสาขารายวัน</span>
-        </div>
-        
-        <div class="flex space-x-2">
-          <div class="tooltip" data-tip="ส่งสรุปยอดรายวันผ่าน Line Official Account">
-            <button
-              class="px-4 py-2 rounded-lg"
-              class:bg-green-500={selectedOptions[7] === 'LINE OA'}
-              on:click={() => selectOption(7, 'LINE OA')}
-            >
-              Line OA
-            </button>
-          </div>
-          <div class="tooltip" data-tip="ปิดการแจ้งเตือนสรุปยอดรายวัน">
-            <button
-              class="px-4 py-2 rounded-lg"
-              class:bg-red-500={selectedOptions[7] === 'DISABLE'}
-              on:click={() => selectOption(7, 'DISABLE')}
-            >
-              ปิด
-            </button>
-          </div>
-        </div>
-      </div>
-                          <!-- คุณสามารถทำซ้ำรูปแบบด้านบนและแก้ไขตัวแปรใน `selectedOptions` ให้เหมาะสม -->
-                          
-                      
+                      </div>
+                      <div >
+                          <button
+                              class="px-2 py-2  rounded-lg"
+                              class:bg-red-500={selectedOptions[0] === 'ALL'}
+                              on:click={() => selectOption(0, 'ALL')}
+                              class:bg-blue-600={selectedOptions[0] === 'ALL'} 
+                              class:bg-gray-300={selectedOptions[0] !== 'ALL'} 
+                          >
+                              <span class={selectedOptions[0] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+
+								<!-- แถว 2 - สลิป ถูกใช้งานแล้ว -->
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left"
+											>สลิป ถูกใช้งานแล้ว</span
+										>
+										<div class="tooltip ml-2" data-tip="การแจ้งเตือนเมื่อสลิปถูกใช้งานแล้ว">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[1] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(1, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[1] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[1] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
                         </div>
-                        {/if}
+                    </div>
+                
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-green-500={selectedOptions[1] === 'LINE_GROUP'}
+                                on:click={() => selectOption(1, 'LINE_GROUP')}
+                                class:bg-blue-600={selectedOptions[1] === 'LINE_GROUP'} 
+                                class:bg-gray-300={selectedOptions[1] !== 'LINE_GROUP'} 
+                            >
+                                <span class={selectedOptions[1] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[1] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[1] === 'ALL'}
+                            on:click={() => selectOption(1, 'ALL')}
+                            class:bg-blue-600={selectedOptions[1] === 'ALL'} 
+                            class:bg-gray-300={selectedOptions[1] !== 'ALL'} 
+                        >
+                            <span class={selectedOptions[1] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+
+								<!-- แถว 3 - 8 -->
+
+								<!-- แถว 3 - สลิป ไม่เจอ / หมดอายุ / ไม่พบ QRCode จากรูป -->
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left md:block md:whitespace-pre-line md:max-w-none sm:max-w-[150px] max-w-[150px]" 
+											>สลิปไม่เจอ/ หมดอายุ / ไม่พบ QRCode จากรูป</span
+										>
+										<div
+											class="tooltip ml-2"
+											data-tip="การแจ้งเตือนเมื่อสลิปหาไม่เจอ หมดอายุ หรือไม่พบ QR Code"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[2] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(2, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[2] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[2] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-green-500={selectedOptions[2] === 'LINE_GROUP'}
+                                on:click={() => selectOption(2, 'LINE_GROUP')}
+                                class:bg-blue-600={selectedOptions[2] === 'LINE_GROUP'} 
+                                class:bg-gray-300={selectedOptions[2] !== 'LINE_GROUP'} 
+                            >
+                                <span class={selectedOptions[2] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[2] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[2] === 'ALL'}
+                            on:click={() => selectOption(2, 'ALL')}
+                            class:bg-blue-600={selectedOptions[2] === 'ALL'} 
+                            class:bg-gray-300={selectedOptions[2] !== 'ALL'} 
+                        >
+                            <span class={selectedOptions[2] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+								<!-- แถว 4 - สลิป ผู้รับเงินไม่ตรง -->
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left"
+											>สลิป ผู้รับเงินไม่ตรง</span
+										>
+										<div
+											class="tooltip ml-2 whitespace-normal break-words"
+											data-tip="การแจ้งเตือนเมื่อผู้รับเงินไม่ตรงกับข้อมูลที่ระบุ"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[3] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(3, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[3] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[3] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-green-500={selectedOptions[3] === 'LINE_GROUP'}
+                                on:click={() => selectOption(3, 'LINE_GROUP')}
+                                class:bg-blue-600={selectedOptions[3] === 'LINE_GROUP'} 
+                                class:bg-gray-300={selectedOptions[3] !== 'LINE_GROUP'} 
+                            >
+                                <span class={selectedOptions[3] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                <div class="tooltip flex justify-center ml-2 whitespace-normal break-words" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[3] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[3] === 'ALL'}
+                            on:click={() => selectOption(3, 'ALL')}
+                            class:bg-blue-600={selectedOptions[3] === 'ALL'} 
+                            class:bg-gray-300={selectedOptions[3] !== 'ALL'} 
+                        >
+                            <span class={selectedOptions[3] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+								<!-- แถว 5 - ยอดโอนต่ำกว่ากำหนด -->
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left"
+											>ยอดโอนต่ำกว่ากำหนด</span
+										>
+										<div
+											class="tooltip ml-2"
+											data-tip="การแจ้งเตือนเมื่อยอดโอนต่ำกว่ายอดเงินขั้นต่ำที่กำหนด"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[4] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(4, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[4] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[4] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-green-500={selectedOptions[4] === 'LINE_GROUP'}
+                                on:click={() => selectOption(4, 'LINE_GROUP')}
+                                class:bg-blue-600={selectedOptions[4] === 'LINE_GROUP'} 
+                                class:bg-gray-300={selectedOptions[4] !== 'LINE_GROUP'} 
+                            >
+                                <span class={selectedOptions[4] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[4] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[4] === 'ALL'}
+                            on:click={() => selectOption(4, 'ALL')}
+                            class:bg-blue-600={selectedOptions[4] === 'ALL'} 
+                            class:bg-gray-300={selectedOptions[4] !== 'ALL'} 
+                        >
+                            <span class={selectedOptions[4] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left md:block md:whitespace-pre-line md:max-w-none sm:max-w-[150px] max-w-[150px]" 
+											>การแจ้งเตือนเติมโควตาและต่ออายุ</span
+										>
+										<div
+											class="tooltip ml-2"
+											data-tip="การแจ้งเตือนเมื่อต้องเติมโควตาหรือต่ออายุการใช้งาน"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[5] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(5, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[5] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[5] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-green-500={selectedOptions[5] === 'LINE_GROUP'}
+                                on:click={() => selectOption(5, 'LINE_GROUP')}
+                                class:bg-blue-600={selectedOptions[5] === 'LINE_GROUP'} 
+                                class:bg-gray-300={selectedOptions[5] !== 'LINE_GROUP'} 
+                            >
+                                <span class={selectedOptions[5] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[5] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[5] === 'ALL'}
+                            on:click={() => selectOption(5, 'ALL')}
+                            class:bg-blue-600={selectedOptions[5] === 'ALL'} 
+                            class:bg-gray-300={selectedOptions[5] !== 'ALL'} 
+                        >
+                            <span class={selectedOptions[5] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left"
+											>การแจ้งเตือนสลิปซ้ำ</span
+										>
+										<div class="tooltip ml-2" data-tip="การแจ้งเตือนเมื่อพบสลิปที่มีการใช้ซ้ำ">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[6] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(6, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[6] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[6] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-green-500={selectedOptions[6] === 'LINE_GROUP'}
+                                on:click={() => selectOption(6, 'LINE_GROUP')}
+                                class:bg-blue-600={selectedOptions[6] === 'LINE_GROUP'} 
+                                class:bg-gray-300={selectedOptions[6] !== 'LINE_GROUP'} 
+                            >
+                                <span class={selectedOptions[6] === 'LINE_GROUP' ? 'text-white' : 'text-black'}>กลุ่มสาธารณะ</span>
+                                <div class="tooltip flex justify-center ml-2" data-tip="ส่งการแจ้งเตือนผ่านกลุ่ม Line">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[6] === 'LINE_GROUP' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[6] === 'ALL'}
+                            on:click={() => selectOption(6, 'ALL')}
+                            class:bg-blue-600={selectedOptions[6] === 'ALL'} 
+                            class:bg-gray-300={selectedOptions[6] !== 'ALL'} 
+                        >
+                            <span class={selectedOptions[6] === 'ALL' ? 'text-white' : 'text-black'}>ทั้งสอง</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+								<!-- แถว 8 - สรุปยอดสาขารายวัน -->
+								<div
+									class="flex flex-col sm:flex-row items-center justify-between bg-white p-4 shadow rounded-lg"
+								>
+									<div class="flex">
+										<span class="flex-1 mb-2 sm:mb-0 text-center sm:text-left"
+											>สรุปยอดสาขารายวัน</span
+										>
+										<div
+											class="tooltip ml-2 "
+											data-tip="การแจ้งเตือนสรุปยอดการทำธุรกรรมของสาขาประจำวัน"
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												class="h-5 w-5 text-blue-500 cursor-help"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+
+									<div class="flex space-x-2 justify-center items-center">
+                    <div>
+                        <div>
+                            <button
+                                class="px-2 py-2 rounded-lg lg:flex md:flex sm:flex"
+                                class:bg-blue-500={selectedOptions[7] === 'LINE_GROUP_PRIVATE'}
+                                on:click={() => selectOption(7, 'LINE_GROUP_PRIVATE')}
+                                class:bg-blue-600={selectedOptions[7] === 'LINE_GROUP_PRIVATE'} 
+                                class:bg-gray-300={selectedOptions[7] !== 'LINE_GROUP_PRIVATE'} 
+                            >
+                                <span class={selectedOptions[7] === 'LINE_GROUP_PRIVATE' ? 'text-white' : 'text-black'}>กลุ่มส่วนตัว</span>
+                                <div class="tooltip flex justify-center items-center ml-2 whitespace-normal break-words" data-tip="ส่งการแจ้งเตือนผ่าน Line Official Account">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class={selectedOptions[7] === 'LINE_GROUP_PRIVATE' ? 'text-white h-5 w-5 cursor-help' : 'text-blue-500 h-5 w-5 cursor-help'} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div>
+                        <button
+                            class="px-2 py-2 rounded-lg"
+                            class:bg-red-500={selectedOptions[7] === 'DISABLE'}
+                            on:click={() => selectOption(7, 'DISABLE')}
+                            class:bg-blue-600={selectedOptions[7] === 'DISABLE'} 
+                            class:bg-gray-300={selectedOptions[7] !== 'DISABLE'} 
+                        >
+                            <span class={selectedOptions[7] === 'DISABLE' ? 'text-white' : 'text-black'}>ปิด</span>
+                        </button>
+                    </div>
+                </div>
+								</div>
+								<!-- คุณสามารถทำซ้ำรูปแบบด้านบนและแก้ไขตัวแปรใน `selectedOptions` ให้เหมาะสม -->
+							</div>
+						{/if}
                         <button 
                         class="w-full bg-black text-white py-2 rounded-lg mt-4"
                         on:click={Update}
@@ -2307,24 +2833,28 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
                   <div>
                       <div class="text-gray-600 mt-5">
                           <strong class="text-lg"> สร้างกลุ่มและเชิญบอท</strong>
-                          <ul class="list-disc ml-5 text-sm">
+                          <ul class="list-disc ml-5 text-md mt-3">
                               <li>ให้สร้างกลุ่ม Line เพื่อใช้ตรวจสอบสลิป</li>
                               <li>คลิก "สร้างกลุ่ม" เพื่อสร้างกลุ่มใหม่</li>
-                              <li>เลือก "เชิญเพื่อน" และเพิ่ม Line OA Check Slip เข้ากลุ่ม</li>
-                              <li>เชิญเพื่อนคนอื่นที่ต้องการใช้บริการด้วยได้</li>
+                              <li>เลือก "เชิญเพื่อน" และเพิ่ม Line OA Sure Sure เข้ากลุ่ม</li>
+                              <li>นำ QR code ที่แคปขั้นตอนที่แล้วมาส่งในกลุ่มเพื่อทำการยืนยันว่าจะนับ โควต้าการใช้งานของคุณ เมื่อมีการส่งรูป</li>
+                              <li>เชิญคนอื่นที่ต้องการใช้บริการด้วย</li>
                              
                           </ul>
+                          <div class="flex  justify-center mt-5">
+                            <button class="btn  bg-primary text-white hover:scale-105  hover:bg-primary" on:click={() =>openLineGroupCreation()}>เข้าหน้าสร้างกลุ่มในไลน์</button>
+                          </div>
                       </div>
-                      <div class="mt-5 flex justify-center">
+                      <div class="mt-10 flex justify-center">
                         <Button
-                        variant="outline"
-                        class=" flex text-center py-0 px-5 bg-primary rounded-md lg:w-full md:w-full group"
+                        variant="secondary"
+                        class=" flex text-center py-0 px-5  rounded-md w-full group border hover:scale-105"
                         style="height:40px"
                         on:click={() => StepStatustofinish()} 
                       >
                         <div
                           style="width: 100%; height:100%"
-                          class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
+                          class="content-center sm:p-2 lg:p-2 group-hover:text-black text-black"
                         >
                           ไปขั้นตอนถัดไป
                         </div>
@@ -2346,14 +2876,17 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
           <h2 class="text-2xl font-semibold mb-2">สามารถใช้งานระบบ SURE SURE ได้แล้ว</h2>
           <div class="flex justify-center mt-5">
             <Button
-  variant="outline"
-  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-70 md:w-70 group"
+
+  class=" flex text-center py-0 px-0 bg-primary rounded-md lg:w-70 md:w-70 group hover:scale-105 "
   style="height:50px"
-  on:click={() => goto('/dashboard')}
+  on:click={() => {
+    sessionStorage.removeItem('steps');
+    goto('/dashboard');
+  }}
 >
   <div
     style="width: 200px; height:200px"
-    class="content-center sm:p-2 lg:p-2 group-hover:text-black text-white"
+    class="content-center sm:p-2 lg:p-2 group-hover:text-white text-white"
   >
     ไปหน้า Dashboard
   </div>
@@ -2418,7 +2951,7 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
   </dialog>
 
 
-  <dialog id="my_modal_5" class="modal">
+  <dialog id="my_modal_5" class="modal fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
     <div class="modal-box ">
       <div class="text-lg font-bold flex justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 32 32" {...$$props}>
@@ -2427,18 +2960,13 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
         </svg>
       </div>
       <p class="py-4 text-center font-bold text-4xl">สำเร็จ</p>
-      <div class=" mx-2 mb-5 flex justify-center"><div class="canvas-container">
+      <div class=" mx-2 mb-2 flex justify-center"><div class="canvas-container">
         <canvas bind:this={qrcanvas1} class="border-2 border-[#113566] rounded-md"></canvas>
       </div></div>
-      <p class=" text-center">1.แคป QR CODE นี้ </p>
-      <p class=" text-center">2.นำรูป QR CODE นี้ส่งในกลุ่มไลน์ที่ต้องการใช้งาน </p>
-      <p class=" text-center">** 1 กลุ่มสามารถใช้ QR CODE ได้แค่ 1 อันไม่สามารถเปลี่ยนได้ ** </p>
+      <p class=" text-center mt-2">แคป QR CODE นี้ เพื่อใช้ในขั้นตอนถัดไป</p>
       <div class="flex  w-full  justify-around mt-5">
       <div class="flex content-center">
-        <!-- Button to close the modal -->
-        
-  
-        <!-- Button to go to another page -->
+      
         <div class="flex w-full justify-around mt-5">
           <button 
             class="btn bg-primary text-white hover:text-black"
@@ -2447,10 +2975,21 @@ const CreateRoom = async (dataupdate:any,bankData:any[][]) => {
             ไปขั้นตอนถัดไป
           </button>
         </div>
+        
     </div>
   </div>
     </div>
-    <!-- <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form> -->
+   
   </dialog>
+
+
+<style scoped>
+  .tooltip:before {
+    max-width: 10rem; /* 320px */
+    white-space: normal; /* อนุญาตให้ข้อความขึ้นบรรทัดใหม่ */
+    word-wrap: break-word; /* แบ่งคำเมื่อยาวเกินขอบเขต */
+    overflow-wrap: break-word; /* การแบ่งคำทางเลือกสำหรับความเข้ากันได้ */
+    hyphens: auto; /* ตัดคำอัตโนมัติ */
+    text-align: center; /* จัดข้อความให้อยู่กึ่งกลาง */
+}
+</style>
