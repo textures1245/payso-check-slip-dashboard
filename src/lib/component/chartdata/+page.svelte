@@ -417,7 +417,8 @@
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true',
+				'apikey': PUBLIC_BACKEND_API_KEY
 			},
 			cache: 'no-store'
 		};

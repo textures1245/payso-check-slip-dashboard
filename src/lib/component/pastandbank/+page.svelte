@@ -72,7 +72,7 @@
 			method: 'GET', //การทำงาน get post update delete
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 		const result = await fetch(apiUrl, config);

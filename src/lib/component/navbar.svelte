@@ -76,8 +76,7 @@
 
 	<div class="">
 		<div class="relative flex h-11 items-center justify-between">
-			<div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
-				<!-- Mobile menu button-->
+			<!-- <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
 				<button
 					type="button"
 					class="relative inline-flex items-center justify-center rounded-md p-2 bg-black text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -87,11 +86,7 @@
 				>
 					<span class="absolute -inset-0.5"></span>
 					<span class="sr-only">Open main menu</span>
-					<!--
-              Icon when menu is closed.
-  
-              Menu open: "hidden", Menu closed: "block"
-            -->
+					
 					<svg
 						class="block h-6 w-6"
 						fill="none"
@@ -106,11 +101,8 @@
 							d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
 						/>
 					</svg>
-					<!--
-              Icon when menu is open.
-  
-              Menu open: "block", Menu closed: "hidden"
-            -->
+					
+            
 					<svg
 						class="hidden h-6 w-6"
 						fill="none"
@@ -122,8 +114,8 @@
 						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
 					</svg>
 				</button>
-			</div>
-			<div class="flex flex-1 items-center mx-10 sm:mx-0 lg:mx-0 sm:items-stretch sm:justify-start">
+			</div> -->
+			<div class="flex flex-1 items-center mx-0 sm:mx-0 lg:mx-0 sm:items-stretch sm:justify-start">
 				<div class="flex flex-shrink-0 items-center">
 					<img class="h-20 w-25 py-2 sm:pr-0 lg:pr-0" src={logo} alt="Your Company" />
 				</div>
@@ -168,17 +160,71 @@
 				<div class="relative content-center">
 					<div class="dropdown dropdown-bottom dropdown-end mx-2 my-2">
 						<div class="flex w-full h-full">
-							<div class="mr-3 text-white content-center">
-								<button class="w-full">
-									{displayName}
+							<div class=" text-white content-center">
+								
+								<button class="w-full flex  items-center">
+									<div class="">{displayName}
+										
+									</div>
+
+									<div class="flex items-center sm:hidden ml-2">
+										<!-- Mobile menu button-->
+										<button
+											type="button"
+											class="relative inline-flex items-center justify-center rounded-md p-2 bg-black text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+											aria-controls="mobile-menu"
+											aria-expanded="false"
+											on:click={toggleMenu}
+										>
+											<span class="absolute -inset-0.5"></span>
+											<span class="sr-only">Open main menu</span>
+											<!--
+									  Icon when menu is closed.
+						  
+									  Menu open: "hidden", Menu closed: "block"
+									-->
+											<svg
+												class="block h-6 w-6"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke-width="1.5"
+												stroke="currentColor"
+												aria-hidden="true"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+												/>
+											</svg>
+											<!--
+									  Icon when menu is open.
+						  
+									  Menu open: "block", Menu closed: "hidden"
+									-->
+											<svg
+												class="hidden h-6 w-6"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke-width="1.5"
+												stroke="currentColor"
+												aria-hidden="true"
+											>
+												<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+											</svg>
+										</button>
+									</div>
+									
 								</button>
+								
 							</div>
-							<!-- <summary tabindex="0" class="text-sm py-1 rounded-2xl" on:click={toggleDropdown}>
-							</summary> -->
+							
+							<summary tabindex="0" class="text-sm py-1 rounded-2xl sm:block hidden" on:click={toggleDropdown}>
+							</summary>
 						</div>
 						<ul
 							tabindex="0"
-							class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1"
+							class="menu dropdown-content bg-white rounded-2xl z-[1] w-32 p-2 shadow-lg text-sm border border-gray-300 mt-1 sm:block hidden"
 						>
 							{#if !isAdminPath}<li>
 									<a class="py-2 px-4 hover:bg-gray-100 rounded" href="/profile"
@@ -247,14 +293,14 @@
 	{#if isMenuOpen}
 		<div class="sm:hidden" id="mobile-menu">
 			<div class="space-y-1 px-2 pb-3 pt-2">
-				<ul class=" text-white ">
+				<ul class=" text-white  ">
 					{#each navItems as item}
-						<li>
-							<a href={item.link} >{item.title}</a>
+						<li class=" my-1">
+							<a href={item.link} class=" " >{item.title}</a>
 						</li>
 					{/each}
 					{#if !isAdminPath}<li>
-						<a class="py-2  hover:bg-gray-100 rounded bg-black" href="/profile"
+						<a class="py-2  hover:bg-gray-100 rounded " href="/profile"
 							><button>โปรไฟล์</button></a
 						>
 					</li>{/if}

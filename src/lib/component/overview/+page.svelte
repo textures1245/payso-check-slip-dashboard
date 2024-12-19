@@ -274,7 +274,7 @@ const formatDate = (/** @type {Date} */ date: Date) => {
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
         }
     };
 
@@ -423,7 +423,7 @@ const SearchTransaction = async (startDate:string,endDate:string,branchId:string
     let config = {
         method: 'GET', // Use GET method
         headers: {
-            'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true',
+            'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
         }
     };
 
