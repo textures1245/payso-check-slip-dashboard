@@ -7,14 +7,16 @@
 	import Navbar, { type NavItem } from '$lib/component/navbar.svelte';
 	import { Separator } from '$lib/components/ui/separator';
 
-	// let navItems: NavItem[] = [
-	// 	{ id: 1, title: 'หน้าแรก',	 link: '/admin' },
-	// 	{ id: 5, title: 'admin', link: '/admin' },
-	// 	{ id: 6, title: 'Log', link: '/admin-log' },
-	// 	{id : 7 , title: 'admindashbord' , link: '/admin-dashbord'},
-	// 	{id : 8 , title : 'admin-manage-package ,' , link: '/admin-manage-package'},
-	// 	{id : 9 , title: 'adminupdate' , link: '/admin-update'},
-	// ];
+	let navItems: NavItem[] = [
+		{ id: 1, title: 'แดชบอร์ด',	 link: '/admin/admin-dashboard' },
+		{ id: 5, title: 'รายชื่อผู้ใช้', link: '/admin/admin-list' },
+		{ id: 6, title: 'จัดการแพ็คเก็จ', link: '/admin/admin-manage-package' },
+		{id : 7 , title: 'บันทึก' , link: '/admin/admin-log'},
+		{id : 8 , title : 'รายงานธุรกรรม' , link: '/admin/admin-report-transection'},
+		{id : 9 , title: 'รายงานห้องของลูกค้า' , link: '/admin/admin-report-roommerchant'},
+	];
+
+	
 
 	let subPaths: {
 		[key: string]: Route[];
@@ -56,7 +58,7 @@
 </script>
 
 <div>
-	<Navbar/>
+	<Navbar {navItems}/>
 	<Separator />
 	<LayoutResizer {accounts} subLinks={subPaths} navCollapsedSize={3}>
 		<div class="py-4 bg-primary-foreground min-h-dvh">
