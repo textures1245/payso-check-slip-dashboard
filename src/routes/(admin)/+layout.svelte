@@ -58,7 +58,14 @@
 </script>
 
 <div>
-	<Navbar {navItems}/>
+	<div class ="block lg:hidden md:hidden xl:hidden sm:hidden">
+		<Navbar {navItems} />
+	</div>
+	<div  class="hidden lg:block md:block sm:block xl:block">
+		<Navbar />
+	</div>
+	
+
 	<Separator />
 	<LayoutResizer {accounts} subLinks={subPaths} navCollapsedSize={3}>
 		<div class="py-4 bg-primary-foreground min-h-dvh">
@@ -67,26 +74,3 @@
 	</LayoutResizer>
 </div>
 
-<!-- <script lang="ts">
-	import Navbar, { type NavItem } from '$lib/component/navbar.svelte';
-	import { Separator } from '$lib/components/ui/separator';
-	let navItems: NavItem[] = [
-		{ id: 1, title: 'หน้าแรก',	 link: '/admin' },
-		{ id: 5, title: 'admin', link: '/admin' },
-		{ id: 6, title: 'Log', link: '/admin-log' },
-		{id : 7 , title: 'admindashbord' , link: '/admin-dashbord'},
-		{id : 8 , title : 'admin-manage-package ,' , link: '/admin-manage-package'},
-		{id : 9 , title: 'adminupdate' , link: '/admin-update'},
-	];
-
-</script>
-<div class=" container mx-auto">
-	<div>
-		<Navbar {navItems} />
-		<Separator />
-		<div class="min-h-dvh">
-			<slot></slot>
-		
-		</div>
-	</div>
-</div> -->
