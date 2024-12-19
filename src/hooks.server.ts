@@ -19,24 +19,35 @@ export const handle = async ({ resolve, event }) => {
 		console.log(event.url.pathname);
 		if (event.url.pathname == '/') {
 			const token = event.cookies.get('merchant_account') || '';
-
-			if (token) {
-				redirect(302, '/dashboard');
-			}
+			const steps = event.cookies.get('steps') || '';
+			
+	if (steps && token ) {
+		// ถ้ามี steps ให้ redirect ไปหน้า advice
+		redirect(302, '/advice');
+	} else if (token && !steps) {
+		// ถ้าไม่มี steps แต่มี token ให้ redirect ไปหน้า dashboard
+		redirect(302, '/dashboard');
+	}
 		}
 		if (event.url.pathname == '/dashboard') {
 			const token = event.cookies.get('merchant_account') || '';
-			if(token){
-				if (token.includes('-/All/-') ||  token.includes('DASHBOARD')) {
+			const steps = event.cookies.get('steps') || '';
+			if (steps && token) {
+				// ถ้ามี steps ให้ redirect ไปหน้า advice
+				redirect(302, '/advice');
+			} else if (token && !steps) {
+				// ตรวจสอบ token ต่อไป
+				if (token.includes('-/All/-') || token.includes('DASHBOARD')) {
 					console.log('มีคำว่า -/All/- DASHBOARD อยู่ใน token');
 				} else {
-					if(token.includes('PACKAGE')){
+					if (token.includes('PACKAGE')) {
 						redirect(302, '/package');
-					}else{
+					} else {
 						redirect(302, '/profile');
 					}
 				}
-			}else{
+			} else {
+				// ถ้าไม่มีทั้ง steps และ token ให้ไปหน้าแรก
 				redirect(302, '/');
 			}
 			
@@ -44,19 +55,26 @@ export const handle = async ({ resolve, event }) => {
 
 		if (event.url.pathname == '/package') {
 			const token = event.cookies.get('merchant_account') || '';
-			if(token){
-			if (token.includes('-/All/-') ||  token.includes('PACKAGE')) {
-				console.log('มีคำว่า -/All/- PACKAGE อยู่ใน token');
-			} else {
-				if(token.includes('DASHBOARD')){
-					redirect(302, '/dashboard');
-				}else{
-					redirect(302, '/profile');
-				}
-			}
-			}else{
-				redirect(302, '/');
-			}
+			const steps = event.cookies.get('steps') || '';
+
+if (steps && token) {
+	// ถ้ามี steps ให้ redirect ไปที่ advice
+	redirect(302, '/advice');
+} else if (token && !steps) {
+	// ถ้ามี token ตรวจสอบเพิ่มเติม
+	if (token.includes('-/All/-') || token.includes('PACKAGE')) {
+		console.log('มีคำว่า -/All/- หรือ PACKAGE อยู่ใน token');
+	} else {
+		if (token.includes('DASHBOARD')) {
+			redirect(302, '/dashboard');
+		} else {
+			redirect(302, '/profile');
+		}
+	}
+} else {
+	// ถ้าไม่มีทั้ง steps และ token ให้ redirect ไปหน้าแรก
+	redirect(302, '/');
+}
 		}
 		
 		if (

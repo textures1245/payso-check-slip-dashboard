@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
 	import PackageCard from './(components)/PackageCards.svelte';
-	import { PUBLIC_API_ENDPOINT, PUBLIC_PAYSO_DEFAULT_SECRET } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT, PUBLIC_PAYSO_DEFAULT_SECRET,PUBLIC_BACKEND_API_KEY ,PUBLIC_DOMAIN } from '$env/static/public';
 	import addGroup from '$lib/image/addGroup.png';
 
 	import { afterUpdate, onMount } from 'svelte';
@@ -19,9 +19,11 @@
 				// อัปเดตสถานะของทุกขั้นตอนก่อนหน้า
 				currentStep = JSON.parse(storedSteps);
 				updateAllPreviousSteps(currentStep);
+				setCookie('steps', storedSteps, 7);
 			} else {
 				// ถ้าไม่มีค่า ให้ตั้งค่าใหม่
 				sessionStorage.setItem('steps', JSON.stringify(currentStep));
+				setCookie('steps', JSON.stringify(currentStep), 7);
 			}
 			const datas = await GetPackage();
 			// Use profileData here
@@ -33,6 +35,15 @@
 			console.error('Error fetching profile:', error);
 		}
 	});
+
+	function setCookie(name: string, value: string, days: number) {
+		let d = new Date();
+		d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+		const url = new URL(PUBLIC_DOMAIN); // Convert string to URL object
+		const domain = url.hostname; // Get the hostname (payso-check-slip-dashboard-xi.vercel.app)
+		document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;Secure;SameSite=Lax;domain=${domain}`;
+		console.log('cookie ', document.cookie, domain);
+	}
 	const GetPackage = async () => {
 		// Create URL parameters from form data
 		let config = {
@@ -734,7 +745,7 @@
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'ngrok-skip-browser-warning': 'true'
+					'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
 				},
 				body: JSON.stringify(requestBody)
 			});
@@ -3451,6 +3462,7 @@
 						style="height:50px"
 						on:click={() => {
 							sessionStorage.removeItem('steps');
+							document.cookie = "steps=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 							goto('/dashboard');
 						}}
 					>

@@ -133,6 +133,8 @@
 							>{item.title}</a
 						>
 					{/each}
+					
+			
 				</div>
 			</div>
 			<div class="flex justify-end">
@@ -171,8 +173,8 @@
 									{displayName}
 								</button>
 							</div>
-							<summary tabindex="0" class="text-sm py-1 rounded-2xl" on:click={toggleDropdown}>
-							</summary>
+							<!-- <summary tabindex="0" class="text-sm py-1 rounded-2xl" on:click={toggleDropdown}>
+							</summary> -->
 						</div>
 						<ul
 							tabindex="0"
@@ -245,12 +247,23 @@
 	{#if isMenuOpen}
 		<div class="sm:hidden" id="mobile-menu">
 			<div class="space-y-1 px-2 pb-3 pt-2">
-				<ul class=" text-white">
+				<ul class=" text-white ">
 					{#each navItems as item}
 						<li>
-							<a href={item.link}>{item.title}</a>
+							<a href={item.link} >{item.title}</a>
 						</li>
 					{/each}
+					{#if !isAdminPath}<li>
+						<a class="py-2  hover:bg-gray-100 rounded bg-black" href="/profile"
+							><button>โปรไฟล์</button></a
+						>
+					</li>{/if}
+				<li>
+					<a
+						class="py-2  hover:bg-gray-100 rounded whitespace-nowrap"
+						on:click={handleLogout}><button style="color:#F04438;">ออกจากระบบ</button></a
+					>
+				</li>
 				</ul>
 			</div>
 		</div>

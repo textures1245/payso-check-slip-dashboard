@@ -5,7 +5,7 @@
 	import Icon from '@iconify/svelte';
 	import { Colors } from 'chart.js';
 
-	import { PUBLIC_API_ENDPOINT } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	import { Button } from '$lib/components/ui/button';
 	import { onMount } from 'svelte';
 	import cookie from 'cookie';

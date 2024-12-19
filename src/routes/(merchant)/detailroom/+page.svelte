@@ -3,7 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Carousel from '$lib/components/ui/carousel';
 	import payment from '$lib/image/thai-qr.png';
-	import { PUBLIC_API_ENDPOINT, PUBLIC_PAYSO_DEFAULT_SECRET } from '$env/static/public';
+	import { PUBLIC_API_ENDPOINT, PUBLIC_PAYSO_DEFAULT_SECRET,PUBLIC_BACKEND_API_KEY } from '$env/static/public';
 	import { writable } from 'svelte/store';
 	import cookie from 'cookie';
 	import { afterUpdate, onMount } from 'svelte';
@@ -242,7 +242,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -273,7 +273,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -297,7 +297,7 @@
 			method: 'GET', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
 			}
 		};
 
@@ -535,7 +535,7 @@
 			method: 'PUT', // Use GET instead of POST
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true'
+				'ngrok-skip-browser-warning': 'true','apikey': PUBLIC_BACKEND_API_KEY
 			},
 			body: JSON.stringify(requestBody)
 		};

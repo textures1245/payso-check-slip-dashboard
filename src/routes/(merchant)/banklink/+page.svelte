@@ -359,7 +359,8 @@
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'ngrok-skip-browser-warning': 'true'
+					'ngrok-skip-browser-warning': 'true',
+					'apikey': PUBLIC_BACKEND_API_KEY
 				},
 				body: JSON.stringify(requestBody)
 			});
