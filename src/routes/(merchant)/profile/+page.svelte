@@ -89,11 +89,9 @@
 			console.log(profileData);
 			const data = await GetProfile();
 			const link = await GetLineLink();
-			const bank = await GetBankLink();
 			// Use profileData here
 			linkline = link;
 			profiles = data;
-			banks = bank;
 			QuotaLimit = data.QuotaLimit;
 			QuotaUse = data.QuotaUsage;
 			id.push(data.Id);
@@ -223,37 +221,6 @@
 		return data.result;
 	};
 
-	const GetBankLink = async () => {
-		// const email = sessionStorage.getItem('email');
-		// const id = sessionStorage.getItem('id'); // Waiting for id from another page
-		const cookies = getCookies();
-		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-
-		console.log('++++++++++', myCookie.Id, myCookie.Email);
-		// console.log('email: ', email, 'id: ', id , );
-
-		// Create URL parameters from form data
-		let config = {
-			method: 'GET', // Use GET instead of POST
-			headers: {
-				'Content-Type': 'application/json',
-        		'apikey': PUBLIC_BACKEND_API_KEY
-			}
-		};
-
-		let url;
-		if (myCookie.Id) {
-			console.log('Get by Merchant Id');
-			url = `${PUBLIC_API_ENDPOINT}/bankdata/${myCookie.Id}`;
-		} else {
-			throw new Error('Neither email nor id is provided.');
-		}
-
-		const result = await fetch(url, config);
-		const data = await result.json();
-		console.log('Link Line', data);
-		return data.result;
-	};
 
 	const DeleteLineLink = async (id: String) => {
 		// Create configuration for the fetch request
@@ -293,76 +260,6 @@
 		}
 	};
 
-	const DeleteBankLink = async (id: String) => {
-		// Create configuration for the fetch request
-		const cookies = getCookies();
-		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		console.log('++++++++++', myCookie.Id, myCookie.Email);
-		let config = {
-			method: 'DELETE', // Use GET method
-			headers: {
-				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true',
-        		'apikey': PUBLIC_BACKEND_API_KEY
-			}
-		};
-
-		try {
-			// Make the fetch request
-			const type = myCookie.Type || 'PaySo';
-			const result = await fetch(
-				`${PUBLIC_API_ENDPOINT}/delete/bankdata/${id}/${myCookie.Email}/${type}`,
-				config
-			);
-			const datas = await result.json();
-			console.log(datas.message);
-			if (datas.message != 'permission denied') {
-				banks = banks.filter((item) => String(item.Id) !== String(id));
-				console.log('banks ', banks);
-				const modal = document.getElementById('my_modal_1');
-				modal.close();
-			} else {
-				const modal = document.getElementById('my_modal_4');
-				if (modal) {
-					modal.showModal();
-				}
-			}
-		} catch (error) {
-			console.error('Error fetching transaction data:', error);
-		}
-	};
-
-	const UpdateBankLink = async (id: String, status: boolean) => {
-		// Create configuration for the fetch request
-		const cookies = getCookies();
-		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
-		console.log(id, status);
-		let config = {
-			method: 'PUT', // Use GET method
-			headers: {
-				'Content-Type': 'application/json',
-        		'apikey': PUBLIC_BACKEND_API_KEY
-			}
-		};
-		console.log(id);
-		try {
-			// Make the fetch request
-			const type = myCookie.Type || 'PaySo';
-			const result = await fetch(`${PUBLIC_API_ENDPOINT}/update/bankdata/${id}/${status}/${myCookie.Email}/${type}`, config);
-			const datas = await result.json();
-			if (datas.message == 'permission denied') {
-				const modal = document.getElementById('my_modal_4');
-				if (modal) {
-					modal.showModal();
-				}
-				return false;
-			}else {
-				return true;
-			}
-		} catch (error) {
-			console.error('Error fetching transaction data:', error);
-		}
-	};
 
 	const UpdateLineLink = async (id: String, status: String) => {
 		// Create configuration for the fetch request
@@ -463,8 +360,6 @@
 		return `${day} ${month} ${year}`; // คืนค่าในรูปแบบ "18 ก.ย. 2024"
 	}
 
-
-
 	async function handleCheckboxChangeLine(event: { target: { checked: boolean } }, id: any) {
 		const isChecked = event.target.checked;
 		console.log(id, isChecked);
@@ -484,7 +379,7 @@
 		if (isChecked1) selectedText += 'DASHBOARD';
 		if (isChecked2) selectedText += selectedText ? ',PACKAGE' : 'PACKAGE';
 		if (isChecked3) selectedText += selectedText ? ',USER_MANAGEMENT' : 'USER_MANAGEMENT';
-		if (isChecked4) selectedText += selectedText ? ',CREATE_ROOM' : 'CREATE_ROOM';
+		if (isChecked4) selectedText += selectedText ? ',LINE_MANAGEMENT' : 'LINE_MANAGEMENT';
 		UpdateLineRoles(Id, selectedText);
 	}
 
@@ -511,7 +406,7 @@
 		if (rolesArray.includes('USER_MANAGEMENT')) {
 			isChecked3 = true;
 		}
-		if (rolesArray.includes('CREATE_ROOM')) {
+		if (rolesArray.includes('LINE_MANAGEMENT')) {
 			isChecked4 = true;
 		}
 		const modal = document.getElementById('my_modal_1');
@@ -526,7 +421,7 @@
 		if (isCheckedLink1) selectedText += 'DASHBOARD';
 		if (isCheckedLink2) selectedText += selectedText ? ',PACKAGE' : 'PACKAGE';
 		if (isCheckedLink3) selectedText += selectedText ? ',USER_MANAGEMENT' : 'USER_MANAGEMENT';
-		if (isCheckedLink4) selectedText += selectedText ? ',CREATE_ROOM' : 'CREATE_ROOM';
+		if (isCheckedLink4) selectedText += selectedText ? ',LINE_MANAGEMENT' : 'LINE_MANAGEMENT';
 		if (isCheckedLink1 || isCheckedLink2 || isCheckedLink3 || isCheckedLink4) {
 			const myDate = myCookie.RegisterDate.split('T')[0];
 			const result = `${myCookie.Id}:${myDate}:${selectedText}`;
@@ -568,50 +463,50 @@
 		modal.showModal();
 		address = profiles.AddressTH;
 		phone = profiles.MerchantTel;
-		storeName=profiles.MerchantCompany;
-		email=profiles.MerchantURL;
+		storeName = profiles.MerchantCompany;
+		email = profiles.MerchantURL;
 	}
 
-	let address= '';
-    let phone= '';
-    let email= '';
-	let storeName= '';
+	let address = '';
+	let phone = '';
+	let email = '';
+	let storeName = '';
 
 	function submitedit() {
-		console.log(address,phone,email,storeName,profiles)
-		UpdateProfile(address,phone,email,storeName)
+		console.log(address, phone, email, storeName, profiles);
+		UpdateProfile(address, phone, email, storeName);
 	}
-	
 
-	const UpdateProfile = async (address: String, phone: String,email:String,storeName:String) => {
+	const UpdateProfile = async (
+		address: String,
+		phone: String,
+		email: String,
+		storeName: String
+	) => {
 		// Create configuration for the fetch request
 		const cookies = getCookies();
 		const myCookie = cookies['merchant_account'] ? JSON.parse(cookies['merchant_account']) : null;
 		const requestBody = {
-            MerchantId: myCookie.Id,
-            Phone: phone,
-            Email:email,
-            Address:address,
-			StoreName:storeName,
-			Actor:myCookie.Email
-        };
+			MerchantId: myCookie.Id,
+			Phone: phone,
+			Email: email,
+			Address: address,
+			StoreName: storeName,
+			Actor: myCookie.Email
+		};
 		let config = {
 			method: 'POST', // Use GET method
 			headers: {
 				'Content-Type': 'application/json',
-				'ngrok-skip-browser-warning': 'true',
-        		'apikey': PUBLIC_BACKEND_API_KEY
-			},body: JSON.stringify(
-				requestBody),
+				'ngrok-skip-browser-warning': 'true'
+			},
+			body: JSON.stringify(requestBody)
 		};
 		console.log(id);
 		try {
 			// Make the fetch request
 			const type = myCookie.Type || 'PaySo';
-			const result = await fetch(
-				`${PUBLIC_API_ENDPOINT}/updateprofile`,
-				config
-			);
+			const result = await fetch(`${PUBLIC_API_ENDPOINT}/updateprofile`, config);
 			const datas = await result.json();
 			if (datas.message == 'permission denied') {
 				const modal = document.getElementById('my_modal_4');
@@ -632,36 +527,36 @@
 	};
 
 	const validateForm = (name: any, value: string | any[]) => {
-    switch (name) {
-      case 'storeName':
-        return value.length < 2 ? 'ชื่อร้านค้าต้องมีความยาวอย่างน้อย 2 ตัวอักษร' : '';
-      case 'address':
-        return value.length < 5 ? 'กรุณากรอกที่อยู่ให้ครบถ้วน' : '';
-      case 'phone':
-	  	phone = value.replace(/[^0-9]/g, '');
-        if (phone.length > 10) {
-			phone = phone.slice(0, 10);
-        }
-        return phone.length < 10 ? 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)' : '';
-      case 'email':
-	  	return '';
-      default:
-        return '';
-    }
-  };
-  let errors = {
-    storeName: '',
-    address: '',
-    phone: '',
-    email: ''
-  };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    errors = {
-      ...errors,
-      [name]: validateForm(name, value)
-    };
-  };
+		switch (name) {
+			case 'storeName':
+				return value.length < 2 ? 'ชื่อร้านค้าต้องมีความยาวอย่างน้อย 2 ตัวอักษร' : '';
+			case 'address':
+				return value.length < 5 ? 'กรุณากรอกที่อยู่ให้ครบถ้วน' : '';
+			case 'phone':
+				phone = value.replace(/[^0-9]/g, '');
+				if (phone.length > 10) {
+					phone = phone.slice(0, 10);
+				}
+				return phone.length < 10 ? 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (10 หลัก)' : '';
+			case 'email':
+				return '';
+			default:
+				return '';
+		}
+	};
+	let errors = {
+		storeName: '',
+		address: '',
+		phone: '',
+		email: ''
+	};
+	const handleInputChange = (e) => {
+		const { name, value } = e.target;
+		errors = {
+			...errors,
+			[name]: validateForm(name, value)
+		};
+	};
 </script>
 
 <!-- <svelte:head>
@@ -797,20 +692,32 @@
 						<Card.Root class=" text-black border-none shadow-none">
 							<Card.Content class="mx-3 my-3 flex px-3  ">
 								<div style="width: 100%;">
-									<div class="text-2xl font-semibold flex  justify-between">
-										<div >เกี่ยวกับ</div>
+									<div class="text-2xl font-semibold flex justify-between">
+										<div>เกี่ยวกับ</div>
 
 										<div>
 											<div class="flex justify-end w-full items-center">
 												<!-- svelte-ignore a11y-click-events-have-key-events -->
 												<!-- svelte-ignore a11y-no-static-element-interactions -->
-												<div on:click={() => {
-												 openModalEdit();
-											  }} ><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" {...$$props}>
-												  <path fill="black" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5" />
-												</svg></div></div>
-											  
-											
+												<div
+													on:click={() => {
+														openModalEdit();
+													}}
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														width="30"
+														height="30"
+														viewBox="0 0 24 24"
+														{...$$props}
+													>
+														<path
+															fill="black"
+															d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"
+														/>
+													</svg>
+												</div>
+											</div>
 										</div>
 									</div>
 									<div
@@ -838,7 +745,7 @@
 								<div class="text-sm break-words col-span-2">{profiles.MerchantURL}</div>
 							</div>
 						</div>
-						<hr class=" bg-gray-300 mb-3 mt-5 mx-5" style="height: 2px;" />	
+						<hr class=" bg-gray-300 mb-3 mt-5 mx-5" style="height: 2px;" />
 						<div class="mx-3 my-3 px-3">
 							<div class=" text-2xl my-3 font-semibold">ลิงก์</div>
 
@@ -1175,9 +1082,6 @@
 	</div>
 </dialog>
 
-
-
-
 <dialog id="my_modal_4" class="modal">
 	<div class="modal-box">
 		<div class="text-lg font-bold flex justify-center">
@@ -1204,112 +1108,227 @@
 	</form>
 </dialog>
 
-
 <dialog id="my_modal_6" class="modal">
 	<div class="modal-box">
 		<!-- {currentId} {Status} -->
 		<form method="dialog">
-			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-				>✕</button
-			>
+			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
 		</form>
-		<div class="p-2  rounded-lg ">
+		<div class="p-2 rounded-lg">
 			<h3 class="text-xl font-bold mb-6">แก้ไขข้อมูลร้านค้า</h3>
-		  
+
 			<div class="space-y-4">
-			  <div class="relative">
-				<!-- svelte-ignore a11y-label-has-associated-control -->
-				<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
-				  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-				  ชื่อร้านค้า
-				</label>
-				<input
-				  type="text"
-				  name="storeName"
-				  bind:value={storeName}
-				  on:input={handleInputChange}
-				  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.storeName ? 'border-red-500' : 'border-gray-300'}"
-				  placeholder="กรุณากรอกชื่อร้านค้า"
-				/>
-				{#if errors.storeName}
-				  <div class="flex items-center mt-1 text-sm text-red-500">
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-					{errors.storeName}
-				  </div>
-				{/if}
-			  </div>
-		  
-			  <div class="relative">
-				<!-- svelte-ignore a11y-label-has-associated-control -->
-				<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
-				  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-				  ที่อยู่
-				</label>
-				<textarea
-				  name="address"
-				  bind:value={address}
-				  on:input={handleInputChange}
-				  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.address ? 'border-red-500' : 'border-gray-300'}"
-				  placeholder="กรุณากรอกที่อยู่"
-				  rows="3"
-				></textarea>
-				{#if errors.address}
-				  <div class="flex items-center mt-1 text-sm text-red-500">
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-					{errors.address}
-				  </div>
-				{/if}
-			  </div>
-		  
-			  <div class="relative">
-				<!-- svelte-ignore a11y-label-has-associated-control -->
-				<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
-				  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-				  เบอร์โทรศัพท์
-				</label>
-				<input
-				  type="tel"
-				  name="phone"
-				  bind:value={phone}
-				  on:input={handleInputChange}
-				  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.phone ? 'border-red-500' : 'border-gray-300'}"
-				  placeholder="กรุณากรอกเบอร์โทรศัพท์"
-				/>
-				{#if errors.phone}
-				  <div class="flex items-center mt-1 text-sm text-red-500">
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-					{errors.phone}
-				  </div>
-				{/if}
-			  </div>
-		  
-			  <div class="relative">
-				<!-- svelte-ignore a11y-label-has-associated-control -->
-				<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
-				  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-				  อีเมล
-				</label>
-				<input
-				  type="email"
-				  name="email"
-				  bind:value={email}
-				  on:input={handleInputChange}
-				  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.email ? 'border-red-500' : 'border-gray-300'}"
-				  placeholder="กรุณากรอกอีเมล"
-				/>
-				{#if errors.email}
-				  <div class="flex items-center mt-1 text-sm text-red-500">
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-					{errors.email}
-				  </div>
-				{/if}
-			  </div>
-		  
-			  <div class="flex justify-center my-3">
-				<Button on:click={() => submitedit()} class="px-3 py-6">บันทึกข้อมูล</Button>
+				<div class="relative">
+					<!-- svelte-ignore a11y-label-has-associated-control -->
+					<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="w-4 h-4 mr-2"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline
+								points="9 22 9 12 15 12 15 22"
+							/></svg
+						>
+						ชื่อร้านค้า
+					</label>
+					<input
+						type="text"
+						name="storeName"
+						bind:value={storeName}
+						on:input={handleInputChange}
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.storeName
+							? 'border-red-500'
+							: 'border-gray-300'}"
+						placeholder="กรุณากรอกชื่อร้านค้า"
+					/>
+					{#if errors.storeName}
+						<div class="flex items-center mt-1 text-sm text-red-500">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="w-4 h-4 mr-1"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line
+									x1="12"
+									y1="16"
+									x2="12.01"
+									y2="16"
+								/></svg
+							>
+							{errors.storeName}
+						</div>
+					{/if}
+				</div>
+
+				<div class="relative">
+					<!-- svelte-ignore a11y-label-has-associated-control -->
+					<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="w-4 h-4 mr-2"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle
+								cx="12"
+								cy="10"
+								r="3"
+							/></svg
+						>
+						ที่อยู่
+					</label>
+					<textarea
+						name="address"
+						bind:value={address}
+						on:input={handleInputChange}
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.address
+							? 'border-red-500'
+							: 'border-gray-300'}"
+						placeholder="กรุณากรอกที่อยู่"
+						rows="3"
+					></textarea>
+					{#if errors.address}
+						<div class="flex items-center mt-1 text-sm text-red-500">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="w-4 h-4 mr-1"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line
+									x1="12"
+									y1="16"
+									x2="12.01"
+									y2="16"
+								/></svg
+							>
+							{errors.address}
+						</div>
+					{/if}
+				</div>
+
+				<div class="relative">
+					<!-- svelte-ignore a11y-label-has-associated-control -->
+					<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="w-4 h-4 mr-2"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path
+								d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+							/></svg
+						>
+						เบอร์โทรศัพท์
+					</label>
+					<input
+						type="tel"
+						name="phone"
+						bind:value={phone}
+						on:input={handleInputChange}
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.phone
+							? 'border-red-500'
+							: 'border-gray-300'}"
+						placeholder="กรุณากรอกเบอร์โทรศัพท์"
+					/>
+					{#if errors.phone}
+						<div class="flex items-center mt-1 text-sm text-red-500">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="w-4 h-4 mr-1"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line
+									x1="12"
+									y1="16"
+									x2="12.01"
+									y2="16"
+								/></svg
+							>
+							{errors.phone}
+						</div>
+					{/if}
+				</div>
+
+				<div class="relative">
+					<!-- svelte-ignore a11y-label-has-associated-control -->
+					<label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="w-4 h-4 mr-2"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							><path
+								d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+							/><polyline points="22,6 12,13 2,6" /></svg
+						>
+						อีเมล
+					</label>
+					<input
+						type="email"
+						name="email"
+						bind:value={email}
+						on:input={handleInputChange}
+						class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent {errors.email
+							? 'border-red-500'
+							: 'border-gray-300'}"
+						placeholder="กรุณากรอกอีเมล"
+					/>
+					{#if errors.email}
+						<div class="flex items-center mt-1 text-sm text-red-500">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								class="w-4 h-4 mr-1"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line
+									x1="12"
+									y1="16"
+									x2="12.01"
+									y2="16"
+								/></svg
+							>
+							{errors.email}
+						</div>
+					{/if}
+				</div>
+
+				<div class="flex justify-center my-3">
+					<Button on:click={() => submitedit()} class="px-3 py-6">บันทึกข้อมูล</Button>
+				</div>
 			</div>
-			</div>
-		  </div>
+		</div>
 		{#if base64Result}
 			<div class="relative my-3">
 				<!-- Input ที่สามารถคลิกเพื่อคัดลอกเนื้อหาได้ -->
